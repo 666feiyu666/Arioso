@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f4f1ea" />
+    <title>Arioso · AI 音乐工坊</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand-row">
+          <div class="brand-mark" aria-hidden="true">A</div>
+          <div>
+            <p class="eyebrow">AI MUSIC STUDIO</p>
+            <h1>Arioso</h1>
+          </div>
+        </div>
+
+        <button class="new-task" id="new-task" type="button">
+          <span>＋</span> 新建任务
+        </button>
+
+        <div class="sidebar-heading">
+          <span>任务</span>
+          <span class="task-count" id="task-count">0</span>
+        </div>
+        <nav class="task-list" id="task-list" aria-label="音乐任务"></nav>
+
+        <div class="sidebar-foot">
+          <span class="status-dot"></span>
+          <span>本地创作空间</span>
+          <small>v0.2.0</small>
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <section id="home-view" class="view home-view">
+          <div class="hero">
+            <p class="eyebrow accent">COMPOSE WITH INTENT</p>
+            <h2>把一个念头，<br />写成一段音乐。</h2>
+            <p class="hero-copy">描述场景、情绪或声音。Arioso 会先整理成完整乐曲规格，再交给 Lyria 生成。</p>
+            <div class="model-settings" aria-label="生成设置">
+              <label>
+                <span>生成模式</span>
+                <select id="mode-select">
+                  <option value="generate">编曲并生成音乐</option>
+                  <option value="compose">仅生成编曲提示</option>
+                </select>
+              </label>
+              <label>
+                <span>Lyria 模型</span>
+                <select id="lyria-model-select">
+                  <option value="lyria-3-clip-preview">Lyria 3 Clip · 30 秒</option>
+                  <option value="lyria-3.5">Lyria 3.5 · 完整歌曲</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <section class="examples-section" aria-labelledby="examples-title">
+            <div class="section-title-row">
+              <div>
+                <p class="eyebrow">STARTING POINTS</p>
+                <h3 id="examples-title">从一个声音画面开始</h3>
+              </div>
+              <p>选择示例后仍可自由修改</p>
+            </div>
+            <div class="example-grid" id="example-grid"></div>
+          </section>
+        </section>
+
+        <section id="task-view" class="view task-view" hidden>
+          <button class="back-button" id="back-home" type="button">← 返回创作台</button>
+          <div id="task-detail"></div>
+        </section>
+
+        <div class="composer-dock" id="composer-dock">
+          <form id="composer-form" class="composer-form">
+            <div class="composer-main">
+              <textarea
+                id="prompt-input"
+                rows="2"
+                maxlength="8000"
+                placeholder="例如：慵懒的午后爵士，刷镲与温暖钢琴轻轻摇摆……"
+                aria-label="描述想生成的音乐"
+                required
+              ></textarea>
+              <button id="submit-task" type="submit" aria-label="开始生成">↑</button>
+            </div>
+            <fieldset class="vocal-setting">
+              <legend>人声规则</legend>
+              <div class="segmented-control">
+                <input id="vocal-auto" name="vocal-mode" type="radio" value="auto" checked />
+                <label for="vocal-auto">自动</label>
+                <input id="vocal-instrumental" name="vocal-mode" type="radio" value="instrumental" />
+                <label for="vocal-instrumental">纯器乐</label>
+                <input id="vocal-enabled" name="vocal-mode" type="radio" value="vocals" />
+                <label for="vocal-enabled">人声</label>
+              </div>
+            </fieldset>
+          </form>
+          <p id="form-message" class="form-message" role="status"></p>
+        </div>
+      </main>
+    </div>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

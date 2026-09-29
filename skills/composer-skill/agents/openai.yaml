@@ -1,0 +1,4 @@
+interface:
+  display_name: "Arioso Composer"
+  short_description: "Turn music ideas into precise Lyria prompts"
+  default_prompt: "Use $composer-skill to turn my music idea into a production-ready Lyria prompt."

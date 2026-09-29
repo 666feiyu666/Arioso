@@ -54,7 +54,10 @@ async function main(): Promise<void> {
   }
 
   const config = loadConfig(command === "generate");
-  const spec = await composeMusic(description, { model: config.openAiModel });
+  const spec = await composeMusic(description, {
+    model: config.openAiModel,
+    lyriaModel: config.lyriaModel,
+  });
 
   if (command === "compose") {
     console.log(JSON.stringify(spec, null, 2));

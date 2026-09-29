@@ -1,6 +1,7 @@
 import { Agent, run } from "@openai/agents";
 
 import { MusicSpecSchema, type MusicSpec } from "../schema/music-spec.js";
+import { loadComposerSkill } from "./composer-skill.js";
 
 const COMPOSER_INSTRUCTIONS = `
 You are Arioso Composer, a specialist music director and prompt engineer for Google Lyria.
@@ -21,6 +22,18 @@ Requirements:
 
 export interface ComposeMusicOptions {
   model?: string;
+  lyriaModel?: string;
+  vocalMode?: "auto" | "instrumental" | "vocals";
+}
+
+function vocalRule(mode: ComposeMusicOptions["vocalMode"]): string {
+  if (mode === "instrumental") {
+    return `Vocal rule selected by the user: instrumental only. This explicit UI setting overrides conflicting text. Set vocals.enabled to false, keep all vocal fields null, include vocals in avoid, and say "instrumental only, no vocals" in lyriaPrompt.`;
+  }
+  if (mode === "vocals") {
+    return "Vocal rule selected by the user: vocals required. This explicit UI setting overrides conflicting text. Set vocals.enabled to true and require vocals in lyriaPrompt. Do not invent lyrics or a lyric language when the user did not provide them; leave unspecified vocal fields null.";
+  }
+  return "Vocal rule selected by the user: auto. Infer whether vocals are enabled only from the music description.";
 }
 
 export async function composeMusic(
@@ -33,9 +46,18 @@ export async function composeMusic(
     throw new Error("A music description is required.");
   }
 
+  const skill = await loadComposerSkill();
+  const targetModel = options.lyriaModel ?? process.env.LYRIA_MODEL ?? "lyria-3-clip-preview";
+
   const agent = new Agent({
     name: "Arioso Composer",
-    instructions: COMPOSER_INSTRUCTIONS,
+    instructions: [
+      COMPOSER_INSTRUCTIONS,
+      `Target Lyria model: ${targetModel}`,
+      vocalRule(options.vocalMode ?? "auto"),
+      "Follow the local composer skill and its prompting reference below.",
+      skill,
+    ].join("\n\n"),
     model: options.model ?? process.env.OPENAI_MODEL ?? "gpt-6-sol",
     outputType: MusicSpecSchema,
   });

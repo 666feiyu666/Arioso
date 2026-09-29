@@ -11,7 +11,9 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "dev": "tsx src/cli.ts",
+    "web": "tsx src/web/server.ts",
     "start": "node dist/cli.js",
+    "start:web": "node dist/web/server.js",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json"
   },
