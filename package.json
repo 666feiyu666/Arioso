@@ -1,0 +1,33 @@
+{
+  "name": "arioso",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A structured music prompt composer for Google Lyria.",
+  "type": "module",
+  "packageManager": "pnpm@11.19.0",
+  "bin": {
+    "arioso": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsx src/cli.ts",
+    "start": "node dist/cli.js",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@google/genai": "^2.24.0",
+    "@openai/agents": "^0.18.0",
+    "dotenv": "^18.0.4",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.2"
+  }
+}
