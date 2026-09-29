@@ -4,6 +4,7 @@ import { createReadStream } from "node:fs";
 import { access, mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import path from "node:path";
+import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 
 import { composeMusic } from "../composer/composer-agent.js";
@@ -29,7 +30,7 @@ interface MusicTask {
   musicSpec?: MusicSpec;
   generatedText?: string | null;
   audioFile?: string;
-  error?: string;
+  error?: string | undefined;
 }
 
 interface CreateTaskInput {
@@ -41,6 +42,7 @@ interface CreateTaskInput {
 
 const WEB_ROOT = path.resolve("web");
 const MAX_BODY_BYTES = 64 * 1024;
+const REQUEST_RETRY_DELAYS_MS = [750, 1_500];
 const MIME_TYPES: Record<string, string> = {
   ".css": "text/css; charset=utf-8",
   ".html": "text/html; charset=utf-8",
@@ -71,11 +73,17 @@ class TaskStore {
               await readFile(path.join(this.#directory, entry.name), "utf8"),
             ) as MusicTask;
             if (task.id) {
+              let interrupted = false;
               if (["queued", "composing", "generating"].includes(task.status)) {
                 task.status = "failed";
                 task.error = "The local server stopped before this task finished.";
+                task.updatedAt = new Date().toISOString();
+                interrupted = true;
               }
               this.#tasks.set(task.id, task);
+              if (interrupted) {
+                await this.save(task);
+              }
             }
           } catch {
             // Ignore malformed task records rather than blocking the whole UI.
@@ -283,32 +291,71 @@ function parseTaskInput(value: unknown): CreateTaskInput {
     : { description, mode, vocalMode };
 }
 
+function isRetryableRequestError(error: unknown): boolean {
+  const candidate = error as { status?: unknown; statusCode?: unknown } | null;
+  const status = Number(candidate?.status ?? candidate?.statusCode);
+  if (status === 408 || status === 409 || status === 429 || status >= 500) {
+    return true;
+  }
+
+  const message = error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
+  return [
+    "fetch failed",
+    "network",
+    "timeout",
+    "timed out",
+    "econnreset",
+    "econnrefused",
+    "eai_again",
+    "socket hang up",
+  ].some((fragment) => message.includes(fragment));
+}
+
+async function withRequestRetry<T>(operation: () => Promise<T>): Promise<T> {
+  for (let attempt = 0; ; attempt += 1) {
+    try {
+      return await operation();
+    } catch (error) {
+      const retryDelay = REQUEST_RETRY_DELAYS_MS[attempt];
+      if (retryDelay === undefined || !isRetryableRequestError(error)) {
+        throw error;
+      }
+      await delay(retryDelay);
+    }
+  }
+}
+
 async function runTask(store: TaskStore, task: MusicTask): Promise<void> {
   try {
-    await store.update(task.id, { status: "composing" });
-    const spec = await composeMusic(task.description, {
-      model: task.composerModel,
-      lyriaModel: task.lyriaModel,
-      vocalMode: task.vocalMode ?? "auto",
-    });
-    await store.update(task.id, { musicSpec: spec, title: spec.title });
+    let spec = task.musicSpec;
+    if (!spec) {
+      await store.update(task.id, { status: "composing", error: undefined });
+      spec = await composeMusic(task.description, {
+        model: task.composerModel,
+        lyriaModel: task.lyriaModel,
+        vocalMode: task.vocalMode ?? "auto",
+      });
+      await store.update(task.id, { musicSpec: spec, title: spec.title });
+    }
 
     if (task.mode === "compose") {
-      await store.update(task.id, { status: "completed" });
+      await store.update(task.id, { status: "completed", error: undefined });
       return;
     }
 
-    await store.update(task.id, { status: "generating" });
+    await store.update(task.id, { status: "generating", error: undefined });
     const config = loadConfig(true);
-    const generated = await new LyriaClient(config.geminiApiKey!).generate(spec.lyriaPrompt, {
+    const client = new LyriaClient(config.geminiApiKey!);
+    const generated = await withRequestRetry(() => client.generate(spec.lyriaPrompt, {
       model: task.lyriaModel,
-    });
+    }));
     const audioFile = `${task.id}.mp3`;
     await writeFile(path.join(path.resolve(config.outputDirectory, "tasks"), audioFile), generated.audio);
     await store.update(task.id, {
       status: "completed",
       audioFile,
       generatedText: generated.generatedText,
+      error: undefined,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -347,6 +394,7 @@ export async function createAriosoServer() {
     const url = new URL(request.url ?? "/", "http://localhost");
     const taskMatch = /^\/api\/tasks\/([^/]+)$/.exec(url.pathname);
     const audioMatch = /^\/api\/tasks\/([^/]+)\/audio$/.exec(url.pathname);
+    const retryMatch = /^\/api\/tasks\/([^/]+)\/retry$/.exec(url.pathname);
 
     try {
       if (request.method === "GET" && url.pathname === "/api/tasks") {
@@ -358,6 +406,23 @@ export async function createAriosoServer() {
         const task = await store.create(parseTaskInput(await readJsonBody(request)));
         void runTask(store, task);
         sendJson(response, 202, task);
+        return;
+      }
+
+      if (request.method === "POST" && retryMatch?.[1]) {
+        const task = store.get(retryMatch[1]);
+        if (!task) {
+          sendJson(response, 404, { error: "Task not found." });
+          return;
+        }
+        if (task.status !== "failed") {
+          sendJson(response, 409, { error: "Only failed tasks can be continued." });
+          return;
+        }
+
+        const queued = await store.update(task.id, { status: "queued", error: undefined });
+        void runTask(store, queued);
+        sendJson(response, 202, queued);
         return;
       }
 

@@ -216,7 +216,15 @@ function renderTaskDetail(task) {
       <p>${task.status === "generating" ? "编曲提示已经完成，正在等待 Lyria 返回音频。" : "OpenAI Composer 正在把你的描述整理成一致的音乐规格。"}</p>
     </div>
   ` : "";
-  const error = task.status === "failed" ? `<div class="error-box">${escapeHtml(task.error || "任务未能完成。")}</div>` : "";
+  const error = task.status === "failed" ? `
+    <div class="error-box">
+      <div>
+        <strong>任务已中断</strong>
+        <p>${escapeHtml(task.error || "任务未能完成。")}</p>
+      </div>
+      <button class="retry-button" type="button" data-retry-task="${task.id}">继续此任务</button>
+    </div>
+  ` : "";
 
   elements.taskDetail.innerHTML = `
     <header class="task-header">
@@ -232,6 +240,9 @@ function renderTaskDetail(task) {
   `;
   elements.taskDetail.querySelectorAll("[data-play-task]").forEach((button) => {
     button.addEventListener("click", () => playTask(button.dataset.playTask));
+  });
+  elements.taskDetail.querySelectorAll("[data-retry-task]").forEach((button) => {
+    button.addEventListener("click", () => retryTask(button.dataset.retryTask, button));
   });
   syncPlaybackControls();
 }
@@ -276,6 +287,30 @@ async function refreshTasks() {
     }
   } catch {
     // A temporary polling failure should not replace the current interface.
+  }
+}
+
+async function retryTask(id, button) {
+  if (button.disabled) return;
+  button.disabled = true;
+  button.textContent = "正在恢复…";
+  elements.message.textContent = "";
+
+  try {
+    const response = await fetch(`/api/tasks/${encodeURIComponent(id)}/retry`, {
+      method: "POST",
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "无法恢复任务。");
+
+    const index = state.tasks.findIndex((task) => task.id === result.id);
+    if (index >= 0) state.tasks[index] = result;
+    renderTaskList();
+    if (state.selectedTaskId === result.id) renderTaskDetail(result);
+  } catch (error) {
+    elements.message.textContent = error instanceof Error ? error.message : String(error);
+    button.disabled = false;
+    button.textContent = "继续此任务";
   }
 }
 

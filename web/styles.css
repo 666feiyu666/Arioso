@@ -123,7 +123,12 @@ button:focus-visible, textarea:focus-visible, select:focus-visible, input:focus-
 .progress-card { max-width: 680px; padding: 34px; border: 1px solid var(--line); border-radius: 22px; background: var(--paper); }
 .progress-line { height: 4px; overflow: hidden; margin: 24px 0 18px; border-radius: 999px; background: #e5e0d7; }
 .progress-line::after { content: ""; display: block; width: 38%; height: 100%; border-radius: inherit; background: var(--accent); animation: travel 1.6s ease-in-out infinite; }
-.error-box { padding: 18px; border: 1px solid rgba(164,64,56,.2); border-radius: 15px; color: #783630; background: rgba(164,64,56,.07); line-height: 1.6; }
+.error-box { display: flex; justify-content: space-between; align-items: center; gap: 18px; padding: 18px; border: 1px solid rgba(164,64,56,.2); border-radius: 15px; color: #783630; background: rgba(164,64,56,.07); line-height: 1.6; }
+.error-box strong { display: block; margin-bottom: 3px; font-size: 12px; }
+.error-box p { margin: 0; font-size: 11px; }
+.retry-button { flex: 0 0 auto; padding: 9px 14px; border: 1px solid rgba(120,54,48,.25); border-radius: 999px; color: #783630; background: rgba(255,255,255,.55); font-size: 11px; transition: 150ms ease; }
+.retry-button:hover { color: #fff; background: #783630; }
+.retry-button:disabled { cursor: wait; opacity: .55; }
 
 @keyframes pulse { 50% { opacity: .45; } }
 @keyframes travel { from { transform: translateX(-110%); } to { transform: translateX(290%); } }
@@ -161,4 +166,6 @@ button:focus-visible, textarea:focus-visible, select:focus-visible, input:focus-
   .section-title-row > p { display: none; }
   .task-header { display: block; }
   .status-pill { display: inline-block; margin-top: 8px; }
+  .error-box { align-items: stretch; flex-direction: column; }
+  .retry-button { align-self: start; }
 }
