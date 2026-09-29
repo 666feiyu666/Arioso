@@ -30,7 +30,12 @@ const statusLabels = {
   failed: "生成失败",
 };
 
-const state = { tasks: [], selectedTaskId: null, submitting: false };
+const state = {
+  tasks: [],
+  selectedTaskId: null,
+  playingTaskId: null,
+  submitting: false,
+};
 const elements = {
   homeView: document.querySelector("#home-view"),
   taskView: document.querySelector("#task-view"),
@@ -44,6 +49,10 @@ const elements = {
   mode: document.querySelector("#mode-select"),
   lyriaModel: document.querySelector("#lyria-model-select"),
   vocalModes: document.querySelectorAll('input[name="vocal-mode"]'),
+  globalPlayer: document.querySelector("#global-player"),
+  audio: document.querySelector("#audio-player"),
+  playerTitle: document.querySelector("#player-title"),
+  playerMeta: document.querySelector("#player-meta"),
 };
 
 function selectedVocalMode() {
@@ -68,6 +77,58 @@ function statusClass(status) {
 
 function formatTime(value) {
   return new Intl.DateTimeFormat("zh-CN", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(value));
+}
+
+function taskIsPlaying(id) {
+  return state.playingTaskId === id && !elements.audio.paused && !elements.audio.ended;
+}
+
+function syncPlaybackControls() {
+  document.querySelectorAll("[data-play-task]").forEach((button) => {
+    const task = state.tasks.find((item) => item.id === button.dataset.playTask);
+    const playing = taskIsPlaying(button.dataset.playTask);
+    const title = task?.title || task?.description || "这首音乐";
+
+    if (button.classList.contains("task-play")) {
+      button.textContent = playing ? "Ⅱ" : "▶";
+      button.setAttribute("aria-label", `${playing ? "暂停" : "播放"}${title}`);
+      button.title = `${playing ? "暂停" : "播放"}${title}`;
+    } else {
+      button.textContent = playing
+        ? "暂停播放"
+        : state.playingTaskId === button.dataset.playTask
+          ? "继续播放"
+          : "在播放器中播放";
+    }
+  });
+}
+
+async function playTask(id) {
+  const task = state.tasks.find((item) => item.id === id);
+  if (!task?.audioFile) return;
+
+  try {
+    if (state.playingTaskId === id) {
+      if (elements.audio.paused) {
+        await elements.audio.play();
+      } else {
+        elements.audio.pause();
+      }
+      return;
+    }
+
+    state.playingTaskId = id;
+    elements.playerTitle.textContent = task.title || task.description;
+    elements.playerMeta.textContent = `${task.lyriaModel} · 完整成品`;
+    elements.globalPlayer.hidden = false;
+    elements.audio.src = `/api/tasks/${encodeURIComponent(task.id)}/audio`;
+    elements.audio.load();
+    await elements.audio.play();
+  } catch (error) {
+    elements.message.textContent = error instanceof Error ? error.message : "音频播放失败。";
+  } finally {
+    syncPlaybackControls();
+  }
 }
 
 function renderExamples() {
@@ -100,17 +161,24 @@ function renderTaskList() {
     return;
   }
   elements.taskList.innerHTML = state.tasks.map((task) => `
-    <button class="task-button ${task.id === state.selectedTaskId ? "active" : ""}" type="button" data-task-id="${task.id}">
-      <strong>${escapeHtml(task.title || task.description)}</strong>
-      <span class="task-meta">
-        <span class="task-state-dot ${statusClass(task.status)}"></span>
-        ${escapeHtml(statusLabels[task.status] || task.status)} · ${formatTime(task.updatedAt)}
-      </span>
-    </button>
+    <div class="task-list-item">
+      <button class="task-button ${task.id === state.selectedTaskId ? "active" : ""}" type="button" data-task-id="${task.id}">
+        <strong>${escapeHtml(task.title || task.description)}</strong>
+        <span class="task-meta">
+          <span class="task-state-dot ${statusClass(task.status)}"></span>
+          ${escapeHtml(statusLabels[task.status] || task.status)} · ${formatTime(task.updatedAt)}
+        </span>
+      </button>
+      ${task.audioFile ? `<button class="task-play" type="button" data-play-task="${task.id}"></button>` : ""}
+    </div>
   `).join("");
   elements.taskList.querySelectorAll("[data-task-id]").forEach((button) => {
     button.addEventListener("click", () => selectTask(button.dataset.taskId));
   });
+  elements.taskList.querySelectorAll("[data-play-task]").forEach((button) => {
+    button.addEventListener("click", () => playTask(button.dataset.playTask));
+  });
+  syncPlaybackControls();
 }
 
 function renderTaskDetail(task) {
@@ -137,7 +205,7 @@ function renderTaskDetail(task) {
   const audioPanel = task.audioFile ? `
     <div class="panel audio-panel">
       <div><h3>试听成品</h3><p>${escapeHtml(task.lyriaModel)} · MP3</p></div>
-      <audio controls preload="metadata" src="/api/tasks/${task.id}/audio"></audio>
+      <button class="listen-button" type="button" data-play-task="${task.id}"></button>
     </div>
   ` : "";
   const progress = running ? `
@@ -162,6 +230,10 @@ function renderTaskDetail(task) {
     ${progress}${error}
     ${spec ? `<div class="result-grid">${promptPanel}${audioPanel}</div>` : ""}
   `;
+  elements.taskDetail.querySelectorAll("[data-play-task]").forEach((button) => {
+    button.addEventListener("click", () => playTask(button.dataset.playTask));
+  });
+  syncPlaybackControls();
 }
 
 function showHome() {
@@ -186,11 +258,21 @@ async function refreshTasks() {
   try {
     const response = await fetch("/api/tasks", { cache: "no-store" });
     if (!response.ok) return;
+    const previousSelected = state.tasks.find((task) => task.id === state.selectedTaskId);
     state.tasks = await response.json();
     renderTaskList();
     if (state.selectedTaskId) {
       const selected = state.tasks.find((task) => task.id === state.selectedTaskId);
-      if (selected) renderTaskDetail(selected);
+      if (selected && selected.updatedAt !== previousSelected?.updatedAt) {
+        renderTaskDetail(selected);
+      }
+    }
+    if (state.playingTaskId) {
+      const playing = state.tasks.find((task) => task.id === state.playingTaskId);
+      if (playing) {
+        elements.playerTitle.textContent = playing.title || playing.description;
+        elements.playerMeta.textContent = `${playing.lyriaModel} · 完整成品`;
+      }
     }
   } catch {
     // A temporary polling failure should not replace the current interface.
@@ -230,6 +312,13 @@ async function submitTask(event) {
 
 renderExamples();
 elements.form.addEventListener("submit", submitTask);
+elements.audio.addEventListener("play", syncPlaybackControls);
+elements.audio.addEventListener("pause", syncPlaybackControls);
+elements.audio.addEventListener("ended", syncPlaybackControls);
+elements.audio.addEventListener("error", () => {
+  elements.message.textContent = "音频加载失败，请重启本地服务后重试。";
+  syncPlaybackControls();
+});
 document.querySelector("#new-task").addEventListener("click", () => { showHome(); elements.input.focus(); });
 document.querySelector("#back-home").addEventListener("click", showHome);
 refreshTasks();

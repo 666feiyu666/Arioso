@@ -1,7 +1,7 @@
 import "dotenv/config";
 
 import { createReadStream } from "node:fs";
-import { access, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -148,6 +148,93 @@ function sendJson(response: ServerResponse, status: number, value: unknown): voi
   response.end(JSON.stringify(value));
 }
 
+interface ByteRange {
+  start: number;
+  end: number;
+}
+
+function parseByteRange(value: string, fileSize: number): ByteRange | null {
+  const match = /^bytes=(\d*)-(\d*)$/i.exec(value.trim());
+  if (!match || fileSize <= 0 || (!match[1] && !match[2])) {
+    return null;
+  }
+
+  if (!match[1]) {
+    const suffixLength = Number(match[2]);
+    if (!Number.isSafeInteger(suffixLength) || suffixLength <= 0) {
+      return null;
+    }
+    return {
+      start: Math.max(fileSize - suffixLength, 0),
+      end: fileSize - 1,
+    };
+  }
+
+  const start = Number(match[1]);
+  const requestedEnd = match[2] ? Number(match[2]) : fileSize - 1;
+  if (
+    !Number.isSafeInteger(start)
+    || !Number.isSafeInteger(requestedEnd)
+    || start < 0
+    || start >= fileSize
+    || requestedEnd < start
+  ) {
+    return null;
+  }
+
+  return { start, end: Math.min(requestedEnd, fileSize - 1) };
+}
+
+async function sendAudio(
+  request: IncomingMessage,
+  response: ServerResponse,
+  filePath: string,
+): Promise<void> {
+  const file = await stat(filePath);
+  const baseHeaders = {
+    "Accept-Ranges": "bytes",
+    "Cache-Control": "private, no-cache",
+    "Content-Type": "audio/mpeg",
+  };
+
+  if (request.method === "HEAD") {
+    response.writeHead(200, {
+      ...baseHeaders,
+      "Content-Length": file.size,
+    });
+    response.end();
+    return;
+  }
+
+  const rangeHeader = request.headers.range;
+  if (!rangeHeader) {
+    response.writeHead(200, {
+      ...baseHeaders,
+      "Content-Length": file.size,
+    });
+    createReadStream(filePath).pipe(response);
+    return;
+  }
+
+  const range = parseByteRange(rangeHeader, file.size);
+  if (!range) {
+    response.writeHead(416, {
+      ...baseHeaders,
+      "Content-Length": 0,
+      "Content-Range": `bytes */${file.size}`,
+    });
+    response.end();
+    return;
+  }
+
+  response.writeHead(206, {
+    ...baseHeaders,
+    "Content-Length": range.end - range.start + 1,
+    "Content-Range": `bytes ${range.start}-${range.end}/${file.size}`,
+  });
+  createReadStream(filePath, range).pipe(response);
+}
+
 async function readJsonBody(request: IncomingMessage): Promise<unknown> {
   const chunks: Buffer[] = [];
   let size = 0;
@@ -274,16 +361,14 @@ export async function createAriosoServer() {
         return;
       }
 
-      if (request.method === "GET" && audioMatch?.[1]) {
+      if ((request.method === "GET" || request.method === "HEAD") && audioMatch?.[1]) {
         const task = store.get(audioMatch[1]);
         const audioPath = task ? store.audioPath(task) : undefined;
         if (!task || !audioPath) {
           sendJson(response, 404, { error: "Audio is not available." });
           return;
         }
-        await access(audioPath);
-        response.writeHead(200, { "Content-Type": "audio/mpeg", "Cache-Control": "no-cache" });
-        createReadStream(audioPath).pipe(response);
+        await sendAudio(request, response, audioPath);
         return;
       }
 

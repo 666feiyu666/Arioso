@@ -77,6 +77,14 @@
         </section>
 
         <div class="composer-dock" id="composer-dock">
+          <div class="global-player" id="global-player" hidden>
+            <div class="player-now">
+              <span>正在播放</span>
+              <strong id="player-title">未选择音乐</strong>
+              <small id="player-meta"></small>
+            </div>
+            <audio id="audio-player" controls preload="metadata"></audio>
+          </div>
           <form id="composer-form" class="composer-form">
             <div class="composer-main">
               <textarea

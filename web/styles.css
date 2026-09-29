@@ -32,9 +32,12 @@ button:focus-visible, textarea:focus-visible, select:focus-visible, input:focus-
 .sidebar-heading { display: flex; justify-content: space-between; align-items: center; padding: 0 6px 12px; color: var(--muted); font-size: 13px; }
 .task-count { min-width: 24px; padding: 2px 7px; text-align: center; border-radius: 999px; background: #ebe7de; font-size: 11px; }
 .task-list { overflow: auto; display: grid; gap: 9px; padding-right: 2px; }
-.task-button { width: 100%; padding: 13px 14px; text-align: left; border: 1px solid transparent; border-radius: 16px; background: transparent; transition: 160ms ease; }
+.task-list-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px; }
+.task-button { min-width: 0; width: 100%; padding: 13px 10px 13px 14px; text-align: left; border: 1px solid transparent; border-radius: 16px; background: transparent; transition: 160ms ease; }
 .task-button:hover, .task-button.active { border-color: var(--line); background: #fff; box-shadow: 0 8px 22px rgba(51, 42, 31, 0.05); }
 .task-button strong { display: block; overflow: hidden; margin-bottom: 8px; font-size: 13px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.task-play { width: 30px; height: 30px; padding: 0; border: 1px solid var(--line); border-radius: 50%; color: var(--ink); background: rgba(255,255,255,.6); font-size: 10px; transition: 150ms ease; }
+.task-play:hover { color: #fff; border-color: var(--ink); background: var(--ink); }
 .task-meta { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 11px; }
 .task-state-dot { width: 7px; height: 7px; border-radius: 50%; background: #a8a49b; }
 .task-state-dot.running { background: var(--accent); box-shadow: 0 0 0 4px rgba(204, 90, 52, 0.1); animation: pulse 1.4s infinite; }
@@ -45,7 +48,7 @@ button:focus-visible, textarea:focus-visible, select:focus-visible, input:focus-
 .sidebar-foot small { margin-left: auto; }
 .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #77906f; box-shadow: 0 0 0 4px rgba(119, 144, 111, 0.12); }
 
-.workspace { grid-column: 2; min-width: 0; padding: 0 7vw 150px; }
+.workspace { grid-column: 2; min-width: 0; padding: 0 7vw 230px; }
 .view { max-width: 1280px; margin: 0 auto; }
 .hero { min-height: 51vh; display: flex; flex-direction: column; justify-content: center; padding: 74px 0 42px; border-bottom: 1px solid var(--line); }
 .hero h2 { max-width: 760px; margin: 16px 0 20px; font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(52px, 6vw, 92px); font-weight: 400; line-height: 1.02; letter-spacing: -0.055em; }
@@ -74,6 +77,13 @@ button:focus-visible, textarea:focus-visible, select:focus-visible, input:focus-
 .tag { padding: 4px 8px; border-radius: 999px; color: #635e56; background: #eeeae2; font-size: 10px; }
 
 .composer-dock { position: fixed; left: calc(310px + 7vw); right: 7vw; bottom: 22px; z-index: 4; max-width: 1280px; margin: auto; }
+.global-player { display: grid; grid-template-columns: minmax(180px, .7fr) minmax(300px, 1.3fr); align-items: center; gap: 18px; margin-bottom: 8px; padding: 12px 16px; border: 1px solid rgba(28,27,24,.13); border-radius: 20px; color: #f7f4ed; background: rgba(34,33,31,.96); box-shadow: 0 14px 38px rgba(49,42,32,.16); backdrop-filter: blur(20px); }
+.global-player[hidden] { display: none; }
+.player-now { min-width: 0; display: grid; gap: 3px; }
+.player-now span { color: #bdb8af; font-size: 9px; font-weight: 750; letter-spacing: .13em; }
+.player-now strong { overflow: hidden; font-family: Georgia, "Noto Serif SC", serif; font-size: 15px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+.player-now small { overflow: hidden; color: #aaa69d; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.global-player audio { width: 100%; min-width: 0; height: 36px; }
 .composer-form { padding: 10px 13px 10px 22px; border: 1px solid rgba(28,27,24,.13); border-radius: 25px; background: rgba(251,250,247,.92); box-shadow: 0 18px 50px rgba(49,42,32,.14); backdrop-filter: blur(20px); }
 .composer-main { display: flex; align-items: center; gap: 12px; }
 .composer-form textarea { flex: 1; resize: none; min-height: 48px; max-height: 150px; padding: 12px 0; border: 0; outline: 0; color: var(--ink); background: transparent; line-height: 1.5; }
@@ -108,7 +118,8 @@ button:focus-visible, textarea:focus-visible, select:focus-visible, input:focus-
 .audio-panel { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 20px; color: #f7f4ed; background: #22211f; }
 .audio-panel h3 { margin-bottom: 7px; }
 .audio-panel p { margin: 0; color: #aaa69d; font-size: 12px; }
-.audio-panel audio { width: min(520px, 46vw); }
+.listen-button { padding: 11px 17px; border: 1px solid rgba(255,255,255,.18); border-radius: 999px; color: #f7f4ed; background: rgba(255,255,255,.08); font-size: 11px; transition: 150ms ease; }
+.listen-button:hover { color: var(--ink); background: #f7f4ed; }
 .progress-card { max-width: 680px; padding: 34px; border: 1px solid var(--line); border-radius: 22px; background: var(--paper); }
 .progress-line { height: 4px; overflow: hidden; margin: 24px 0 18px; border-radius: 999px; background: #e5e0d7; }
 .progress-line::after { content: ""; display: block; width: 38%; height: 100%; border-radius: inherit; background: var(--accent); animation: travel 1.6s ease-in-out infinite; }
@@ -126,7 +137,6 @@ button:focus-visible, textarea:focus-visible, select:focus-visible, input:focus-
   .example-card:last-child { display: none; }
   .result-grid { grid-template-columns: 1fr; }
   .audio-panel { grid-column: auto; grid-template-columns: 1fr; }
-  .audio-panel audio { width: 100%; }
 }
 
 @media (max-width: 700px) {
@@ -136,12 +146,14 @@ button:focus-visible, textarea:focus-visible, select:focus-visible, input:focus-
   .brand-row h1 { font-size: 23px; }
   .new-task { width: auto; margin: 0; padding: 10px 14px; }
   .sidebar-heading, .task-list, .sidebar-foot { display: none; }
-  .workspace { padding: 0 20px 140px; }
+  .workspace { padding: 0 20px 230px; }
   .hero { min-height: auto; padding: 70px 0 44px; }
   .hero h2 { font-size: 48px; }
   .example-grid { grid-template-columns: 1fr; }
   .example-card:last-child { display: flex; }
   .composer-dock { left: 16px; right: 16px; bottom: 14px; }
+  .global-player { grid-template-columns: 1fr; gap: 8px; padding: 11px 14px; }
+  .player-now small { display: none; }
   .composer-form { padding-left: 16px; }
   .vocal-setting legend { letter-spacing: 0; }
   .segmented-control { margin-left: 4px; }
