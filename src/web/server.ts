@@ -31,6 +31,8 @@ interface MusicTask {
   createdAt: string;
   updatedAt: string;
   title?: string;
+  retrievalQuery?: string;
+  retrievedReferenceIds?: string[];
   musicSpec?: MusicSpec;
   generatedText?: string | null;
   audioFile?: string;
@@ -342,6 +344,12 @@ async function runTask(
         model: task.composerModel,
         lyriaModel: task.lyriaModel,
         vocalMode: task.vocalMode ?? "auto",
+        onJazzRetrieval: async ({ query, referenceIds }) => {
+          await store.update(task.id, {
+            retrievalQuery: query,
+            retrievedReferenceIds: referenceIds,
+          });
+        },
       });
       await store.update(task.id, { musicSpec: spec, title: spec.title });
     }

@@ -1,4 +1,8 @@
-export { composeMusic, type ComposeMusicOptions } from "./composer/composer-agent.js";
+export {
+  composeMusic,
+  type ComposeMusicOptions,
+  type JazzRetrievalTrace,
+} from "./composer/composer-agent.js";
 export { LyriaClient, type GeneratedMusic, type GenerateMusicOptions } from "./lyria/lyria-client.js";
 export {
   createJazzRetriever,

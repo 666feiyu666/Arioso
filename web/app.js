@@ -29,6 +29,7 @@ const translations = {
     audioPlaybackFailed: "音频播放失败。", audioLoadFailed: "音频加载失败，请重启本地服务后重试。",
     unnamedWork: "未命名作品", thinking: "正在构思…", lyriaPrompt: "Lyria 生成提示", musicalDirection: "音乐方向",
     genre: "风格", mood: "情绪", tempo: "速度", tonality: "调性", instrumentation: "编制", vocals: "人声",
+    retrievalContext: "检索记录", retrievalQuery: "英文检索描述", retrievedReferences: "参考曲目",
     openTonality: "开放调性", enabled: "启用", instrumentalNoVocals: "纯器乐 · 无人声", listen: "试听成品",
     inProgress: "IN PROGRESS", generatingProgress: "编曲提示已经完成，正在等待 Lyria 返回音频。",
     composingProgress: "OpenAI Composer 正在把你的描述整理成一致的音乐规格。",
@@ -65,6 +66,7 @@ const translations = {
     audioPlaybackFailed: "Audio playback failed.", audioLoadFailed: "Audio failed to load. Restart the local server and try again.",
     unnamedWork: "Untitled work", thinking: "Thinking…", lyriaPrompt: "Lyria generation prompt", musicalDirection: "Musical direction",
     genre: "Genre", mood: "Mood", tempo: "Tempo", tonality: "Tonality", instrumentation: "Instrumentation", vocals: "Vocals",
+    retrievalContext: "Retrieval record", retrievalQuery: "English retrieval description", retrievedReferences: "Reference tracks",
     openTonality: "Open tonality", enabled: "Enabled", instrumentalNoVocals: "Instrumental · no vocals", listen: "Listen",
     inProgress: "IN PROGRESS", generatingProgress: "The composition prompt is ready. Waiting for Lyria to return audio.",
     composingProgress: "OpenAI Composer is turning your description into a coherent music specification.",
@@ -345,6 +347,15 @@ function renderTaskDetail(task) {
       </div>
     </div>
   ` : "";
+  const retrievalPanel = task.retrievalQuery ? `
+    <div class="panel">
+      <h3>${t("retrievalContext")}</h3>
+      <div class="spec-list">
+        <div class="spec-row"><span>${t("retrievalQuery")}</span><strong>${escapeHtml(task.retrievalQuery)}</strong></div>
+        <div class="spec-row"><span>${t("retrievedReferences")}</span><strong>${escapeHtml((task.retrievedReferenceIds || []).join(" · "))}</strong></div>
+      </div>
+    </div>
+  ` : "";
   const audioPanel = task.audioFile ? `
     <div class="panel audio-panel">
       <div><h3>${t("listen")}</h3><p>${escapeHtml(task.lyriaModel)} · MP3</p></div>
@@ -379,7 +390,7 @@ function renderTaskDetail(task) {
       <span class="status-pill ${statusClass(task.status)}">${escapeHtml(statusLabel(task.status))}</span>
     </header>
     ${progress}${error}
-    ${spec ? `<div class="result-grid">${promptPanel}${audioPanel}</div>` : ""}
+    ${spec || retrievalPanel ? `<div class="result-grid">${promptPanel}${retrievalPanel}${audioPanel}</div>` : ""}
   `;
   elements.taskDetail.querySelectorAll("[data-play-task]").forEach((button) => {
     button.addEventListener("click", () => playTask(button.dataset.playTask));
