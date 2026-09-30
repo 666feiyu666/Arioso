@@ -1,1 +1,8 @@
-scripts/
+.env
+AGENTS.md
+node_modules/*
+dist/*
+outputs/*
+scripts/*
+docs/*
+tools/*
