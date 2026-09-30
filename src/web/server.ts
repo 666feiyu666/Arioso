@@ -19,12 +19,14 @@ import type { MusicSpec } from "../schema/music-spec.js";
 type TaskMode = "compose" | "generate";
 type TaskStatus = "queued" | "composing" | "generating" | "completed" | "failed";
 type VocalMode = "auto" | "instrumental" | "vocals";
+type CorpusMode = "none" | "jazz";
 
 interface MusicTask {
   id: string;
   description: string;
   mode: TaskMode;
   vocalMode: VocalMode;
+  corpusMode: CorpusMode;
   status: TaskStatus;
   composerModel: string;
   lyriaModel: string;
@@ -43,6 +45,7 @@ interface CreateTaskInput {
   description: string;
   mode: TaskMode;
   vocalMode: VocalMode;
+  corpusMode: CorpusMode;
   lyriaModel?: string;
 }
 
@@ -79,6 +82,9 @@ class TaskStore {
               await readFile(path.join(this.#directory, entry.name), "utf8"),
             ) as MusicTask;
             if (task.id) {
+              task.corpusMode = task.corpusMode === "jazz" || task.retrievalQuery
+                ? "jazz"
+                : "none";
               let interrupted = false;
               if (["queued", "composing", "generating"].includes(task.status)) {
                 task.status = "failed";
@@ -115,6 +121,7 @@ class TaskStore {
       description: input.description,
       mode: input.mode,
       vocalMode: input.vocalMode,
+      corpusMode: input.corpusMode,
       status: "queued",
       composerModel: config.openAiModel,
       lyriaModel: input.lyriaModel ?? config.lyriaModel,
@@ -268,7 +275,7 @@ async function readJsonBody(request: IncomingMessage): Promise<unknown> {
   }
 }
 
-function parseTaskInput(value: unknown): CreateTaskInput {
+export function parseTaskInput(value: unknown): CreateTaskInput {
   if (!value || typeof value !== "object") {
     throw new Error("A task request is required.");
   }
@@ -279,6 +286,12 @@ function parseTaskInput(value: unknown): CreateTaskInput {
     candidate.vocalMode === "instrumental" || candidate.vocalMode === "vocals"
       ? candidate.vocalMode
       : "auto";
+  if (candidate.corpusMode !== undefined
+    && candidate.corpusMode !== "none"
+    && candidate.corpusMode !== "jazz") {
+    throw new Error("Unsupported corpus mode.");
+  }
+  const corpusMode: CorpusMode = candidate.corpusMode === "jazz" ? "jazz" : "none";
   const lyriaModel =
     candidate.lyriaModel === "lyria-3.5" || candidate.lyriaModel === "lyria-3-clip-preview"
       ? candidate.lyriaModel
@@ -292,8 +305,8 @@ function parseTaskInput(value: unknown): CreateTaskInput {
   }
 
   return lyriaModel
-    ? { description, mode, vocalMode, lyriaModel }
-    : { description, mode, vocalMode };
+    ? { description, mode, vocalMode, corpusMode, lyriaModel }
+    : { description, mode, vocalMode, corpusMode };
 }
 
 function isRetryableRequestError(error: unknown): boolean {
@@ -344,6 +357,7 @@ async function runTask(
         model: task.composerModel,
         lyriaModel: task.lyriaModel,
         vocalMode: task.vocalMode ?? "auto",
+        corpusMode: task.corpusMode ?? "none",
         onJazzRetrieval: async ({ query, referenceIds }) => {
           await store.update(task.id, {
             retrievalQuery: query,

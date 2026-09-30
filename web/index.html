@@ -40,11 +40,43 @@
       </aside>
 
       <main class="workspace">
-        <section id="home-view" class="view home-view">
+        <section id="entry-view" class="view entry-view">
+          <div class="entry-hero">
+            <p class="eyebrow accent" data-i18n="entryEyebrow">CHOOSE A WORKFLOW</p>
+            <h2 data-i18n-html="entryTitle">选择音乐的<br />创作方式。</h2>
+            <p data-i18n="entryCopy">从模型自身知识开始，或让 Jazz 语料为编曲提供参考。</p>
+          </div>
+          <div class="workflow-grid" aria-label="生成方式" data-i18n-aria-label="workflowChoices">
+            <button class="workflow-card" type="button" data-corpus-mode="none">
+              <span class="workflow-index">01</span>
+              <span class="workflow-copy">
+                <span class="workflow-tag" data-i18n="allStyles">不限风格</span>
+                <strong data-i18n="noCorpusTitle">无语料生成</strong>
+                <span data-i18n="noCorpusDescription">直接使用模型已有的音乐知识，将你的想法整理成完整编曲。</span>
+              </span>
+              <span class="workflow-action" data-i18n="enterStudio">进入创作台 →</span>
+            </button>
+            <button class="workflow-card corpus" type="button" data-corpus-mode="jazz">
+              <span class="workflow-index">02</span>
+              <span class="workflow-copy">
+                <span class="workflow-tag" data-i18n="jazzOnly">仅限 Jazz</span>
+                <strong data-i18n="jazzCorpusTitle">含语料生成</strong>
+                <span data-i18n="jazzCorpusDescription">先检索本地 Jazz 语料，再结合参考信息完成编曲。</span>
+              </span>
+              <span class="workflow-action" data-i18n="enterJazzStudio">进入 Jazz 创作台 →</span>
+            </button>
+          </div>
+        </section>
+
+        <section id="home-view" class="view home-view" hidden>
+          <div class="creator-toolbar">
+            <button class="back-button" id="back-entry" type="button" data-i18n="backEntry">← 返回生成方式选择</button>
+            <span class="creation-mode-badge" id="creation-mode-badge"></span>
+          </div>
           <div class="hero">
-            <p class="eyebrow accent" data-i18n="heroEyebrow">COMPOSE WITH INTENT</p>
-            <h2 data-i18n-html="heroTitle">把一个念头，<br />写成一段音乐。</h2>
-            <p class="hero-copy" data-i18n="heroCopy">描述场景、情绪或声音。Arioso 会先整理成完整乐曲规格，再交给 Lyria 生成。</p>
+            <p class="eyebrow accent" id="hero-eyebrow">COMPOSE WITH INTENT</p>
+            <h2 id="hero-title">把一个念头，<br />写成一段音乐。</h2>
+            <p class="hero-copy" id="hero-copy">描述场景、情绪或声音。Arioso 会先整理成完整乐曲规格，再交给 Lyria 生成。</p>
             <div class="model-settings" aria-label="生成设置" data-i18n-aria-label="generationSettings">
               <label>
                 <span data-i18n="generationMode">生成模式</span>
@@ -80,7 +112,7 @@
           <div id="task-detail"></div>
         </section>
 
-        <div class="composer-dock" id="composer-dock">
+        <div class="composer-dock" id="composer-dock" hidden>
           <div class="global-player" id="global-player" hidden>
             <div class="player-now">
               <span data-i18n="nowPlaying">正在播放</span>

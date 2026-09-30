@@ -52,6 +52,27 @@ button:focus-visible, textarea:focus-visible, select:focus-visible, input:focus-
 
 .workspace { grid-column: 2; min-width: 0; padding: 0 7vw 230px; }
 .view { max-width: 1280px; margin: 0 auto; }
+.entry-view { min-height: 100vh; display: grid; align-content: center; gap: 42px; padding: 72px 0 90px; }
+.entry-view[hidden] { display: none; }
+.entry-hero h2 { max-width: 850px; margin: 16px 0 20px; font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(52px, 6vw, 88px); font-weight: 400; line-height: 1.02; letter-spacing: -.055em; }
+.entry-hero > p:last-child { max-width: 620px; margin: 0; color: var(--muted); font-size: 16px; line-height: 1.8; }
+.workflow-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.workflow-card { min-height: 300px; display: grid; grid-template-rows: auto 1fr auto; gap: 28px; padding: 28px; text-align: left; border: 1px solid var(--line); border-radius: 26px; color: var(--ink); background: var(--paper); box-shadow: 0 12px 38px rgba(51, 42, 31, .05); transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease; }
+.workflow-card:hover { transform: translateY(-4px); border-color: rgba(28, 27, 24, .28); box-shadow: var(--shadow); }
+.workflow-card.corpus { color: #f7f4ed; border-color: transparent; background: linear-gradient(145deg, #202827, #394d48 58%, #746d50); }
+.workflow-index { color: var(--muted); font-family: Georgia, serif; font-size: 13px; }
+.workflow-card.corpus .workflow-index { color: rgba(247, 244, 237, .58); }
+.workflow-copy { display: grid; align-content: center; justify-items: start; gap: 14px; }
+.workflow-copy strong { font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(30px, 3vw, 43px); font-weight: 500; }
+.workflow-copy > span:last-child { max-width: 440px; color: var(--muted); font-size: 13px; line-height: 1.75; }
+.workflow-card.corpus .workflow-copy > span:last-child { color: rgba(247, 244, 237, .7); }
+.workflow-tag { padding: 5px 9px; border-radius: 999px; color: #625e56; background: #eeeae2; font-size: 10px; font-weight: 700; letter-spacing: .05em; }
+.workflow-card.corpus .workflow-tag { color: #fff; background: rgba(255, 255, 255, .13); }
+.workflow-action { font-size: 12px; font-weight: 700; }
+.creator-toolbar { position: sticky; top: 14px; z-index: 3; min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 18px; padding-top: 10px; pointer-events: none; }
+.creator-toolbar .back-button { pointer-events: auto; padding: 10px 15px; border: 1px solid rgba(28, 27, 24, .18); border-radius: 999px; color: var(--ink); background: rgba(251, 250, 247, .94); box-shadow: 0 6px 18px rgba(51, 42, 31, .1); backdrop-filter: blur(12px); font-weight: 650; transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease, background 160ms ease; }
+.creator-toolbar .back-button:hover { transform: translateX(-2px); border-color: rgba(28, 27, 24, .42); background: #fff; box-shadow: 0 9px 24px rgba(51, 42, 31, .11); }
+.creation-mode-badge { pointer-events: auto; padding: 7px 11px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: rgba(251, 250, 247, .9); backdrop-filter: blur(12px); font-size: 10px; font-weight: 700; letter-spacing: .04em; }
 .hero { min-height: 51vh; display: flex; flex-direction: column; justify-content: center; padding: 74px 0 42px; border-bottom: 1px solid var(--line); }
 .hero h2 { max-width: 760px; margin: 16px 0 20px; font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(52px, 6vw, 92px); font-weight: 400; line-height: 1.02; letter-spacing: -0.055em; }
 .hero-copy { max-width: 650px; margin: 0; color: var(--muted); font-size: 16px; line-height: 1.8; }
@@ -66,8 +87,8 @@ button:focus-visible, textarea:focus-visible, select:focus-visible, input:focus-
 .example-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 .example-card { overflow: hidden; min-height: 290px; display: flex; flex-direction: column; padding: 0; text-align: left; border: 1px solid var(--line); border-radius: 22px; background: var(--paper); box-shadow: 0 10px 32px rgba(51, 42, 31, 0.04); transition: transform 180ms ease, box-shadow 180ms ease; }
 .example-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
-.example-art { min-height: 168px; position: relative; display: grid; place-items: center; overflow: hidden; }
-.example-art::before { content: ""; width: 75%; height: 75%; border: 1px solid rgba(255,255,255,.38); border-radius: 50%; box-shadow: 0 0 0 24px rgba(255,255,255,.07), 0 0 0 52px rgba(255,255,255,.04); }
+.example-art { min-height: 0; aspect-ratio: 16 / 9; position: relative; display: grid; place-items: center; overflow: hidden; }
+.example-art::before { content: ""; width: clamp(112px, 42%, 168px); height: auto; aspect-ratio: 1; border: 1px solid rgba(255,255,255,.38); border-radius: 50%; box-shadow: 0 0 0 24px rgba(255,255,255,.07), 0 0 0 52px rgba(255,255,255,.04); }
 .example-art::after { content: "♪"; position: absolute; color: rgba(255,255,255,.82); font-family: Georgia, serif; font-size: 34px; }
 .example-card:nth-child(1) .example-art { background: radial-gradient(circle at 20% 20%, #bd7a56, transparent 34%), linear-gradient(145deg, #28252d, #6b3844 60%, #b65c39); }
 .example-card:nth-child(2) .example-art { background: radial-gradient(circle at 70% 30%, #dfc78c, transparent 28%), linear-gradient(145deg, #233c40, #4c6d67 55%, #a29868); }
@@ -175,6 +196,8 @@ button:focus-visible, textarea:focus-visible, select:focus-visible, input:focus-
   .sidebar { width: 240px; }
   .workspace { padding-inline: 5vw; }
   .composer-dock { left: calc(240px + 5vw); right: 5vw; }
+  .entry-view { gap: 30px; }
+  .workflow-card { min-height: 270px; }
   .example-grid { grid-template-columns: 1fr 1fr; }
   .example-card:last-child { display: none; }
   .result-grid { grid-template-columns: 1fr; }
@@ -193,6 +216,11 @@ button:focus-visible, textarea:focus-visible, select:focus-visible, input:focus-
   .settings-button { width: 40px; height: 40px; margin: 0; padding: 0; }
   .settings-button span:last-child { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
   .workspace { padding: 0 20px 230px; }
+  .entry-view { min-height: calc(100vh - 68px); gap: 28px; padding: 54px 0 90px; }
+  .entry-hero h2 { font-size: 48px; }
+  .workflow-grid { grid-template-columns: 1fr; }
+  .workflow-card { min-height: 240px; padding: 23px; }
+  .creator-toolbar { top: 8px; padding-top: 8px; }
   .hero { min-height: auto; padding: 70px 0 44px; }
   .hero h2 { font-size: 48px; }
   .example-grid { grid-template-columns: 1fr; }

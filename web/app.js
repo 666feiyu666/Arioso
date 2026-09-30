@@ -2,9 +2,20 @@ const translations = {
   "zh-CN": {
     pageTitle: "Arioso · AI 音乐工坊",
     newTask: "新建任务", tasks: "任务", musicTasks: "音乐任务", settings: "设置",
+    entryEyebrow: "CHOOSE A WORKFLOW", entryTitle: "选择音乐的<br />创作方式。",
+    entryCopy: "从模型自身知识开始，或让 Jazz 语料为编曲提供参考。",
+    workflowChoices: "生成方式", allStyles: "不限风格", jazzOnly: "仅限 Jazz",
+    noCorpusTitle: "无语料生成", noCorpusDescription: "直接使用模型已有的音乐知识，将你的想法整理成完整编曲。",
+    jazzCorpusTitle: "含语料生成", jazzCorpusDescription: "先检索本地 Jazz 语料，再结合参考信息完成编曲。",
+    enterStudio: "进入创作台 →", enterJazzStudio: "进入 Jazz 创作台 →", backEntry: "← 返回生成方式选择",
+    noCorpusBadge: "无语料 · 不限风格", jazzCorpusBadge: "Jazz 语料增强",
     localWorkspace: "本地创作空间", heroEyebrow: "COMPOSE WITH INTENT",
     heroTitle: "把一个念头，<br />写成一段音乐。",
     heroCopy: "描述场景、情绪或声音。Arioso 会先整理成完整乐曲规格，再交给 Lyria 生成。",
+    jazzHeroEyebrow: "COMPOSE WITH JAZZ MEMORY",
+    jazzHeroTitle: "从爵士记忆里，<br />找到新的声音。",
+    jazzHeroCopy: "描述年代、编制、节奏或氛围。Arioso 会检索本地 Jazz 语料，再整理成完整乐曲规格。",
+    generalExamplesTitle: "从一个声音画面开始", jazzExamplesTitle: "从一种爵士气质开始",
     generationSettings: "生成设置", generationMode: "生成模式", modeGenerate: "编曲并生成音乐",
     modeCompose: "仅生成编曲提示", lyriaModel: "Lyria 模型", lyriaClip: "Lyria 3 Clip · 30 秒",
     lyriaFull: "Lyria 3.5 · 完整歌曲", examplesTitle: "从一个声音画面开始",
@@ -29,6 +40,7 @@ const translations = {
     audioPlaybackFailed: "音频播放失败。", audioLoadFailed: "音频加载失败，请重启本地服务后重试。",
     unnamedWork: "未命名作品", thinking: "正在构思…", lyriaPrompt: "Lyria 生成提示", musicalDirection: "音乐方向",
     genre: "风格", mood: "情绪", tempo: "速度", tonality: "调性", instrumentation: "编制", vocals: "人声",
+    noCorpusSource: "模型知识 · 无语料", jazzCorpusSource: "Jazz 本地语料",
     retrievalContext: "检索记录", retrievalQuery: "英文检索描述", retrievedReferences: "参考曲目",
     openTonality: "开放调性", enabled: "启用", instrumentalNoVocals: "纯器乐 · 无人声", listen: "试听成品",
     inProgress: "IN PROGRESS", generatingProgress: "编曲提示已经完成，正在等待 Lyria 返回音频。",
@@ -39,9 +51,20 @@ const translations = {
   en: {
     pageTitle: "Arioso · AI Music Studio",
     newTask: "New task", tasks: "Tasks", musicTasks: "Music tasks", settings: "Settings",
+    entryEyebrow: "CHOOSE A WORKFLOW", entryTitle: "Choose how to<br />create your music.",
+    entryCopy: "Start from the model's musical knowledge, or ground the composition in the Jazz corpus.",
+    workflowChoices: "Generation workflows", allStyles: "All styles", jazzOnly: "Jazz only",
+    noCorpusTitle: "Without corpus", noCorpusDescription: "Use the model's existing musical knowledge to shape your idea into a complete arrangement.",
+    jazzCorpusTitle: "With corpus", jazzCorpusDescription: "Search the local Jazz corpus before composing with the retrieved references.",
+    enterStudio: "Enter studio →", enterJazzStudio: "Enter Jazz studio →", backEntry: "← Back to workflow selection",
+    noCorpusBadge: "No corpus · All styles", jazzCorpusBadge: "Jazz corpus enhanced",
     localWorkspace: "Local creative space", heroEyebrow: "COMPOSE WITH INTENT",
     heroTitle: "Turn an idea<br />into a piece of music.",
     heroCopy: "Describe a scene, feeling, or sound. Arioso shapes it into a complete music specification before sending it to Lyria.",
+    jazzHeroEyebrow: "COMPOSE WITH JAZZ MEMORY",
+    jazzHeroTitle: "Find a new sound<br />in Jazz memory.",
+    jazzHeroCopy: "Describe an era, ensemble, rhythm, or mood. Arioso searches the local Jazz corpus before shaping a complete music specification.",
+    generalExamplesTitle: "Start with a sonic scene", jazzExamplesTitle: "Start with a Jazz character",
     generationSettings: "Generation settings", generationMode: "Mode", modeGenerate: "Compose and generate music",
     modeCompose: "Compose prompt only", lyriaModel: "Lyria model", lyriaClip: "Lyria 3 Clip · 30 seconds",
     lyriaFull: "Lyria 3.5 · Full song", examplesTitle: "Start with a sonic scene",
@@ -66,6 +89,7 @@ const translations = {
     audioPlaybackFailed: "Audio playback failed.", audioLoadFailed: "Audio failed to load. Restart the local server and try again.",
     unnamedWork: "Untitled work", thinking: "Thinking…", lyriaPrompt: "Lyria generation prompt", musicalDirection: "Musical direction",
     genre: "Genre", mood: "Mood", tempo: "Tempo", tonality: "Tonality", instrumentation: "Instrumentation", vocals: "Vocals",
+    noCorpusSource: "Model knowledge · No corpus", jazzCorpusSource: "Local Jazz corpus",
     retrievalContext: "Retrieval record", retrievalQuery: "English retrieval description", retrievedReferences: "Reference tracks",
     openTonality: "Open tonality", enabled: "Enabled", instrumentalNoVocals: "Instrumental · no vocals", listen: "Listen",
     inProgress: "IN PROGRESS", generatingProgress: "The composition prompt is ready. Waiting for Lyria to return audio.",
@@ -75,7 +99,7 @@ const translations = {
   },
 };
 
-const examples = [
+const generalExamples = [
   {
     title: "午后爵士",
     description: "慵懒松弛的午后爵士，刷镲、低音提琴与温暖钢琴轻轻摇摆。",
@@ -117,17 +141,54 @@ const examples = [
   },
 ];
 
+const jazzExamples = [
+  generalExamples[0],
+  {
+    title: "午夜硬波普",
+    description: "锋利而有推进感的硬波普五重奏，铜管主题与鼓组彼此追逐。",
+    prompt: "一段 30 秒的午夜硬波普爵士，纯器乐，约 148 BPM。以小号、次中音萨克斯、爵士钢琴、低音提琴与鼓组成五重奏；开头用紧凑有力的铜管齐奏主题，中段留出短促的萨克斯即兴，并用切分钢琴和富有推进感的 ride cymbal 支撑。声音应直接、热烈、有现场俱乐部感，但保持清晰的主题与自然收束。不要人声。",
+    tags: ["Hard bop", "夜晚", "五重奏"],
+    vocalMode: "instrumental",
+    en: {
+      title: "Midnight Hard Bop",
+      description: "A driving hard-bop quintet with sharp horn themes and propulsive drums.",
+      prompt: "A 30-second midnight hard-bop jazz instrumental around 148 BPM. Use a quintet of trumpet, tenor saxophone, jazz piano, double bass, and drums. Open with a tight, forceful horn theme, make room for a brief tenor saxophone improvisation, and support it with syncopated piano comping and a propulsive ride cymbal. Keep the sound direct, energetic, and club-like while preserving a clear theme and natural ending. Instrumental only, no vocals.",
+      tags: ["Hard bop", "Night", "Quintet"],
+    },
+  },
+  {
+    title: "雾色调式爵士",
+    description: "宽阔、克制的调式爵士，在留白与缓慢变化的和声中展开。",
+    prompt: "一段 30 秒的调式爵士，纯器乐，约 92 BPM，宽阔而克制。以柔和小号、次中音萨克斯、钢琴、低音提琴和轻盈鼓组为核心；使用持续较久的调式和声、疏朗钢琴和弦与有呼吸感的旋律，让即兴从安静留白中逐渐展开。整体像清晨薄雾，冷静、内省，但不要阴沉。不要人声。",
+    tags: ["Modal jazz", "克制", "留白"],
+    vocalMode: "instrumental",
+    en: {
+      title: "Misty Modal Jazz",
+      description: "Spacious, restrained modal jazz unfolding through silence and slowly changing harmony.",
+      prompt: "A 30-second modal jazz instrumental around 92 BPM, spacious and restrained. Center it on muted trumpet, tenor saxophone, piano, double bass, and light drums. Use long modal harmonic areas, open piano voicings, and breathing melodic lines so the improvisation gradually emerges from quiet space. Keep it cool and introspective like early-morning mist, but not gloomy. Instrumental only, no vocals.",
+      tags: ["Modal jazz", "Restrained", "Spacious"],
+    },
+  },
+];
+
 const state = {
   tasks: [],
   selectedTaskId: null,
   playingTaskId: null,
+  corpusMode: "none",
   submitting: false,
   language: "zh-CN",
   settings: null,
 };
 const elements = {
+  entryView: document.querySelector("#entry-view"),
   homeView: document.querySelector("#home-view"),
   taskView: document.querySelector("#task-view"),
+  composerDock: document.querySelector("#composer-dock"),
+  heroEyebrow: document.querySelector("#hero-eyebrow"),
+  heroTitle: document.querySelector("#hero-title"),
+  heroCopy: document.querySelector("#hero-copy"),
+  creationModeBadge: document.querySelector("#creation-mode-badge"),
   taskDetail: document.querySelector("#task-detail"),
   taskList: document.querySelector("#task-list"),
   taskCount: document.querySelector("#task-count"),
@@ -169,6 +230,21 @@ function localizedExample(example) {
   return state.language === "en" ? { ...example, ...example.en } : example;
 }
 
+function normalizeCorpusMode(value) {
+  return value === "jazz" ? "jazz" : "none";
+}
+
+function renderComposerContext() {
+  const isJazz = state.corpusMode === "jazz";
+  elements.heroEyebrow.textContent = t(isJazz ? "jazzHeroEyebrow" : "heroEyebrow");
+  elements.heroTitle.innerHTML = t(isJazz ? "jazzHeroTitle" : "heroTitle");
+  elements.heroCopy.textContent = t(isJazz ? "jazzHeroCopy" : "heroCopy");
+  elements.creationModeBadge.textContent = t(isJazz ? "jazzCorpusBadge" : "noCorpusBadge");
+  document.querySelector("#examples-title").textContent = t(
+    isJazz ? "jazzExamplesTitle" : "generalExamplesTitle",
+  );
+}
+
 function applyTranslations() {
   document.documentElement.lang = state.language;
   document.title = t("pageTitle");
@@ -184,6 +260,7 @@ function applyTranslations() {
   document.querySelectorAll("[data-i18n-aria-label]").forEach((element) => {
     element.setAttribute("aria-label", t(element.dataset.i18nAriaLabel));
   });
+  renderComposerContext();
   renderExamples();
   renderTaskList();
   const selected = state.tasks.find((task) => task.id === state.selectedTaskId);
@@ -272,7 +349,8 @@ async function playTask(id) {
 }
 
 function renderExamples() {
-  document.querySelector("#example-grid").innerHTML = examples.map((source, index) => {
+  const activeExamples = state.corpusMode === "jazz" ? jazzExamples : generalExamples;
+  document.querySelector("#example-grid").innerHTML = activeExamples.map((source, index) => {
     const example = localizedExample(source);
     return `
     <button class="example-card" type="button" data-example="${index}">
@@ -288,7 +366,7 @@ function renderExamples() {
 
   document.querySelectorAll("[data-example]").forEach((button) => {
     button.addEventListener("click", () => {
-      const source = examples[Number(button.dataset.example)];
+      const source = activeExamples[Number(button.dataset.example)];
       if (!source) return;
       const example = localizedExample(source);
       elements.input.value = example.prompt;
@@ -383,7 +461,7 @@ function renderTaskDetail(task) {
   elements.taskDetail.innerHTML = `
     <header class="task-header">
       <div>
-        <p class="eyebrow">${escapeHtml(task.lyriaModel.toUpperCase())}</p>
+        <p class="eyebrow">${escapeHtml(task.lyriaModel.toUpperCase())} · ${escapeHtml(t(normalizeCorpusMode(task.corpusMode) === "jazz" ? "jazzCorpusSource" : "noCorpusSource"))}</p>
         <h2>${escapeHtml(title)}</h2>
         <p>${escapeHtml(task.description)}</p>
       </div>
@@ -401,19 +479,38 @@ function renderTaskDetail(task) {
   syncPlaybackControls();
 }
 
-function showHome() {
+function showEntry() {
   state.selectedTaskId = null;
+  elements.entryView.hidden = false;
+  elements.homeView.hidden = true;
+  elements.taskView.hidden = true;
+  elements.composerDock.hidden = true;
+  renderTaskList();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function showComposer(corpusMode = "none") {
+  state.selectedTaskId = null;
+  state.corpusMode = normalizeCorpusMode(corpusMode);
+  elements.entryView.hidden = true;
   elements.homeView.hidden = false;
   elements.taskView.hidden = true;
+  elements.composerDock.hidden = false;
+  renderComposerContext();
+  renderExamples();
   renderTaskList();
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function selectTask(id) {
   state.selectedTaskId = id;
   const task = state.tasks.find((item) => item.id === id);
   if (!task) return;
+  state.corpusMode = normalizeCorpusMode(task.corpusMode);
+  elements.entryView.hidden = true;
   elements.homeView.hidden = true;
   elements.taskView.hidden = false;
+  elements.composerDock.hidden = false;
   renderTaskList();
   renderTaskDetail(task);
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -484,6 +581,7 @@ async function submitTask(event) {
         mode: elements.mode.value,
         lyriaModel: elements.lyriaModel.value,
         vocalMode: selectedVocalMode(),
+        corpusMode: state.corpusMode,
       }),
     });
     const result = await response.json();
@@ -623,8 +721,15 @@ elements.audio.addEventListener("error", () => {
   elements.message.textContent = t("audioLoadFailed");
   syncPlaybackControls();
 });
-document.querySelector("#new-task").addEventListener("click", () => { showHome(); elements.input.focus(); });
-document.querySelector("#back-home").addEventListener("click", showHome);
+document.querySelector("#new-task").addEventListener("click", showEntry);
+document.querySelector("#back-entry").addEventListener("click", showEntry);
+document.querySelector("#back-home").addEventListener("click", () => showComposer(state.corpusMode));
+document.querySelectorAll("[data-corpus-mode]").forEach((button) => {
+  button.addEventListener("click", () => {
+    showComposer(button.dataset.corpusMode);
+    elements.input.focus();
+  });
+});
 document.querySelector("#open-settings").addEventListener("click", openSettings);
 document.querySelector("#close-settings").addEventListener("click", () => elements.settingsDialog.close());
 document.querySelector("#cancel-settings").addEventListener("click", () => elements.settingsDialog.close());
