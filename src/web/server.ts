@@ -1,5 +1,3 @@
-import "dotenv/config";
-
 import { createReadStream } from "node:fs";
 import { access, mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
@@ -8,7 +6,13 @@ import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 
 import { composeMusic } from "../composer/composer-agent.js";
-import { loadConfig } from "../config/env.js";
+import { loadConfig, type AriosoConfig } from "../config/env.js";
+import {
+  SettingsStore,
+  SUPPORTED_LANGUAGES,
+  type ApiProvider,
+  type InterfaceLanguage,
+} from "../config/settings.js";
 import { LyriaClient } from "../lyria/lyria-client.js";
 import type { MusicSpec } from "../schema/music-spec.js";
 
@@ -102,8 +106,7 @@ class TaskStore {
     return this.#tasks.get(id);
   }
 
-  async create(input: CreateTaskInput): Promise<MusicTask> {
-    const config = loadConfig(input.mode === "generate");
+  async create(input: CreateTaskInput, config: AriosoConfig): Promise<MusicTask> {
     const now = new Date().toISOString();
     const task: MusicTask = {
       id: crypto.randomUUID(),
@@ -325,12 +328,17 @@ async function withRequestRetry<T>(operation: () => Promise<T>): Promise<T> {
   }
 }
 
-async function runTask(store: TaskStore, task: MusicTask): Promise<void> {
+async function runTask(
+  store: TaskStore,
+  task: MusicTask,
+  config: AriosoConfig,
+): Promise<void> {
   try {
     let spec = task.musicSpec;
     if (!spec) {
       await store.update(task.id, { status: "composing", error: undefined });
       spec = await composeMusic(task.description, {
+        apiKey: config.openAiApiKey,
         model: task.composerModel,
         lyriaModel: task.lyriaModel,
         vocalMode: task.vocalMode ?? "auto",
@@ -344,7 +352,6 @@ async function runTask(store: TaskStore, task: MusicTask): Promise<void> {
     }
 
     await store.update(task.id, { status: "generating", error: undefined });
-    const config = loadConfig(true);
     const client = new LyriaClient(config.geminiApiKey!);
     const generated = await withRequestRetry(() => client.generate(spec.lyriaPrompt, {
       model: task.lyriaModel,
@@ -360,6 +367,31 @@ async function runTask(store: TaskStore, task: MusicTask): Promise<void> {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     await store.update(task.id, { status: "failed", error: message });
+  }
+}
+
+function isApiProvider(value: unknown): value is ApiProvider {
+  return value === "openai" || value === "gemini";
+}
+
+function isInterfaceLanguage(value: unknown): value is InterfaceLanguage {
+  return SUPPORTED_LANGUAGES.includes(value as InterfaceLanguage);
+}
+
+async function testApiConnection(provider: ApiProvider, apiKey: string): Promise<boolean> {
+  try {
+    const response = provider === "openai"
+      ? await fetch("https://api.openai.com/v1/models", {
+          headers: { Authorization: `Bearer ${apiKey}` },
+          signal: AbortSignal.timeout(20_000),
+        })
+      : await fetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=1", {
+          headers: { "x-goog-api-key": apiKey },
+          signal: AbortSignal.timeout(20_000),
+        });
+    return response.ok;
+  } catch {
+    return false;
   }
 }
 
@@ -385,9 +417,26 @@ async function serveStatic(pathname: string, response: ServerResponse): Promise<
   }
 }
 
-export async function createAriosoServer() {
-  const config = loadConfig(false);
-  const store = new TaskStore(path.resolve(config.outputDirectory, "tasks"));
+export interface AriosoServerOptions {
+  environment?: NodeJS.ProcessEnv;
+  envPath?: string;
+  preferencesPath?: string;
+}
+
+export async function createAriosoServer(options: AriosoServerOptions = {}) {
+  const baseEnvironment = options.environment ?? process.env;
+  const settings = new SettingsStore({
+    envPath: path.resolve(options.envPath ?? baseEnvironment.ARIOSO_ENV_PATH ?? ".env"),
+    preferencesPath: path.resolve(
+      options.preferencesPath
+        ?? baseEnvironment.ARIOSO_SETTINGS_PATH
+        ?? "outputs/settings.json",
+    ),
+    environment: baseEnvironment,
+  });
+  const environment = await settings.runtimeEnvironment();
+  const outputDirectory = environment.ARIOSO_OUTPUT_DIR ?? "outputs";
+  const store = new TaskStore(path.resolve(outputDirectory, "tasks"));
   await store.initialize();
 
   return createServer(async (request, response) => {
@@ -395,16 +444,97 @@ export async function createAriosoServer() {
     const taskMatch = /^\/api\/tasks\/([^/]+)$/.exec(url.pathname);
     const audioMatch = /^\/api\/tasks\/([^/]+)\/audio$/.exec(url.pathname);
     const retryMatch = /^\/api\/tasks\/([^/]+)\/retry$/.exec(url.pathname);
+    const credentialMatch = /^\/api\/settings\/credentials\/(openai|gemini)$/.exec(
+      url.pathname,
+    );
 
     try {
+      if (request.method === "GET" && url.pathname === "/api/settings") {
+        sendJson(response, 200, await settings.snapshot());
+        return;
+      }
+
+      if (request.method === "PUT" && url.pathname === "/api/settings") {
+        const value = await readJsonBody(request);
+        if (!value || typeof value !== "object") {
+          throw new Error("A settings request is required.");
+        }
+        const candidate = value as Record<string, unknown>;
+
+        if (candidate.language !== undefined) {
+          if (!isInterfaceLanguage(candidate.language)) {
+            throw new Error("Unsupported interface language.");
+          }
+          await settings.saveLanguage(candidate.language);
+        }
+
+        const credentials = candidate.credentials;
+        if (credentials !== undefined) {
+          if (!credentials || typeof credentials !== "object") {
+            throw new Error("Invalid API configuration.");
+          }
+          const credentialValues = credentials as Record<string, unknown>;
+          const remember = candidate.remember === true;
+          for (const provider of ["openai", "gemini"] as const) {
+            const apiKey = credentialValues[provider];
+            if (apiKey !== undefined) {
+              if (typeof apiKey !== "string" || !apiKey.trim()) {
+                throw new Error("API key is required.");
+              }
+              await settings.saveCredential(provider, apiKey, remember);
+            }
+          }
+        }
+
+        sendJson(response, 200, await settings.snapshot());
+        return;
+      }
+
+      if (request.method === "DELETE" && credentialMatch?.[1]) {
+        const provider = credentialMatch[1];
+        if (!isApiProvider(provider)) {
+          throw new Error("Unknown API provider.");
+        }
+        await settings.clearCredential(provider);
+        sendJson(response, 200, await settings.snapshot());
+        return;
+      }
+
+      if (request.method === "POST" && url.pathname === "/api/settings/test") {
+        const value = await readJsonBody(request);
+        if (!value || typeof value !== "object") {
+          throw new Error("A connection test request is required.");
+        }
+        const candidate = value as Record<string, unknown>;
+        if (!isApiProvider(candidate.provider)) {
+          throw new Error("Unknown API provider.");
+        }
+        const submittedKey = typeof candidate.apiKey === "string"
+          ? candidate.apiKey.trim()
+          : "";
+        const apiKey = submittedKey || await settings.resolveCredential(candidate.provider);
+        if (!apiKey) {
+          throw new Error("API key is required.");
+        }
+        sendJson(response, 200, {
+          ok: await testApiConnection(candidate.provider, apiKey),
+        });
+        return;
+      }
+
       if (request.method === "GET" && url.pathname === "/api/tasks") {
         sendJson(response, 200, store.list());
         return;
       }
 
       if (request.method === "POST" && url.pathname === "/api/tasks") {
-        const task = await store.create(parseTaskInput(await readJsonBody(request)));
-        void runTask(store, task);
+        const input = parseTaskInput(await readJsonBody(request));
+        const config = loadConfig(
+          input.mode === "generate",
+          await settings.runtimeEnvironment(),
+        );
+        const task = await store.create(input, config);
+        void runTask(store, task, config);
         sendJson(response, 202, task);
         return;
       }
@@ -420,8 +550,12 @@ export async function createAriosoServer() {
           return;
         }
 
+        const config = loadConfig(
+          task.mode === "generate",
+          await settings.runtimeEnvironment(),
+        );
         const queued = await store.update(task.id, { status: "queued", error: undefined });
-        void runTask(store, queued);
+        void runTask(store, queued, config);
         sendJson(response, 202, queued);
         return;
       }

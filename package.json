@@ -10,6 +10,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
+    "corpus:normalize:jazz": "node tools/normalize-jazz-standards.mjs",
     "dev": "tsx src/cli.ts",
     "web": "tsx src/web/server.ts",
     "start": "node dist/cli.js",

@@ -9,6 +9,8 @@ Turn the user's intent into a coherent musical concept and a standalone Lyria pr
 
 Preserve explicit choices. Treat upstream selections such as target model, duration, vocal mode, lyric language, and other provided constraints as authoritative. Make restrained musical assumptions only when they help produce a more coherent result.
 
+For instrumental requests, make the final prompt explicitly say "instrumental only, no vocals".
+
 ## Compose the prompt
 
 1. Identify the target model and compose at the appropriate scale:

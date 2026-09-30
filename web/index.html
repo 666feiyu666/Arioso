@@ -19,18 +19,22 @@
         </div>
 
         <button class="new-task" id="new-task" type="button">
-          <span>＋</span> 新建任务
+          <span>＋</span> <span data-i18n="newTask">新建任务</span>
         </button>
 
         <div class="sidebar-heading">
-          <span>任务</span>
+          <span data-i18n="tasks">任务</span>
           <span class="task-count" id="task-count">0</span>
         </div>
-        <nav class="task-list" id="task-list" aria-label="音乐任务"></nav>
+        <nav class="task-list" id="task-list" aria-label="音乐任务" data-i18n-aria-label="musicTasks"></nav>
 
         <div class="sidebar-foot">
+          <button class="settings-button" id="open-settings" type="button">
+            <span aria-hidden="true">⚙</span>
+            <span data-i18n="settings">设置</span>
+          </button>
           <span class="status-dot"></span>
-          <span>本地创作空间</span>
+          <span data-i18n="localWorkspace">本地创作空间</span>
           <small>v0.2.0</small>
         </div>
       </aside>
@@ -38,22 +42,22 @@
       <main class="workspace">
         <section id="home-view" class="view home-view">
           <div class="hero">
-            <p class="eyebrow accent">COMPOSE WITH INTENT</p>
-            <h2>把一个念头，<br />写成一段音乐。</h2>
-            <p class="hero-copy">描述场景、情绪或声音。Arioso 会先整理成完整乐曲规格，再交给 Lyria 生成。</p>
-            <div class="model-settings" aria-label="生成设置">
+            <p class="eyebrow accent" data-i18n="heroEyebrow">COMPOSE WITH INTENT</p>
+            <h2 data-i18n-html="heroTitle">把一个念头，<br />写成一段音乐。</h2>
+            <p class="hero-copy" data-i18n="heroCopy">描述场景、情绪或声音。Arioso 会先整理成完整乐曲规格，再交给 Lyria 生成。</p>
+            <div class="model-settings" aria-label="生成设置" data-i18n-aria-label="generationSettings">
               <label>
-                <span>生成模式</span>
+                <span data-i18n="generationMode">生成模式</span>
                 <select id="mode-select">
-                  <option value="generate">编曲并生成音乐</option>
-                  <option value="compose">仅生成编曲提示</option>
+                  <option value="generate" data-i18n="modeGenerate">编曲并生成音乐</option>
+                  <option value="compose" data-i18n="modeCompose">仅生成编曲提示</option>
                 </select>
               </label>
               <label>
-                <span>Lyria 模型</span>
+                <span data-i18n="lyriaModel">Lyria 模型</span>
                 <select id="lyria-model-select">
-                  <option value="lyria-3-clip-preview">Lyria 3 Clip · 30 秒</option>
-                  <option value="lyria-3.5">Lyria 3.5 · 完整歌曲</option>
+                  <option value="lyria-3-clip-preview" data-i18n="lyriaClip">Lyria 3 Clip · 30 秒</option>
+                  <option value="lyria-3.5" data-i18n="lyriaFull">Lyria 3.5 · 完整歌曲</option>
                 </select>
               </label>
             </div>
@@ -63,24 +67,24 @@
             <div class="section-title-row">
               <div>
                 <p class="eyebrow">STARTING POINTS</p>
-                <h3 id="examples-title">从一个声音画面开始</h3>
+                <h3 id="examples-title" data-i18n="examplesTitle">从一个声音画面开始</h3>
               </div>
-              <p>选择示例后仍可自由修改</p>
+              <p data-i18n="examplesHint">选择示例后仍可自由修改</p>
             </div>
             <div class="example-grid" id="example-grid"></div>
           </section>
         </section>
 
         <section id="task-view" class="view task-view" hidden>
-          <button class="back-button" id="back-home" type="button">← 返回创作台</button>
+          <button class="back-button" id="back-home" type="button" data-i18n="backHome">← 返回创作台</button>
           <div id="task-detail"></div>
         </section>
 
         <div class="composer-dock" id="composer-dock">
           <div class="global-player" id="global-player" hidden>
             <div class="player-now">
-              <span>正在播放</span>
-              <strong id="player-title">未选择音乐</strong>
+              <span data-i18n="nowPlaying">正在播放</span>
+              <strong id="player-title" data-i18n="noMusicSelected">未选择音乐</strong>
               <small id="player-meta"></small>
             </div>
             <audio id="audio-player" controls preload="metadata"></audio>
@@ -92,20 +96,22 @@
                 rows="2"
                 maxlength="8000"
                 placeholder="例如：慵懒的午后爵士，刷镲与温暖钢琴轻轻摇摆……"
+                data-i18n-placeholder="promptPlaceholder"
                 aria-label="描述想生成的音乐"
+                data-i18n-aria-label="promptLabel"
                 required
               ></textarea>
-              <button id="submit-task" type="submit" aria-label="开始生成">↑</button>
+              <button id="submit-task" type="submit" aria-label="开始生成" data-i18n-aria-label="startGeneration">↑</button>
             </div>
             <fieldset class="vocal-setting">
-              <legend>人声规则</legend>
+              <legend data-i18n="vocalRule">人声规则</legend>
               <div class="segmented-control">
                 <input id="vocal-auto" name="vocal-mode" type="radio" value="auto" checked />
-                <label for="vocal-auto">自动</label>
+                <label for="vocal-auto" data-i18n="vocalAuto">自动</label>
                 <input id="vocal-instrumental" name="vocal-mode" type="radio" value="instrumental" />
-                <label for="vocal-instrumental">纯器乐</label>
+                <label for="vocal-instrumental" data-i18n="vocalInstrumental">纯器乐</label>
                 <input id="vocal-enabled" name="vocal-mode" type="radio" value="vocals" />
-                <label for="vocal-enabled">人声</label>
+                <label for="vocal-enabled" data-i18n="vocalEnabled">人声</label>
               </div>
             </fieldset>
           </form>
@@ -113,6 +119,71 @@
         </div>
       </main>
     </div>
+
+    <dialog class="settings-dialog" id="settings-dialog">
+      <form id="settings-form">
+        <header class="settings-header">
+          <div>
+            <p class="eyebrow" data-i18n="preferences">PREFERENCES</p>
+            <h2 data-i18n="settings">设置</h2>
+          </div>
+          <button class="dialog-close" id="close-settings" type="button" aria-label="关闭" data-i18n-aria-label="close">×</button>
+        </header>
+
+        <label class="settings-field">
+          <span data-i18n="interfaceLanguage">界面语言</span>
+          <select id="language-select">
+            <option value="zh-CN">简体中文</option>
+            <option value="en">English</option>
+          </select>
+        </label>
+
+        <section class="api-settings" aria-labelledby="api-settings-title">
+          <div class="settings-section-title">
+            <h3 id="api-settings-title" data-i18n="apiConfiguration">API 配置</h3>
+            <p data-i18n="apiNeverShown">密钥只保存在本机，界面不会回显完整内容。</p>
+          </div>
+
+          <div class="credential-card" data-provider="openai">
+            <div class="credential-heading">
+              <label for="openai-api-key">OpenAI API Key</label>
+              <span id="openai-key-status" class="credential-status"></span>
+            </div>
+            <input id="openai-api-key" type="password" autocomplete="off" data-i18n-placeholder="apiKeyPlaceholder" />
+            <div class="credential-actions">
+              <button type="button" class="secondary-button" data-test-provider="openai" data-i18n="testConnection">测试连接</button>
+              <button type="button" class="text-button" data-clear-provider="openai" data-i18n="removeSavedKey">移除已保存的 Key</button>
+            </div>
+          </div>
+
+          <div class="credential-card" data-provider="gemini">
+            <div class="credential-heading">
+              <label for="gemini-api-key">Gemini API Key</label>
+              <span id="gemini-key-status" class="credential-status"></span>
+            </div>
+            <input id="gemini-api-key" type="password" autocomplete="off" data-i18n-placeholder="apiKeyPlaceholder" />
+            <div class="credential-actions">
+              <button type="button" class="secondary-button" data-test-provider="gemini" data-i18n="testConnection">测试连接</button>
+              <button type="button" class="text-button" data-clear-provider="gemini" data-i18n="removeSavedKey">移除已保存的 Key</button>
+            </div>
+          </div>
+
+          <label class="remember-setting">
+            <input id="remember-api-keys" type="checkbox" />
+            <span>
+              <strong data-i18n="rememberApiKeys">记住 API Key</strong>
+              <small data-i18n="rememberApiKeysHelp">开启后写入本机 .env；关闭后仅在本次服务运行期间使用。</small>
+            </span>
+          </label>
+        </section>
+
+        <p id="settings-message" class="settings-message" role="status"></p>
+        <footer class="settings-footer">
+          <button class="secondary-button" id="cancel-settings" type="button" data-i18n="cancel">取消</button>
+          <button class="primary-button" id="save-settings" type="submit" data-i18n="save">保存</button>
+        </footer>
+      </form>
+    </dialog>
 
     <script type="module" src="/app.js"></script>
   </body>

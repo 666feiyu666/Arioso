@@ -16,16 +16,19 @@ export interface AriosoConfig {
   outputDirectory: string;
 }
 
-export function loadConfig(requireGemini = false): AriosoConfig {
-  const parsed = EnvironmentSchema.safeParse(process.env);
+export function loadConfig(
+  requireGemini = false,
+  environment: NodeJS.ProcessEnv = process.env,
+): AriosoConfig {
+  const parsed = EnvironmentSchema.safeParse(environment);
 
   if (!parsed.success) {
     const messages = parsed.error.issues.map((issue) => issue.message).join(" ");
-    throw new Error(`${messages} Copy .env.example to .env and fill in your API keys.`);
+    throw new Error(`${messages} Configure it in Settings or in .env.`);
   }
 
   if (requireGemini && !parsed.data.GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY is required for music generation. Copy .env.example to .env and fill it in.");
+    throw new Error("GEMINI_API_KEY is required for music generation. Configure it in Settings or in .env.");
   }
 
   return {

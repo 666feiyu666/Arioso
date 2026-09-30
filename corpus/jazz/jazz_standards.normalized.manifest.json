@@ -1,0 +1,11 @@
+{
+  "corpus_id": "arioso-jazz-standards-normalized",
+  "schema_version": "0.1.0",
+  "generated_at": "2026-09-30T03:11:37.753Z",
+  "source_file": "jazz_standards.raw.jsonl",
+  "output_file": "jazz_standards.normalized.jsonl",
+  "record_count": 354,
+  "complete_count": 209,
+  "insufficient_evidence_count": 145,
+  "normalization_method": "Evidence-preserving sentence filtering over seed descriptions and article extracts using explicit musical-language patterns."
+}
