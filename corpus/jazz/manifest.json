@@ -1,0 +1,17 @@
+{
+  "corpus_id": "arioso-jazz-genres-wikipedia",
+  "schema_version": 1,
+  "record_count": 56,
+  "generated_at": "2026-09-30",
+  "seed_page": "List of jazz genres",
+  "seed_page_url": "https://en.wikipedia.org/wiki/List_of_jazz_genres",
+  "seed_revision_id": 1356587016,
+  "seed_revision_url": "https://en.wikipedia.org/w/index.php?title=List_of_jazz_genres&oldid=1356587016",
+  "license": "CC BY-SA 4.0",
+  "attribution": "Wikipedia contributors, List of jazz genres",
+  "snapshot_method": "Seed-table rows retrieved from the cited Wikipedia revision; link markup and prose were normalized into plain text.",
+  "normalization_status": "pending",
+  "files": [
+    "jazz_genres.raw.jsonl"
+  ]
+}

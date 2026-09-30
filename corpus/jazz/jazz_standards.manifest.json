@@ -1,0 +1,60 @@
+{
+  "corpus_id": "arioso-jazz-standards",
+  "schema_version": "0.1.0",
+  "record_type": "jazz_standard",
+  "record_count": 354,
+  "generated_at": "2026-09-30T02:36:00.545Z",
+  "output_file": "jazz_standards.raw.jsonl",
+  "enriched_article_intros": true,
+  "seed_pages": [
+    {
+      "title": "List of pre-1920 jazz standards",
+      "period": "pre-1920",
+      "url": "https://en.wikipedia.org/wiki/List_of_pre-1920_jazz_standards",
+      "revision_id": 1336714375,
+      "revision_url": "https://en.wikipedia.org/wiki/List_of_pre-1920_jazz_standards?oldid=1336714375",
+      "retrieved_at": "2026-09-30T02:36:00.545Z"
+    },
+    {
+      "title": "List of 1920s jazz standards",
+      "period": "1920s",
+      "url": "https://en.wikipedia.org/wiki/List_of_1920s_jazz_standards",
+      "revision_id": 1375273169,
+      "revision_url": "https://en.wikipedia.org/wiki/List_of_1920s_jazz_standards?oldid=1375273169",
+      "retrieved_at": "2026-09-30T02:36:00.545Z"
+    },
+    {
+      "title": "List of 1930s jazz standards",
+      "period": "1930s",
+      "url": "https://en.wikipedia.org/wiki/List_of_1930s_jazz_standards",
+      "revision_id": 1345155756,
+      "revision_url": "https://en.wikipedia.org/wiki/List_of_1930s_jazz_standards?oldid=1345155756",
+      "retrieved_at": "2026-09-30T02:36:00.545Z"
+    },
+    {
+      "title": "List of 1940s jazz standards",
+      "period": "1940s",
+      "url": "https://en.wikipedia.org/wiki/List_of_1940s_jazz_standards",
+      "revision_id": 1362686769,
+      "revision_url": "https://en.wikipedia.org/wiki/List_of_1940s_jazz_standards?oldid=1362686769",
+      "retrieved_at": "2026-09-30T02:36:00.545Z"
+    },
+    {
+      "title": "List of post-1950 jazz standards",
+      "period": "post-1950",
+      "url": "https://en.wikipedia.org/wiki/List_of_post-1950_jazz_standards",
+      "revision_id": 1362687287,
+      "revision_url": "https://en.wikipedia.org/wiki/List_of_post-1950_jazz_standards?oldid=1362687287",
+      "retrieved_at": "2026-09-30T02:36:00.545Z"
+    }
+  ],
+  "license": {
+    "name": "Creative Commons Attribution-ShareAlike 4.0 International",
+    "spdx": "CC-BY-SA-4.0",
+    "url": "https://creativecommons.org/licenses/by-sa/4.0/"
+  },
+  "attribution": "Source text and article extracts are from English Wikipedia contributors; see each pinned revision URL for attribution history.",
+  "extraction_method": "MediaWiki Action API parse output for standards lists; article intro HTML, readable text, and revision enrichment through the Action API.",
+  "normalization_status": "pending",
+  "style_link_status": "pending"
+}
