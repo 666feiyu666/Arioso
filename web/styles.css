@@ -60,15 +60,23 @@ button:focus-visible, textarea:focus-visible, select:focus-visible, input:focus-
 .workflow-card { min-height: 300px; display: grid; grid-template-rows: auto 1fr auto; gap: 28px; padding: 28px; text-align: left; border: 1px solid var(--line); border-radius: 26px; color: var(--ink); background: var(--paper); box-shadow: 0 12px 38px rgba(51, 42, 31, .05); transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease; }
 .workflow-card:hover { transform: translateY(-4px); border-color: rgba(28, 27, 24, .28); box-shadow: var(--shadow); }
 .workflow-card.corpus { color: #f7f4ed; border-color: transparent; background: linear-gradient(145deg, #202827, #394d48 58%, #746d50); }
+.workflow-card.orchestral { color: #f8f3ea; border-color: transparent; background: linear-gradient(145deg, #2a2230, #5c3d46 58%, #a16b4b); }
+.workflow-card.album { background: linear-gradient(145deg, #f8f5ee, #e8dfd0); }
 .workflow-index { color: var(--muted); font-family: Georgia, serif; font-size: 13px; }
-.workflow-card.corpus .workflow-index { color: rgba(247, 244, 237, .58); }
+.workflow-card.corpus .workflow-index, .workflow-card.orchestral .workflow-index { color: rgba(247, 244, 237, .58); }
 .workflow-copy { display: grid; align-content: center; justify-items: start; gap: 14px; }
 .workflow-copy strong { font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(30px, 3vw, 43px); font-weight: 500; }
 .workflow-copy > span:last-child { max-width: 440px; color: var(--muted); font-size: 13px; line-height: 1.75; }
-.workflow-card.corpus .workflow-copy > span:last-child { color: rgba(247, 244, 237, .7); }
+.workflow-card.corpus .workflow-copy > span:last-child, .workflow-card.orchestral .workflow-copy > span:last-child { color: rgba(247, 244, 237, .7); }
 .workflow-tag { padding: 5px 9px; border-radius: 999px; color: #625e56; background: #eeeae2; font-size: 10px; font-weight: 700; letter-spacing: .05em; }
-.workflow-card.corpus .workflow-tag { color: #fff; background: rgba(255, 255, 255, .13); }
+.workflow-card.corpus .workflow-tag, .workflow-card.orchestral .workflow-tag { color: #fff; background: rgba(255, 255, 255, .13); }
 .workflow-action { font-size: 12px; font-weight: 700; }
+.development-view { min-height: 100vh; padding: 64px 0 90px; }
+.development-view[hidden] { display: none; }
+.development-card { min-height: 70vh; display: flex; flex-direction: column; justify-content: center; align-items: start; max-width: 940px; }
+.development-status { margin: 28px 0 12px; padding: 7px 12px; border-radius: 999px; color: var(--accent-dark); background: rgba(204,90,52,.1); font-size: 11px; font-weight: 750; letter-spacing: .06em; }
+.development-card h2 { max-width: 850px; margin: 0 0 24px; font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(52px, 6vw, 88px); font-weight: 400; line-height: 1.02; letter-spacing: -.055em; }
+.development-card > p:last-child { max-width: 650px; margin: 0; color: var(--muted); font-size: 16px; line-height: 1.8; }
 .creator-toolbar { position: sticky; top: 14px; z-index: 3; min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 18px; padding-top: 10px; pointer-events: none; }
 .creator-toolbar .back-button { pointer-events: auto; padding: 10px 15px; border: 1px solid rgba(28, 27, 24, .18); border-radius: 999px; color: var(--ink); background: rgba(251, 250, 247, .94); box-shadow: 0 6px 18px rgba(51, 42, 31, .1); backdrop-filter: blur(12px); font-weight: 650; transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease, background 160ms ease; }
 .creator-toolbar .back-button:hover { transform: translateX(-2px); border-color: rgba(28, 27, 24, .42); background: #fff; box-shadow: 0 9px 24px rgba(51, 42, 31, .11); }
@@ -115,6 +123,7 @@ button:focus-visible, textarea:focus-visible, select:focus-visible, input:focus-
 .composer-form button:hover { transform: translateY(-1px); background: var(--accent-dark); }
 .composer-form button:disabled { cursor: wait; opacity: .45; transform: none; }
 .vocal-setting { display: flex; align-items: center; gap: 10px; margin: 0; padding: 5px 0 0; border: 0; border-top: 1px solid var(--line); }
+.vocal-setting[hidden] { display: none; }
 .vocal-setting legend { float: left; padding: 7px 0 0; color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .08em; }
 .segmented-control { display: inline-flex; gap: 2px; margin-left: 10px; padding: 3px; border-radius: 999px; background: #ebe7de; }
 .segmented-control input { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
@@ -187,6 +196,18 @@ button:focus-visible, textarea:focus-visible, select:focus-visible, input:focus-
 .retry-button { flex: 0 0 auto; padding: 9px 14px; border: 1px solid rgba(120,54,48,.25); border-radius: 999px; color: #783630; background: rgba(255,255,255,.55); font-size: 11px; transition: 150ms ease; }
 .retry-button:hover { color: #fff; background: #783630; }
 .retry-button:disabled { cursor: wait; opacity: .55; }
+.orchestral-contract { margin-bottom: 28px; }
+.orchestral-progress { margin-bottom: 28px; }
+.movement-list { display: grid; gap: 16px; padding-top: 12px; }
+.movement-list > h2 { margin: 18px 0 4px; font-family: Georgia, "Noto Serif SC", serif; font-size: 34px; font-weight: 500; }
+.movement-card { padding: 24px; border: 1px solid var(--line); border-radius: 22px; background: var(--paper); }
+.movement-card > header { display: flex; align-items: start; justify-content: space-between; gap: 20px; }
+.movement-card h3 { margin: 6px 0 18px; font-family: Georgia, "Noto Serif SC", serif; font-size: 26px; font-weight: 500; }
+.movement-details { display: grid; gap: 20px; }
+.movement-details details { border-top: 1px solid var(--line); padding-top: 16px; }
+.movement-details summary { margin-bottom: 14px; color: var(--muted); font-size: 11px; font-weight: 700; cursor: pointer; }
+.movement-play { margin-top: 18px; color: var(--ink); border-color: var(--line); background: #eeeae2; }
+.movement-error { margin: 10px 0 0; color: #8a342f; font-size: 11px; line-height: 1.6; }
 
 @keyframes pulse { 50% { opacity: .45; } }
 @keyframes travel { from { transform: translateX(-110%); } to { transform: translateX(290%); } }

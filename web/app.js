@@ -3,11 +3,18 @@ const translations = {
     pageTitle: "Arioso · AI 音乐工坊",
     newTask: "新建任务", tasks: "任务", musicTasks: "音乐任务", settings: "设置",
     entryEyebrow: "CHOOSE A WORKFLOW", entryTitle: "选择音乐的<br />创作方式。",
-    entryCopy: "从模型自身知识开始，或让 Jazz 语料为编曲提供参考。",
+    entryCopy: "从单曲、Jazz 语料到多乐章作品，选择适合当前构想的创作方式。",
     workflowChoices: "生成方式", allStyles: "不限风格", jazzOnly: "仅限 Jazz",
     noCorpusTitle: "无语料生成", noCorpusDescription: "直接使用模型已有的音乐知识，将你的想法整理成完整编曲。",
     jazzCorpusTitle: "含语料生成", jazzCorpusDescription: "先检索本地 Jazz 语料，再结合参考信息完成编曲。",
     enterStudio: "进入创作台 →", enterJazzStudio: "进入 Jazz 创作台 →", backEntry: "← 返回生成方式选择",
+    multiMovement: "多乐章", orchestralTitle: "管弦乐作曲",
+    orchestralDescription: "由 Agent 规划统一主题与完整乐章，再依次生成一部连贯的管弦乐作品。",
+    enterOrchestralStudio: "进入管弦乐创作台 →", sameThemeTracks: "同一主题 · 多曲目",
+    albumTitle: "专辑作曲", albumDescription: "围绕同一音乐身份规划多首独立曲目，保持主题、音色与制作风格的一致性。",
+    viewAlbumDevelopment: "查看开发进度 →", inDevelopment: "正在开发中",
+    albumDevelopmentTitle: "让一组作品，拥有同一种声音。",
+    albumDevelopmentCopy: "专辑作曲将复用管弦乐工作流中的共享音乐契约与多曲目任务模型。在 03 成熟后开放。",
     noCorpusBadge: "无语料 · 不限风格", jazzCorpusBadge: "Jazz 语料增强",
     localWorkspace: "本地创作空间", heroEyebrow: "COMPOSE WITH INTENT",
     heroTitle: "把一个念头，<br />写成一段音乐。",
@@ -15,6 +22,9 @@ const translations = {
     jazzHeroEyebrow: "COMPOSE WITH JAZZ MEMORY",
     jazzHeroTitle: "从爵士记忆里，<br />找到新的声音。",
     jazzHeroCopy: "描述年代、编制、节奏或氛围。Arioso 会检索本地 Jazz 语料，再整理成完整乐曲规格。",
+    orchestralBadge: "管弦乐 · 多乐章", orchestralHeroEyebrow: "COMPOSE ACROSS MOVEMENTS",
+    orchestralHeroTitle: "让同一个主题，<br />走过完整的旅程。",
+    orchestralHeroCopy: "描述作品的世界、情绪与戏剧走向。Agent 会建立共享音乐契约，构思完整乐章并自动依次生成。",
     generalExamplesTitle: "从一个声音画面开始", jazzExamplesTitle: "从一种爵士气质开始",
     generationSettings: "生成设置", generationMode: "生成模式", modeGenerate: "编曲并生成音乐",
     modeCompose: "仅生成编曲提示", lyriaModel: "Lyria 模型", lyriaClip: "Lyria 3 Clip · 30 秒",
@@ -41,6 +51,11 @@ const translations = {
     unnamedWork: "未命名作品", thinking: "正在构思…", lyriaPrompt: "Lyria 生成提示", musicalDirection: "音乐方向",
     genre: "风格", mood: "情绪", tempo: "速度", tonality: "调性", instrumentation: "编制", vocals: "人声",
     noCorpusSource: "模型知识 · 无语料", jazzCorpusSource: "Jazz 本地语料",
+    orchestralSource: "管弦乐多乐章", workContract: "作品音乐契约", movements: "乐章",
+    identityMotif: "主题动机", tonalWorld: "调性世界", orchestra: "统一编制", acousticSpace: "声学空间",
+    movementPlanning: "正在构思完整乐章", movementGenerating: "正在生成乐章音频",
+    movementRole: "戏剧功能", motifDevelopment: "主题发展", orchestrationArc: "配器轨迹",
+    entranceContract: "进入衔接", exitContract: "退出衔接", movementPrompt: "乐章 Lyria 提示",
     retrievalContext: "检索记录", retrievalQuery: "英文检索描述", retrievedReferences: "参考曲目",
     openTonality: "开放调性", enabled: "启用", instrumentalNoVocals: "纯器乐 · 无人声", listen: "试听成品",
     inProgress: "IN PROGRESS", generatingProgress: "编曲提示已经完成，正在等待 Lyria 返回音频。",
@@ -52,11 +67,18 @@ const translations = {
     pageTitle: "Arioso · AI Music Studio",
     newTask: "New task", tasks: "Tasks", musicTasks: "Music tasks", settings: "Settings",
     entryEyebrow: "CHOOSE A WORKFLOW", entryTitle: "Choose how to<br />create your music.",
-    entryCopy: "Start from the model's musical knowledge, or ground the composition in the Jazz corpus.",
+    entryCopy: "Choose the workflow that fits your idea, from a single piece or Jazz corpus to a multi-movement work.",
     workflowChoices: "Generation workflows", allStyles: "All styles", jazzOnly: "Jazz only",
     noCorpusTitle: "Without corpus", noCorpusDescription: "Use the model's existing musical knowledge to shape your idea into a complete arrangement.",
     jazzCorpusTitle: "With corpus", jazzCorpusDescription: "Search the local Jazz corpus before composing with the retrieved references.",
     enterStudio: "Enter studio →", enterJazzStudio: "Enter Jazz studio →", backEntry: "← Back to workflow selection",
+    multiMovement: "Multi-movement", orchestralTitle: "Orchestral composition",
+    orchestralDescription: "Let an agent plan a shared identity and complete movements, then generate a coherent orchestral work in sequence.",
+    enterOrchestralStudio: "Enter orchestral studio →", sameThemeTracks: "One identity · Multiple tracks",
+    albumTitle: "Album composition", albumDescription: "Plan independent tracks around one musical identity with consistent themes, timbre, and production.",
+    viewAlbumDevelopment: "View development status →", inDevelopment: "In development",
+    albumDevelopmentTitle: "Give a collection of pieces one recognizable voice.",
+    albumDevelopmentCopy: "Album composition will reuse the shared musical contract and multi-track task model proven by the orchestral workflow. It will open after workflow 03 matures.",
     noCorpusBadge: "No corpus · All styles", jazzCorpusBadge: "Jazz corpus enhanced",
     localWorkspace: "Local creative space", heroEyebrow: "COMPOSE WITH INTENT",
     heroTitle: "Turn an idea<br />into a piece of music.",
@@ -64,6 +86,9 @@ const translations = {
     jazzHeroEyebrow: "COMPOSE WITH JAZZ MEMORY",
     jazzHeroTitle: "Find a new sound<br />in Jazz memory.",
     jazzHeroCopy: "Describe an era, ensemble, rhythm, or mood. Arioso searches the local Jazz corpus before shaping a complete music specification.",
+    orchestralBadge: "Orchestral · Multi-movement", orchestralHeroEyebrow: "COMPOSE ACROSS MOVEMENTS",
+    orchestralHeroTitle: "Let one theme travel<br />through a complete work.",
+    orchestralHeroCopy: "Describe the work's world, emotion, and dramatic direction. The agent establishes a shared musical contract, composes complete movements, and generates them automatically in sequence.",
     generalExamplesTitle: "Start with a sonic scene", jazzExamplesTitle: "Start with a Jazz character",
     generationSettings: "Generation settings", generationMode: "Mode", modeGenerate: "Compose and generate music",
     modeCompose: "Compose prompt only", lyriaModel: "Lyria model", lyriaClip: "Lyria 3 Clip · 30 seconds",
@@ -90,6 +115,11 @@ const translations = {
     unnamedWork: "Untitled work", thinking: "Thinking…", lyriaPrompt: "Lyria generation prompt", musicalDirection: "Musical direction",
     genre: "Genre", mood: "Mood", tempo: "Tempo", tonality: "Tonality", instrumentation: "Instrumentation", vocals: "Vocals",
     noCorpusSource: "Model knowledge · No corpus", jazzCorpusSource: "Local Jazz corpus",
+    orchestralSource: "Multi-movement orchestral work", workContract: "Shared musical contract", movements: "Movements",
+    identityMotif: "Identity motif", tonalWorld: "Tonal world", orchestra: "Orchestra", acousticSpace: "Acoustic space",
+    movementPlanning: "Composing the complete movement", movementGenerating: "Generating movement audio",
+    movementRole: "Dramatic role", motifDevelopment: "Motif development", orchestrationArc: "Orchestration arc",
+    entranceContract: "Entrance contract", exitContract: "Exit contract", movementPrompt: "Movement Lyria prompt",
     retrievalContext: "Retrieval record", retrievalQuery: "English retrieval description", retrievedReferences: "Reference tracks",
     openTonality: "Open tonality", enabled: "Enabled", instrumentalNoVocals: "Instrumental · no vocals", listen: "Listen",
     inProgress: "IN PROGRESS", generatingProgress: "The composition prompt is ready. Waiting for Lyria to return audio.",
@@ -171,17 +201,62 @@ const jazzExamples = [
   },
 ];
 
+const orchestralExamples = [
+  {
+    title: "星海远征",
+    description: "以同一主题贯穿启程、风暴与归航的三乐章交响诗。",
+    prompt: "创作一部三乐章管弦交响诗：从寂静星海中的启程开始，穿越充满切分节奏与铜管冲突的风暴，最终在辽阔而克制的归航中完成主题。使用原创的短小身份动机贯穿三个乐章，并保持统一的交响乐团、声学空间与动态尺度。纯器乐。",
+    tags: ["交响诗", "三乐章", "纯器乐"],
+    vocalMode: "instrumental",
+    en: {
+      title: "Voyage Across the Stars",
+      description: "A three-movement symphonic poem whose shared theme travels through departure, storm, and return.",
+      prompt: "Create a three-movement orchestral symphonic poem that begins with departure into a silent star field, crosses a storm of syncopated rhythms and brass conflict, and completes its theme in a spacious, restrained homecoming. Use one original compact identity motif across all movements and preserve the same orchestra, acoustic space, and dynamic scale. Instrumental only.",
+      tags: ["Symphonic poem", "Three movements", "Instrumental"],
+    },
+  },
+  {
+    title: "古城四时",
+    description: "四个乐章描绘古城从春晨到冬夜的时间流转。",
+    prompt: "创作一部四乐章管弦组曲，以同一座古城的春晨、盛夏午后、秋日庆典与冬夜为四个乐章。设计一个原创主题动机，让它随着季节改变调性、速度、织体和配器，但始终保持可辨识的家族关系。纯器乐，保持自然音乐厅声场。",
+    tags: ["管弦组曲", "四乐章", "季节"],
+    vocalMode: "instrumental",
+    en: {
+      title: "Four Seasons of an Old City",
+      description: "Four movements follow an old city from a spring morning to a winter night.",
+      prompt: "Create a four-movement orchestral suite portraying spring morning, midsummer afternoon, an autumn festival, and winter night in the same old city. Design one original identity motif and transform its tonality, tempo, texture, and orchestration with each season while preserving a recognizable family resemblance. Instrumental only, in one natural concert-hall perspective.",
+      tags: ["Orchestral suite", "Four movements", "Seasons"],
+    },
+  },
+  {
+    title: "山河与回声",
+    description: "从自然景观出发，以主题变形构成有终点的多乐章旅程。",
+    prompt: "构思一部多乐章管弦乐作品，描绘高山、峡谷、河流与最终抵达海洋的旅程。由 Agent 决定最合适的三至四乐章结构，以一个原创音程动机作为统一身份，通过增值、倒影、碎片化与配器转移发展。前几个乐章可开放结束，终章必须明确收束。纯器乐。",
+    tags: ["自然", "主题变形", "多乐章"],
+    vocalMode: "instrumental",
+    en: {
+      title: "Landscapes and Echoes",
+      description: "A goal-directed multi-movement journey shaped by motif transformation and natural landscapes.",
+      prompt: "Conceive a multi-movement orchestral work traveling through mountains, a canyon, a river, and an eventual arrival at the sea. Let the agent choose an appropriate three- or four-movement structure. Use one original intervallic motif as the shared identity and develop it through augmentation, inversion, fragmentation, and orchestral transfer. Earlier movements may end openly; the finale must close decisively. Instrumental only.",
+      tags: ["Nature", "Motif transformation", "Multi-movement"],
+    },
+  },
+];
+
 const state = {
   tasks: [],
   selectedTaskId: null,
   playingTaskId: null,
+  playingMovementId: null,
   corpusMode: "none",
+  compositionMode: "single",
   submitting: false,
   language: "zh-CN",
   settings: null,
 };
 const elements = {
   entryView: document.querySelector("#entry-view"),
+  developmentView: document.querySelector("#development-view"),
   homeView: document.querySelector("#home-view"),
   taskView: document.querySelector("#task-view"),
   composerDock: document.querySelector("#composer-dock"),
@@ -199,6 +274,7 @@ const elements = {
   mode: document.querySelector("#mode-select"),
   lyriaModel: document.querySelector("#lyria-model-select"),
   vocalModes: document.querySelectorAll('input[name="vocal-mode"]'),
+  vocalSetting: document.querySelector("#vocal-setting"),
   globalPlayer: document.querySelector("#global-player"),
   audio: document.querySelector("#audio-player"),
   playerTitle: document.querySelector("#player-title"),
@@ -236,13 +312,23 @@ function normalizeCorpusMode(value) {
 
 function renderComposerContext() {
   const isJazz = state.corpusMode === "jazz";
-  elements.heroEyebrow.textContent = t(isJazz ? "jazzHeroEyebrow" : "heroEyebrow");
-  elements.heroTitle.innerHTML = t(isJazz ? "jazzHeroTitle" : "heroTitle");
-  elements.heroCopy.textContent = t(isJazz ? "jazzHeroCopy" : "heroCopy");
-  elements.creationModeBadge.textContent = t(isJazz ? "jazzCorpusBadge" : "noCorpusBadge");
-  document.querySelector("#examples-title").textContent = t(
-    isJazz ? "jazzExamplesTitle" : "generalExamplesTitle",
+  const isOrchestral = state.compositionMode === "orchestral";
+  elements.heroEyebrow.textContent = t(
+    isOrchestral ? "orchestralHeroEyebrow" : isJazz ? "jazzHeroEyebrow" : "heroEyebrow",
   );
+  elements.heroTitle.innerHTML = t(
+    isOrchestral ? "orchestralHeroTitle" : isJazz ? "jazzHeroTitle" : "heroTitle",
+  );
+  elements.heroCopy.textContent = t(
+    isOrchestral ? "orchestralHeroCopy" : isJazz ? "jazzHeroCopy" : "heroCopy",
+  );
+  elements.creationModeBadge.textContent = t(
+    isOrchestral ? "orchestralBadge" : isJazz ? "jazzCorpusBadge" : "noCorpusBadge",
+  );
+  document.querySelector("#examples-title").textContent = t(
+    isOrchestral ? "orchestralTitle" : isJazz ? "jazzExamplesTitle" : "generalExamplesTitle",
+  );
+  elements.vocalSetting.hidden = isOrchestral;
 }
 
 function applyTranslations() {
@@ -267,7 +353,13 @@ function applyTranslations() {
   if (selected) renderTaskDetail(selected);
   if (state.playingTaskId) {
     const playing = state.tasks.find((task) => task.id === state.playingTaskId);
-    if (playing) elements.playerMeta.textContent = `${playing.lyriaModel} · ${t("finishedTrack")}`;
+    const movement = playing?.movements?.find((item) => item.id === state.playingMovementId);
+    if (playing && movement) {
+      elements.playerTitle.textContent = `${movement.order}. ${movement.title}`;
+      elements.playerMeta.textContent = `${playing.lyriaModel} · ${playing.title || playing.description}`;
+    } else if (playing) {
+      elements.playerMeta.textContent = `${playing.lyriaModel} · ${t("finishedTrack")}`;
+    }
   }
   renderCredentialStatus();
 }
@@ -297,7 +389,17 @@ function formatTime(value) {
 }
 
 function taskIsPlaying(id) {
-  return state.playingTaskId === id && !elements.audio.paused && !elements.audio.ended;
+  return state.playingTaskId === id
+    && !state.playingMovementId
+    && !elements.audio.paused
+    && !elements.audio.ended;
+}
+
+function movementIsPlaying(taskId, movementId) {
+  return state.playingTaskId === taskId
+    && state.playingMovementId === movementId
+    && !elements.audio.paused
+    && !elements.audio.ended;
 }
 
 function syncPlaybackControls() {
@@ -318,6 +420,10 @@ function syncPlaybackControls() {
           : t("playInPlayer");
     }
   });
+  document.querySelectorAll("[data-play-movement]").forEach((button) => {
+    const playing = movementIsPlaying(button.dataset.parentTask, button.dataset.playMovement);
+    button.textContent = playing ? t("pausePlayback") : t("playInPlayer");
+  });
 }
 
 async function playTask(id) {
@@ -325,7 +431,7 @@ async function playTask(id) {
   if (!task?.audioFile) return;
 
   try {
-    if (state.playingTaskId === id) {
+    if (state.playingTaskId === id && !state.playingMovementId) {
       if (elements.audio.paused) {
         await elements.audio.play();
       } else {
@@ -335,6 +441,7 @@ async function playTask(id) {
     }
 
     state.playingTaskId = id;
+    state.playingMovementId = null;
     elements.playerTitle.textContent = task.title || task.description;
     elements.playerMeta.textContent = `${task.lyriaModel} · ${t("finishedTrack")}`;
     elements.globalPlayer.hidden = false;
@@ -348,8 +455,37 @@ async function playTask(id) {
   }
 }
 
+async function playMovement(taskId, movementId) {
+  const task = state.tasks.find((item) => item.id === taskId);
+  const movement = task?.movements?.find((item) => item.id === movementId);
+  if (!movement?.audioFile) return;
+
+  try {
+    if (state.playingTaskId === taskId && state.playingMovementId === movementId) {
+      if (elements.audio.paused) await elements.audio.play();
+      else elements.audio.pause();
+      return;
+    }
+
+    state.playingTaskId = taskId;
+    state.playingMovementId = movementId;
+    elements.playerTitle.textContent = `${movement.order}. ${movement.title}`;
+    elements.playerMeta.textContent = `${task.lyriaModel} · ${task.title || task.description}`;
+    elements.globalPlayer.hidden = false;
+    elements.audio.src = `/api/tasks/${encodeURIComponent(taskId)}/movements/${encodeURIComponent(movementId)}/audio`;
+    elements.audio.load();
+    await elements.audio.play();
+  } catch (error) {
+    elements.message.textContent = error instanceof Error ? error.message : t("audioPlaybackFailed");
+  } finally {
+    syncPlaybackControls();
+  }
+}
+
 function renderExamples() {
-  const activeExamples = state.corpusMode === "jazz" ? jazzExamples : generalExamples;
+  const activeExamples = state.compositionMode === "orchestral"
+    ? orchestralExamples
+    : state.corpusMode === "jazz" ? jazzExamples : generalExamples;
   document.querySelector("#example-grid").innerHTML = activeExamples.map((source, index) => {
     const example = localizedExample(source);
     return `
@@ -404,7 +540,103 @@ function renderTaskList() {
   syncPlaybackControls();
 }
 
+function renderOrchestralTaskDetail(task) {
+  const running = ["queued", "composing", "generating"].includes(task.status);
+  const plan = task.orchestralPlan;
+  const movements = task.movements || [];
+  const activeMovement = movements.find((movement) =>
+    ["queued", "composing", "generating"].includes(movement.status),
+  );
+  const contractPanel = plan ? `
+    <div class="panel orchestral-contract">
+      <h3>${t("workContract")}</h3>
+      <div class="spec-list">
+        <div class="spec-row"><span>${t("identityMotif")}</span><strong>${escapeHtml(plan.sharedContract.identityMotif)}</strong></div>
+        <div class="spec-row"><span>${t("tonalWorld")}</span><strong>${escapeHtml(plan.sharedContract.tonalWorld)}</strong></div>
+        <div class="spec-row"><span>${t("orchestra")}</span><strong>${escapeHtml(plan.sharedContract.orchestra)}</strong></div>
+        <div class="spec-row"><span>${t("acousticSpace")}</span><strong>${escapeHtml(plan.sharedContract.acousticSpace)}</strong></div>
+      </div>
+    </div>
+  ` : "";
+  const movementCards = movements.map((movement) => {
+    const movementPlan = movement.plan;
+    const details = movementPlan ? `
+      <div class="movement-details">
+        <div class="spec-list">
+          <div class="spec-row"><span>${t("movementRole")}</span><strong>${escapeHtml(movementPlan.dramaticRole)}</strong></div>
+          <div class="spec-row"><span>${t("tempo")}</span><strong>${escapeHtml(movementPlan.tempoAndMeter)}</strong></div>
+          <div class="spec-row"><span>${t("tonality")}</span><strong>${escapeHtml(movementPlan.tonalPlan)}</strong></div>
+          <div class="spec-row"><span>${t("motifDevelopment")}</span><strong>${escapeHtml(movementPlan.motifDevelopment.join(" · "))}</strong></div>
+          <div class="spec-row"><span>${t("orchestrationArc")}</span><strong>${escapeHtml(movementPlan.orchestrationArc)}</strong></div>
+          <div class="spec-row"><span>${t("entranceContract")}</span><strong>${escapeHtml(movementPlan.entranceContract)}</strong></div>
+          <div class="spec-row"><span>${t("exitContract")}</span><strong>${escapeHtml(movementPlan.exitContract)}</strong></div>
+        </div>
+        <details>
+          <summary>${t("movementPrompt")}</summary>
+          <div class="prompt-output">${escapeHtml(movementPlan.lyriaPrompt)}</div>
+        </details>
+      </div>
+    ` : "";
+    const movementError = movement.status === "failed" && movement.error
+      ? `<p class="movement-error">${escapeHtml(movement.error)}</p>`
+      : "";
+    return `
+      <article class="movement-card">
+        <header>
+          <div>
+            <p class="eyebrow">${String(movement.order).padStart(2, "0")} · ${escapeHtml(t("movements").toUpperCase())}</p>
+            <h3>${escapeHtml(movement.title)}</h3>
+          </div>
+          <span class="status-pill ${statusClass(movement.status)}">${escapeHtml(statusLabel(movement.status))}</span>
+        </header>
+        ${details}${movementError}
+        ${movement.audioFile ? `<button class="listen-button movement-play" type="button" data-parent-task="${task.id}" data-play-movement="${movement.id}">${t("playInPlayer")}</button>` : ""}
+      </article>
+    `;
+  }).join("");
+  const progress = running ? `
+    <div class="progress-card orchestral-progress">
+      <p class="eyebrow accent">${t("inProgress")}</p>
+      <h3>${activeMovement ? `${activeMovement.order}. ${escapeHtml(activeMovement.title)}` : escapeHtml(statusLabel(task.status))}</h3>
+      <div class="progress-line"></div>
+      <p>${task.status === "generating" ? t("movementGenerating") : t("movementPlanning")}</p>
+    </div>
+  ` : "";
+  const error = task.status === "failed" ? `
+    <div class="error-box">
+      <div><strong>${t("taskInterrupted")}</strong><p>${escapeHtml(task.error || t("taskFailedFallback"))}</p></div>
+      <button class="retry-button" type="button" data-retry-task="${task.id}">${t("continueTask")}</button>
+    </div>
+  ` : "";
+
+  elements.taskDetail.innerHTML = `
+    <header class="task-header">
+      <div>
+        <p class="eyebrow">${escapeHtml(task.lyriaModel.toUpperCase())} · ${t("orchestralSource")}</p>
+        <h2>${escapeHtml(task.title || (running ? t("thinking") : t("unnamedWork")))}</h2>
+        <p>${escapeHtml(task.description)}</p>
+      </div>
+      <span class="status-pill ${statusClass(task.status)}">${escapeHtml(statusLabel(task.status))}</span>
+    </header>
+    ${progress}${error}${contractPanel}
+    ${movements.length ? `<section class="movement-list"><h2>${t("movements")}</h2>${movementCards}</section>` : ""}
+  `;
+  elements.taskDetail.querySelectorAll("[data-play-movement]").forEach((button) => {
+    button.addEventListener("click", () => {
+      playMovement(button.dataset.parentTask, button.dataset.playMovement);
+    });
+  });
+  elements.taskDetail.querySelectorAll("[data-retry-task]").forEach((button) => {
+    button.addEventListener("click", () => retryTask(button.dataset.retryTask, button));
+  });
+  syncPlaybackControls();
+}
+
 function renderTaskDetail(task) {
+  if (task.compositionMode === "orchestral") {
+    renderOrchestralTaskDetail(task);
+    return;
+  }
   const running = ["queued", "composing", "generating"].includes(task.status);
   const title = task.title || (running ? t("thinking") : t("unnamedWork"));
   const spec = task.musicSpec;
@@ -482,6 +714,7 @@ function renderTaskDetail(task) {
 function showEntry() {
   state.selectedTaskId = null;
   elements.entryView.hidden = false;
+  elements.developmentView.hidden = true;
   elements.homeView.hidden = true;
   elements.taskView.hidden = true;
   elements.composerDock.hidden = true;
@@ -489,15 +722,32 @@ function showEntry() {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-function showComposer(corpusMode = "none") {
+function showComposer(corpusMode = "none", compositionMode = "single") {
   state.selectedTaskId = null;
   state.corpusMode = normalizeCorpusMode(corpusMode);
+  state.compositionMode = compositionMode === "orchestral" ? "orchestral" : "single";
   elements.entryView.hidden = true;
+  elements.developmentView.hidden = true;
   elements.homeView.hidden = false;
   elements.taskView.hidden = true;
   elements.composerDock.hidden = false;
   renderComposerContext();
   renderExamples();
+  if (state.compositionMode === "orchestral") {
+    elements.lyriaModel.value = "lyria-3.5";
+    selectVocalMode("instrumental");
+  }
+  renderTaskList();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function showDevelopment() {
+  state.selectedTaskId = null;
+  elements.entryView.hidden = true;
+  elements.developmentView.hidden = false;
+  elements.homeView.hidden = true;
+  elements.taskView.hidden = true;
+  elements.composerDock.hidden = true;
   renderTaskList();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -507,7 +757,9 @@ function selectTask(id) {
   const task = state.tasks.find((item) => item.id === id);
   if (!task) return;
   state.corpusMode = normalizeCorpusMode(task.corpusMode);
+  state.compositionMode = task.compositionMode === "orchestral" ? "orchestral" : "single";
   elements.entryView.hidden = true;
+  elements.developmentView.hidden = true;
   elements.homeView.hidden = true;
   elements.taskView.hidden = false;
   elements.composerDock.hidden = false;
@@ -531,7 +783,11 @@ async function refreshTasks() {
     }
     if (state.playingTaskId) {
       const playing = state.tasks.find((task) => task.id === state.playingTaskId);
-      if (playing) {
+      const movement = playing?.movements?.find((item) => item.id === state.playingMovementId);
+      if (playing && movement) {
+        elements.playerTitle.textContent = `${movement.order}. ${movement.title}`;
+        elements.playerMeta.textContent = `${playing.lyriaModel} · ${playing.title || playing.description}`;
+      } else if (playing) {
         elements.playerTitle.textContent = playing.title || playing.description;
         elements.playerMeta.textContent = `${playing.lyriaModel} · ${t("finishedTrack")}`;
       }
@@ -582,6 +838,7 @@ async function submitTask(event) {
         lyriaModel: elements.lyriaModel.value,
         vocalMode: selectedVocalMode(),
         corpusMode: state.corpusMode,
+        compositionMode: state.compositionMode,
       }),
     });
     const result = await response.json();
@@ -723,10 +980,17 @@ elements.audio.addEventListener("error", () => {
 });
 document.querySelector("#new-task").addEventListener("click", showEntry);
 document.querySelector("#back-entry").addEventListener("click", showEntry);
-document.querySelector("#back-home").addEventListener("click", () => showComposer(state.corpusMode));
-document.querySelectorAll("[data-corpus-mode]").forEach((button) => {
+document.querySelector("#back-development").addEventListener("click", showEntry);
+document.querySelector("#back-home").addEventListener("click", () => {
+  showComposer(state.corpusMode, state.compositionMode);
+});
+document.querySelectorAll("[data-composition-mode]").forEach((button) => {
   button.addEventListener("click", () => {
-    showComposer(button.dataset.corpusMode);
+    if (button.dataset.compositionMode === "album") {
+      showDevelopment();
+      return;
+    }
+    showComposer(button.dataset.corpusMode, button.dataset.compositionMode);
     elements.input.focus();
   });
 });

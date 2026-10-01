@@ -11,4 +11,14 @@ describe("composer skill", () => {
     expect(skill).toContain("instrumental only, no vocals");
     expect(skill).not.toContain("[TODO:");
   });
+
+  it("loads orchestral continuity guidance only for orchestral composition", async () => {
+    const single = await loadComposerSkill();
+    const orchestral = await loadComposerSkill("orchestral");
+
+    expect(single).not.toContain("Each Lyria generation is independent");
+    expect(orchestral).toContain("Each Lyria generation is independent");
+    expect(orchestral).toContain("entrance and exit explicitly");
+    expect(orchestral).not.toContain("[TODO:");
+  });
 });

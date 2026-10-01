@@ -6,6 +6,10 @@ import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 
 import { composeMusic } from "../composer/composer-agent.js";
+import {
+  composeOrchestralMovement,
+  planOrchestralWork,
+} from "../composer/orchestral-agent.js";
 import { loadConfig, type AriosoConfig } from "../config/env.js";
 import {
   SettingsStore,
@@ -15,11 +19,29 @@ import {
 } from "../config/settings.js";
 import { LyriaClient } from "../lyria/lyria-client.js";
 import type { MusicSpec } from "../schema/music-spec.js";
+import type {
+  OrchestralMovementPlan,
+  OrchestralWorkPlan,
+} from "../schema/orchestral-plan.js";
 
 type TaskMode = "compose" | "generate";
 type TaskStatus = "queued" | "composing" | "generating" | "completed" | "failed";
 type VocalMode = "auto" | "instrumental" | "vocals";
 type CorpusMode = "none" | "jazz";
+type CompositionMode = "single" | "orchestral";
+
+interface OrchestralMovementTask {
+  id: string;
+  order: number;
+  title: string;
+  status: TaskStatus;
+  createdAt: string;
+  updatedAt: string;
+  plan?: OrchestralMovementPlan;
+  generatedText?: string | null;
+  audioFile?: string;
+  error?: string | undefined;
+}
 
 interface MusicTask {
   id: string;
@@ -27,6 +49,7 @@ interface MusicTask {
   mode: TaskMode;
   vocalMode: VocalMode;
   corpusMode: CorpusMode;
+  compositionMode: CompositionMode;
   status: TaskStatus;
   composerModel: string;
   lyriaModel: string;
@@ -36,6 +59,8 @@ interface MusicTask {
   retrievalQuery?: string;
   retrievedReferenceIds?: string[];
   musicSpec?: MusicSpec;
+  orchestralPlan?: OrchestralWorkPlan;
+  movements?: OrchestralMovementTask[];
   generatedText?: string | null;
   audioFile?: string;
   error?: string | undefined;
@@ -46,6 +71,7 @@ interface CreateTaskInput {
   mode: TaskMode;
   vocalMode: VocalMode;
   corpusMode: CorpusMode;
+  compositionMode: CompositionMode;
   lyriaModel?: string;
 }
 
@@ -82,6 +108,9 @@ class TaskStore {
               await readFile(path.join(this.#directory, entry.name), "utf8"),
             ) as MusicTask;
             if (task.id) {
+              task.compositionMode = task.compositionMode === "orchestral"
+                ? "orchestral"
+                : "single";
               task.corpusMode = task.corpusMode === "jazz" || task.retrievalQuery
                 ? "jazz"
                 : "none";
@@ -91,6 +120,20 @@ class TaskStore {
                 task.error = "The local server stopped before this task finished.";
                 task.updatedAt = new Date().toISOString();
                 interrupted = true;
+              }
+              if (task.movements) {
+                task.movements = task.movements.map((movement) => {
+                  if (!["queued", "composing", "generating"].includes(movement.status)) {
+                    return movement;
+                  }
+                  interrupted = true;
+                  return {
+                    ...movement,
+                    status: "failed",
+                    error: "The local server stopped before this movement finished.",
+                    updatedAt: new Date().toISOString(),
+                  };
+                });
               }
               this.#tasks.set(task.id, task);
               if (interrupted) {
@@ -122,6 +165,7 @@ class TaskStore {
       mode: input.mode,
       vocalMode: input.vocalMode,
       corpusMode: input.corpusMode,
+      compositionMode: input.compositionMode,
       status: "queued",
       composerModel: config.openAiModel,
       lyriaModel: input.lyriaModel ?? config.lyriaModel,
@@ -144,11 +188,35 @@ class TaskStore {
     return task;
   }
 
+  async updateMovement(
+    taskId: string,
+    movementId: string,
+    changes: Partial<OrchestralMovementTask>,
+  ): Promise<MusicTask> {
+    const task = this.#tasks.get(taskId);
+    const movement = task?.movements?.find((candidate) => candidate.id === movementId);
+    if (!task || !movement) {
+      throw new Error(`Unknown orchestral movement: ${movementId}`);
+    }
+    const updatedAt = new Date().toISOString();
+    const movements = task.movements!.map((candidate) => candidate.id === movementId
+      ? { ...candidate, ...changes, id: movementId, updatedAt }
+      : candidate);
+    return this.update(taskId, { movements });
+  }
+
   audioPath(task: MusicTask): string | undefined {
     if (!task.audioFile || path.basename(task.audioFile) !== task.audioFile) {
       return undefined;
     }
     return path.join(this.#directory, task.audioFile);
+  }
+
+  movementAudioPath(movement: OrchestralMovementTask): string | undefined {
+    if (!movement.audioFile || path.basename(movement.audioFile) !== movement.audioFile) {
+      return undefined;
+    }
+    return path.join(this.#directory, movement.audioFile);
   }
 
   async save(task: MusicTask): Promise<void> {
@@ -292,6 +360,14 @@ export function parseTaskInput(value: unknown): CreateTaskInput {
     throw new Error("Unsupported corpus mode.");
   }
   const corpusMode: CorpusMode = candidate.corpusMode === "jazz" ? "jazz" : "none";
+  if (candidate.compositionMode !== undefined
+    && candidate.compositionMode !== "single"
+    && candidate.compositionMode !== "orchestral") {
+    throw new Error("Unsupported composition mode.");
+  }
+  const compositionMode: CompositionMode = candidate.compositionMode === "orchestral"
+    ? "orchestral"
+    : "single";
   const lyriaModel =
     candidate.lyriaModel === "lyria-3.5" || candidate.lyriaModel === "lyria-3-clip-preview"
       ? candidate.lyriaModel
@@ -305,8 +381,8 @@ export function parseTaskInput(value: unknown): CreateTaskInput {
   }
 
   return lyriaModel
-    ? { description, mode, vocalMode, corpusMode, lyriaModel }
-    : { description, mode, vocalMode, corpusMode };
+    ? { description, mode, vocalMode, corpusMode, compositionMode, lyriaModel }
+    : { description, mode, vocalMode, corpusMode, compositionMode };
 }
 
 function isRetryableRequestError(error: unknown): boolean {
@@ -349,6 +425,11 @@ async function runTask(
   config: AriosoConfig,
 ): Promise<void> {
   try {
+    if (task.compositionMode === "orchestral") {
+      await runOrchestralTask(store, task, config);
+      return;
+    }
+
     let spec = task.musicSpec;
     if (!spec) {
       await store.update(task.id, { status: "composing", error: undefined });
@@ -390,6 +471,95 @@ async function runTask(
     const message = error instanceof Error ? error.message : String(error);
     await store.update(task.id, { status: "failed", error: message });
   }
+}
+
+async function runOrchestralTask(
+  store: TaskStore,
+  task: MusicTask,
+  config: AriosoConfig,
+): Promise<void> {
+  let currentTask = task;
+  let workPlan = currentTask.orchestralPlan;
+
+  if (!workPlan) {
+    await store.update(currentTask.id, { status: "composing", error: undefined });
+    workPlan = await planOrchestralWork(currentTask.description, {
+      apiKey: config.openAiApiKey,
+      model: currentTask.composerModel,
+      lyriaModel: currentTask.lyriaModel,
+    });
+    const now = new Date().toISOString();
+    currentTask = await store.update(currentTask.id, {
+      title: workPlan.title,
+      orchestralPlan: workPlan,
+      movements: workPlan.movements.map((movement) => ({
+        id: crypto.randomUUID(),
+        order: movement.order,
+        title: movement.title,
+        status: "queued",
+        createdAt: now,
+        updatedAt: now,
+      })),
+    });
+  }
+
+  for (const movement of currentTask.movements ?? []) {
+    if (movement.status === "completed") continue;
+
+    try {
+      let movementPlan = movement.plan;
+      if (!movementPlan) {
+        await store.update(currentTask.id, { status: "composing", error: undefined });
+        await store.updateMovement(currentTask.id, movement.id, {
+          status: "composing",
+          error: undefined,
+        });
+        movementPlan = await composeOrchestralMovement(workPlan, movement.order, {
+          apiKey: config.openAiApiKey,
+          model: currentTask.composerModel,
+          lyriaModel: currentTask.lyriaModel,
+        });
+        currentTask = await store.updateMovement(currentTask.id, movement.id, {
+          title: movementPlan.title,
+          plan: movementPlan,
+          status: currentTask.mode === "compose" ? "completed" : "queued",
+          error: undefined,
+        });
+      }
+
+      if (currentTask.mode === "compose") continue;
+
+      await store.update(currentTask.id, { status: "generating", error: undefined });
+      await store.updateMovement(currentTask.id, movement.id, {
+        status: "generating",
+        error: undefined,
+      });
+      const client = new LyriaClient(config.geminiApiKey!);
+      const generated = await withRequestRetry(() => client.generate(movementPlan.lyriaPrompt, {
+        model: currentTask.lyriaModel,
+      }));
+      const audioFile = `${currentTask.id}-movement-${movement.order}.mp3`;
+      await writeFile(
+        path.join(path.resolve(config.outputDirectory, "tasks"), audioFile),
+        generated.audio,
+      );
+      currentTask = await store.updateMovement(currentTask.id, movement.id, {
+        status: "completed",
+        audioFile,
+        generatedText: generated.generatedText,
+        error: undefined,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      await store.updateMovement(currentTask.id, movement.id, {
+        status: "failed",
+        error: message,
+      });
+      throw error;
+    }
+  }
+
+  await store.update(currentTask.id, { status: "completed", error: undefined });
 }
 
 function isApiProvider(value: unknown): value is ApiProvider {
@@ -465,6 +635,8 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
     const url = new URL(request.url ?? "/", "http://localhost");
     const taskMatch = /^\/api\/tasks\/([^/]+)$/.exec(url.pathname);
     const audioMatch = /^\/api\/tasks\/([^/]+)\/audio$/.exec(url.pathname);
+    const movementAudioMatch = /^\/api\/tasks\/([^/]+)\/movements\/([^/]+)\/audio$/
+      .exec(url.pathname);
     const retryMatch = /^\/api\/tasks\/([^/]+)\/retry$/.exec(url.pathname);
     const credentialMatch = /^\/api\/settings\/credentials\/(openai|gemini)$/.exec(
       url.pathname,
@@ -587,6 +759,24 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
         const audioPath = task ? store.audioPath(task) : undefined;
         if (!task || !audioPath) {
           sendJson(response, 404, { error: "Audio is not available." });
+          return;
+        }
+        await sendAudio(request, response, audioPath);
+        return;
+      }
+
+      if (
+        (request.method === "GET" || request.method === "HEAD")
+        && movementAudioMatch?.[1]
+        && movementAudioMatch[2]
+      ) {
+        const task = store.get(movementAudioMatch[1]);
+        const movement = task?.movements?.find(
+          (candidate) => candidate.id === movementAudioMatch[2],
+        );
+        const audioPath = movement ? store.movementAudioPath(movement) : undefined;
+        if (!task || !movement || !audioPath) {
+          sendJson(response, 404, { error: "Movement audio is not available." });
           return;
         }
         await sendAudio(request, response, audioPath);

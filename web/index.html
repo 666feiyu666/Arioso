@@ -47,7 +47,7 @@
             <p data-i18n="entryCopy">从模型自身知识开始，或让 Jazz 语料为编曲提供参考。</p>
           </div>
           <div class="workflow-grid" aria-label="生成方式" data-i18n-aria-label="workflowChoices">
-            <button class="workflow-card" type="button" data-corpus-mode="none">
+            <button class="workflow-card" type="button" data-composition-mode="single" data-corpus-mode="none">
               <span class="workflow-index">01</span>
               <span class="workflow-copy">
                 <span class="workflow-tag" data-i18n="allStyles">不限风格</span>
@@ -56,7 +56,7 @@
               </span>
               <span class="workflow-action" data-i18n="enterStudio">进入创作台 →</span>
             </button>
-            <button class="workflow-card corpus" type="button" data-corpus-mode="jazz">
+            <button class="workflow-card corpus" type="button" data-composition-mode="single" data-corpus-mode="jazz">
               <span class="workflow-index">02</span>
               <span class="workflow-copy">
                 <span class="workflow-tag" data-i18n="jazzOnly">仅限 Jazz</span>
@@ -65,6 +65,34 @@
               </span>
               <span class="workflow-action" data-i18n="enterJazzStudio">进入 Jazz 创作台 →</span>
             </button>
+            <button class="workflow-card orchestral" type="button" data-composition-mode="orchestral" data-corpus-mode="none">
+              <span class="workflow-index">03</span>
+              <span class="workflow-copy">
+                <span class="workflow-tag" data-i18n="multiMovement">多乐章</span>
+                <strong data-i18n="orchestralTitle">管弦乐作曲</strong>
+                <span data-i18n="orchestralDescription">由 Agent 规划统一主题与完整乐章，再依次生成一部连贯的管弦乐作品。</span>
+              </span>
+              <span class="workflow-action" data-i18n="enterOrchestralStudio">进入管弦乐创作台 →</span>
+            </button>
+            <button class="workflow-card album" type="button" data-composition-mode="album" data-corpus-mode="none">
+              <span class="workflow-index">04</span>
+              <span class="workflow-copy">
+                <span class="workflow-tag" data-i18n="sameThemeTracks">同一主题 · 多曲目</span>
+                <strong data-i18n="albumTitle">专辑作曲</strong>
+                <span data-i18n="albumDescription">围绕同一音乐身份规划多首独立曲目，保持主题、音色与制作风格的一致性。</span>
+              </span>
+              <span class="workflow-action" data-i18n="viewAlbumDevelopment">查看开发进度 →</span>
+            </button>
+          </div>
+        </section>
+
+        <section id="development-view" class="view development-view" hidden>
+          <button class="back-button" id="back-development" type="button" data-i18n="backEntry">← 返回生成方式选择</button>
+          <div class="development-card">
+            <p class="eyebrow accent">04 · ALBUM COMPOSITION</p>
+            <span class="development-status" data-i18n="inDevelopment">正在开发中</span>
+            <h2 data-i18n="albumDevelopmentTitle">让一组作品，拥有同一种声音。</h2>
+            <p data-i18n="albumDevelopmentCopy">专辑作曲将复用管弦乐工作流中的共享音乐契约与多曲目任务模型。在 03 成熟后开放。</p>
           </div>
         </section>
 
@@ -135,7 +163,7 @@
               ></textarea>
               <button id="submit-task" type="submit" aria-label="开始生成" data-i18n-aria-label="startGeneration">↑</button>
             </div>
-            <fieldset class="vocal-setting">
+            <fieldset class="vocal-setting" id="vocal-setting">
               <legend data-i18n="vocalRule">人声规则</legend>
               <div class="segmented-control">
                 <input id="vocal-auto" name="vocal-mode" type="radio" value="auto" checked />
