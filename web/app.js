@@ -44,6 +44,12 @@ const translations = {
     connectionOk: "连接成功。", connectionFailed: "连接失败，请检查 API Key 和网络连接。",
     keyCleared: "已移除保存的 API Key。", keyFallback: "已移除本地保存的 Key；当前仍检测到环境变量中的可用 Key。",
     emptyTasks: "还没有任务。<br />从一个声音画面开始吧。",
+    workflow01: "01 无语料单曲", workflow02: "02 Jazz 语料单曲",
+    workflow03: "03 管弦乐作品", workflow04: "04 主题专辑",
+    noTasksInWorkflow: "暂无任务", albumComingSoon: "正在开发",
+    movementProgress: "{completed}/{total} 乐章", totalDuration: "作品总时长", movementDuration: "乐章时长",
+    durationAdjusted: "时长调整", minutes: "分钟",
+    serverRestartRequired: "当前本地服务仍是旧版本，无法安全创建多乐章任务。请重启 Arioso 服务后再试。",
     queued: "等待开始", composing: "正在整理编曲", generating: "Lyria 正在生成", completed: "已完成",
     failed: "生成失败", pause: "暂停", play: "播放", pausePlayback: "暂停播放", resumePlayback: "继续播放",
     playInPlayer: "在播放器中播放", thisMusic: "这首音乐", finishedTrack: "完整成品",
@@ -108,6 +114,12 @@ const translations = {
     connectionOk: "Connection successful.", connectionFailed: "Connection failed. Check the API key and network connection.",
     keyCleared: "The saved API key was removed.", keyFallback: "The locally saved key was removed; a key is still available from the environment.",
     emptyTasks: "No tasks yet.<br />Start with a sonic scene.",
+    workflow01: "01 Single · No corpus", workflow02: "02 Single · Jazz corpus",
+    workflow03: "03 Orchestral work", workflow04: "04 Themed album",
+    noTasksInWorkflow: "No tasks", albumComingSoon: "In development",
+    movementProgress: "{completed}/{total} movements", totalDuration: "Total work duration", movementDuration: "Movement duration",
+    durationAdjusted: "Duration adjustment", minutes: "minutes",
+    serverRestartRequired: "The local service is still running an older version and cannot safely create multi-movement tasks. Restart Arioso and try again.",
     queued: "Waiting to start", composing: "Composing", generating: "Lyria is generating", completed: "Completed",
     failed: "Generation failed", pause: "Pause ", play: "Play ", pausePlayback: "Pause", resumePlayback: "Resume",
     playInPlayer: "Play in player", thisMusic: "this music", finishedTrack: "Finished track",
@@ -203,42 +215,42 @@ const jazzExamples = [
 
 const orchestralExamples = [
   {
-    title: "星海远征",
-    description: "以同一主题贯穿启程、风暴与归航的三乐章交响诗。",
-    prompt: "创作一部三乐章管弦交响诗：从寂静星海中的启程开始，穿越充满切分节奏与铜管冲突的风暴，最终在辽阔而克制的归航中完成主题。使用原创的短小身份动机贯穿三个乐章，并保持统一的交响乐团、声学空间与动态尺度。纯器乐。",
-    tags: ["交响诗", "三乐章", "纯器乐"],
+    title: "新大陆回声",
+    description: "参考德沃夏克《自新大陆》的辽阔气质，展开四乐章晚期浪漫主义交响旅程。",
+    prompt: "创作一部总时长约十一分钟、四乐章的原创晚期浪漫主义交响曲，以德沃夏克《自新大陆》所代表的辽阔、歌唱性与民间节奏活力作为高层美学参考，但不得引用、改写或近似复现其中任何可识别的旋律、和声进行或配器段落。建立一个原创而易辨识的主题动机；通过宽广圆号呼唤、富有歌唱性的木管、深沉弦乐、切分舞蹈节奏与厚重但自然的交响高潮，让它依次经历远行、沉思、舞蹈和归返。四个乐章共同分配约十一分钟，保持统一的管弦乐团、音乐厅声场和主题身份，终章给予明确而有重量的收束。纯器乐。",
+    tags: ["晚期浪漫主义", "四乐章", "交响曲"],
     vocalMode: "instrumental",
     en: {
-      title: "Voyage Across the Stars",
-      description: "A three-movement symphonic poem whose shared theme travels through departure, storm, and return.",
-      prompt: "Create a three-movement orchestral symphonic poem that begins with departure into a silent star field, crosses a storm of syncopated rhythms and brass conflict, and completes its theme in a spacious, restrained homecoming. Use one original compact identity motif across all movements and preserve the same orchestra, acoustic space, and dynamic scale. Instrumental only.",
-      tags: ["Symphonic poem", "Three movements", "Instrumental"],
+      title: "Echoes of a New Continent",
+      description: "A four-movement late-Romantic journey with the breadth and lyricism associated with Dvořák's New World Symphony.",
+      prompt: "Create an original four-movement late-Romantic symphony with a total duration of approximately eleven minutes, taking only high-level inspiration from the breadth, lyricism, and folk-rhythmic vitality associated with Dvořák's New World Symphony. Do not quote, paraphrase, or closely reproduce any identifiable melody, harmonic progression, or orchestral passage from it. Establish one original, memorable identity motif and carry it through a journey of departure, reflection, dance, and return using broad horn calls, singing woodwinds, dark strings, syncopated dance energy, and weighty but natural symphonic climaxes. Distribute the eleven-minute total across all four movements and preserve one orchestra, concert-hall perspective, and thematic identity, with decisive closure in the finale. Instrumental only.",
+      tags: ["Late Romantic", "Four movements", "Symphony"],
     },
   },
   {
-    title: "古城四时",
-    description: "四个乐章描绘古城从春晨到冬夜的时间流转。",
-    prompt: "创作一部四乐章管弦组曲，以同一座古城的春晨、盛夏午后、秋日庆典与冬夜为四个乐章。设计一个原创主题动机，让它随着季节改变调性、速度、织体和配器，但始终保持可辨识的家族关系。纯器乐，保持自然音乐厅声场。",
-    tags: ["管弦组曲", "四乐章", "季节"],
+    title: "铁色狂欢",
+    description: "以肖斯塔科维奇式的冷峻、讽刺与强烈对比构成四乐章现代交响曲。",
+    prompt: "创作一部总时长约十分钟、四乐章的原创二十世纪现代主义交响曲，以肖斯塔科维奇作品中常见的尖锐戏剧、冷峻讽刺、机械进行曲、突然的动态断裂与深沉慢乐章作为高层风格参考，但不得引用或近似复现任何可识别作品。设计一个短促、棱角分明的原创动机，让它在压迫性的低弦与铜管、怪诞木管舞蹈、室内乐式孤独段落和矛盾而强烈的终章中不断变形。四个乐章共同分配约十分钟，保留清晰的主题逻辑、极端但可控的动态对比，以及带有疑问感而非廉价胜利的最终收束。纯器乐。",
+    tags: ["现代主义", "四乐章", "冷峻讽刺"],
     vocalMode: "instrumental",
     en: {
-      title: "Four Seasons of an Old City",
-      description: "Four movements follow an old city from a spring morning to a winter night.",
-      prompt: "Create a four-movement orchestral suite portraying spring morning, midsummer afternoon, an autumn festival, and winter night in the same old city. Design one original identity motif and transform its tonality, tempo, texture, and orchestration with each season while preserving a recognizable family resemblance. Instrumental only, in one natural concert-hall perspective.",
-      tags: ["Orchestral suite", "Four movements", "Seasons"],
+      title: "Iron-Colored Carnival",
+      description: "A four-movement modernist symphony shaped by the severity, irony, and extreme contrasts associated with Shostakovich.",
+      prompt: "Create an original four-movement, approximately ten-minute twentieth-century modernist symphony using only high-level traits associated with Shostakovich: sharp drama, austere irony, mechanized marches, abrupt dynamic fractures, and a deeply inward slow movement. Do not quote or closely reproduce any identifiable work. Design one compact, angular original motif and transform it through oppressive low strings and brass, grotesque woodwind dances, chamber-like solitude, and a conflicted, forceful finale. Distribute the ten-minute total across all four movements, preserving clear motivic logic and extreme but controlled contrasts, and end with ambiguity and weight rather than easy triumph. Instrumental only.",
+      tags: ["Modernist", "Four movements", "Austere irony"],
     },
   },
   {
-    title: "山河与回声",
-    description: "从自然景观出发，以主题变形构成有终点的多乐章旅程。",
-    prompt: "构思一部多乐章管弦乐作品，描绘高山、峡谷、河流与最终抵达海洋的旅程。由 Agent 决定最合适的三至四乐章结构，以一个原创音程动机作为统一身份，通过增值、倒影、碎片化与配器转移发展。前几个乐章可开放结束，终章必须明确收束。纯器乐。",
-    tags: ["自然", "主题变形", "多乐章"],
+    title: "雾与水的素描",
+    description: "以德彪西式的印象主义和声与流动音色写成三幅管弦乐素描。",
+    prompt: "创作一部总时长约九分钟、三乐章的原创印象主义管弦组曲，以德彪西作品所代表的流动音色、朦胧和声、调式与全音阶色彩、细腻木管、竖琴和弱音弦乐作为高层美学参考，但不得引用、改写或近似复现任何可识别旋律或段落。三个乐章分别描绘黎明水面、午后林影和夜间薄雾，并共同分配约九分钟。使用一个原创的短小音程细胞作为统一身份，让它通过音色转换、和声重着色、节奏伸缩和片段化自然显现，不采用厚重的德奥式发展。保持透明、富有空气感的管弦织体，并在终章安静而完整地消散。纯器乐。",
+    tags: ["印象主义", "三乐章", "管弦素描"],
     vocalMode: "instrumental",
     en: {
-      title: "Landscapes and Echoes",
-      description: "A goal-directed multi-movement journey shaped by motif transformation and natural landscapes.",
-      prompt: "Conceive a multi-movement orchestral work traveling through mountains, a canyon, a river, and an eventual arrival at the sea. Let the agent choose an appropriate three- or four-movement structure. Use one original intervallic motif as the shared identity and develop it through augmentation, inversion, fragmentation, and orchestral transfer. Earlier movements may end openly; the finale must close decisively. Instrumental only.",
-      tags: ["Nature", "Motif transformation", "Multi-movement"],
+      title: "Sketches of Mist and Water",
+      description: "Three orchestral sketches shaped by the Impressionist harmony and fluid color associated with Debussy.",
+      prompt: "Create an original three-movement Impressionist orchestral suite with a total duration of approximately nine minutes, using only high-level traits associated with Debussy: fluid color, veiled harmony, modal and whole-tone inflections, delicate woodwinds, harp, and muted strings. Do not quote, paraphrase, or closely reproduce any identifiable melody or passage. Let the movements portray dawn on water, afternoon shadows in a grove, and mist at night, sharing the nine-minute total. Use one original compact interval cell as the shared identity, revealed through timbral transfer, harmonic recoloring, rhythmic expansion, and fragmentation rather than heavy Germanic development. Preserve transparent, air-filled orchestration and let the finale dissolve quietly but completely. Instrumental only.",
+      tags: ["Impressionist", "Three movements", "Orchestral sketches"],
     },
   },
 ];
@@ -250,6 +262,8 @@ const state = {
   playingMovementId: null,
   corpusMode: "none",
   compositionMode: "single",
+  workflowType: "01-general",
+  supportedWorkflows: new Set(["01-general", "02-jazz"]),
   submitting: false,
   language: "zh-CN",
   settings: null,
@@ -257,6 +271,7 @@ const state = {
 const elements = {
   entryView: document.querySelector("#entry-view"),
   developmentView: document.querySelector("#development-view"),
+  entryMessage: document.querySelector("#entry-message"),
   homeView: document.querySelector("#home-view"),
   taskView: document.querySelector("#task-view"),
   composerDock: document.querySelector("#composer-dock"),
@@ -308,6 +323,24 @@ function localizedExample(example) {
 
 function normalizeCorpusMode(value) {
   return value === "jazz" ? "jazz" : "none";
+}
+
+function workflowTypeForTask(task) {
+  if (["01-general", "02-jazz", "03-orchestral", "04-album"].includes(task.workflowType)) {
+    return task.workflowType;
+  }
+  if (task.compositionMode === "orchestral") return "03-orchestral";
+  if (normalizeCorpusMode(task.corpusMode) === "jazz" || task.retrievalQuery) return "02-jazz";
+  return "01-general";
+}
+
+function workflowLabel(workflowType) {
+  return t({
+    "01-general": "workflow01",
+    "02-jazz": "workflow02",
+    "03-orchestral": "workflow03",
+    "04-album": "workflow04",
+  }[workflowType]);
 }
 
 function renderComposerContext() {
@@ -515,22 +548,36 @@ function renderExamples() {
 
 function renderTaskList() {
   elements.taskCount.textContent = String(state.tasks.length);
-  if (!state.tasks.length) {
-    elements.taskList.innerHTML = `<p class="empty-tasks">${t("emptyTasks")}</p>`;
-    return;
-  }
-  elements.taskList.innerHTML = state.tasks.map((task) => `
-    <div class="task-list-item">
-      <button class="task-button ${task.id === state.selectedTaskId ? "active" : ""}" type="button" data-task-id="${task.id}">
-        <strong>${escapeHtml(task.title || task.description)}</strong>
-        <span class="task-meta">
-          <span class="task-state-dot ${statusClass(task.status)}"></span>
-          ${escapeHtml(statusLabel(task.status))} · ${formatTime(task.updatedAt)}
-        </span>
-      </button>
-      ${task.audioFile ? `<button class="task-play" type="button" data-play-task="${task.id}"></button>` : ""}
-    </div>
-  `).join("");
+  const workflowTypes = ["01-general", "02-jazz", "03-orchestral", "04-album"];
+  elements.taskList.innerHTML = workflowTypes.map((workflowType) => {
+    const tasks = state.tasks.filter((task) => workflowTypeForTask(task) === workflowType);
+    const taskItems = tasks.map((task) => {
+      const movements = task.movements || [];
+      const completedMovements = movements.filter((movement) => movement.status === "completed").length;
+      const progress = workflowType === "03-orchestral" && movements.length
+        ? ` · ${t("movementProgress", { completed: completedMovements, total: movements.length })}`
+        : "";
+      return `
+        <div class="task-list-item">
+          <button class="task-button ${task.id === state.selectedTaskId ? "active" : ""}" type="button" data-task-id="${task.id}">
+            <strong>${escapeHtml(task.title || task.description)}</strong>
+            <span class="task-meta">
+              <span class="task-state-dot ${statusClass(task.status)}"></span>
+              ${escapeHtml(statusLabel(task.status))}${escapeHtml(progress)} · ${formatTime(task.updatedAt)}
+            </span>
+          </button>
+          ${task.audioFile ? `<button class="task-play" type="button" data-play-task="${task.id}"></button>` : ""}
+        </div>
+      `;
+    }).join("");
+    const emptyLabel = workflowType === "04-album" ? t("albumComingSoon") : t("noTasksInWorkflow");
+    return `
+      <section class="task-group" data-task-group="${workflowType}">
+        <header><strong>${escapeHtml(workflowLabel(workflowType))}</strong><span>${tasks.length}</span></header>
+        ${taskItems || `<p class="task-group-empty">${escapeHtml(emptyLabel)}</p>`}
+      </section>
+    `;
+  }).join("");
   elements.taskList.querySelectorAll("[data-task-id]").forEach((button) => {
     button.addEventListener("click", () => selectTask(button.dataset.taskId));
   });
@@ -551,6 +598,8 @@ function renderOrchestralTaskDetail(task) {
     <div class="panel orchestral-contract">
       <h3>${t("workContract")}</h3>
       <div class="spec-list">
+        <div class="spec-row"><span>${t("totalDuration")}</span><strong>${escapeHtml(String(plan.plannedTotalDurationMinutes))} ${t("minutes")}</strong></div>
+        ${plan.durationAdjustmentReason ? `<div class="spec-row"><span>${t("durationAdjusted")}</span><strong>${escapeHtml(plan.durationAdjustmentReason)}</strong></div>` : ""}
         <div class="spec-row"><span>${t("identityMotif")}</span><strong>${escapeHtml(plan.sharedContract.identityMotif)}</strong></div>
         <div class="spec-row"><span>${t("tonalWorld")}</span><strong>${escapeHtml(plan.sharedContract.tonalWorld)}</strong></div>
         <div class="spec-row"><span>${t("orchestra")}</span><strong>${escapeHtml(plan.sharedContract.orchestra)}</strong></div>
@@ -564,6 +613,7 @@ function renderOrchestralTaskDetail(task) {
       <div class="movement-details">
         <div class="spec-list">
           <div class="spec-row"><span>${t("movementRole")}</span><strong>${escapeHtml(movementPlan.dramaticRole)}</strong></div>
+          <div class="spec-row"><span>${t("movementDuration")}</span><strong>${escapeHtml(String(movementPlan.targetDurationMinutes))} ${t("minutes")}</strong></div>
           <div class="spec-row"><span>${t("tempo")}</span><strong>${escapeHtml(movementPlan.tempoAndMeter)}</strong></div>
           <div class="spec-row"><span>${t("tonality")}</span><strong>${escapeHtml(movementPlan.tonalPlan)}</strong></div>
           <div class="spec-row"><span>${t("motifDevelopment")}</span><strong>${escapeHtml(movementPlan.motifDevelopment.join(" · "))}</strong></div>
@@ -722,10 +772,15 @@ function showEntry() {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-function showComposer(corpusMode = "none", compositionMode = "single") {
+function showComposer(
+  corpusMode = "none",
+  compositionMode = "single",
+  workflowType = "01-general",
+) {
   state.selectedTaskId = null;
   state.corpusMode = normalizeCorpusMode(corpusMode);
   state.compositionMode = compositionMode === "orchestral" ? "orchestral" : "single";
+  state.workflowType = workflowType;
   elements.entryView.hidden = true;
   elements.developmentView.hidden = true;
   elements.homeView.hidden = false;
@@ -756,6 +811,7 @@ function selectTask(id) {
   state.selectedTaskId = id;
   const task = state.tasks.find((item) => item.id === id);
   if (!task) return;
+  state.workflowType = workflowTypeForTask(task);
   state.corpusMode = normalizeCorpusMode(task.corpusMode);
   state.compositionMode = task.compositionMode === "orchestral" ? "orchestral" : "single";
   elements.entryView.hidden = true;
@@ -824,6 +880,10 @@ async function retryTask(id, button) {
 async function submitTask(event) {
   event.preventDefault();
   if (state.submitting) return;
+  if (!state.supportedWorkflows.has(state.workflowType)) {
+    elements.message.textContent = t("serverRestartRequired");
+    return;
+  }
   state.submitting = true;
   elements.submit.disabled = true;
   elements.message.textContent = "";
@@ -839,6 +899,7 @@ async function submitTask(event) {
         vocalMode: selectedVocalMode(),
         corpusMode: state.corpusMode,
         compositionMode: state.compositionMode,
+        workflowType: state.workflowType,
       }),
     });
     const result = await response.json();
@@ -881,6 +942,18 @@ async function loadSettings() {
   elements.openAiKey.value = "";
   elements.geminiKey.value = "";
   applyTranslations();
+}
+
+async function loadCapabilities() {
+  try {
+    const response = await fetch("/api/capabilities", { cache: "no-store" });
+    if (!response.ok) return;
+    const result = await response.json();
+    if (result.apiVersion < 2 || !Array.isArray(result.workflows)) return;
+    state.supportedWorkflows = new Set(result.workflows);
+  } catch {
+    // An older local server has no capabilities endpoint. Keep orchestral creation blocked.
+  }
 }
 
 async function openSettings() {
@@ -982,15 +1055,21 @@ document.querySelector("#new-task").addEventListener("click", showEntry);
 document.querySelector("#back-entry").addEventListener("click", showEntry);
 document.querySelector("#back-development").addEventListener("click", showEntry);
 document.querySelector("#back-home").addEventListener("click", () => {
-  showComposer(state.corpusMode, state.compositionMode);
+  showComposer(state.corpusMode, state.compositionMode, state.workflowType);
 });
-document.querySelectorAll("[data-composition-mode]").forEach((button) => {
+document.querySelectorAll("[data-workflow-type]").forEach((button) => {
   button.addEventListener("click", () => {
-    if (button.dataset.compositionMode === "album") {
+    const workflowType = button.dataset.workflowType;
+    elements.entryMessage.textContent = "";
+    if (workflowType === "04-album") {
       showDevelopment();
       return;
     }
-    showComposer(button.dataset.corpusMode, button.dataset.compositionMode);
+    if (!state.supportedWorkflows.has(workflowType)) {
+      elements.entryMessage.textContent = t("serverRestartRequired");
+      return;
+    }
+    showComposer(button.dataset.corpusMode, button.dataset.compositionMode, workflowType);
     elements.input.focus();
   });
 });
@@ -1016,6 +1095,7 @@ document.querySelectorAll("[data-clear-provider]").forEach((button) => {
 });
 
 try {
+  await loadCapabilities();
   await loadSettings();
 } catch {
   applyTranslations();

@@ -13,6 +13,10 @@ You are Arioso's orchestral work planner.
 
 Turn the user's idea into a coherent multi-movement orchestral work plan.
 - Preserve the user's explicit intent and requested movement count. When no count is given, choose three or four movements.
+- Treat duration as a whole-work constraint. The complete work, including every movement, must total between 5 and 11 minutes.
+- Preserve an explicit requested total in requestedTotalDurationMinutes. If it is below 5 or above 11 minutes, choose the nearest supported total and explain the adjustment briefly in durationAdjustmentReason.
+- Allocate 1–3 minutes to every movement. Movement target durations must add up to plannedTotalDurationMinutes within 0.25 minutes.
+- Never assign the whole-work duration to an individual movement.
 - Establish one shared musical contract: tonal world, original identity motif, orchestra, acoustic space, dynamic language, and exclusions.
 - Give every movement a distinct dramatic purpose while keeping the work recognizably unified.
 - Define audible entrance and exit contracts that make independently generated movements feel intentionally related.
@@ -26,6 +30,7 @@ You are Arioso's orchestral movement composer.
 
 Develop one complete movement from an approved orchestral work plan.
 - Treat the shared contract and the selected movement outline as authoritative.
+- Copy the selected outline's 1–3 minute target into targetDurationMinutes and design only that amount of music.
 - Design a complete movement-scale trajectory through motif, harmony, orchestration, texture, rhythm, register, dynamics, and transitions.
 - Honor the entrance and exit contracts. A non-final movement may remain open; a final movement must close the complete work.
 - The Lyria prompt must stand alone because audio generations do not share hidden state. Repeat the essential shared identity and continuity cues inside it.
@@ -105,7 +110,7 @@ export async function composeOrchestralMovement(
   const input = [
     "Complete orchestral work plan:",
     JSON.stringify(workPlan, null, 2),
-    `\nDevelop movement ${movementOrder}: ${outline.title}`,
+    `\nDevelop only movement ${movementOrder}: ${outline.title}. Its complete target duration is ${outline.targetDurationMinutes} minutes, not the duration of the whole work.`,
   ].join("\n");
   const result = await runAgent<OrchestralMovementPlan>(agent, input, options.apiKey);
   return OrchestralMovementPlanSchema.parse(result);

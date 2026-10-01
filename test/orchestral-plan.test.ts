@@ -33,6 +33,9 @@ describe("orchestral plan schemas", () => {
       schemaVersion: "1.0",
       title: "River to the Sea",
       intent: "A journey from a mountain spring to the open sea",
+      requestedTotalDurationMinutes: null,
+      plannedTotalDurationMinutes: 5,
+      durationAdjustmentReason: null,
       sharedContract,
       movements: [movement, { ...movement, order: 2, title: "Open Water" }],
     };
@@ -44,6 +47,9 @@ describe("orchestral plan schemas", () => {
       schemaVersion: "1.0",
       title: "Incomplete Work",
       intent: "Only one movement",
+      requestedTotalDurationMinutes: null,
+      plannedTotalDurationMinutes: 5,
+      durationAdjustmentReason: null,
       sharedContract,
       movements: [movement],
     })).toThrow();
@@ -54,6 +60,7 @@ describe("orchestral plan schemas", () => {
       schemaVersion: "1.0",
       movementOrder: 1,
       title: "Distant Procession",
+      targetDurationMinutes: 2.5,
       dramaticRole: movement.dramaticRole,
       tempoAndMeter: movement.tempoAndMeter,
       tonalPlan: movement.tonalPlan,
@@ -71,5 +78,38 @@ describe("orchestral plan schemas", () => {
     expect(OrchestralMovementPlanSchema.parse(plan)).toEqual(plan);
     expect(plan).not.toHaveProperty("chainOfThought");
   });
-});
 
+  it("adjusts an ambitious request to an eleven-minute four-movement plan", () => {
+    const movements = Array.from({ length: 4 }, (_, index) => ({
+      ...movement,
+      order: index + 1,
+      title: `Movement ${index + 1}`,
+      targetDurationMinutes: 2.75,
+    }));
+    const plan = {
+      schemaVersion: "1.0",
+      title: "Compact Symphony",
+      intent: "A complete four-movement arc within the supported duration",
+      requestedTotalDurationMinutes: 45,
+      plannedTotalDurationMinutes: 11,
+      durationAdjustmentReason: "The orchestral workflow supports 5–11 minutes in total.",
+      sharedContract,
+      movements,
+    };
+
+    expect(OrchestralWorkPlanSchema.parse(plan)).toEqual(plan);
+  });
+
+  it("rejects a plan whose movement allocation does not match the work total", () => {
+    expect(() => OrchestralWorkPlanSchema.parse({
+      schemaVersion: "1.0",
+      title: "Miscalculated Symphony",
+      intent: "An invalid duration allocation",
+      requestedTotalDurationMinutes: 11,
+      plannedTotalDurationMinutes: 11,
+      durationAdjustmentReason: null,
+      sharedContract,
+      movements: [movement, { ...movement, order: 2 }],
+    })).toThrow("Movement durations must add up");
+  });
+});

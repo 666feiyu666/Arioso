@@ -47,7 +47,7 @@
             <p data-i18n="entryCopy">从模型自身知识开始，或让 Jazz 语料为编曲提供参考。</p>
           </div>
           <div class="workflow-grid" aria-label="生成方式" data-i18n-aria-label="workflowChoices">
-            <button class="workflow-card" type="button" data-composition-mode="single" data-corpus-mode="none">
+            <button class="workflow-card" type="button" data-workflow-type="01-general" data-composition-mode="single" data-corpus-mode="none">
               <span class="workflow-index">01</span>
               <span class="workflow-copy">
                 <span class="workflow-tag" data-i18n="allStyles">不限风格</span>
@@ -56,7 +56,7 @@
               </span>
               <span class="workflow-action" data-i18n="enterStudio">进入创作台 →</span>
             </button>
-            <button class="workflow-card corpus" type="button" data-composition-mode="single" data-corpus-mode="jazz">
+            <button class="workflow-card corpus" type="button" data-workflow-type="02-jazz" data-composition-mode="single" data-corpus-mode="jazz">
               <span class="workflow-index">02</span>
               <span class="workflow-copy">
                 <span class="workflow-tag" data-i18n="jazzOnly">仅限 Jazz</span>
@@ -65,7 +65,7 @@
               </span>
               <span class="workflow-action" data-i18n="enterJazzStudio">进入 Jazz 创作台 →</span>
             </button>
-            <button class="workflow-card orchestral" type="button" data-composition-mode="orchestral" data-corpus-mode="none">
+            <button class="workflow-card orchestral" type="button" data-workflow-type="03-orchestral" data-composition-mode="orchestral" data-corpus-mode="none">
               <span class="workflow-index">03</span>
               <span class="workflow-copy">
                 <span class="workflow-tag" data-i18n="multiMovement">多乐章</span>
@@ -74,7 +74,7 @@
               </span>
               <span class="workflow-action" data-i18n="enterOrchestralStudio">进入管弦乐创作台 →</span>
             </button>
-            <button class="workflow-card album" type="button" data-composition-mode="album" data-corpus-mode="none">
+            <button class="workflow-card album" type="button" data-workflow-type="04-album" data-composition-mode="album" data-corpus-mode="none">
               <span class="workflow-index">04</span>
               <span class="workflow-copy">
                 <span class="workflow-tag" data-i18n="sameThemeTracks">同一主题 · 多曲目</span>
@@ -84,6 +84,7 @@
               <span class="workflow-action" data-i18n="viewAlbumDevelopment">查看开发进度 →</span>
             </button>
           </div>
+          <p class="entry-message" id="entry-message" role="status"></p>
         </section>
 
         <section id="development-view" class="view development-view" hidden>

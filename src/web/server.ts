@@ -1,5 +1,14 @@
 import { createReadStream } from "node:fs";
-import { access, mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
+import {
+  access,
+  copyFile,
+  mkdir,
+  readFile,
+  readdir,
+  rename,
+  stat,
+  writeFile,
+} from "node:fs/promises";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import path from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
@@ -29,6 +38,38 @@ type TaskStatus = "queued" | "composing" | "generating" | "completed" | "failed"
 type VocalMode = "auto" | "instrumental" | "vocals";
 type CorpusMode = "none" | "jazz";
 type CompositionMode = "single" | "orchestral";
+type WorkflowType = "01-general" | "02-jazz" | "03-orchestral" | "04-album";
+
+const WORKFLOW_TYPES: readonly WorkflowType[] = [
+  "01-general",
+  "02-jazz",
+  "03-orchestral",
+  "04-album",
+];
+
+function isWorkflowType(value: unknown): value is WorkflowType {
+  return WORKFLOW_TYPES.includes(value as WorkflowType);
+}
+
+export function inferWorkflowType(task: {
+  workflowType?: unknown;
+  compositionMode?: unknown;
+  corpusMode?: unknown;
+  retrievalQuery?: unknown;
+  description?: unknown;
+}): WorkflowType {
+  if (isWorkflowType(task.workflowType)) return task.workflowType;
+  if (task.compositionMode === "orchestral") return "03-orchestral";
+  if (
+    typeof task.description === "string"
+    && /(?:[二三四五六2-6]\s*(?:个)?乐章|(?:two|three|four|five|six|multi)[-\s]movement)/iu
+      .test(task.description)
+  ) {
+    return "03-orchestral";
+  }
+  if (task.corpusMode === "jazz" || task.retrievalQuery) return "02-jazz";
+  return "01-general";
+}
 
 interface OrchestralMovementTask {
   id: string;
@@ -50,6 +91,7 @@ interface MusicTask {
   vocalMode: VocalMode;
   corpusMode: CorpusMode;
   compositionMode: CompositionMode;
+  workflowType: WorkflowType;
   status: TaskStatus;
   composerModel: string;
   lyriaModel: string;
@@ -72,6 +114,7 @@ interface CreateTaskInput {
   vocalMode: VocalMode;
   corpusMode: CorpusMode;
   compositionMode: CompositionMode;
+  workflowType: WorkflowType;
   lyriaModel?: string;
 }
 
@@ -87,33 +130,154 @@ const MIME_TYPES: Record<string, string> = {
   ".svg": "image/svg+xml",
 };
 
+function safeAudioName(value: string | undefined, fallback: string): string {
+  const normalized = (value ?? "")
+    .replace(/[<>:"/\\|?*\u0000-\u001f]/g, " ")
+    .replace(/\s+/g, " ")
+    .replace(/[. ]+$/g, "")
+    .trim()
+    .slice(0, 96);
+  return `${normalized || fallback}.mp3`;
+}
+
+async function taskRecordPaths(directory: string): Promise<string[]> {
+  const paths: string[] = [];
+  const entries = await readdir(directory, { withFileTypes: true });
+  for (const entry of entries) {
+    const entryPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      paths.push(...await taskRecordPaths(entryPath));
+    } else if (entry.isFile() && entry.name.endsWith(".json")) {
+      paths.push(entryPath);
+    }
+  }
+  return paths;
+}
+
+async function copyVerified(source: string, destination: string): Promise<boolean> {
+  try {
+    const sourceStat = await stat(source);
+    await mkdir(path.dirname(destination), { recursive: true });
+    await copyFile(source, destination);
+    const destinationStat = await stat(destination);
+    if (sourceStat.size !== destinationStat.size) {
+      throw new Error(`Incomplete task asset copy: ${source}`);
+    }
+    return true;
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === "ENOENT") return false;
+    throw error;
+  }
+}
+
+export interface TaskStorageMigrationResult {
+  migratedTasks: number;
+  migratedAudioFiles: number;
+}
+
+export async function organizeTaskStorage(
+  directory: string,
+): Promise<TaskStorageMigrationResult> {
+  await mkdir(directory, { recursive: true });
+  await Promise.all(WORKFLOW_TYPES.map((workflowType) =>
+    mkdir(path.join(directory, workflowType), { recursive: true })
+  ));
+
+  let migratedTasks = 0;
+  let migratedAudioFiles = 0;
+  const entries = await readdir(directory, { withFileTypes: true });
+  const legacyRecords = entries.filter(
+    (entry) => entry.isFile() && entry.name.endsWith(".json"),
+  );
+  const backupRoot = path.join(path.dirname(directory), `${path.basename(directory)}-legacy-backup`);
+
+  for (const entry of legacyRecords) {
+    const legacyRecordPath = path.join(directory, entry.name);
+    let task: MusicTask;
+    try {
+      task = JSON.parse(await readFile(legacyRecordPath, "utf8")) as MusicTask;
+    } catch {
+      continue;
+    }
+    if (!task.id || path.basename(task.id) !== task.id) continue;
+
+    task.workflowType = inferWorkflowType(task);
+    task.compositionMode = task.workflowType === "03-orchestral" ? "orchestral" : "single";
+    task.corpusMode = task.workflowType === "02-jazz" ? "jazz" : "none";
+    const taskDirectory = path.join(directory, task.workflowType, task.id);
+    const recordPath = path.join(taskDirectory, "task.json");
+    await mkdir(taskDirectory, { recursive: true });
+
+    const copiedSources: string[] = [];
+    if (task.audioFile && path.basename(task.audioFile) === task.audioFile) {
+      const source = path.join(directory, task.audioFile);
+      const audioFile = safeAudioName(task.title, task.id);
+      if (await copyVerified(source, path.join(taskDirectory, audioFile))) {
+        task.audioFile = audioFile;
+        copiedSources.push(source);
+        migratedAudioFiles += 1;
+      }
+    }
+
+    if (task.movements) {
+      for (const movement of task.movements) {
+        if (!movement.audioFile || path.basename(movement.audioFile) !== movement.audioFile) {
+          continue;
+        }
+        const source = path.join(directory, movement.audioFile);
+        const audioFile = safeAudioName(
+          `${String(movement.order).padStart(2, "0")} - ${movement.title}`,
+          `movement-${movement.order}`,
+        );
+        if (await copyVerified(source, path.join(taskDirectory, "movements", audioFile))) {
+          movement.audioFile = audioFile;
+          copiedSources.push(source);
+          migratedAudioFiles += 1;
+        }
+      }
+    }
+
+    await writeFile(recordPath, `${JSON.stringify(task, null, 2)}\n`, "utf8");
+    JSON.parse(await readFile(recordPath, "utf8"));
+
+    const taskBackupDirectory = path.join(backupRoot, task.id);
+    await mkdir(taskBackupDirectory, { recursive: true });
+    for (const source of copiedSources) {
+      await rename(source, path.join(taskBackupDirectory, path.basename(source)));
+    }
+    await rename(legacyRecordPath, path.join(taskBackupDirectory, entry.name));
+    migratedTasks += 1;
+  }
+
+  return { migratedTasks, migratedAudioFiles };
+}
+
 class TaskStore {
   readonly #directory: string;
   readonly #tasks = new Map<string, MusicTask>();
+  readonly #taskDirectories = new Map<string, string>();
 
   constructor(directory: string) {
     this.#directory = directory;
   }
 
   async initialize(): Promise<void> {
-    await mkdir(this.#directory, { recursive: true });
-    const entries = await readdir(this.#directory, { withFileTypes: true });
+    await organizeTaskStorage(this.#directory);
+    const recordPaths = await taskRecordPaths(this.#directory);
 
     await Promise.all(
-      entries
-        .filter((entry) => entry.isFile() && entry.name.endsWith(".json"))
-        .map(async (entry) => {
+      recordPaths.map(async (recordPath) => {
           try {
             const task = JSON.parse(
-              await readFile(path.join(this.#directory, entry.name), "utf8"),
+              await readFile(recordPath, "utf8"),
             ) as MusicTask;
             if (task.id) {
-              task.compositionMode = task.compositionMode === "orchestral"
+              task.workflowType = inferWorkflowType(task);
+              task.compositionMode = task.workflowType === "03-orchestral"
                 ? "orchestral"
                 : "single";
-              task.corpusMode = task.corpusMode === "jazz" || task.retrievalQuery
-                ? "jazz"
-                : "none";
+              task.corpusMode = task.workflowType === "02-jazz" ? "jazz" : "none";
               let interrupted = false;
               if (["queued", "composing", "generating"].includes(task.status)) {
                 task.status = "failed";
@@ -136,6 +300,7 @@ class TaskStore {
                 });
               }
               this.#tasks.set(task.id, task);
+              this.#taskDirectories.set(task.id, path.dirname(recordPath));
               if (interrupted) {
                 await this.save(task);
               }
@@ -166,6 +331,7 @@ class TaskStore {
       vocalMode: input.vocalMode,
       corpusMode: input.corpusMode,
       compositionMode: input.compositionMode,
+      workflowType: input.workflowType,
       status: "queued",
       composerModel: config.openAiModel,
       lyriaModel: input.lyriaModel ?? config.lyriaModel,
@@ -173,6 +339,7 @@ class TaskStore {
       updatedAt: now,
     };
     this.#tasks.set(task.id, task);
+    this.#taskDirectories.set(task.id, this.taskDirectory(task));
     await this.save(task);
     return task;
   }
@@ -209,22 +376,55 @@ class TaskStore {
     if (!task.audioFile || path.basename(task.audioFile) !== task.audioFile) {
       return undefined;
     }
-    return path.join(this.#directory, task.audioFile);
+    return path.join(this.taskDirectory(task), task.audioFile);
   }
 
-  movementAudioPath(movement: OrchestralMovementTask): string | undefined {
+  movementAudioPath(
+    task: MusicTask,
+    movement: OrchestralMovementTask,
+  ): string | undefined {
     if (!movement.audioFile || path.basename(movement.audioFile) !== movement.audioFile) {
       return undefined;
     }
-    return path.join(this.#directory, movement.audioFile);
+    return path.join(this.taskDirectory(task), "movements", movement.audioFile);
+  }
+
+  async writeAudio(task: MusicTask, audio: Uint8Array): Promise<string> {
+    const audioFile = safeAudioName(task.title, task.id);
+    const taskDirectory = this.taskDirectory(task);
+    await mkdir(taskDirectory, { recursive: true });
+    await writeFile(path.join(taskDirectory, audioFile), audio);
+    return audioFile;
+  }
+
+  async writeMovementAudio(
+    task: MusicTask,
+    movement: Pick<OrchestralMovementTask, "order" | "title">,
+    audio: Uint8Array,
+  ): Promise<string> {
+    const audioFile = safeAudioName(
+      `${String(movement.order).padStart(2, "0")} - ${movement.title}`,
+      `movement-${movement.order}`,
+    );
+    const movementDirectory = path.join(this.taskDirectory(task), "movements");
+    await mkdir(movementDirectory, { recursive: true });
+    await writeFile(path.join(movementDirectory, audioFile), audio);
+    return audioFile;
   }
 
   async save(task: MusicTask): Promise<void> {
+    const taskDirectory = this.taskDirectory(task);
+    await mkdir(taskDirectory, { recursive: true });
     await writeFile(
-      path.join(this.#directory, `${task.id}.json`),
+      path.join(taskDirectory, "task.json"),
       `${JSON.stringify(task, null, 2)}\n`,
       "utf8",
     );
+  }
+
+  private taskDirectory(task: MusicTask): string {
+    return this.#taskDirectories.get(task.id)
+      ?? path.join(this.#directory, task.workflowType, task.id);
   }
 }
 
@@ -354,18 +554,25 @@ export function parseTaskInput(value: unknown): CreateTaskInput {
     candidate.vocalMode === "instrumental" || candidate.vocalMode === "vocals"
       ? candidate.vocalMode
       : "auto";
+  if (candidate.workflowType !== undefined && !isWorkflowType(candidate.workflowType)) {
+    throw new Error("Unsupported workflow type.");
+  }
   if (candidate.corpusMode !== undefined
     && candidate.corpusMode !== "none"
     && candidate.corpusMode !== "jazz") {
     throw new Error("Unsupported corpus mode.");
   }
-  const corpusMode: CorpusMode = candidate.corpusMode === "jazz" ? "jazz" : "none";
   if (candidate.compositionMode !== undefined
     && candidate.compositionMode !== "single"
     && candidate.compositionMode !== "orchestral") {
     throw new Error("Unsupported composition mode.");
   }
-  const compositionMode: CompositionMode = candidate.compositionMode === "orchestral"
+  const workflowType = inferWorkflowType(candidate);
+  if (workflowType === "04-album") {
+    throw new Error("Album composition is still in development.");
+  }
+  const corpusMode: CorpusMode = workflowType === "02-jazz" ? "jazz" : "none";
+  const compositionMode: CompositionMode = workflowType === "03-orchestral"
     ? "orchestral"
     : "single";
   const lyriaModel =
@@ -381,8 +588,8 @@ export function parseTaskInput(value: unknown): CreateTaskInput {
   }
 
   return lyriaModel
-    ? { description, mode, vocalMode, corpusMode, compositionMode, lyriaModel }
-    : { description, mode, vocalMode, corpusMode, compositionMode };
+    ? { description, mode, vocalMode, corpusMode, compositionMode, workflowType, lyriaModel }
+    : { description, mode, vocalMode, corpusMode, compositionMode, workflowType };
 }
 
 function isRetryableRequestError(error: unknown): boolean {
@@ -459,8 +666,8 @@ async function runTask(
     const generated = await withRequestRetry(() => client.generate(spec.lyriaPrompt, {
       model: task.lyriaModel,
     }));
-    const audioFile = `${task.id}.mp3`;
-    await writeFile(path.join(path.resolve(config.outputDirectory, "tasks"), audioFile), generated.audio);
+    const latestTask = store.get(task.id) ?? task;
+    const audioFile = await store.writeAudio(latestTask, generated.audio);
     await store.update(task.id, {
       status: "completed",
       audioFile,
@@ -538,9 +745,12 @@ async function runOrchestralTask(
       const generated = await withRequestRetry(() => client.generate(movementPlan.lyriaPrompt, {
         model: currentTask.lyriaModel,
       }));
-      const audioFile = `${currentTask.id}-movement-${movement.order}.mp3`;
-      await writeFile(
-        path.join(path.resolve(config.outputDirectory, "tasks"), audioFile),
+      const currentMovement = currentTask.movements?.find(
+        (candidate) => candidate.id === movement.id,
+      ) ?? movement;
+      const audioFile = await store.writeMovementAudio(
+        currentTask,
+        currentMovement,
         generated.audio,
       );
       currentTask = await store.updateMovement(currentTask.id, movement.id, {
@@ -643,6 +853,19 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
     );
 
     try {
+      if (request.method === "GET" && url.pathname === "/api/capabilities") {
+        sendJson(response, 200, {
+          apiVersion: 2,
+          workflows: ["01-general", "02-jazz", "03-orchestral"],
+          orchestralDuration: {
+            minimumTotalMinutes: 5,
+            maximumTotalMinutes: 11,
+            maximumMovementMinutes: 3,
+          },
+        });
+        return;
+      }
+
       if (request.method === "GET" && url.pathname === "/api/settings") {
         sendJson(response, 200, await settings.snapshot());
         return;
@@ -774,7 +997,9 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
         const movement = task?.movements?.find(
           (candidate) => candidate.id === movementAudioMatch[2],
         );
-        const audioPath = movement ? store.movementAudioPath(movement) : undefined;
+        const audioPath = task && movement
+          ? store.movementAudioPath(task, movement)
+          : undefined;
         if (!task || !movement || !audioPath) {
           sendJson(response, 404, { error: "Movement audio is not available." });
           return;

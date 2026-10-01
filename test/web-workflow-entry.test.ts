@@ -8,6 +8,8 @@ describe("workflow entry page", () => {
 
     expect(html).toContain('data-composition-mode="orchestral"');
     expect(html).toContain('data-composition-mode="album"');
+    expect(html).toContain('data-workflow-type="01-general"');
+    expect(html).toContain('data-workflow-type="04-album"');
     expect(html).toContain('id="development-view"');
   });
 });
