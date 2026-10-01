@@ -263,6 +263,7 @@ const state = {
   corpusMode: "none",
   compositionMode: "single",
   workflowType: "01-general",
+  expandedTaskGroup: "01-general",
   supportedWorkflows: new Set(["01-general", "02-jazz"]),
   submitting: false,
   language: "zh-CN",
@@ -572,12 +573,33 @@ function renderTaskList() {
     }).join("");
     const emptyLabel = workflowType === "04-album" ? t("albumComingSoon") : t("noTasksInWorkflow");
     return `
-      <section class="task-group" data-task-group="${workflowType}">
-        <header><strong>${escapeHtml(workflowLabel(workflowType))}</strong><span>${tasks.length}</span></header>
-        ${taskItems || `<p class="task-group-empty">${escapeHtml(emptyLabel)}</p>`}
-      </section>
+      <details class="task-group" data-task-group="${workflowType}" ${state.expandedTaskGroup === workflowType ? "open" : ""}>
+        <summary>
+          <strong>${escapeHtml(workflowLabel(workflowType))}</strong>
+          <span class="task-group-summary-meta">
+            <span class="task-group-count">${tasks.length}</span>
+            <span class="task-group-chevron" aria-hidden="true"></span>
+          </span>
+        </summary>
+        <div class="task-group-content">
+          ${taskItems || `<p class="task-group-empty">${escapeHtml(emptyLabel)}</p>`}
+        </div>
+      </details>
     `;
   }).join("");
+  elements.taskList.querySelectorAll("[data-task-group]").forEach((group) => {
+    group.addEventListener("toggle", () => {
+      const workflowType = group.dataset.taskGroup;
+      if (group.open) {
+        state.expandedTaskGroup = workflowType;
+        elements.taskList.querySelectorAll("[data-task-group]").forEach((otherGroup) => {
+          if (otherGroup !== group) otherGroup.open = false;
+        });
+      } else if (state.expandedTaskGroup === workflowType) {
+        state.expandedTaskGroup = null;
+      }
+    });
+  });
   elements.taskList.querySelectorAll("[data-task-id]").forEach((button) => {
     button.addEventListener("click", () => selectTask(button.dataset.taskId));
   });
@@ -784,6 +806,7 @@ function showComposer(
   state.corpusMode = normalizeCorpusMode(corpusMode);
   state.compositionMode = compositionMode === "orchestral" ? "orchestral" : "single";
   state.workflowType = workflowType;
+  state.expandedTaskGroup = workflowType;
   elements.entryView.hidden = true;
   elements.developmentView.hidden = true;
   elements.homeView.hidden = false;
@@ -815,6 +838,7 @@ function selectTask(id) {
   const task = state.tasks.find((item) => item.id === id);
   if (!task) return;
   state.workflowType = workflowTypeForTask(task);
+  state.expandedTaskGroup = state.workflowType;
   state.corpusMode = normalizeCorpusMode(task.corpusMode);
   state.compositionMode = task.compositionMode === "orchestral" ? "orchestral" : "single";
   elements.entryView.hidden = true;
