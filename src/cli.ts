@@ -9,18 +9,18 @@ import { fileURLToPath } from "node:url";
 import { composeMusic } from "./composer/composer-agent.js";
 import { loadConfig } from "./config/env.js";
 import { LyriaClient } from "./lyria/lyria-client.js";
-import { stitchWavFiles } from "./audio/stitch.js";
+import { stitchAudioFiles } from "./audio/stitch.js";
 
 const USAGE = `
 Usage:
   pnpm dev compose "<music description>"
   pnpm dev generate "<music description>"
-  pnpm dev stitch "<output.wav>" "<part-1.wav>" "<part-2.wav>" [...more.wav]
+  pnpm dev stitch "<output.wav|mp3>" "<part-1>" "<part-2>" [...more]
 
 Commands:
   compose   Produce and print a validated MusicSpec without calling Lyria.
   generate  Compose a MusicSpec, call Lyria, and save audio plus metadata.
-  stitch    Concatenate two or more complete WAV files in order without trimming or overlap.
+  stitch    Concatenate compatible WAV or MP3 files in order without trimming or overlap.
 `.trim();
 
 function slugify(value: string): string {
@@ -50,14 +50,14 @@ async function main(): Promise<void> {
   if (command === "stitch") {
     const [outputFile, ...inputFiles] = descriptionParts;
     if (!outputFile || inputFiles.length < 2) {
-      throw new Error(`An output WAV and at least two input WAV files are required.\n\n${USAGE}`);
+      throw new Error(`An output file and at least two matching WAV or MP3 inputs are required.\n\n${USAGE}`);
     }
-    const result = await stitchWavFiles(outputFile, inputFiles);
+    const result = await stitchAudioFiles(outputFile, inputFiles);
     console.log(`Audio: ${result.outputPath}`);
     console.log(
       `Duration: ${result.durationSeconds.toFixed(3)} seconds (${result.segmentDurationsSeconds.map((seconds) => seconds.toFixed(3)).join(" + ")})`,
     );
-    console.log(`Format: ${result.sampleRate} Hz, ${result.channels} channels, 16-bit PCM WAV`);
+    console.log(`Format: ${result.sampleRate} Hz, ${result.channels} channels, ${path.extname(result.outputPath).slice(1).toUpperCase()}`);
     return;
   }
 

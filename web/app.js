@@ -50,7 +50,7 @@ const translations = {
     movementProgress: "{completed}/{total} 乐章", totalDuration: "作品总时长", movementDuration: "乐章时长",
     durationAdjusted: "时长调整", minutes: "分钟",
     serverRestartRequired: "当前本地服务仍是旧版本，无法安全创建多乐章任务。请重启 Arioso 服务后再试。",
-    queued: "等待开始", composing: "正在整理编曲", generating: "Lyria 正在生成", completed: "已完成",
+    queued: "等待开始", composing: "正在整理编曲", generating: "Lyria 正在生成", assembling: "正在组合完整作品", completed: "已完成",
     failed: "生成失败", pause: "暂停", play: "播放", pausePlayback: "暂停播放", resumePlayback: "继续播放",
     playInPlayer: "在播放器中播放", thisMusic: "这首音乐", finishedTrack: "完整成品",
     audioPlaybackFailed: "音频播放失败。", audioLoadFailed: "音频加载失败，请重启本地服务后重试。",
@@ -59,7 +59,7 @@ const translations = {
     noCorpusSource: "模型知识 · 无语料", jazzCorpusSource: "Jazz 本地语料",
     orchestralSource: "管弦乐多乐章", workContract: "作品音乐契约", movements: "乐章",
     identityMotif: "主题动机", tonalWorld: "调性世界", orchestra: "统一编制", acousticSpace: "声学空间",
-    movementPlanning: "正在构思完整乐章", movementGenerating: "正在生成乐章音频",
+    movementPlanning: "正在构思完整乐章", movementGenerating: "正在生成乐章音频", movementAssembling: "正在按顺序组合全部乐章",
     movementRole: "戏剧功能", motifDevelopment: "主题发展", orchestrationArc: "配器轨迹",
     entranceContract: "进入衔接", exitContract: "退出衔接", movementPrompt: "乐章 Lyria 提示",
     retrievalContext: "检索记录", retrievalQuery: "英文检索描述", retrievedReferences: "参考曲目",
@@ -120,7 +120,7 @@ const translations = {
     movementProgress: "{completed}/{total} movements", totalDuration: "Total work duration", movementDuration: "Movement duration",
     durationAdjusted: "Duration adjustment", minutes: "minutes",
     serverRestartRequired: "The local service is still running an older version and cannot safely create multi-movement tasks. Restart Arioso and try again.",
-    queued: "Waiting to start", composing: "Composing", generating: "Lyria is generating", completed: "Completed",
+    queued: "Waiting to start", composing: "Composing", generating: "Lyria is generating", assembling: "Assembling complete work", completed: "Completed",
     failed: "Generation failed", pause: "Pause ", play: "Play ", pausePlayback: "Pause", resumePlayback: "Resume",
     playInPlayer: "Play in player", thisMusic: "this music", finishedTrack: "Finished track",
     audioPlaybackFailed: "Audio playback failed.", audioLoadFailed: "Audio failed to load. Restart the local server and try again.",
@@ -129,7 +129,7 @@ const translations = {
     noCorpusSource: "Model knowledge · No corpus", jazzCorpusSource: "Local Jazz corpus",
     orchestralSource: "Multi-movement orchestral work", workContract: "Shared musical contract", movements: "Movements",
     identityMotif: "Identity motif", tonalWorld: "Tonal world", orchestra: "Orchestra", acousticSpace: "Acoustic space",
-    movementPlanning: "Composing the complete movement", movementGenerating: "Generating movement audio",
+    movementPlanning: "Composing the complete movement", movementGenerating: "Generating movement audio", movementAssembling: "Assembling all movements in order",
     movementRole: "Dramatic role", motifDevelopment: "Motif development", orchestrationArc: "Orchestration arc",
     entranceContract: "Entrance contract", exitContract: "Exit contract", movementPrompt: "Movement Lyria prompt",
     retrievalContext: "Retrieval record", retrievalQuery: "English retrieval description", retrievedReferences: "Reference tracks",
@@ -413,7 +413,7 @@ function escapeHtml(value = "") {
 }
 
 function statusClass(status) {
-  if (["queued", "composing", "generating"].includes(status)) return "running";
+  if (["queued", "composing", "generating", "assembling"].includes(status)) return "running";
   return status;
 }
 
@@ -588,7 +588,7 @@ function renderTaskList() {
 }
 
 function renderOrchestralTaskDetail(task) {
-  const running = ["queued", "composing", "generating"].includes(task.status);
+  const running = ["queued", "composing", "generating", "assembling"].includes(task.status);
   const plan = task.orchestralPlan;
   const movements = task.movements || [];
   const activeMovement = movements.find((movement) =>
@@ -649,7 +649,7 @@ function renderOrchestralTaskDetail(task) {
       <p class="eyebrow accent">${t("inProgress")}</p>
       <h3>${activeMovement ? `${activeMovement.order}. ${escapeHtml(activeMovement.title)}` : escapeHtml(statusLabel(task.status))}</h3>
       <div class="progress-line"></div>
-      <p>${task.status === "generating" ? t("movementGenerating") : t("movementPlanning")}</p>
+      <p>${task.status === "assembling" ? t("movementAssembling") : task.status === "generating" ? t("movementGenerating") : t("movementPlanning")}</p>
     </div>
   ` : "";
   const error = task.status === "failed" ? `
@@ -668,13 +668,16 @@ function renderOrchestralTaskDetail(task) {
       </div>
       <span class="status-pill ${statusClass(task.status)}">${escapeHtml(statusLabel(task.status))}</span>
     </header>
-    ${progress}${error}${contractPanel}
+    ${progress}${error}${task.audioFile ? `<button class="listen-button" type="button" data-play-task="${task.id}">${t("playInPlayer")}</button>` : ""}${contractPanel}
     ${movements.length ? `<section class="movement-list"><h2>${t("movements")}</h2>${movementCards}</section>` : ""}
   `;
   elements.taskDetail.querySelectorAll("[data-play-movement]").forEach((button) => {
     button.addEventListener("click", () => {
       playMovement(button.dataset.parentTask, button.dataset.playMovement);
     });
+  });
+  elements.taskDetail.querySelectorAll("[data-play-task]").forEach((button) => {
+    button.addEventListener("click", () => playTask(button.dataset.playTask));
   });
   elements.taskDetail.querySelectorAll("[data-retry-task]").forEach((button) => {
     button.addEventListener("click", () => retryTask(button.dataset.retryTask, button));

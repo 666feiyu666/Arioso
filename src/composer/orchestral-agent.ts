@@ -1,12 +1,18 @@
 import { Agent, OpenAIProvider, Runner, run } from "@openai/agents";
 
 import {
+  OrchestralMovementDraftSchema,
   OrchestralMovementPlanSchema,
   OrchestralWorkPlanSchema,
+  type OrchestralMovementDraft,
   type OrchestralMovementPlan,
   type OrchestralWorkPlan,
 } from "../schema/orchestral-plan.js";
 import { loadComposerSkill } from "./composer-skill.js";
+import {
+  buildOrchestralLyriaPrompt,
+  ORCHESTRAL_PROMPT_FORMAT,
+} from "./orchestral-prompt.js";
 
 const WORK_PLANNER_INSTRUCTIONS = `
 You are Arioso's orchestral work planner.
@@ -33,7 +39,7 @@ Develop one complete movement from an approved orchestral work plan.
 - Copy the selected outline's 1–3 minute target into targetDurationMinutes and design only that amount of music.
 - Design a complete movement-scale trajectory through motif, harmony, orchestration, texture, rhythm, register, dynamics, and transitions.
 - Honor the entrance and exit contracts. A non-final movement may remain open; a final movement must close the complete work.
-- The Lyria prompt must stand alone because audio generations do not share hidden state. Repeat the essential shared identity and continuity cues inside it.
+- Return only the movement's structured musical fields. Arioso renders the final Lyria prompt from a fixed template so every movement preserves the same shared-contract wording and section order.
 - Keep the music purely instrumental unless the shared contract explicitly permits wordless choir as orchestral color.
 - Do not quote or closely imitate an identifiable composition, arrangement, or recording.
 - Return only the structured movement plan. Do not expose analysis, hidden reasoning, or implementation commentary.
@@ -104,7 +110,7 @@ export async function composeOrchestralMovement(
       skill,
     ].join("\n\n"),
     model: options.model ?? process.env.OPENAI_MODEL ?? "gpt-6-sol",
-    outputType: OrchestralMovementPlanSchema,
+    outputType: OrchestralMovementDraftSchema,
   });
 
   const input = [
@@ -112,6 +118,12 @@ export async function composeOrchestralMovement(
     JSON.stringify(workPlan, null, 2),
     `\nDevelop only movement ${movementOrder}: ${outline.title}. Its complete target duration is ${outline.targetDurationMinutes} minutes, not the duration of the whole work.`,
   ].join("\n");
-  const result = await runAgent<OrchestralMovementPlan>(agent, input, options.apiKey);
-  return OrchestralMovementPlanSchema.parse(result);
+  const draft = OrchestralMovementDraftSchema.parse(
+    await runAgent<OrchestralMovementDraft>(agent, input, options.apiKey),
+  );
+  return OrchestralMovementPlanSchema.parse({
+    ...draft,
+    lyriaPromptFormat: ORCHESTRAL_PROMPT_FORMAT,
+    lyriaPrompt: buildOrchestralLyriaPrompt(workPlan, draft),
+  });
 }

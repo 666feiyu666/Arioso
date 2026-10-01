@@ -92,8 +92,15 @@ export const OrchestralMovementPlanSchema = z.object({
   entranceContract: z.string().min(1),
   exitContract: z.string().min(1),
   assumptions: z.array(z.string()),
+  lyriaPromptFormat: z.literal("orchestral-v1"),
   lyriaPrompt: z.string().min(1),
+});
+
+export const OrchestralMovementDraftSchema = OrchestralMovementPlanSchema.omit({
+  lyriaPromptFormat: true,
+  lyriaPrompt: true,
 });
 
 export type OrchestralWorkPlan = z.infer<typeof OrchestralWorkPlanSchema>;
 export type OrchestralMovementPlan = z.infer<typeof OrchestralMovementPlanSchema>;
+export type OrchestralMovementDraft = z.infer<typeof OrchestralMovementDraftSchema>;

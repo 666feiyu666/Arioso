@@ -4,6 +4,10 @@ import {
   OrchestralMovementPlanSchema,
   OrchestralWorkPlanSchema,
 } from "../src/schema/orchestral-plan.js";
+import {
+  buildOrchestralLyriaPrompt,
+  renderOrchestralSharedContract,
+} from "../src/composer/orchestral-prompt.js";
 
 const sharedContract = {
   tonalWorld: "D minor with restrained Phrygian color",
@@ -73,10 +77,63 @@ describe("orchestral plan schemas", () => {
       entranceContract: movement.entranceContract,
       exitContract: movement.exitContract,
       assumptions: [],
+      lyriaPromptFormat: "orchestral-v1",
       lyriaPrompt: "Create the first movement of an original orchestral work in D minor.",
     };
     expect(OrchestralMovementPlanSchema.parse(plan)).toEqual(plan);
     expect(plan).not.toHaveProperty("chainOfThought");
+  });
+
+  it("renders every movement with one fixed prompt structure and shared contract", () => {
+    const workPlan = OrchestralWorkPlanSchema.parse({
+      schemaVersion: "1.0",
+      title: "River to the Sea",
+      intent: "A journey from a mountain spring to the open sea",
+      requestedTotalDurationMinutes: null,
+      plannedTotalDurationMinutes: 5,
+      durationAdjustmentReason: null,
+      sharedContract,
+      movements: [movement, { ...movement, order: 2, title: "Open Water" }],
+    });
+    const draft = {
+      schemaVersion: "1.0" as const,
+      movementOrder: 1,
+      title: movement.title,
+      targetDurationMinutes: movement.targetDurationMinutes,
+      dramaticRole: movement.dramaticRole,
+      tempoAndMeter: movement.tempoAndMeter,
+      tonalPlan: movement.tonalPlan,
+      motifDevelopment: [movement.motifDevelopment],
+      orchestrationArc: movement.orchestrationArc,
+      phases: [
+        { label: "Emergence", approximateDurationSeconds: 90, direction: "Reveal the motif." },
+        { label: "Withdrawal", approximateDurationSeconds: 60, direction: "Return to the pedal." },
+      ],
+      entranceContract: movement.entranceContract,
+      exitContract: movement.exitContract,
+      assumptions: [],
+    };
+    const first = buildOrchestralLyriaPrompt(workPlan, draft);
+    const second = buildOrchestralLyriaPrompt(workPlan, {
+      ...draft,
+      movementOrder: 2,
+      title: "Open Water",
+    });
+    const headings = [
+      "SHARED MUSICAL CONTRACT",
+      "MOVEMENT BRIEF",
+      "FORMAL TRAJECTORY",
+      "CONTINUITY CONTRACT",
+      "GENERATION CONSTRAINTS",
+    ];
+
+    expect(headings.map((heading) => first.indexOf(heading))).toEqual(
+      [...headings.map((heading) => first.indexOf(heading))].sort((a, b) => a - b),
+    );
+    expect(second).toContain(renderOrchestralSharedContract(workPlan));
+    expect(first).toContain(renderOrchestralSharedContract(workPlan));
+    expect(first).toContain("Instrumental only, no vocals");
+    expect(second).toContain("provide decisive closure");
   });
 
   it("adjusts an ambitious request to an eleven-minute four-movement plan", () => {

@@ -15,6 +15,7 @@ import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 
 import { composeMusic } from "../composer/composer-agent.js";
+import { stitchAudioFiles } from "../audio/stitch.js";
 import {
   composeOrchestralMovement,
   planOrchestralWork,
@@ -34,7 +35,7 @@ import type {
 } from "../schema/orchestral-plan.js";
 
 type TaskMode = "compose" | "generate";
-type TaskStatus = "queued" | "composing" | "generating" | "completed" | "failed";
+type TaskStatus = "queued" | "composing" | "generating" | "assembling" | "completed" | "failed";
 type VocalMode = "auto" | "instrumental" | "vocals";
 type CorpusMode = "none" | "jazz";
 type CompositionMode = "single" | "orchestral";
@@ -84,6 +85,15 @@ interface OrchestralMovementTask {
   error?: string | undefined;
 }
 
+interface OrchestralAssembly {
+  format: "mp3" | "wav";
+  durationSeconds: number;
+  segmentDurationsSeconds: number[];
+  sampleRate: number;
+  channels: number;
+  assembledAt: string;
+}
+
 interface MusicTask {
   id: string;
   description: string;
@@ -103,6 +113,7 @@ interface MusicTask {
   musicSpec?: MusicSpec;
   orchestralPlan?: OrchestralWorkPlan;
   movements?: OrchestralMovementTask[];
+  orchestralAssembly?: OrchestralAssembly;
   generatedText?: string | null;
   audioFile?: string;
   error?: string | undefined;
@@ -262,7 +273,7 @@ class TaskStore {
     this.#directory = directory;
   }
 
-  async initialize(): Promise<void> {
+  async initialize(options: { markInterrupted?: boolean } = {}): Promise<void> {
     await organizeTaskStorage(this.#directory);
     const recordPaths = await taskRecordPaths(this.#directory);
 
@@ -279,7 +290,10 @@ class TaskStore {
                 : "single";
               task.corpusMode = task.workflowType === "02-jazz" ? "jazz" : "none";
               let interrupted = false;
-              if (["queued", "composing", "generating"].includes(task.status)) {
+              if (
+                options.markInterrupted !== false
+                && ["queued", "composing", "generating", "assembling"].includes(task.status)
+              ) {
                 task.status = "failed";
                 task.error = "The local server stopped before this task finished.";
                 task.updatedAt = new Date().toISOString();
@@ -412,6 +426,45 @@ class TaskStore {
     return audioFile;
   }
 
+  async assembleOrchestralAudio(
+    task: MusicTask,
+  ): Promise<{ audioFile: string; assembly: OrchestralAssembly }> {
+    const movements = [...(task.movements ?? [])].sort((left, right) => left.order - right.order);
+    if (movements.length < 2) {
+      throw new Error("At least two orchestral movements are required for assembly.");
+    }
+
+    const inputFiles = movements.map((movement) => {
+      if (movement.status !== "completed" || !movement.audioFile) {
+        throw new Error(`Movement ${movement.order} is not ready for assembly.`);
+      }
+      const audioPath = this.movementAudioPath(task, movement);
+      if (!audioPath) throw new Error(`Movement ${movement.order} has no safe audio path.`);
+      return audioPath;
+    });
+    const extensions = new Set(inputFiles.map((file) => path.extname(file).toLowerCase()));
+    if (extensions.size !== 1 || !extensions.has(".mp3")) {
+      throw new Error("Orchestral assembly currently requires compatible MP3 movement files.");
+    }
+
+    const audioFile = safeAudioName(task.title, task.id);
+    const result = await stitchAudioFiles(
+      path.join(this.taskDirectory(task), audioFile),
+      inputFiles,
+    );
+    return {
+      audioFile,
+      assembly: {
+        format: "mp3",
+        durationSeconds: result.durationSeconds,
+        segmentDurationsSeconds: result.segmentDurationsSeconds,
+        sampleRate: result.sampleRate,
+        channels: result.channels,
+        assembledAt: new Date().toISOString(),
+      },
+    };
+  }
+
   async save(task: MusicTask): Promise<void> {
     const taskDirectory = this.taskDirectory(task);
     await mkdir(taskDirectory, { recursive: true });
@@ -426,6 +479,53 @@ class TaskStore {
     return this.#taskDirectories.get(task.id)
       ?? path.join(this.#directory, task.workflowType, task.id);
   }
+}
+
+export interface AssembleCompletedOrchestralTasksResult {
+  assembledTasks: number;
+  skippedTasks: number;
+  failures: Array<{ taskId: string; error: string }>;
+}
+
+export async function assembleCompletedOrchestralTasks(
+  directory: string,
+): Promise<AssembleCompletedOrchestralTasksResult> {
+  const store = new TaskStore(directory);
+  await store.initialize({ markInterrupted: false });
+  let assembledTasks = 0;
+  let skippedTasks = 0;
+  const failures: Array<{ taskId: string; error: string }> = [];
+
+  for (const task of store.list()) {
+    if (task.workflowType !== "03-orchestral") continue;
+    const eligible = task.workflowType === "03-orchestral"
+      && task.mode === "generate"
+      && task.status === "completed"
+      && !task.audioFile
+      && (task.movements?.length ?? 0) >= 2
+      && task.movements?.every((movement) => movement.status === "completed" && movement.audioFile);
+    if (!eligible) {
+      skippedTasks += 1;
+      continue;
+    }
+
+    try {
+      const assembled = await store.assembleOrchestralAudio(task);
+      await store.update(task.id, {
+        audioFile: assembled.audioFile,
+        orchestralAssembly: assembled.assembly,
+        error: undefined,
+      });
+      assembledTasks += 1;
+    } catch (error) {
+      failures.push({
+        taskId: task.id,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  return { assembledTasks, skippedTasks, failures };
 }
 
 function sendJson(response: ServerResponse, status: number, value: unknown): void {
@@ -769,7 +869,20 @@ async function runOrchestralTask(
     }
   }
 
-  await store.update(currentTask.id, { status: "completed", error: undefined });
+  if (currentTask.mode === "compose") {
+    await store.update(currentTask.id, { status: "completed", error: undefined });
+    return;
+  }
+
+  currentTask = store.get(currentTask.id) ?? currentTask;
+  await store.update(currentTask.id, { status: "assembling", error: undefined });
+  const assembled = await store.assembleOrchestralAudio(currentTask);
+  await store.update(currentTask.id, {
+    status: "completed",
+    audioFile: assembled.audioFile,
+    orchestralAssembly: assembled.assembly,
+    error: undefined,
+  });
 }
 
 function isApiProvider(value: unknown): value is ApiProvider {
@@ -855,8 +968,10 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
     try {
       if (request.method === "GET" && url.pathname === "/api/capabilities") {
         sendJson(response, 200, {
-          apiVersion: 2,
+          apiVersion: 3,
           workflows: ["01-general", "02-jazz", "03-orchestral"],
+          orchestralAssembly: true,
+          orchestralPromptFormat: "orchestral-v1",
           orchestralDuration: {
             minimumTotalMinutes: 5,
             maximumTotalMinutes: 11,

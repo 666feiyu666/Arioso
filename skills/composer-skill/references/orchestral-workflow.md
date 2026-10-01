@@ -18,7 +18,8 @@ Use phases or timestamped spans when they clarify the large-scale trajectory. Do
 
 Each Lyria generation is independent. Therefore every movement prompt must repeat the essential shared contract and describe its intended entrance and exit explicitly.
 
+Arioso owns the final prompt layout. The movement agent supplies structured musical fields; a deterministic renderer emits the same section order for every movement: shared musical contract, movement brief, formal trajectory, continuity contract, and generation constraints. Do not improvise a separate prompt format or paraphrase the shared contract independently for each movement.
+
 Use continuity cues such as a sustained pedal, incomplete motif, shared tempo, returning timbre, unresolved dominant, natural breath, or decisive cadence. Do not claim literal audio continuity or rely on unstated memory from another generation.
 
 Earlier movements may end openly when the following movement has a matching entrance contract. The final movement must provide unambiguous closure for the complete work.
-
