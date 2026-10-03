@@ -1,0 +1,30 @@
+{
+  "corpus_id": "arioso-gioia-2012-jazz-standards",
+  "schema_version": "0.3.0",
+  "generated_at": "2026-10-03T13:18:04.987Z",
+  "source_file": "gioia_2012.raw.jsonl",
+  "output_file": "gioia_2012.normalized.jsonl",
+  "record_unit": "One complete tune discussion from the 2012 first edition; recommended-recording lists are preserved separately in raw records.",
+  "record_count": 252,
+  "complete_count": 250,
+  "insufficient_evidence_count": 2,
+  "pdf_sha256": "3cc1b5cce9e1d93dd7a2a0c8893bfb8f17135cdb6a9ae063730a3b596f5a26ca",
+  "zotero_item_key": "Y5A78C4X",
+  "zotero_attachment_key": "TD86TZ3G",
+  "extraction_method": "Each of the 252 PDF tune bookmarks is checked against actual chapter-title typography. Page headers, alphabet decorations and blank pages are removed. Artificial spaces contained inside adjacent printed glyphs are removed; typographic ligatures are expanded. Line-wrap hyphenation is normalized, retaining compound hyphens when the same hyphenated word appears unbroken elsewhere in the book. Source prose is not paraphrased or translated.",
+  "normalization_method": "The same musical-evidence sentence filter and 300-word/12-sentence selection budget as the Wikipedia corpus. Sentences may span pages and retain their page ranges. Composer credits and recommended-recording lists are excluded from retrieval evidence. Complete means evidence is present, not every musical dimension is documented.",
+  "license": {
+    "name": "All rights reserved",
+    "redistribution_allowed": false
+  },
+  "incomplete_records": [
+    {
+      "id": "gioia-2012-autumn-leaves",
+      "title": "Autumn Leaves"
+    },
+    {
+      "id": "gioia-2012-pennies-from-heaven",
+      "title": "Pennies from Heaven"
+    }
+  ]
+}

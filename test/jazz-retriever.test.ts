@@ -115,4 +115,57 @@ describe("jazz retriever", () => {
       "usable",
     ]);
   });
+
+  it("locates the named song rather than a short description mentioning it", () => {
+    const localRetriever = createJazzRetriever([
+      record("impressions", "Impressions", "Its chord sequence is identical to So What."),
+      record("so-what", "So What", "A modal piece in D Dorian with a bass theme and quartal piano voicings."),
+    ]);
+
+    for (const query of ["So What", "so what?", "  Ｓｏ   Ｗｈａｔ？  ", '“So What?”']) {
+      expect(localRetriever.search(query, 5)).toEqual([
+        expect.objectContaining({ id: "so-what", matchType: "title", score: 1 }),
+      ]);
+    }
+  });
+
+  it("uses an explicit title query without falling back to unrelated descriptions", () => {
+    expect(retriever.search("Unknown Minor Ballad", 5, "title")).toEqual([]);
+    expect(retriever.search("What", 5, "title")).toEqual([]);
+  });
+
+  it("keeps description comparison separate when its query coincides with a title", () => {
+    const localRetriever = createJazzRetriever([
+      record("named-modal", "Modal", "An energetic blues shuffle with brass riffs."),
+      record("modal-evidence", "Another Song", "A spacious modal piece with sparse piano voicings."),
+    ]);
+
+    expect(localRetriever.search("modal", 1)[0]?.id).toBe("named-modal");
+    expect(localRetriever.search("modal", 1, "description")[0]).toMatchObject({
+      id: "modal-evidence", matchType: "description",
+    });
+  });
+
+  it("returns an incomplete named card with its evidence status", () => {
+    const localRetriever = createJazzRetriever([
+      { ...record("empty", "Empty", ""), normalization_status: "insufficient_musical_evidence" },
+      record("usable", "Usable", "A modal jazz piece with sparse piano."),
+    ]);
+
+    expect(localRetriever.search("Empty", 5, "title")).toEqual([
+      expect.objectContaining({ id: "empty", musicalDescription: "", normalizationStatus: "insufficient_musical_evidence" }),
+    ]);
+    expect(localRetriever.search("modal piano", 5, "description").map((item) => item.id)).toEqual(["usable"]);
+  });
+
+  it("preserves multiple records with the same title and respects the lookup limit", () => {
+    const localRetriever = createJazzRetriever([
+      record("one", "Same Title", "A slow blues."),
+      record("two", "Same Title", "A fast swing piece."),
+    ]);
+
+    expect(localRetriever.search("same title", 5, "title").map((item) => item.id)).toEqual(["one", "two"]);
+    expect(localRetriever.search("same title", 1, "title").map((item) => item.id)).toEqual(["one"]);
+    expect(localRetriever.search("???", 5, "title")).toEqual([]);
+  });
 });

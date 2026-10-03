@@ -8,6 +8,7 @@ export {
   createJazzRetriever,
   loadJazzRetriever,
   type JazzRetriever,
+  type JazzSearchMode,
   type NormalizedJazzRecord,
   type RetrievedJazzReference,
 } from "./retrieval/jazz-retriever.js";

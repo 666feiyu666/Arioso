@@ -10,6 +10,18 @@ export interface NormalizedJazzRecord {
   normalization_status: "complete" | "insufficient_musical_evidence";
   source: {
     article_url: string | null;
+    type?: "book";
+    title?: string;
+    author?: string;
+    publication_year?: number;
+    citation?: string;
+    zotero_item_key?: string;
+    pages?: {
+      pdf_start: number;
+      pdf_end: number;
+      printed_start: string;
+      printed_end: string;
+    };
   };
 }
 
@@ -21,7 +33,12 @@ export interface RetrievedJazzReference {
   period: string | null;
   musicalDescription: string;
   articleUrl: string | null;
+  source: NormalizedJazzRecord["source"];
+  matchType: "title" | "description";
+  normalizationStatus: NormalizedJazzRecord["normalization_status"];
 }
+
+export type JazzSearchMode = "auto" | "title" | "description";
 
 interface IndexedDocument {
   record: NormalizedJazzRecord;
@@ -42,6 +59,34 @@ function tokenize(value: string): string[] {
     .toLowerCase()
     .match(/[a-z0-9]+(?:'[a-z0-9]+)?/g)
     ?.filter((token) => token.length > 1 && !STOP_WORDS.has(token)) ?? [];
+}
+
+function normalizeTitle(value: string): string {
+  return value
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s]/gu, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function referenceFor(
+  record: NormalizedJazzRecord,
+  score: number,
+  matchType: RetrievedJazzReference["matchType"],
+): RetrievedJazzReference {
+  return {
+    id: record.id,
+    title: record.title,
+    score: Number(score.toFixed(6)),
+    year: record.year,
+    period: record.period,
+    musicalDescription: record.musical_description,
+    articleUrl: record.source.article_url,
+    source: record.source,
+    matchType,
+    normalizationStatus: record.normalization_status,
+  };
 }
 
 function termCounts(tokens: string[]): Map<string, number> {
@@ -78,10 +123,19 @@ function parseJsonLines(text: string): NormalizedJazzRecord[] {
 }
 
 export interface JazzRetriever {
-  search(query: string, limit?: number): RetrievedJazzReference[];
+  search(query: string, limit?: number, mode?: JazzSearchMode): RetrievedJazzReference[];
 }
 
 export function createJazzRetriever(records: NormalizedJazzRecord[]): JazzRetriever {
+  // Identity lookup includes incomplete cards so evidence gaps remain visible.
+  const titleIndex = new Map<string, NormalizedJazzRecord[]>();
+  for (const record of records) {
+    const title = normalizeTitle(record.title);
+    if (!title) continue;
+    const matches = titleIndex.get(title) ?? [];
+    matches.push(record);
+    titleIndex.set(title, matches);
+  }
   const searchableRecords = records.filter(
     (record) =>
       record.normalization_status === "complete" && record.musical_description.trim(),
@@ -107,8 +161,15 @@ export function createJazzRetriever(records: NormalizedJazzRecord[]): JazzRetrie
   });
 
   return {
-    search(query: string, limit = 5): RetrievedJazzReference[] {
+    search(query: string, limit = 5, mode: JazzSearchMode = "auto"): RetrievedJazzReference[] {
       const safeLimit = Math.max(1, Math.min(Math.trunc(limit), 5));
+      if (mode !== "description") {
+        const matches = titleIndex.get(normalizeTitle(query)) ?? [];
+        if (mode === "title" || matches.length) {
+          // A title match has identity score 1, not a cosine similarity score.
+          return matches.slice(0, safeLimit).map((record) => referenceFor(record, 1, "title"));
+        }
+      }
       const queryWeights = weightsFor(termCounts(tokenize(query)), inverseDocumentFrequency);
       const queryMagnitude = magnitude(queryWeights);
 
@@ -128,15 +189,7 @@ export function createJazzRetriever(records: NormalizedJazzRecord[]): JazzRetrie
         })
         .sort((left, right) => right.score - left.score)
         .slice(0, safeLimit)
-        .map(({ record, score }) => ({
-          id: record.id,
-          title: record.title,
-          score: Number(score.toFixed(6)),
-          year: record.year,
-          period: record.period,
-          musicalDescription: record.musical_description,
-          articleUrl: record.source.article_url,
-        }));
+        .map(({ record, score }) => referenceFor(record, score, "description"));
     },
   };
 }
@@ -146,7 +199,7 @@ let cachedRetriever: Promise<JazzRetriever> | undefined;
 export function loadJazzRetriever(): Promise<JazzRetriever> {
   const corpusPath = path.resolve(
     process.env.ARIOSO_JAZZ_CORPUS ??
-      path.join("corpus", "jazz", "jazz_standards.normalized.jsonl"),
+      path.join("corpus", "jazz", "jazz_standards.combined.normalized.jsonl"),
   );
   cachedRetriever ??= readFile(corpusPath, "utf8").then((text) =>
     createJazzRetriever(parseJsonLines(text)),

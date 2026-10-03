@@ -1,0 +1,30 @@
+{
+  "corpus_id": "arioso-jazz-standards-combined",
+  "schema_version": "0.3.0",
+  "generated_at": "2026-10-03T13:18:05.088Z",
+  "input_files": [
+    "jazz_standards.normalized.jsonl",
+    "gioia_2012.normalized.jsonl"
+  ],
+  "output_file": "jazz_standards.combined.normalized.jsonl",
+  "record_unit": "One source document discussing one tune; the same tune in different sources counts separately.",
+  "record_count": 606,
+  "complete_count": 520,
+  "insufficient_evidence_count": 86,
+  "source_counts": {
+    "wikipedia": 354,
+    "gioia_2012": 252
+  },
+  "searchable_source_counts": {
+    "wikipedia": 270,
+    "gioia_2012": 250
+  },
+  "same_title_as_wikipedia_count": 189,
+  "book_only_title_count": 63,
+  "distinct_title_count": 417,
+  "distinct_title_count_method": "Case/punctuation/diacritic-insensitive title strings; aliases are not resolved. This is not a verified unique-composition count.",
+  "assignment_minimum": 500,
+  "exceeds_assignment_minimum": true,
+  "searchable_records_exceed_minimum": true,
+  "book_source_license": "All rights reserved. Book-derived source text is local research material, not CC-BY-SA Wikipedia text."
+}
