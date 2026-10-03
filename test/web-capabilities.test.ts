@@ -26,6 +26,7 @@ describe("web capabilities API", () => {
       expect(await response.json()).toEqual({
         apiVersion: 4,
         workflows: ["01-general", "02-jazz", "03-orchestral"],
+        jazzCorpusToggle: true,
         orchestralAssembly: true,
         orchestralPromptFormat: "orchestral-v1",
         orchestralKnowledgeCards: true,

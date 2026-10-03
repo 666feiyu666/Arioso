@@ -51,6 +51,7 @@ button:focus-visible, textarea:focus-visible, select:focus-visible, input:focus-
 .task-play { width: 30px; height: 30px; padding: 0; border: 1px solid var(--line); border-radius: 50%; color: var(--ink); background: rgba(255,255,255,.6); font-size: 10px; transition: 150ms ease; }
 .task-play:hover { color: #fff; border-color: var(--ink); background: var(--ink); }
 .task-meta { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 11px; }
+.task-corpus-mode { display: block; margin-top: 5px; color: var(--muted); font-size: 10px; }
 .task-state-dot { width: 7px; height: 7px; border-radius: 50%; background: #a8a49b; }
 .task-state-dot.running { background: var(--accent); box-shadow: 0 0 0 4px rgba(204, 90, 52, 0.1); animation: pulse 1.4s infinite; }
 .task-state-dot.completed { background: var(--moss); }

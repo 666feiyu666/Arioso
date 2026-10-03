@@ -25,9 +25,11 @@ Requirements:
 - Keep assumptions short and observable so the user can revise them later.
 `.trim();
 
+const JAZZ_STYLE_INSTRUCTIONS =
+  "Treat the request as a Jazz composition brief, even when it mainly describes mood, setting, or instrumentation.";
+
 const JAZZ_CORPUS_INSTRUCTIONS = `
 The user explicitly selected the Jazz corpus workflow.
-- Treat the request as a Jazz composition brief, even when it mainly describes mood, setting, or instrumentation.
 - Use the jazz corpus search tool exactly once before composing.
 - If the user specifies a song title, use mode "title" and put only that title in query. Preserve the title's wording; do not replace it with inferred musical features. Request up to five source cards for that song. Return only matching cards, without filling the result with similar songs.
 - If no song title is specified, use mode "description" with a concise English query capturing the most important audible musical intentions, and request up to five references for comparison.
@@ -98,6 +100,7 @@ export interface ComposeMusicOptions {
   lyriaModel?: string;
   vocalMode?: "auto" | "instrumental" | "vocals";
   corpusMode?: "none" | "jazz";
+  genre?: "jazz";
   onJazzRetrieval?: (trace: JazzRetrievalTrace) => Promise<void> | void;
 }
 
@@ -129,6 +132,7 @@ export async function composeMusic(
     name: "Arioso Composer",
     instructions: [
       COMPOSER_INSTRUCTIONS,
+      options.genre === "jazz" || corpusMode === "jazz" ? JAZZ_STYLE_INSTRUCTIONS : "",
       corpusMode === "jazz" ? JAZZ_CORPUS_INSTRUCTIONS : NO_CORPUS_INSTRUCTIONS,
       `Target Lyria model: ${targetModel}`,
       vocalRule(options.vocalMode ?? "auto"),

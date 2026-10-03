@@ -121,6 +121,13 @@
                   <option value="lyria-3.5" data-i18n="lyriaFull">Lyria 3.5 · 完整歌曲</option>
                 </select>
               </label>
+              <label id="jazz-corpus-setting" hidden>
+                <span data-i18n="corpusSetting">语料</span>
+                <select id="corpus-mode-select" aria-describedby="jazz-corpus-help">
+                  <option value="jazz" data-i18n="withCorpus">使用语料</option>
+                  <option value="none" data-i18n="withoutCorpus">不使用语料</option>
+                </select>
+              </label>
               <label id="orchestral-reference-setting" hidden>
                 <span data-i18n="knowledgeCard">知识卡片</span>
                 <select id="orchestral-reference-select" aria-describedby="orchestral-reference-help">
@@ -128,6 +135,7 @@
                 </select>
               </label>
             </div>
+            <p id="jazz-corpus-help" class="reference-help" hidden></p>
             <p id="orchestral-reference-help" class="reference-help" hidden></p>
           </div>
 

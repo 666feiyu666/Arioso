@@ -41,6 +41,19 @@ describe("web task input", () => {
     })).toThrow("Unsupported corpus mode.");
   });
 
+  it("accepts Jazz without corpus while preserving the workflow", () => {
+    expect(parseTaskInput({
+      description: 'Create instrumental jazz inspired by "So What".',
+      workflowType: "02-jazz",
+      corpusMode: "none",
+    })).toMatchObject({ workflowType: "02-jazz", corpusMode: "none", compositionMode: "single" });
+  });
+
+  it("defaults Jazz requests without an explicit corpus choice to corpus retrieval", () => {
+    expect(parseTaskInput({ description: "quiet evening", workflowType: "02-jazz" }))
+      .toMatchObject({ corpusMode: "jazz" });
+  });
+
   it("accepts the orchestral composition workflow", () => {
     expect(parseTaskInput({
       description: "a three-movement work about a river reaching the sea",

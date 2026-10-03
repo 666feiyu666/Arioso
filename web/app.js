@@ -6,7 +6,7 @@ const translations = {
     entryCopy: "从单曲、Jazz 语料到多乐章作品，选择适合当前构想的创作方式。",
     workflowChoices: "生成方式", allStyles: "不限风格", jazzOnly: "仅限 Jazz",
     noCorpusTitle: "无语料生成", noCorpusDescription: "直接使用模型已有的音乐知识，将你的想法整理成完整编曲。",
-    jazzCorpusTitle: "含语料生成", jazzCorpusDescription: "先检索本地 Jazz 语料，再结合参考信息完成编曲。",
+    jazzCorpusTitle: "Jazz 作曲", jazzCorpusDescription: "以 Jazz 为创作方向，可选择使用本地语料或仅使用模型知识。",
     enterStudio: "进入创作台 →", enterJazzStudio: "进入 Jazz 创作台 →", backEntry: "← 返回生成方式选择",
     multiMovement: "多乐章", orchestralTitle: "管弦乐作曲",
     orchestralDescription: "由 Agent 规划统一主题与完整乐章，再依次生成一部连贯的管弦乐作品。",
@@ -15,13 +15,16 @@ const translations = {
     viewAlbumDevelopment: "查看开发进度 →", inDevelopment: "正在开发中",
     albumDevelopmentTitle: "让一组作品，拥有同一种声音。",
     albumDevelopmentCopy: "专辑作曲将复用管弦乐工作流中的共享音乐契约与多曲目任务模型。在 03 成熟后开放。",
-    noCorpusBadge: "无语料 · 不限风格", jazzCorpusBadge: "Jazz 语料增强",
+    noCorpusBadge: "无语料 · 不限风格", jazzCorpusBadge: "Jazz 语料增强", jazzNoCorpusBadge: "Jazz · 无语料",
+    corpusSetting: "语料", withCorpus: "使用语料", withoutCorpus: "不使用语料",
+    jazzCorpusRestartRequired: "请重启 Arioso 服务并刷新页面，以启用 Jazz 有无语料对比。",
     localWorkspace: "本地创作空间", heroEyebrow: "COMPOSE WITH INTENT",
     heroTitle: "把一个念头，<br />写成一段音乐。",
     heroCopy: "描述场景、情绪或声音。Arioso 会先整理成完整乐曲规格，再交给 Lyria 生成。",
     jazzHeroEyebrow: "COMPOSE WITH JAZZ MEMORY",
     jazzHeroTitle: "从爵士记忆里，<br />找到新的声音。",
     jazzHeroCopy: "描述年代、编制、节奏或氛围。Arioso 会检索本地 Jazz 语料，再整理成完整乐曲规格。",
+    jazzNoCorpusHeroCopy: "描述年代、编制、节奏或氛围。Arioso 会使用模型已有的音乐知识，整理成完整 Jazz 乐曲规格。",
     orchestralBadge: "管弦乐 · 多乐章", orchestralHeroEyebrow: "COMPOSE ACROSS MOVEMENTS",
     orchestralHeroTitle: "让同一个主题，<br />走过完整的旅程。",
     orchestralHeroCopy: "描述作品的世界、情绪与戏剧走向。Agent 会建立共享音乐契约，构思完整乐章并自动依次生成。",
@@ -49,7 +52,7 @@ const translations = {
     connectionOk: "连接成功。", connectionFailed: "连接失败，请检查 API Key 和网络连接。",
     keyCleared: "已移除保存的 API Key。", keyFallback: "已移除本地保存的 Key；当前仍检测到环境变量中的可用 Key。",
     emptyTasks: "还没有任务。<br />从一个声音画面开始吧。",
-    workflow01: "01 无语料单曲", workflow02: "02 Jazz 语料单曲",
+    workflow01: "01 无语料单曲", workflow02: "02 Jazz 单曲",
     workflow03: "03 管弦乐作品", workflow04: "04 主题专辑",
     noTasksInWorkflow: "暂无任务", albumComingSoon: "正在开发",
     movementProgress: "{completed}/{total} 乐章", totalDuration: "作品总时长", movementDuration: "乐章时长",
@@ -81,7 +84,7 @@ const translations = {
     entryCopy: "Choose the workflow that fits your idea, from a single piece or Jazz corpus to a multi-movement work.",
     workflowChoices: "Generation workflows", allStyles: "All styles", jazzOnly: "Jazz only",
     noCorpusTitle: "Without corpus", noCorpusDescription: "Use the model's existing musical knowledge to shape your idea into a complete arrangement.",
-    jazzCorpusTitle: "With corpus", jazzCorpusDescription: "Search the local Jazz corpus before composing with the retrieved references.",
+    jazzCorpusTitle: "Jazz composition", jazzCorpusDescription: "Compose Jazz with local corpus references or the model's existing musical knowledge.",
     enterStudio: "Enter studio →", enterJazzStudio: "Enter Jazz studio →", backEntry: "← Back to workflow selection",
     multiMovement: "Multi-movement", orchestralTitle: "Orchestral composition",
     orchestralDescription: "Let an agent plan a shared identity and complete movements, then generate a coherent orchestral work in sequence.",
@@ -90,13 +93,16 @@ const translations = {
     viewAlbumDevelopment: "View development status →", inDevelopment: "In development",
     albumDevelopmentTitle: "Give a collection of pieces one recognizable voice.",
     albumDevelopmentCopy: "Album composition will reuse the shared musical contract and multi-track task model proven by the orchestral workflow. It will open after workflow 03 matures.",
-    noCorpusBadge: "No corpus · All styles", jazzCorpusBadge: "Jazz corpus enhanced",
+    noCorpusBadge: "No corpus · All styles", jazzCorpusBadge: "Jazz corpus enhanced", jazzNoCorpusBadge: "Jazz · No corpus",
+    corpusSetting: "Corpus", withCorpus: "With corpus", withoutCorpus: "Without corpus",
+    jazzCorpusRestartRequired: "Restart Arioso and refresh this page to enable Jazz corpus comparison.",
     localWorkspace: "Local creative space", heroEyebrow: "COMPOSE WITH INTENT",
     heroTitle: "Turn an idea<br />into a piece of music.",
     heroCopy: "Describe a scene, feeling, or sound. Arioso shapes it into a complete music specification before sending it to Lyria.",
     jazzHeroEyebrow: "COMPOSE WITH JAZZ MEMORY",
     jazzHeroTitle: "Find a new sound<br />in Jazz memory.",
     jazzHeroCopy: "Describe an era, ensemble, rhythm, or mood. Arioso searches the local Jazz corpus before shaping a complete music specification.",
+    jazzNoCorpusHeroCopy: "Describe an era, ensemble, rhythm, or mood. Arioso uses the model's existing musical knowledge to shape a complete Jazz music specification.",
     orchestralBadge: "Orchestral · Multi-movement", orchestralHeroEyebrow: "COMPOSE ACROSS MOVEMENTS",
     orchestralHeroTitle: "Let one theme travel<br />through a complete work.",
     orchestralHeroCopy: "Describe the work's world, emotion, and dramatic direction. The agent establishes a shared musical contract, composes complete movements, and generates them automatically in sequence.",
@@ -124,7 +130,7 @@ const translations = {
     connectionOk: "Connection successful.", connectionFailed: "Connection failed. Check the API key and network connection.",
     keyCleared: "The saved API key was removed.", keyFallback: "The locally saved key was removed; a key is still available from the environment.",
     emptyTasks: "No tasks yet.<br />Start with a sonic scene.",
-    workflow01: "01 Single · No corpus", workflow02: "02 Single · Jazz corpus",
+    workflow01: "01 Single · No corpus", workflow02: "02 Single · Jazz",
     workflow03: "03 Orchestral work", workflow04: "04 Themed album",
     noTasksInWorkflow: "No tasks", albumComingSoon: "In development",
     movementProgress: "{completed}/{total} movements", totalDuration: "Total work duration", movementDuration: "Movement duration",
@@ -276,6 +282,7 @@ const state = {
   expandedTaskGroup: "01-general",
   supportedWorkflows: new Set(["01-general", "02-jazz"]),
   supportsOrchestralCards: false,
+  supportsJazzCorpusToggle: false,
   orchestralCards: [],
   orchestralCardsError: false,
   orchestralReferenceId: "",
@@ -303,6 +310,9 @@ const elements = {
   message: document.querySelector("#form-message"),
   mode: document.querySelector("#mode-select"),
   lyriaModel: document.querySelector("#lyria-model-select"),
+  corpusMode: document.querySelector("#corpus-mode-select"),
+  jazzCorpusSetting: document.querySelector("#jazz-corpus-setting"),
+  jazzCorpusHelp: document.querySelector("#jazz-corpus-help"),
   vocalModes: document.querySelectorAll('input[name="vocal-mode"]'),
   vocalSetting: document.querySelector("#vocal-setting"),
   orchestralReferenceSetting: document.querySelector("#orchestral-reference-setting"),
@@ -362,7 +372,8 @@ function workflowLabel(workflowType) {
 }
 
 function renderComposerContext() {
-  const isJazz = state.corpusMode === "jazz";
+  const isJazz = state.workflowType === "02-jazz";
+  const usesJazzCorpus = state.corpusMode === "jazz";
   const isOrchestral = state.compositionMode === "orchestral";
   elements.heroEyebrow.textContent = t(
     isOrchestral ? "orchestralHeroEyebrow" : isJazz ? "jazzHeroEyebrow" : "heroEyebrow",
@@ -371,15 +382,22 @@ function renderComposerContext() {
     isOrchestral ? "orchestralHeroTitle" : isJazz ? "jazzHeroTitle" : "heroTitle",
   );
   elements.heroCopy.textContent = t(
-    isOrchestral ? "orchestralHeroCopy" : isJazz ? "jazzHeroCopy" : "heroCopy",
+    isOrchestral ? "orchestralHeroCopy"
+      : isJazz ? (usesJazzCorpus ? "jazzHeroCopy" : "jazzNoCorpusHeroCopy") : "heroCopy",
   );
   elements.creationModeBadge.textContent = t(
-    isOrchestral ? "orchestralBadge" : isJazz ? "jazzCorpusBadge" : "noCorpusBadge",
+    isOrchestral ? "orchestralBadge"
+      : isJazz ? (usesJazzCorpus ? "jazzCorpusBadge" : "jazzNoCorpusBadge") : "noCorpusBadge",
   );
   document.querySelector("#examples-title").textContent = t(
     isOrchestral ? "orchestralTitle" : isJazz ? "jazzExamplesTitle" : "generalExamplesTitle",
   );
   elements.vocalSetting.hidden = isOrchestral;
+  elements.jazzCorpusSetting.hidden = !isJazz;
+  elements.corpusMode.value = state.corpusMode;
+  elements.corpusMode.disabled = !state.supportsJazzCorpusToggle;
+  elements.jazzCorpusHelp.hidden = !isJazz || state.supportsJazzCorpusToggle;
+  elements.jazzCorpusHelp.textContent = t("jazzCorpusRestartRequired");
   elements.orchestralReferenceSetting.hidden = !isOrchestral;
   elements.orchestralReferenceHelp.hidden = !isOrchestral;
   elements.orchestralReference.disabled = !state.supportsOrchestralCards || state.orchestralCardsError;
@@ -553,7 +571,7 @@ async function playMovement(taskId, movementId) {
 function renderExamples() {
   const activeExamples = state.compositionMode === "orchestral"
     ? orchestralExamples
-    : state.corpusMode === "jazz" ? jazzExamples : generalExamples;
+    : state.workflowType === "02-jazz" ? jazzExamples : generalExamples;
   document.querySelector("#example-grid").innerHTML = activeExamples.map((source, index) => {
     const example = localizedExample(source);
     return `
@@ -600,6 +618,7 @@ function renderTaskList() {
               <span class="task-state-dot ${statusClass(task.status)}"></span>
               ${escapeHtml(statusLabel(task.status))}${escapeHtml(progress)} · ${formatTime(task.updatedAt)}
             </span>
+            ${workflowType === "02-jazz" ? `<span class="task-corpus-mode">${escapeHtml(t(normalizeCorpusMode(task.corpusMode) === "jazz" ? "withCorpus" : "withoutCorpus"))}</span>` : ""}
           </button>
           ${task.audioFile ? `<button class="task-play" type="button" data-play-task="${task.id}"></button>` : ""}
         </div>
@@ -954,6 +973,11 @@ async function submitTask(event) {
     elements.message.textContent = t("serverRestartRequired");
     return;
   }
+  if (state.workflowType === "02-jazz" && state.corpusMode === "none"
+    && !state.supportsJazzCorpusToggle) {
+    elements.message.textContent = t("jazzCorpusRestartRequired");
+    return;
+  }
   if (state.compositionMode === "orchestral" && state.orchestralReferenceId
     && (!state.supportsOrchestralCards || state.orchestralCardsError)) {
     elements.message.textContent = t(state.orchestralCardsError ? "knowledgeCardLoadFailed" : "serverRestartRequired");
@@ -1028,6 +1052,7 @@ async function loadCapabilities() {
     const result = await response.json();
     if (result.apiVersion < 2 || !Array.isArray(result.workflows)) return;
     state.supportedWorkflows = new Set(result.workflows);
+    state.supportsJazzCorpusToggle = result.jazzCorpusToggle === true;
     state.supportsOrchestralCards = result.orchestralKnowledgeCards === true;
     if (state.supportsOrchestralCards) {
       try {
@@ -1131,6 +1156,10 @@ async function clearCredential(provider, button) {
 }
 
 elements.form.addEventListener("submit", submitTask);
+elements.corpusMode.addEventListener("change", () => {
+  state.corpusMode = normalizeCorpusMode(elements.corpusMode.value);
+  renderComposerContext();
+});
 elements.orchestralReference.addEventListener("change", () => {
   state.orchestralReferenceId = elements.orchestralReference.value;
 });

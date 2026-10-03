@@ -58,6 +58,10 @@ function isWorkflowType(value: unknown): value is WorkflowType {
   return WORKFLOW_TYPES.includes(value as WorkflowType);
 }
 
+function corpusModeForWorkflow(workflowType: WorkflowType, selection: unknown): CorpusMode {
+  return workflowType === "02-jazz" && selection !== "none" ? "jazz" : "none";
+}
+
 export function inferWorkflowType(task: {
   workflowType?: unknown;
   compositionMode?: unknown;
@@ -223,7 +227,7 @@ export async function organizeTaskStorage(
 
     task.workflowType = inferWorkflowType(task);
     task.compositionMode = task.workflowType === "03-orchestral" ? "orchestral" : "single";
-    task.corpusMode = task.workflowType === "02-jazz" ? "jazz" : "none";
+    task.corpusMode = corpusModeForWorkflow(task.workflowType, task.corpusMode);
     const taskDirectory = path.join(directory, task.workflowType, task.id);
     const recordPath = path.join(taskDirectory, "task.json");
     await mkdir(taskDirectory, { recursive: true });
@@ -296,7 +300,7 @@ class TaskStore {
               task.compositionMode = task.workflowType === "03-orchestral"
                 ? "orchestral"
                 : "single";
-              task.corpusMode = task.workflowType === "02-jazz" ? "jazz" : "none";
+              task.corpusMode = corpusModeForWorkflow(task.workflowType, task.corpusMode);
               let interrupted = false;
               if (
                 options.markInterrupted !== false
@@ -683,7 +687,7 @@ export function parseTaskInput(value: unknown): CreateTaskInput {
   if (workflowType === "04-album") {
     throw new Error("Album composition is still in development.");
   }
-  const corpusMode: CorpusMode = workflowType === "02-jazz" ? "jazz" : "none";
+  const corpusMode = corpusModeForWorkflow(workflowType, candidate.corpusMode);
   const compositionMode: CompositionMode = workflowType === "03-orchestral"
     ? "orchestral"
     : "single";
@@ -769,6 +773,7 @@ async function runTask(
         lyriaModel: task.lyriaModel,
         vocalMode: task.vocalMode ?? "auto",
         corpusMode: task.corpusMode ?? "none",
+        ...(task.workflowType === "02-jazz" ? { genre: "jazz" as const } : {}),
         onJazzRetrieval: async ({ query, referenceIds }) => {
           await store.update(task.id, {
             retrievalQuery: query,
@@ -995,6 +1000,7 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
         sendJson(response, 200, {
           apiVersion: 4,
           workflows: ["01-general", "02-jazz", "03-orchestral"],
+          jazzCorpusToggle: true,
           orchestralAssembly: true,
           orchestralPromptFormat: "orchestral-v1",
           orchestralKnowledgeCards: true,
