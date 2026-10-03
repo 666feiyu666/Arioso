@@ -25,6 +25,11 @@ const translations = {
     orchestralBadge: "管弦乐 · 多乐章", orchestralHeroEyebrow: "COMPOSE ACROSS MOVEMENTS",
     orchestralHeroTitle: "让同一个主题，<br />走过完整的旅程。",
     orchestralHeroCopy: "描述作品的世界、情绪与戏剧走向。Agent 会建立共享音乐契约，构思完整乐章并自动依次生成。",
+    knowledgeCard: "知识卡片", noKnowledgeCard: "无参考",
+    knowledgeCardHelp: "可选：参考卡片中的音乐与想象描述，构思整体作品和各乐章。",
+    knowledgeCardLoadFailed: "知识卡片加载失败，请刷新页面重试。",
+    noKnowledgeCardsAvailable: "暂无已审阅的知识卡片。",
+    knowledgeCardSnapshot: "查看本次使用的卡片",
     generalExamplesTitle: "从一个声音画面开始", jazzExamplesTitle: "从一种爵士气质开始",
     generationSettings: "生成设置", generationMode: "生成模式", modeGenerate: "编曲并生成音乐",
     modeCompose: "仅生成编曲提示", lyriaModel: "Lyria 模型", lyriaClip: "Lyria 3 Clip · 30 秒",
@@ -95,6 +100,11 @@ const translations = {
     orchestralBadge: "Orchestral · Multi-movement", orchestralHeroEyebrow: "COMPOSE ACROSS MOVEMENTS",
     orchestralHeroTitle: "Let one theme travel<br />through a complete work.",
     orchestralHeroCopy: "Describe the work's world, emotion, and dramatic direction. The agent establishes a shared musical contract, composes complete movements, and generates them automatically in sequence.",
+    knowledgeCard: "Knowledge card", noKnowledgeCard: "No reference",
+    knowledgeCardHelp: "Optional: use the card's musical and imaginative descriptions to shape the whole work and its movements.",
+    knowledgeCardLoadFailed: "Knowledge cards could not be loaded. Refresh the page to try again.",
+    noKnowledgeCardsAvailable: "No reviewed knowledge cards are available.",
+    knowledgeCardSnapshot: "View the card used for this work",
     generalExamplesTitle: "Start with a sonic scene", jazzExamplesTitle: "Start with a Jazz character",
     generationSettings: "Generation settings", generationMode: "Mode", modeGenerate: "Compose and generate music",
     modeCompose: "Compose prompt only", lyriaModel: "Lyria model", lyriaClip: "Lyria 3 Clip · 30 seconds",
@@ -265,6 +275,10 @@ const state = {
   workflowType: "01-general",
   expandedTaskGroup: "01-general",
   supportedWorkflows: new Set(["01-general", "02-jazz"]),
+  supportsOrchestralCards: false,
+  orchestralCards: [],
+  orchestralCardsError: false,
+  orchestralReferenceId: "",
   submitting: false,
   language: "zh-CN",
   settings: null,
@@ -291,6 +305,9 @@ const elements = {
   lyriaModel: document.querySelector("#lyria-model-select"),
   vocalModes: document.querySelectorAll('input[name="vocal-mode"]'),
   vocalSetting: document.querySelector("#vocal-setting"),
+  orchestralReferenceSetting: document.querySelector("#orchestral-reference-setting"),
+  orchestralReference: document.querySelector("#orchestral-reference-select"),
+  orchestralReferenceHelp: document.querySelector("#orchestral-reference-help"),
   globalPlayer: document.querySelector("#global-player"),
   audio: document.querySelector("#audio-player"),
   playerTitle: document.querySelector("#player-title"),
@@ -363,6 +380,23 @@ function renderComposerContext() {
     isOrchestral ? "orchestralTitle" : isJazz ? "jazzExamplesTitle" : "generalExamplesTitle",
   );
   elements.vocalSetting.hidden = isOrchestral;
+  elements.orchestralReferenceSetting.hidden = !isOrchestral;
+  elements.orchestralReferenceHelp.hidden = !isOrchestral;
+  elements.orchestralReference.disabled = !state.supportsOrchestralCards || state.orchestralCardsError;
+  const cards = [...state.orchestralCards];
+  const savedReference = state.tasks.find((task) => task.id === state.selectedTaskId)?.orchestralReference;
+  if (savedReference && !cards.some((card) => card.id === savedReference.id)) {
+    cards.push(savedReference);
+  }
+  elements.orchestralReference.innerHTML = `<option value="">${escapeHtml(t("noKnowledgeCard"))}</option>`
+    + cards.map((card) => `<option value="${escapeHtml(card.id)}">${escapeHtml(card.title)}</option>`).join("");
+  elements.orchestralReference.value = state.orchestralReferenceId;
+  if (!state.selectedTaskId) state.orchestralReferenceId = elements.orchestralReference.value;
+  elements.orchestralReferenceHelp.textContent = t(
+    !state.supportsOrchestralCards ? "serverRestartRequired"
+      : state.orchestralCardsError ? "knowledgeCardLoadFailed"
+        : !cards.length ? "noKnowledgeCardsAvailable" : "knowledgeCardHelp",
+  );
 }
 
 function applyTranslations() {
@@ -613,6 +647,13 @@ function renderOrchestralTaskDetail(task) {
   const running = ["queued", "composing", "generating", "assembling"].includes(task.status);
   const plan = task.orchestralPlan;
   const movements = task.movements || [];
+  const referencePanel = `
+    <div class="panel orchestral-reference">
+      <h3>${t("knowledgeCard")}</h3>
+      <p>${escapeHtml(task.orchestralReference?.title || t("noKnowledgeCard"))}</p>
+      ${task.orchestralReference ? `<details><summary>${t("knowledgeCardSnapshot")}</summary><div class="prompt-output">${escapeHtml(task.orchestralReference.content)}</div></details>` : ""}
+    </div>
+  `;
   const activeMovement = movements.find((movement) =>
     ["queued", "composing", "generating"].includes(movement.status),
   );
@@ -690,7 +731,7 @@ function renderOrchestralTaskDetail(task) {
       </div>
       <span class="status-pill ${statusClass(task.status)}">${escapeHtml(statusLabel(task.status))}</span>
     </header>
-    ${progress}${error}${task.audioFile ? `<button class="listen-button" type="button" data-play-task="${task.id}">${t("playInPlayer")}</button>` : ""}${contractPanel}
+    ${progress}${error}${task.audioFile ? `<button class="listen-button" type="button" data-play-task="${task.id}">${t("playInPlayer")}</button>` : ""}${referencePanel}${contractPanel}
     ${movements.length ? `<section class="movement-list"><h2>${t("movements")}</h2>${movementCards}</section>` : ""}
   `;
   elements.taskDetail.querySelectorAll("[data-play-movement]").forEach((button) => {
@@ -841,6 +882,8 @@ function selectTask(id) {
   state.expandedTaskGroup = state.workflowType;
   state.corpusMode = normalizeCorpusMode(task.corpusMode);
   state.compositionMode = task.compositionMode === "orchestral" ? "orchestral" : "single";
+  state.orchestralReferenceId = task.orchestralReference?.id ?? "";
+  renderComposerContext();
   elements.entryView.hidden = true;
   elements.developmentView.hidden = true;
   elements.homeView.hidden = true;
@@ -911,6 +954,11 @@ async function submitTask(event) {
     elements.message.textContent = t("serverRestartRequired");
     return;
   }
+  if (state.compositionMode === "orchestral" && state.orchestralReferenceId
+    && (!state.supportsOrchestralCards || state.orchestralCardsError)) {
+    elements.message.textContent = t(state.orchestralCardsError ? "knowledgeCardLoadFailed" : "serverRestartRequired");
+    return;
+  }
   state.submitting = true;
   elements.submit.disabled = true;
   elements.message.textContent = "";
@@ -927,6 +975,8 @@ async function submitTask(event) {
         corpusMode: state.corpusMode,
         compositionMode: state.compositionMode,
         workflowType: state.workflowType,
+        ...(state.compositionMode === "orchestral" && state.orchestralReferenceId
+          ? { orchestralReferenceId: state.orchestralReferenceId } : {}),
       }),
     });
     const result = await response.json();
@@ -978,6 +1028,17 @@ async function loadCapabilities() {
     const result = await response.json();
     if (result.apiVersion < 2 || !Array.isArray(result.workflows)) return;
     state.supportedWorkflows = new Set(result.workflows);
+    state.supportsOrchestralCards = result.orchestralKnowledgeCards === true;
+    if (state.supportsOrchestralCards) {
+      try {
+        const cardsResponse = await fetch("/api/orchestral-cards", { cache: "no-store" });
+        if (!cardsResponse.ok) throw new Error("Knowledge cards unavailable.");
+        state.orchestralCards = await cardsResponse.json();
+      } catch {
+        state.orchestralCardsError = true;
+      }
+    }
+    renderComposerContext();
   } catch {
     // An older local server has no capabilities endpoint. Keep orchestral creation blocked.
   }
@@ -1070,6 +1131,9 @@ async function clearCredential(provider, button) {
 }
 
 elements.form.addEventListener("submit", submitTask);
+elements.orchestralReference.addEventListener("change", () => {
+  state.orchestralReferenceId = elements.orchestralReference.value;
+});
 elements.settingsForm.addEventListener("submit", saveSettings);
 elements.audio.addEventListener("play", syncPlaybackControls);
 elements.audio.addEventListener("pause", syncPlaybackControls);

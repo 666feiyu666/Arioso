@@ -24,10 +24,11 @@ describe("web capabilities API", () => {
       const response = await fetch(`http://127.0.0.1:${address.port}/api/capabilities`);
       expect(response.ok).toBe(true);
       expect(await response.json()).toEqual({
-        apiVersion: 3,
+        apiVersion: 4,
         workflows: ["01-general", "02-jazz", "03-orchestral"],
         orchestralAssembly: true,
         orchestralPromptFormat: "orchestral-v1",
+        orchestralKnowledgeCards: true,
         orchestralDuration: {
           minimumTotalMinutes: 5,
           maximumTotalMinutes: 11,

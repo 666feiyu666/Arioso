@@ -66,6 +66,33 @@ describe("web task input", () => {
     })).toThrow("Album composition is still in development.");
   });
 
+  it("accepts an explicitly selected orchestral knowledge card", () => {
+    expect(parseTaskInput({
+      description: "a five-minute orchestral journey",
+      workflowType: "03-orchestral",
+      orchestralReferenceId: "dvorak-symphony-no-9",
+    })).toMatchObject({
+      compositionMode: "orchestral",
+      corpusMode: "none",
+      orchestralReferenceId: "dvorak-symphony-no-9",
+    });
+  });
+
+  it("rejects card selection outside the orchestral workflow", () => {
+    expect(() => parseTaskInput({
+      description: "warm piano",
+      orchestralReferenceId: "dvorak-symphony-no-9",
+    })).toThrow("Knowledge cards are supported only for orchestral composition.");
+  });
+
+  it.each(["../outside", "", null, 42])("rejects invalid card IDs: %s", (id) => {
+    expect(() => parseTaskInput({
+      description: "an orchestral journey",
+      workflowType: "03-orchestral",
+      orchestralReferenceId: id,
+    })).toThrow("Invalid orchestral knowledge card ID.");
+  });
+
   it("classifies legacy task records without workflow metadata", () => {
     expect(inferWorkflowType({ corpusMode: "none" })).toBe("01-general");
     expect(inferWorkflowType({ retrievalQuery: "modal jazz" })).toBe("02-jazz");

@@ -29,6 +29,12 @@ import {
 } from "../config/settings.js";
 import { LyriaClient } from "../lyria/lyria-client.js";
 import type { MusicSpec } from "../schema/music-spec.js";
+import {
+  isOrchestralCardId,
+  listOrchestralKnowledgeCards,
+  loadOrchestralKnowledgeCard,
+  type OrchestralKnowledgeCard,
+} from "../retrieval/orchestral-cards.js";
 import type {
   OrchestralMovementPlan,
   OrchestralWorkPlan,
@@ -112,6 +118,7 @@ interface MusicTask {
   retrievedReferenceIds?: string[];
   musicSpec?: MusicSpec;
   orchestralPlan?: OrchestralWorkPlan;
+  orchestralReference?: OrchestralKnowledgeCard;
   movements?: OrchestralMovementTask[];
   orchestralAssembly?: OrchestralAssembly;
   generatedText?: string | null;
@@ -127,6 +134,7 @@ interface CreateTaskInput {
   compositionMode: CompositionMode;
   workflowType: WorkflowType;
   lyriaModel?: string;
+  orchestralReferenceId?: string;
 }
 
 const WEB_ROOT = path.resolve("web");
@@ -337,6 +345,9 @@ class TaskStore {
   }
 
   async create(input: CreateTaskInput, config: AriosoConfig): Promise<MusicTask> {
+    const orchestralReference = input.orchestralReferenceId
+      ? await loadOrchestralKnowledgeCard(input.orchestralReferenceId)
+      : undefined;
     const now = new Date().toISOString();
     const task: MusicTask = {
       id: crypto.randomUUID(),
@@ -346,6 +357,7 @@ class TaskStore {
       corpusMode: input.corpusMode,
       compositionMode: input.compositionMode,
       workflowType: input.workflowType,
+      ...(orchestralReference ? { orchestralReference } : {}),
       status: "queued",
       composerModel: config.openAiModel,
       lyriaModel: input.lyriaModel ?? config.lyriaModel,
@@ -675,6 +687,15 @@ export function parseTaskInput(value: unknown): CreateTaskInput {
   const compositionMode: CompositionMode = workflowType === "03-orchestral"
     ? "orchestral"
     : "single";
+  const orchestralReferenceId = candidate.orchestralReferenceId;
+  if (orchestralReferenceId !== undefined) {
+    if (compositionMode !== "orchestral") {
+      throw new Error("Knowledge cards are supported only for orchestral composition.");
+    }
+    if (!isOrchestralCardId(orchestralReferenceId)) {
+      throw new Error("Invalid orchestral knowledge card ID.");
+    }
+  }
   const lyriaModel =
     candidate.lyriaModel === "lyria-3.5" || candidate.lyriaModel === "lyria-3-clip-preview"
       ? candidate.lyriaModel
@@ -687,9 +708,11 @@ export function parseTaskInput(value: unknown): CreateTaskInput {
     throw new Error("The music description must be 8,000 characters or fewer.");
   }
 
-  return lyriaModel
-    ? { description, mode, vocalMode, corpusMode, compositionMode, workflowType, lyriaModel }
-    : { description, mode, vocalMode, corpusMode, compositionMode, workflowType };
+  return {
+    description, mode, vocalMode, corpusMode, compositionMode, workflowType,
+    ...(lyriaModel ? { lyriaModel } : {}),
+    ...(orchestralReferenceId ? { orchestralReferenceId } : {}),
+  };
 }
 
 function isRetryableRequestError(error: unknown): boolean {
@@ -794,6 +817,7 @@ async function runOrchestralTask(
       apiKey: config.openAiApiKey,
       model: currentTask.composerModel,
       lyriaModel: currentTask.lyriaModel,
+      ...(currentTask.orchestralReference ? { referenceCard: currentTask.orchestralReference } : {}),
     });
     const now = new Date().toISOString();
     currentTask = await store.update(currentTask.id, {
@@ -825,6 +849,7 @@ async function runOrchestralTask(
           apiKey: config.openAiApiKey,
           model: currentTask.composerModel,
           lyriaModel: currentTask.lyriaModel,
+          ...(currentTask.orchestralReference ? { referenceCard: currentTask.orchestralReference } : {}),
         });
         currentTask = await store.updateMovement(currentTask.id, movement.id, {
           title: movementPlan.title,
@@ -968,16 +993,22 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
     try {
       if (request.method === "GET" && url.pathname === "/api/capabilities") {
         sendJson(response, 200, {
-          apiVersion: 3,
+          apiVersion: 4,
           workflows: ["01-general", "02-jazz", "03-orchestral"],
           orchestralAssembly: true,
           orchestralPromptFormat: "orchestral-v1",
+          orchestralKnowledgeCards: true,
           orchestralDuration: {
             minimumTotalMinutes: 5,
             maximumTotalMinutes: 11,
             maximumMovementMinutes: 3,
           },
         });
+        return;
+      }
+
+      if (request.method === "GET" && url.pathname === "/api/orchestral-cards") {
+        sendJson(response, 200, await listOrchestralKnowledgeCards());
         return;
       }
 
