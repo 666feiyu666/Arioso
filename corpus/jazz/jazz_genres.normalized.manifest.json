@@ -1,0 +1,20 @@
+{
+  "corpus_id": "arioso-jazz-genres-normalized",
+  "schema_version": "0.1.0",
+  "generated_at": "2026-10-03T12:54:34.743Z",
+  "source_file": "jazz_genres.raw.jsonl",
+  "output_file": "jazz_genres.normalized.jsonl",
+  "record_count": 56,
+  "complete_count": 55,
+  "insufficient_evidence_count": 1,
+  "article_evidence_file": "jazz_genres.article_evidence.jsonl",
+  "article_body_count": 55,
+  "incomplete_records": [
+    {
+      "id": "jazz-style-crossover-jazz",
+      "title": "Crossover jazz",
+      "reason": "No specific musical evidence found in available source prose."
+    }
+  ],
+  "normalization_method": "Source-excerpt sentence filtering over pinned jazz-genre table characteristics and revision-pinned article prose. Agent-facing descriptions prioritize musical analysis and feature diversity with a 300-word/12-sentence budget (a single longer source sentence is preserved intact); full evidence and raw snapshots are retained separately."
+}

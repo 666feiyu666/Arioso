@@ -1,11 +1,530 @@
 {
   "corpus_id": "arioso-jazz-standards-normalized",
-  "schema_version": "0.1.0",
-  "generated_at": "2026-09-30T03:11:37.753Z",
+  "schema_version": "0.2.0",
+  "generated_at": "2026-10-03T12:54:34.604Z",
   "source_file": "jazz_standards.raw.jsonl",
   "output_file": "jazz_standards.normalized.jsonl",
   "record_count": 354,
-  "complete_count": 209,
-  "insufficient_evidence_count": 145,
-  "normalization_method": "Evidence-preserving sentence filtering over seed descriptions and article extracts using explicit musical-language patterns."
+  "complete_count": 270,
+  "insufficient_evidence_count": 84,
+  "article_evidence_file": "jazz_standards.article_evidence.jsonl",
+  "article_body_count": 354,
+  "feature_coverage": {
+    "harmony": 147,
+    "rhythm": 157,
+    "melody": 134,
+    "form": 105,
+    "instrumentation": 126,
+    "arrangement": 99,
+    "style": 153,
+    "mood": 0
+  },
+  "limited_evidence_count": 56,
+  "incomplete_records": [
+    {
+      "id": "jazz-standard-ballin-the-jack",
+      "title": "Ballin' the Jack",
+      "article_url": "https://en.wikipedia.org/wiki/Ballin'_the_Jack",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-darktown-strutters-ball",
+      "title": "Darktown Strutters' Ball",
+      "article_url": "https://en.wikipedia.org/wiki/Darktown_Strutters'_Ball",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-china-boy",
+      "title": "China Boy",
+      "article_url": "https://en.wikipedia.org/wiki/China_Boy",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-everybody-loves-my-baby",
+      "title": "Everybody Loves My Baby",
+      "article_url": "https://en.wikipedia.org/wiki/Everybody_Loves_My_Baby",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-hard-hearted-hannah-the-vamp-of-savannah",
+      "title": "Hard Hearted Hannah (The Vamp of Savannah)",
+      "article_url": "https://en.wikipedia.org/wiki/Hard_Hearted_Hannah_(The_Vamp_of_Savannah)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-i-ll-see-you-in-my-dreams",
+      "title": "I'll See You in My Dreams",
+      "article_url": "https://en.wikipedia.org/wiki/I'll_See_You_in_My_Dreams_(1924_song)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-riverboat-shuffle",
+      "title": "Riverboat Shuffle",
+      "article_url": "https://en.wikipedia.org/wiki/Riverboat_Shuffle",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-somebody-loves-me",
+      "title": "Somebody Loves Me",
+      "article_url": "https://en.wikipedia.org/wiki/Somebody_Loves_Me",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-deed-i-do",
+      "title": "'Deed I Do",
+      "article_url": "https://en.wikipedia.org/wiki/'Deed_I_Do",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-i-can-t-believe-that-you-re-in-love-with-me",
+      "title": "I Can't Believe That You're in Love with Me",
+      "article_url": "https://en.wikipedia.org/wiki/I_Can't_Believe_That_You're_in_Love_with_Me",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-if-i-could-be-with-you-one-hour-tonight",
+      "title": "If I Could Be with You (One Hour Tonight)",
+      "article_url": "https://en.wikipedia.org/wiki/If_I_Could_Be_with_You_(One_Hour_Tonight)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-sugar",
+      "title": "Sugar",
+      "article_url": "https://en.wikipedia.org/wiki/Sugar%3A_That_Sugar_Baby_O'Mine",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-if-i-had-you",
+      "title": "If I Had You",
+      "article_url": "https://en.wikipedia.org/wiki/If_I_Had_You_(Ted_Shapiro%2C_Jimmy_Campbell_and_Reg_Connelly_song)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-black-and-blue",
+      "title": "Black and Blue",
+      "article_url": "https://en.wikipedia.org/wiki/Black_and_Blue_(Fats_Waller_song)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-just-you-just-me",
+      "title": "Just You, Just Me",
+      "article_url": "https://en.wikipedia.org/wiki/Just_You%2C_Just_Me",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-mean-to-me",
+      "title": "Mean to Me",
+      "article_url": "https://en.wikipedia.org/wiki/Mean_to_Me_(1929_song)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-more-than-you-know",
+      "title": "More Than You Know",
+      "article_url": "https://en.wikipedia.org/wiki/More_Than_You_Know_(Youmans%2C_Rose_and_Eliscu_song)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-confessin",
+      "title": "Confessin'",
+      "article_url": "https://en.wikipedia.org/wiki/Confessin'",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-embraceable-you",
+      "title": "Embraceable You",
+      "article_url": "https://en.wikipedia.org/wiki/Embraceable_You",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-exactly-like-you",
+      "title": "Exactly Like You",
+      "article_url": "https://en.wikipedia.org/wiki/Exactly_Like_You_(song)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-memories-of-you",
+      "title": "Memories of You",
+      "article_url": "https://en.wikipedia.org/wiki/Memories_of_You",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-i-surrender-dear",
+      "title": "I Surrender Dear",
+      "article_url": "https://en.wikipedia.org/wiki/I_Surrender_Dear",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-just-friends",
+      "title": "Just Friends",
+      "article_url": "https://en.wikipedia.org/wiki/Just_Friends_(John_Klenner_and_Sam_M._Lewis_song)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-when-it-s-sleepy-time-down-south",
+      "title": "When It's Sleepy Time Down South",
+      "article_url": "https://en.wikipedia.org/wiki/When_It's_Sleepy_Time_Down_South",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-when-your-lover-has-gone",
+      "title": "When Your Lover Has Gone",
+      "article_url": "https://en.wikipedia.org/wiki/When_Your_Lover_Has_Gone",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-how-deep-is-the-ocean-how-high-is-the-sky",
+      "title": "How Deep Is the Ocean? (How High Is the Sky?)",
+      "article_url": "https://en.wikipedia.org/wiki/How_Deep_Is_the_Ocean%3F",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-don-t-blame-me",
+      "title": "Don't Blame Me",
+      "article_url": "https://en.wikipedia.org/wiki/Don't_Blame_Me_(Dorothy_Fields_and_Jimmy_McHugh_song)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-i-cover-the-waterfront",
+      "title": "I Cover the Waterfront",
+      "article_url": "https://en.wikipedia.org/wiki/I_Cover_the_Waterfront_(song)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-it-s-only-a-paper-moon",
+      "title": "It's Only a Paper Moon",
+      "article_url": "https://en.wikipedia.org/wiki/It's_Only_a_Paper_Moon",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-yesterdays",
+      "title": "Yesterdays",
+      "article_url": "https://en.wikipedia.org/wiki/Yesterdays_(1933_song)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-autumn-in-new-york",
+      "title": "Autumn in New York",
+      "article_url": "https://en.wikipedia.org/wiki/Autumn_in_New_York_(song)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-for-all-we-know",
+      "title": "For All We Know",
+      "article_url": "https://en.wikipedia.org/wiki/For_All_We_Know_(1934_song)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-pennies-from-heaven",
+      "title": "Pennies from Heaven",
+      "article_url": "https://en.wikipedia.org/wiki/Pennies_from_Heaven_(song)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-a-foggy-day",
+      "title": "A Foggy Day",
+      "article_url": "https://en.wikipedia.org/wiki/A_Foggy_Day",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-old-folks",
+      "title": "Old Folks",
+      "article_url": "https://en.wikipedia.org/wiki/Old_Folks_(1938_song)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-darn-that-dream",
+      "title": "Darn That Dream",
+      "article_url": "https://en.wikipedia.org/wiki/Darn_That_Dream",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-i-didn-t-know-what-time-it-was",
+      "title": "I Didn't Know What Time It Was",
+      "article_url": "https://en.wikipedia.org/wiki/I_Didn't_Know_What_Time_It_Was",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-do-nothing-till-you-hear-from-me",
+      "title": "Do Nothing till You Hear from Me",
+      "article_url": "https://en.wikipedia.org/wiki/Do_Nothing_till_You_Hear_from_Me",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-don-t-get-around-much-anymore",
+      "title": "Don't Get Around Much Anymore",
+      "article_url": "https://en.wikipedia.org/wiki/Don't_Get_Around_Much_Anymore",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-polka-dots-and-moonbeams",
+      "title": "Polka Dots and Moonbeams",
+      "article_url": "https://en.wikipedia.org/wiki/Polka_Dots_and_Moonbeams",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-you-stepped-out-of-a-dream",
+      "title": "You Stepped Out of a Dream",
+      "article_url": "https://en.wikipedia.org/wiki/You_Stepped_Out_of_a_Dream",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-flamingo",
+      "title": "Flamingo",
+      "article_url": "https://en.wikipedia.org/wiki/Flamingo_(song)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-i-got-it-bad-and-that-ain-t-good",
+      "title": "I Got It Bad (and That Ain't Good)",
+      "article_url": "https://en.wikipedia.org/wiki/I_Got_It_Bad_(and_That_Ain't_Good)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-i-hear-a-rhapsody",
+      "title": "I Hear A Rhapsody",
+      "article_url": "https://en.wikipedia.org/wiki/I_Hear_a_Rhapsody",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-i-ll-remember-april",
+      "title": "I'll Remember April",
+      "article_url": "https://en.wikipedia.org/wiki/I'll_Remember_April_(song)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-jim",
+      "title": "Jim",
+      "article_url": "https://en.wikipedia.org/wiki/Jim_(song)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-just-a-sittin-and-a-rockin",
+      "title": "Just A-Sittin' and A-Rockin'",
+      "article_url": "https://en.wikipedia.org/wiki/Just_A-Sittin'_and_A-Rockin'",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-just-squeeze-me-but-please-don-t-tease-me",
+      "title": "Just Squeeze Me (But Please Don't Tease Me)",
+      "article_url": "https://en.wikipedia.org/wiki/Just_Squeeze_Me_(But_Please_Don't_Tease_Me)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-you-don-t-know-what-love-is",
+      "title": "You Don't Know What Love Is",
+      "article_url": "https://en.wikipedia.org/wiki/You_Don't_Know_What_Love_Is",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-perdido",
+      "title": "Perdido",
+      "article_url": "https://en.wikipedia.org/wiki/Perdido_(song)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-star-eyes",
+      "title": "Star Eyes",
+      "article_url": "https://en.wikipedia.org/wiki/Star_Eyes_(song)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-the-surrey-with-the-fringe-on-top",
+      "title": "The Surrey with the Fringe on Top",
+      "article_url": "https://en.wikipedia.org/wiki/The_Surrey_with_the_Fringe_on_Top",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-long-ago-and-far-away",
+      "title": "Long Ago (and Far Away)",
+      "article_url": "https://en.wikipedia.org/wiki/Long_Ago_(and_Far_Away)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-stella-by-starlight",
+      "title": "Stella by Starlight",
+      "article_url": "https://en.wikipedia.org/wiki/Stella_by_Starlight",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-i-m-just-a-lucky-so-and-so",
+      "title": "I'm Just a Lucky So-and-So",
+      "article_url": "https://en.wikipedia.org/wiki/I'm_Just_a_Lucky_So-and-So",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-angel-eyes",
+      "title": "Angel Eyes",
+      "article_url": "https://en.wikipedia.org/wiki/Angel_Eyes_(1946_song)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-day-dream",
+      "title": "Day Dream",
+      "article_url": "https://en.wikipedia.org/wiki/Day_Dream",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-do-you-know-what-it-means-to-miss-new-orleans",
+      "title": "Do You Know What It Means to Miss New Orleans",
+      "article_url": "https://en.wikipedia.org/wiki/Do_You_Know_What_It_Means_to_Miss_New_Orleans%3F",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-if-you-could-see-me-now",
+      "title": "If You Could See Me Now",
+      "article_url": "https://en.wikipedia.org/wiki/If_You_Could_See_Me_Now_(1946_song)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-nobody-else-but-me",
+      "title": "Nobody Else But Me",
+      "article_url": "https://en.wikipedia.org/wiki/Nobody_Else_but_Me",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-detour-ahead",
+      "title": "Detour Ahead",
+      "article_url": "https://en.wikipedia.org/wiki/Detour_Ahead",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-the-night-has-a-thousand-eyes",
+      "title": "The Night Has a Thousand Eyes",
+      "article_url": "https://en.wikipedia.org/wiki/The_Night_Has_a_Thousand_Eyes_(jazz_standard)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-my-foolish-heart",
+      "title": "My Foolish Heart",
+      "article_url": "https://en.wikipedia.org/wiki/My_Foolish_Heart_(song)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-if-i-were-a-bell",
+      "title": "If I Were a Bell",
+      "article_url": "https://en.wikipedia.org/wiki/If_I_Were_a_Bell",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-au-privave",
+      "title": "Au Privave",
+      "article_url": "https://en.wikipedia.org/wiki/Au_Privave",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-birks-works",
+      "title": "Birks' Works",
+      "article_url": "https://en.wikipedia.org/wiki/Birks'_Works_(composition)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-all-of-you",
+      "title": "All of You",
+      "article_url": "https://en.wikipedia.org/wiki/All_of_You_(Cole_Porter_song)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-canadian-sunset",
+      "title": "Canadian Sunset",
+      "article_url": "https://en.wikipedia.org/wiki/Canadian_Sunset",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-st-thomas",
+      "title": "St. Thomas",
+      "article_url": "https://en.wikipedia.org/wiki/St._Thomas_(song)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-i-remember-clifford",
+      "title": "I Remember Clifford",
+      "article_url": "https://en.wikipedia.org/wiki/I_Remember_Clifford_(song)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-the-best-is-yet-to-come",
+      "title": "The Best Is Yet to Come",
+      "article_url": "https://en.wikipedia.org/wiki/The_Best_Is_Yet_to_Come",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-jeannine",
+      "title": "Jeannine",
+      "article_url": "https://en.wikipedia.org/wiki/Jeannine",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-corcovado",
+      "title": "Corcovado",
+      "article_url": "https://en.wikipedia.org/wiki/Corcovado_(song)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-meditation",
+      "title": "Meditation",
+      "article_url": "https://en.wikipedia.org/wiki/Meditation_(Ant%C3%B4nio_Carlos_Jobim_song)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-bluesette",
+      "title": "Bluesette",
+      "article_url": "https://en.wikipedia.org/wiki/Bluesette",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-if-you-never-come-to-me",
+      "title": "If You Never Come to Me",
+      "article_url": "https://en.wikipedia.org/wiki/In%C3%BAtil_Paisagem",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-water-to-drink",
+      "title": "Water to Drink",
+      "article_url": "https://en.wikipedia.org/wiki/%C3%81gua_de_Beber",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-cantaloupe-island",
+      "title": "Cantaloupe Island",
+      "article_url": "https://en.wikipedia.org/wiki/Cantaloupe_Island",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-ceora",
+      "title": "Ceora",
+      "article_url": "https://en.wikipedia.org/wiki/Cornbread_(album)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-dindi",
+      "title": "Dindi",
+      "article_url": "https://en.wikipedia.org/wiki/Dindi",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-dolphin-dance",
+      "title": "Dolphin Dance",
+      "article_url": "https://en.wikipedia.org/wiki/Maiden_Voyage_(Herbie_Hancock_album)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-the-gift",
+      "title": "The Gift!",
+      "article_url": "https://en.wikipedia.org/wiki/Paul_Francis_Webster",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-triste",
+      "title": "Triste",
+      "article_url": "https://en.wikipedia.org/wiki/Triste_(Ant%C3%B4nio_Carlos_Jobim_song)",
+      "reason": "No specific musical evidence found in available source prose."
+    },
+    {
+      "id": "jazz-standard-wave",
+      "title": "Wave",
+      "article_url": "https://en.wikipedia.org/wiki/Wave_(Ant%C3%B4nio_Carlos_Jobim_song)",
+      "reason": "No specific musical evidence found in available source prose."
+    }
+  ],
+  "normalization_method": "Source-excerpt sentence filtering over seed descriptions, intro snapshots and pinned article-body paragraphs. Generic standard status and title-only fragments are excluded. Agent-facing descriptions prioritize musical analysis and feature diversity, with a 300-word/12-sentence budget (a single longer source sentence is preserved intact). Full filtered evidence is retained. Complete means evidence is present, not that every musical dimension is documented."
 }

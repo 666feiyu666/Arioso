@@ -1,0 +1,13 @@
+{
+  "corpus_id": "arioso-jazz-genres-article-evidence",
+  "schema_version": "0.1.0",
+  "generated_at": "2026-10-03T12:54:33.938Z",
+  "source_file": "jazz_genres.raw.jsonl",
+  "output_file": "jazz_genres.article_evidence.jsonl",
+  "expected_count": 56,
+  "record_count": 56,
+  "complete_count": 55,
+  "failed_count": 0,
+  "seed_only_count": 1,
+  "extraction_method": "Prose paragraphs from pinned MediaWiki article revisions, with section names; tables, block quotations, lyrics and reference sections excluded. Original intro snapshots are preserved separately."
+}

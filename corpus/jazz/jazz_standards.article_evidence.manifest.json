@@ -1,0 +1,12 @@
+{
+  "corpus_id": "arioso-jazz-standards-article-evidence",
+  "schema_version": "0.1.0",
+  "generated_at": "2026-10-03T12:42:45.189Z",
+  "source_file": "jazz_standards.raw.jsonl",
+  "output_file": "jazz_standards.article_evidence.jsonl",
+  "expected_count": 354,
+  "record_count": 354,
+  "complete_count": 354,
+  "failed_count": 0,
+  "extraction_method": "Prose paragraphs from pinned MediaWiki article revisions, with section names; tables, block quotations, lyrics and reference sections excluded. Original intro snapshots are preserved separately."
+}

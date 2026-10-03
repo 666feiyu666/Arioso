@@ -10,7 +10,8 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "corpus:normalize:jazz": "node tools/normalize-jazz-standards.mjs",
+    "corpus:enrich:jazz": "node src/corpus/enrich-jazz-corpus.mjs && node src/corpus/enrich-jazz-corpus.mjs --genres",
+    "corpus:normalize:jazz": "node src/corpus/normalize-jazz-standards.mjs && node src/corpus/normalize-jazz-genres.mjs",
     "dev": "tsx src/cli.ts",
     "orchestral:assemble": "tsx src/tools/assemble-orchestral-tasks.ts",
     "storage:organize": "tsx src/tools/organize-task-storage.ts",
