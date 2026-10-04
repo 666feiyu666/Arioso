@@ -1,0 +1,26 @@
+Instrumental only, no vocals.
+
+Aim for approximately 165 seconds, with a self-contained beginning, development and ending.
+
+Instrumental only, no vocals, humming, spoken words or choir. Contemporary acoustic neoclassical chamber music for calm solitary study, with clear melodic writing, restrained dynamics and modest scale. Intimate acoustic space with restrained natural room reverberation and clear instrumental separation. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion; no environmental sound layers, page sounds, rain, vinyl crackle, heavy percussion, horror effects or forceful climaxes.
+
+contemporary acoustic neoclassical chamber music, minimalist chamber music. focused, quietly contemplative, inward, softly resolved
+
+Rhythm: 66 BPM; Quiet, steady 4/4 with continuous eighth-note motion distributed across the trio; restrained dynamics and patient phrasing.; 4/4 meter.
+
+Harmony: C; minor with modal ambiguity.
+
+Instrumentation and interaction:
+acoustic piano: Establishes the repeating four-note pattern, supplies harmonic support, and subtly changes voicings around a sustained pedal bass. Tone: Warm, clear, lightly resonant, measured touch; spacious middle register with occasional low-register support.
+cello: Provides the patient pedal-bass foundation, answers and later shares the central motif with the violin, then settles with piano into the closing open fifth. Tone: Warm, legato, rounded low-to-middle register; restrained vibrato and connected bowing.
+violin: Enters with a narrow lyrical motif, exchanges it with cello through quiet imitation, then gradually recedes before the ending. Tone: Intimate, focused middle register, soft legato articulation, modest vibrato, never virtuosic.
+
+Development:
+[Intro] Approximately 25s. Sparse piano introduces the repeating four-note pattern over a quiet C pedal, with open space and gently descending inner voices.
+[Development] Approximately 85s. Cello adds a patient bass line; violin enters with a narrow motif. Build restrained interlocking counterpoint, passing the motif between violin and cello while piano changes voicings subtly without becoming dominant.
+[Reduction] Approximately 35s. Thin the texture gradually, removing violin first. Let piano and cello continue the pattern more sparsely, with softened register and dynamics.
+[Outro] Approximately 20s. Resolve into a hushed open fifth shared by cello and piano, allowing natural resonance and a quiet, non-grand ending.
+
+Production: Intimate acoustic chamber recording with clear separation, modest natural room reverberation, and a close but spacious perspective. Preserve the trio's restrained dynamics and natural blend. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.
+
+Avoid: vocals; humming; spoken words; choir; environmental sound layers; page sounds; rain; vinyl crackle; heavy percussion; horror effects; forceful climaxes; clipping; crackling; digital distortion.

@@ -1,0 +1,171 @@
+{
+  "count": 14,
+  "numbering": true,
+  "instrumental": true,
+  "allCompleted": true,
+  "allCandidates": false,
+  "durationTargets": [
+    150,
+    135,
+    140,
+    165,
+    145,
+    155,
+    130,
+    175,
+    125,
+    150,
+    135,
+    180,
+    120,
+    165
+  ],
+  "plannedBatchSeconds": 2070.0,
+  "actualBatchSeconds": 2049.5673469386475,
+  "qualityChecks": [
+    {
+      "number": 1,
+      "cleanStudio": true,
+      "naturalAcoustic": true,
+      "smoothTransients": true,
+      "controlledPeaks": true,
+      "noDistortion": true
+    },
+    {
+      "number": 2,
+      "cleanStudio": true,
+      "naturalAcoustic": true,
+      "smoothTransients": true,
+      "controlledPeaks": true,
+      "noDistortion": true
+    },
+    {
+      "number": 3,
+      "cleanStudio": true,
+      "naturalAcoustic": true,
+      "smoothTransients": true,
+      "controlledPeaks": true,
+      "noDistortion": true
+    },
+    {
+      "number": 4,
+      "cleanStudio": true,
+      "naturalAcoustic": true,
+      "smoothTransients": true,
+      "controlledPeaks": true,
+      "noDistortion": true
+    },
+    {
+      "number": 5,
+      "cleanStudio": true,
+      "naturalAcoustic": true,
+      "smoothTransients": true,
+      "controlledPeaks": true,
+      "noDistortion": true
+    },
+    {
+      "number": 6,
+      "cleanStudio": true,
+      "naturalAcoustic": true,
+      "smoothTransients": true,
+      "controlledPeaks": true,
+      "noDistortion": true
+    },
+    {
+      "number": 7,
+      "cleanStudio": true,
+      "naturalAcoustic": true,
+      "smoothTransients": true,
+      "controlledPeaks": true,
+      "noDistortion": true
+    },
+    {
+      "number": 8,
+      "cleanStudio": true,
+      "naturalAcoustic": true,
+      "smoothTransients": true,
+      "controlledPeaks": true,
+      "noDistortion": true
+    },
+    {
+      "number": 9,
+      "cleanStudio": true,
+      "naturalAcoustic": true,
+      "smoothTransients": true,
+      "controlledPeaks": true,
+      "noDistortion": true
+    },
+    {
+      "number": 10,
+      "cleanStudio": true,
+      "naturalAcoustic": true,
+      "smoothTransients": true,
+      "controlledPeaks": true,
+      "noDistortion": true
+    },
+    {
+      "number": 11,
+      "cleanStudio": true,
+      "naturalAcoustic": true,
+      "smoothTransients": true,
+      "controlledPeaks": true,
+      "noDistortion": true
+    },
+    {
+      "number": 12,
+      "cleanStudio": true,
+      "naturalAcoustic": true,
+      "smoothTransients": true,
+      "controlledPeaks": true,
+      "noDistortion": true
+    },
+    {
+      "number": 13,
+      "cleanStudio": true,
+      "naturalAcoustic": true,
+      "smoothTransients": true,
+      "controlledPeaks": true,
+      "noDistortion": true
+    },
+    {
+      "number": 14,
+      "cleanStudio": true,
+      "naturalAcoustic": true,
+      "smoothTransients": true,
+      "controlledPeaks": true,
+      "noDistortion": true
+    }
+  ],
+  "finalReview": "needs-work",
+  "earlierGenerationVerification": {
+    "source": "Tool checks performed in this chat after generation",
+    "decodedTrackCount": 14,
+    "allTrackDecodeExitCodes": 0,
+    "mergedDecodeExitCode": 0,
+    "decodeErrorLines": 0,
+    "audioHead200Count": 14,
+    "listeningReviewPerformed": false
+  },
+  "admissionCountsAtArchive": [
+    {
+      "state": "included",
+      "count": 14
+    }
+  ],
+  "originalVerificationAllCandidates": true,
+  "archiveIntegrity": {
+    "initialSpecCount": 14,
+    "initialPromptCount": 14,
+    "finalSpecCount": 14,
+    "finalPromptCount": 14,
+    "changedTrackNumbers": [
+      12,
+      14
+    ],
+    "unrevisedSpecCount": 12,
+    "unrevisedSpecsIdentical": true,
+    "exactPromptExports": true,
+    "brokenLocalMarkdownLinks": 0,
+    "initialSnapshotHashMatches": true
+  }
+}

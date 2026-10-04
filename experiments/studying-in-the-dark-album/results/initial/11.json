@@ -1,0 +1,84 @@
+{
+  "schemaVersion": "1.0",
+  "title": "Quiet Corrections",
+  "intent": "A calm chamber miniature in which piano and viola move from lightly detached thought to clarified, sustained lyricism.",
+  "genres": [
+    "contemporary acoustic neoclassical chamber music"
+  ],
+  "moods": [
+    "quietly focused",
+    "gently searching",
+    "clarified",
+    "restful"
+  ],
+  "tempo": {
+    "bpm": 68,
+    "feel": "Unhurried 4/4 with lightly detached offbeat piano figures, spacious viola entrances, and modest dynamic motion."
+  },
+  "tonality": {
+    "tonic": "A",
+    "mode": "A major with Mixolydian inflections and restrained borrowed minor chords"
+  },
+  "meter": "4/4",
+  "instrumentation": [
+    {
+      "name": "acoustic piano",
+      "role": "Provides the opening offbeat repeating figure, harmonic frame, interlocking counterpoint, and final suspended sonority.",
+      "timbre": "Clear, intimate, lightly detached articulation; spacious voicings with restrained resonance."
+    },
+    {
+      "name": "viola",
+      "role": "Answers the piano first with soft pizzicato, then carries the motif arco in longer lyrical phrases and understated counterpoint.",
+      "timbre": "Warm, close-miked alto register; gentle pizzicato transitioning into smooth legato arco."
+    }
+  ],
+  "structure": [
+    {
+      "section": "Intro",
+      "durationSeconds": 18,
+      "direction": "Sparse acoustic piano establishes a short, lightly detached offbeat figure in A major, with generous space and no dramatic emphasis."
+    },
+    {
+      "section": "Development",
+      "durationSeconds": 48,
+      "direction": "Viola answers with soft pizzicato, gradually restates the figure arco, and lengthens its phrases. Piano and viola interlock through subtle Mixolydian color and borrowed minor chords while dynamics remain restrained."
+    },
+    {
+      "section": "Repose",
+      "durationSeconds": 42,
+      "direction": "Pizzicato disappears; viola and piano continue in smooth legato, exchanging the motif with gently increasing warmth but no climax."
+    },
+    {
+      "section": "Outro",
+      "durationSeconds": 27,
+      "direction": "Viola recedes, leaving piano alone to slow the figure and close on a softly voiced suspended chord with natural decay."
+    }
+  ],
+  "vocals": {
+    "enabled": false,
+    "language": null,
+    "style": null,
+    "lyricalTheme": null
+  },
+  "production": "Intimate acoustic chamber recording with clear separation between piano and viola, restrained natural room reverberation, warm close perspective, controlled dynamics, and natural acoustic timbres. Clean studio recording, smooth transients and controlled peaks.",
+  "avoid": [
+    "vocals",
+    "humming",
+    "spoken words",
+    "choir",
+    "environmental sound layers",
+    "page sounds",
+    "rain",
+    "vinyl crackle",
+    "heavy percussion",
+    "forceful climaxes",
+    "clipping",
+    "crackling",
+    "digital distortion"
+  ],
+  "assumptions": [
+    "Set the tempo near 68 BPM to support spacious offbeat piano figures and legato viola entrances.",
+    "Use a compact four-part arc totaling approximately 135 seconds."
+  ],
+  "lyriaPrompt": "Instrumental only, no vocals.\n\nAim for approximately 135 seconds, with a self-contained beginning, development and ending.\n\nInstrumental only, no vocals, humming, spoken words or choir. Contemporary acoustic neoclassical chamber music for calm solitary study, with clear melodic writing, restrained dynamics and modest scale. Intimate acoustic space with restrained natural room reverberation and clear instrumental separation. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion; no environmental sound layers, page sounds, rain, vinyl crackle, heavy percussion, horror effects or forceful climaxes.\n\ncontemporary acoustic neoclassical chamber music. quietly focused, gently searching, clarified, restful\n\nRhythm: 68 BPM; Unhurried 4/4 with lightly detached offbeat piano figures, spacious viola entrances, and modest dynamic motion.; 4/4 meter.\n\nHarmony: A; A major with Mixolydian inflections and restrained borrowed minor chords.\n\nInstrumentation and interaction:\nacoustic piano: Provides the opening offbeat repeating figure, harmonic frame, interlocking counterpoint, and final suspended sonority. Tone: Clear, intimate, lightly detached articulation; spacious voicings with restrained resonance.\nviola: Answers the piano first with soft pizzicato, then carries the motif arco in longer lyrical phrases and understated counterpoint. Tone: Warm, close-miked alto register; gentle pizzicato transitioning into smooth legato arco.\n\nDevelopment:\n[Intro] Approximately 18s. Sparse acoustic piano establishes a short, lightly detached offbeat figure in A major, with generous space and no dramatic emphasis.\n[Development] Approximately 48s. Viola answers with soft pizzicato, gradually restates the figure arco, and lengthens its phrases. Piano and viola interlock through subtle Mixolydian color and borrowed minor chords while dynamics remain restrained.\n[Repose] Approximately 42s. Pizzicato disappears; viola and piano continue in smooth legato, exchanging the motif with gently increasing warmth but no climax.\n[Outro] Approximately 27s. Viola recedes, leaving piano alone to slow the figure and close on a softly voiced suspended chord with natural decay.\n\nProduction: Intimate acoustic chamber recording with clear separation between piano and viola, restrained natural room reverberation, warm close perspective, controlled dynamics, and natural acoustic timbres. Clean studio recording, smooth transients and controlled peaks.\n\nAvoid: vocals; humming; spoken words; choir; environmental sound layers; page sounds; rain; vinyl crackle; heavy percussion; forceful climaxes; clipping; crackling; digital distortion."
+}

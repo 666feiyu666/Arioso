@@ -1,0 +1,90 @@
+{
+  "schemaVersion": "1.0",
+  "title": "Midnight Concordance",
+  "intent": "A deeply reflective chamber miniature for piano, viola, and cello, shaped by slow-moving counterpoint and a quiet midnight atmosphere.",
+  "genres": [
+    "contemporary acoustic neoclassical chamber music"
+  ],
+  "moods": [
+    "introspective",
+    "shadowed",
+    "quietly convergent",
+    "softly unresolved"
+  ],
+  "tempo": {
+    "bpm": null,
+    "feel": "Free-feeling 4/4 with a barely perceptible pulse, long legato phrase arcs, and flexible breathing between gestures."
+  },
+  "tonality": {
+    "tonic": "E-flat",
+    "mode": "minor with restrained octatonic-adjacent chromatic color and suspended ninths"
+  },
+  "meter": "4/4",
+  "instrumentation": [
+    {
+      "name": "acoustic piano",
+      "role": "Begins with isolated intervals, later connects the ensemble through sparse inner motion and harmonic illumination.",
+      "timbre": "Quiet, resonant, rounded attack with generous space between notes."
+    },
+    {
+      "name": "viola",
+      "role": "Introduces a questioning two-note cell and becomes the central connective countervoice.",
+      "timbre": "Warm, dark, intimate arco tone with restrained vibrato."
+    },
+    {
+      "name": "cello",
+      "role": "Provides the low sustained foundation, then participates in the quiet convergence before returning to a solitary final presence.",
+      "timbre": "Deep, mellow legato bowing with soft sustained resonance."
+    }
+  ],
+  "structure": [
+    {
+      "section": "Intro",
+      "durationSeconds": 35,
+      "direction": "Low sustained cello tone beneath isolated piano intervals; sparse E-flat minor sonority, spacious and nearly pulse-free."
+    },
+    {
+      "section": "Development",
+      "durationSeconds": 55,
+      "direction": "Viola introduces a questioning two-note cell. Piano gradually adds delicate inner motion, while cello sustains and subtly reshapes the harmonic floor."
+    },
+    {
+      "section": "Convergence",
+      "durationSeconds": 50,
+      "direction": "The three instruments form denser but still quiet counterpoint. Motifs overlap across registers, with suspended ninths and restrained chromatic tension; never become forceful."
+    },
+    {
+      "section": "Release",
+      "durationSeconds": 35,
+      "direction": "Remove layers in reverse order: piano motion recedes, viola withdraws, and cello remains with a final isolated piano interval. End softly, without a firm dominant resolution."
+    }
+  ],
+  "vocals": {
+    "enabled": false,
+    "language": null,
+    "style": null,
+    "lyricalTheme": null
+  },
+  "production": "Intimate acoustic chamber recording with clear separation, close but natural perspective, restrained natural room reverberation, and controlled dynamics. Preserve the warm natural timbres of piano, viola, and cello; keep the stereo image modest and spacious. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.",
+  "avoid": [
+    "vocals",
+    "humming",
+    "spoken words",
+    "choir",
+    "environmental sound layers",
+    "page sounds",
+    "rain",
+    "vinyl crackle",
+    "heavy percussion",
+    "horror effects",
+    "forceful climaxes",
+    "clipping",
+    "crackling",
+    "digital distortion"
+  ],
+  "assumptions": [
+    "The supplied free-feeling 4/4 is realized as flexible chamber pulse rather than strict metric repetition.",
+    "The octave-adjacent chromatic color remains sparse and subordinate to the E-flat minor tonal center."
+  ],
+  "lyriaPrompt": "Instrumental only, no vocals.\n\nAim for approximately 175 seconds, with a self-contained beginning, development and ending.\n\nInstrumental only, no vocals, humming, spoken words or choir. Contemporary acoustic neoclassical chamber music for calm solitary study, with clear melodic writing, restrained dynamics and modest scale. Intimate acoustic space with restrained natural room reverberation and clear instrumental separation. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion; no environmental sound layers, page sounds, rain, vinyl crackle, heavy percussion, horror effects or forceful climaxes.\n\ncontemporary acoustic neoclassical chamber music. introspective, shadowed, quietly convergent, softly unresolved\n\nRhythm: Free-feeling 4/4 with a barely perceptible pulse, long legato phrase arcs, and flexible breathing between gestures.; 4/4 meter.\n\nHarmony: E-flat; minor with restrained octatonic-adjacent chromatic color and suspended ninths.\n\nInstrumentation and interaction:\nacoustic piano: Begins with isolated intervals, later connects the ensemble through sparse inner motion and harmonic illumination. Tone: Quiet, resonant, rounded attack with generous space between notes.\nviola: Introduces a questioning two-note cell and becomes the central connective countervoice. Tone: Warm, dark, intimate arco tone with restrained vibrato.\ncello: Provides the low sustained foundation, then participates in the quiet convergence before returning to a solitary final presence. Tone: Deep, mellow legato bowing with soft sustained resonance.\n\nDevelopment:\n[Intro] Approximately 35s. Low sustained cello tone beneath isolated piano intervals; sparse E-flat minor sonority, spacious and nearly pulse-free.\n[Development] Approximately 55s. Viola introduces a questioning two-note cell. Piano gradually adds delicate inner motion, while cello sustains and subtly reshapes the harmonic floor.\n[Convergence] Approximately 50s. The three instruments form denser but still quiet counterpoint. Motifs overlap across registers, with suspended ninths and restrained chromatic tension; never become forceful.\n[Release] Approximately 35s. Remove layers in reverse order: piano motion recedes, viola withdraws, and cello remains with a final isolated piano interval. End softly, without a firm dominant resolution.\n\nProduction: Intimate acoustic chamber recording with clear separation, close but natural perspective, restrained natural room reverberation, and controlled dynamics. Preserve the warm natural timbres of piano, viola, and cello; keep the stereo image modest and spacious. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.\n\nAvoid: vocals; humming; spoken words; choir; environmental sound layers; page sounds; rain; vinyl crackle; heavy percussion; horror effects; forceful climaxes; clipping; crackling; digital distortion."
+}

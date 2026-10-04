@@ -1,0 +1,103 @@
+{
+  "schemaVersion": "1.0",
+  "title": "The Lower Gallery",
+  "intent": "A quiet chamber study for piano and strings, centered on blended low-register sonority, suspended time, and gradual thinning toward repose.",
+  "genres": [
+    "contemporary acoustic neoclassical chamber music",
+    "minimalist chamber music"
+  ],
+  "moods": [
+    "dark and contemplative",
+    "patient and inward",
+    "softly luminous",
+    "quietly unresolved"
+  ],
+  "tempo": {
+    "bpm": 48,
+    "feel": "Adagio 6/4 with a sustained flexible pulse, overlapping bow changes, and no rhythmic insistence."
+  },
+  "tonality": {
+    "tonic": "F",
+    "mode": "minor with Phrygian inflections"
+  },
+  "meter": "6/4",
+  "instrumentation": [
+    {
+      "name": "acoustic piano",
+      "role": "Provides sparse harmonic illumination through widely spaced tones and delivers the final sonority.",
+      "timbre": "Warm, natural, resonant, lightly pedaled, with restrained attack."
+    },
+    {
+      "name": "violin",
+      "role": "Carries a narrow luminous upper line, passing focus gently with the piano.",
+      "timbre": "Soft legato arco in the intimate upper-middle register, with delicate vibrato."
+    },
+    {
+      "name": "viola",
+      "role": "Forms the dark inner foundation and articulates subtle harmonic changes.",
+      "timbre": "Warm, dark sustained arco with smooth bowing."
+    },
+    {
+      "name": "cello",
+      "role": "Anchors the low register with long tones and patient foundational movement.",
+      "timbre": "Rich, rounded arco with restrained vibrato and spacious phrasing."
+    }
+  ],
+  "structure": [
+    {
+      "section": "Intro",
+      "durationSeconds": 30,
+      "direction": "Cello and viola establish a dark sustained F-minor foundation with overlapping bow changes and descending inner motion."
+    },
+    {
+      "section": "Development I",
+      "durationSeconds": 45,
+      "direction": "Violin enters with a narrow luminous line while piano adds widely spaced harmonic tones; keep the texture sparse and blended."
+    },
+    {
+      "section": "Development II",
+      "durationSeconds": 55,
+      "direction": "Pass the upper focus between violin and piano as cello and viola reshape the harmony through descending chromatic inner lines and rare softened cadences."
+    },
+    {
+      "section": "Repose",
+      "durationSeconds": 30,
+      "direction": "Reduce melodic activity and density; let the strings sustain longer tones while piano becomes occasional and transparent."
+    },
+    {
+      "section": "Outro",
+      "durationSeconds": 20,
+      "direction": "Thin to cello and viola with one final softly voiced piano chord; end quietly with natural resonance and no emphatic resolution."
+    }
+  ],
+  "vocals": {
+    "enabled": false,
+    "language": null,
+    "style": null,
+    "lyricalTheme": null
+  },
+  "production": "Intimate acoustic chamber recording with close but natural separation, restrained room reverberation, warm low-register detail, and gentle stereo depth. Preserve the natural blend of piano and bowed strings. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.",
+  "avoid": [
+    "vocals",
+    "humming",
+    "spoken words",
+    "choir",
+    "heavy percussion",
+    "forceful climaxes",
+    "environmental sound layers",
+    "page sounds",
+    "rain",
+    "horror effects",
+    "excessive vibrato",
+    "bright aggressive piano attack",
+    "clipping",
+    "crackling",
+    "digital distortion"
+  ],
+  "assumptions": [
+    "Retained the 48 BPM Adagio character and 180-second form.",
+    "Kept all strings in restrained arco to preserve the blended chamber texture.",
+    "Maintained a softly unresolved ending rather than a full cadence."
+  ],
+  "lyriaPrompt": "Instrumental only, no vocals.\n\nAim for approximately 180 seconds, with a self-contained beginning, development and ending.\n\nInstrumental only, no vocals, humming, spoken words or choir. Contemporary acoustic neoclassical chamber music for calm solitary study, with clear melodic writing, restrained dynamics and modest scale. Intimate acoustic space with restrained natural room reverberation and clear instrumental separation. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion; no environmental sound layers, page sounds, rain, vinyl crackle, heavy percussion, horror effects or forceful climaxes.\n\ncontemporary acoustic neoclassical chamber music, minimalist chamber music. dark and contemplative, patient and inward, softly luminous, quietly unresolved\n\nRhythm: 48 BPM; Adagio 6/4 with a sustained flexible pulse, overlapping bow changes, and no rhythmic insistence.; 6/4 meter.\n\nHarmony: F; minor with Phrygian inflections.\n\nInstrumentation and interaction:\nacoustic piano: Provides sparse harmonic illumination through widely spaced tones and delivers the final sonority. Tone: Warm, natural, resonant, lightly pedaled, with restrained attack.\nviolin: Carries a narrow luminous upper line, passing focus gently with the piano. Tone: Soft legato arco in the intimate upper-middle register, with delicate vibrato.\nviola: Forms the dark inner foundation and articulates subtle harmonic changes. Tone: Warm, dark sustained arco with smooth bowing.\ncello: Anchors the low register with long tones and patient foundational movement. Tone: Rich, rounded arco with restrained vibrato and spacious phrasing.\n\nDevelopment:\n[Intro] Approximately 30s. Cello and viola establish a dark sustained F-minor foundation with overlapping bow changes and descending inner motion.\n[Development I] Approximately 45s. Violin enters with a narrow luminous line while piano adds widely spaced harmonic tones; keep the texture sparse and blended.\n[Development II] Approximately 55s. Pass the upper focus between violin and piano as cello and viola reshape the harmony through descending chromatic inner lines and rare softened cadences.\n[Repose] Approximately 30s. Reduce melodic activity and density; let the strings sustain longer tones while piano becomes occasional and transparent.\n[Outro] Approximately 20s. Thin to cello and viola with one final softly voiced piano chord; end quietly with natural resonance and no emphatic resolution.\n\nProduction: Intimate acoustic chamber recording with close but natural separation, restrained room reverberation, warm low-register detail, and gentle stereo depth. Preserve the natural blend of piano and bowed strings. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.\n\nAvoid: vocals; humming; spoken words; choir; heavy percussion; forceful climaxes; environmental sound layers; page sounds; rain; horror effects; excessive vibrato; bright aggressive piano attack; clipping; crackling; digital distortion."
+}

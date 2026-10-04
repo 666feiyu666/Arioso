@@ -1,0 +1,164 @@
+{
+  "source": "Observed pre-repair task and persisted final task",
+  "changedTrackNumbers": [
+    12,
+    14
+  ],
+  "tracks": [
+    {
+      "number": 1,
+      "title": "Dusk at the Reading Room",
+      "changed": false,
+      "changedFields": [],
+      "initialSpec": "initial/01.json",
+      "finalSpec": "final/01.json",
+      "initialPrompt": "initial/01.prompt.txt",
+      "finalPrompt": "final/01.prompt.txt"
+    },
+    {
+      "number": 2,
+      "title": "Dust in the Lamplight",
+      "changed": false,
+      "changedFields": [],
+      "initialSpec": "initial/02.json",
+      "finalSpec": "final/02.json",
+      "initialPrompt": "initial/02.prompt.txt",
+      "finalPrompt": "final/02.prompt.txt"
+    },
+    {
+      "number": 3,
+      "title": "First Margins",
+      "changed": false,
+      "changedFields": [],
+      "initialSpec": "initial/03.json",
+      "finalSpec": "final/03.json",
+      "initialPrompt": "initial/03.prompt.txt",
+      "finalPrompt": "final/03.prompt.txt"
+    },
+    {
+      "number": 4,
+      "title": "The Long Table",
+      "changed": false,
+      "changedFields": [],
+      "initialSpec": "initial/04.json",
+      "finalSpec": "final/04.json",
+      "initialPrompt": "initial/04.prompt.txt",
+      "finalPrompt": "final/04.prompt.txt"
+    },
+    {
+      "number": 5,
+      "title": "Index of Shadows",
+      "changed": false,
+      "changedFields": [],
+      "initialSpec": "initial/05.json",
+      "finalSpec": "final/05.json",
+      "initialPrompt": "initial/05.prompt.txt",
+      "finalPrompt": "final/05.prompt.txt"
+    },
+    {
+      "number": 6,
+      "title": "Between Shelves",
+      "changed": false,
+      "changedFields": [],
+      "initialSpec": "initial/06.json",
+      "finalSpec": "final/06.json",
+      "initialPrompt": "initial/06.prompt.txt",
+      "finalPrompt": "final/06.prompt.txt"
+    },
+    {
+      "number": 7,
+      "title": "A Page Turned Slowly",
+      "changed": false,
+      "changedFields": [],
+      "initialSpec": "initial/07.json",
+      "finalSpec": "final/07.json",
+      "initialPrompt": "initial/07.prompt.txt",
+      "finalPrompt": "final/07.prompt.txt"
+    },
+    {
+      "number": 8,
+      "title": "Midnight Concordance",
+      "changed": false,
+      "changedFields": [],
+      "initialSpec": "initial/08.json",
+      "finalSpec": "final/08.json",
+      "initialPrompt": "initial/08.prompt.txt",
+      "finalPrompt": "final/08.prompt.txt"
+    },
+    {
+      "number": 9,
+      "title": "Marginalia in Blue",
+      "changed": false,
+      "changedFields": [],
+      "initialSpec": "initial/09.json",
+      "finalSpec": "final/09.json",
+      "initialPrompt": "initial/09.prompt.txt",
+      "finalPrompt": "final/09.prompt.txt"
+    },
+    {
+      "number": 10,
+      "title": "The Clock Without Hands",
+      "changed": false,
+      "changedFields": [],
+      "initialSpec": "initial/10.json",
+      "finalSpec": "final/10.json",
+      "initialPrompt": "initial/10.prompt.txt",
+      "finalPrompt": "final/10.prompt.txt"
+    },
+    {
+      "number": 11,
+      "title": "Quiet Corrections",
+      "changed": false,
+      "changedFields": [],
+      "initialSpec": "initial/11.json",
+      "finalSpec": "final/11.json",
+      "initialPrompt": "initial/11.prompt.txt",
+      "finalPrompt": "final/11.prompt.txt"
+    },
+    {
+      "number": 12,
+      "title": "The Lower Gallery",
+      "changed": true,
+      "changedFields": [
+        "intent",
+        "tempo",
+        "instrumentation",
+        "structure",
+        "production",
+        "assumptions",
+        "lyriaPrompt"
+      ],
+      "initialSpec": "initial/12.json",
+      "finalSpec": "final/12.json",
+      "initialPrompt": "initial/12.prompt.txt",
+      "finalPrompt": "final/12.prompt.txt"
+    },
+    {
+      "number": 13,
+      "title": "Last Notes Before Closing",
+      "changed": false,
+      "changedFields": [],
+      "initialSpec": "initial/13.json",
+      "finalSpec": "final/13.json",
+      "initialPrompt": "initial/13.prompt.txt",
+      "finalPrompt": "final/13.prompt.txt"
+    },
+    {
+      "number": 14,
+      "title": "Lights Out in the Library",
+      "changed": true,
+      "changedFields": [
+        "intent",
+        "tonality",
+        "instrumentation",
+        "structure",
+        "assumptions",
+        "lyriaPrompt"
+      ],
+      "initialSpec": "initial/14.json",
+      "finalSpec": "final/14.json",
+      "initialPrompt": "initial/14.prompt.txt",
+      "finalPrompt": "final/14.prompt.txt"
+    }
+  ]
+}

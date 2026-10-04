@@ -1,0 +1,78 @@
+{
+  "schemaVersion": "1.0",
+  "title": "Last Notes Before Closing",
+  "intent": "A spacious solo-piano study miniature that gradually dissolves into the closing hush of a reading session.",
+  "genres": [
+    "contemporary acoustic neoclassical",
+    "minimalist piano"
+  ],
+  "moods": [
+    "weightless concentration",
+    "quiet introspection",
+    "soft repose"
+  ],
+  "tempo": {
+    "bpm": 52,
+    "feel": "Slow 4/4 with gently separated broken chords, generous silence, and flexible phrase endings."
+  },
+  "tonality": {
+    "tonic": "G",
+    "mode": "natural minor opening toward G Dorian, ending with an understated major sixth color"
+  },
+  "meter": "4/4",
+  "instrumentation": [
+    {
+      "name": "acoustic piano",
+      "role": "Sole voice; presents isolated intervals, descending motif, sparse accompaniment, and final incomplete melodic gesture.",
+      "timbre": "Warm, intimate, lightly voiced, natural sustain, restrained touch, low-to-middle register with a brief luminous upper-register rise."
+    }
+  ],
+  "structure": [
+    {
+      "section": "Intro",
+      "durationSeconds": 25,
+      "direction": "Isolated low-to-middle-register intervals establish spaciousness, followed by a simple descending three-note motif with ample silence."
+    },
+    {
+      "section": "Development",
+      "durationSeconds": 40,
+      "direction": "Gradually connect the intervals into a flowing but sparse broken-chord accompaniment. Keep dynamics controlled and let the motif recur in subtly varied registers."
+    },
+    {
+      "section": "Release",
+      "durationSeconds": 30,
+      "direction": "Allow the melody to rise briefly into the upper register, then recede. Reduce harmonic density and remove bass support, leaving more space between gestures."
+    },
+    {
+      "section": "Outro",
+      "durationSeconds": 25,
+      "direction": "Present an incomplete return of the descending motif, ending on a soft resonant upper chord colored by G Dorian and a gentle major sixth; allow natural decay."
+    }
+  ],
+  "vocals": {
+    "enabled": false,
+    "language": null,
+    "style": null,
+    "lyricalTheme": null
+  },
+  "production": "Intimate acoustic piano recording in a quiet, modest room with restrained natural reverberation, clear articulation, warm resonance, and generous silence between phrases. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.",
+  "avoid": [
+    "vocals",
+    "humming",
+    "spoken words",
+    "choir",
+    "environmental sound layers",
+    "page sounds",
+    "rain",
+    "heavy percussion",
+    "forceful climaxes",
+    "clipping",
+    "crackling",
+    "digital distortion"
+  ],
+  "assumptions": [
+    "A gentle 52 BPM pulse supports the requested spacious 4/4 pacing.",
+    "The final major sixth is treated as a subtle G-Dorian color rather than a bright full resolution."
+  ],
+  "lyriaPrompt": "Instrumental only, no vocals.\n\nAim for approximately 120 seconds, with a self-contained beginning, development and ending.\n\nInstrumental only, no vocals, humming, spoken words or choir. Contemporary acoustic neoclassical chamber music for calm solitary study, with clear melodic writing, restrained dynamics and modest scale. Intimate acoustic space with restrained natural room reverberation and clear instrumental separation. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion; no environmental sound layers, page sounds, rain, vinyl crackle, heavy percussion, horror effects or forceful climaxes.\n\ncontemporary acoustic neoclassical, minimalist piano. weightless concentration, quiet introspection, soft repose\n\nRhythm: 52 BPM; Slow 4/4 with gently separated broken chords, generous silence, and flexible phrase endings.; 4/4 meter.\n\nHarmony: G; natural minor opening toward G Dorian, ending with an understated major sixth color.\n\nInstrumentation and interaction:\nacoustic piano: Sole voice; presents isolated intervals, descending motif, sparse accompaniment, and final incomplete melodic gesture. Tone: Warm, intimate, lightly voiced, natural sustain, restrained touch, low-to-middle register with a brief luminous upper-register rise.\n\nDevelopment:\n[Intro] Approximately 25s. Isolated low-to-middle-register intervals establish spaciousness, followed by a simple descending three-note motif with ample silence.\n[Development] Approximately 40s. Gradually connect the intervals into a flowing but sparse broken-chord accompaniment. Keep dynamics controlled and let the motif recur in subtly varied registers.\n[Release] Approximately 30s. Allow the melody to rise briefly into the upper register, then recede. Reduce harmonic density and remove bass support, leaving more space between gestures.\n[Outro] Approximately 25s. Present an incomplete return of the descending motif, ending on a soft resonant upper chord colored by G Dorian and a gentle major sixth; allow natural decay.\n\nProduction: Intimate acoustic piano recording in a quiet, modest room with restrained natural reverberation, clear articulation, warm resonance, and generous silence between phrases. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.\n\nAvoid: vocals; humming; spoken words; choir; environmental sound layers; page sounds; rain; heavy percussion; forceful climaxes; clipping; crackling; digital distortion."
+}

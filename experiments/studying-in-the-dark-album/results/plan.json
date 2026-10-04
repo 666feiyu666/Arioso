@@ -1,0 +1,193 @@
+{
+  "albumTitle": "Studying in the Dark",
+  "albumMind": "A quietly continuous night in an old library: dusk arrival, settled concentration, inward reflection, and a softened closing hour. Contemporary acoustic piano and intimate strings use clear motifs, restrained counterpoint, low-register shadows, modal color, and gentle harmonic motion to support sustained reading without demanding attention.",
+  "cohesionStrategy": "Piano anchors every candidate, while the foreground rotates among solo piano, cello, viola, and small string groupings. The first group favors clear pulse and arrival gestures; the middle group deepens counterpoint, modal ambiguity, and lower-register focus; the final group thins toward repose. Meter, articulation, motif shape, harmonic rhythm, register, and chamber interaction vary substantially, but dynamics remain controlled and spaces remain intimate. Each piece is independently shaped with a gentle opening, modest development, and softened ending.",
+  "sharedSoundContract": "Instrumental only, no vocals, humming, spoken words or choir. Contemporary acoustic neoclassical chamber music for calm solitary study, with clear melodic writing, restrained dynamics and modest scale. Intimate acoustic space with restrained natural room reverberation and clear instrumental separation. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion; no environmental sound layers, page sounds, rain, vinyl crackle, heavy percussion, horror effects or forceful climaxes.",
+  "tracks": [
+    {
+      "number": 1,
+      "title": "Dusk at the Reading Room",
+      "musicalRole": "Piano introduces the library’s arrival through a measured walking motif; cello enters as a quiet shadow rather than a lead.",
+      "instruments": [
+        "acoustic piano",
+        "cello"
+      ],
+      "groove": "Slow 4/4, evenly spaced quarter-note pulse with gently breathing rests.",
+      "harmony": "D minor with Dorian inflections, suspended fourths, and gradual inner-voice changes.",
+      "development": "Begin with sparse low-to-middle piano chords and a three-note motif. Add legato cello responses, then let piano and cello briefly overlap in calm counterpoint before returning to the opening motif in a lower, quieter register and ending on a soft unresolved sixth.",
+      "targetSeconds": 150
+    },
+    {
+      "number": 2,
+      "title": "Dust in the Lamplight",
+      "musicalRole": "Solo piano studies a delicate repeating figure whose small variations suggest settling into concentration.",
+      "instruments": [
+        "acoustic piano"
+      ],
+      "groove": "6/8, slow rocking compound pulse with understated left-hand ostinato.",
+      "harmony": "E minor, colored by B Phrygian touches and slowly shifting added tones.",
+      "development": "Open with a transparent two-bar arpeggiated figure. Gradually place a singing melody above it, alter the figure’s final notes, and briefly darken the bass without increasing volume. Thin the texture until only a partial reprise remains, ending with natural decay.",
+      "targetSeconds": 135
+    },
+    {
+      "number": 3,
+      "title": "First Margins",
+      "musicalRole": "Viola carries a restrained lyrical line while piano supplies spacious, non-percussive annotations beneath it.",
+      "instruments": [
+        "acoustic piano",
+        "viola"
+      ],
+      "groove": "Unhurried 3/4 with flexible phrase lengths and no emphatic downbeats.",
+      "harmony": "A minor with modal mixture, chromatic inner pedals, and delayed cadences.",
+      "development": "Piano begins with widely spaced intervals; viola enters in a narrow, speech-like register. The instruments exchange the motif, then join briefly in parallel sixths before separating. Close by reducing the viola to held tones over isolated piano notes.",
+      "targetSeconds": 140
+    },
+    {
+      "number": 4,
+      "title": "The Long Table",
+      "musicalRole": "A small piano trio creates sustained concentration through interlocking lines rather than a dominant melody.",
+      "instruments": [
+        "acoustic piano",
+        "violin",
+        "cello"
+      ],
+      "groove": "4/4, quiet continuous eighth-note motion distributed across the ensemble.",
+      "harmony": "C minor with modal ambiguity, pedal bass, and gently descending inner voices.",
+      "development": "Piano establishes a repeating four-note pattern, cello adds a patient bass line, and violin enters with a narrow motif. Shift the motif between violin and cello while the piano subtly changes its voicings. Reduce the violin first, then let cello and piano settle into a hushed open fifth.",
+      "targetSeconds": 165
+    },
+    {
+      "number": 5,
+      "title": "Index of Shadows",
+      "musicalRole": "Solo piano foregrounds low-register resonance and a clear melody that gradually becomes more inward.",
+      "instruments": [
+        "acoustic piano"
+      ],
+      "groove": "Sparse 5/4 grouped 2+3, smooth and unaccented rather than angular.",
+      "harmony": "F-sharp minor with Aeolian color, suspended resolutions, and slow harmonic rhythm.",
+      "development": "Start with low bass notes followed by carefully spaced treble phrases. Extend the melody through subtle registral displacement, then introduce a second voice in the middle register. Let the 5/4 grouping dissolve into freer spacing before a quiet return of the opening bass and a soft minor-third ending.",
+      "targetSeconds": 145
+    },
+    {
+      "number": 6,
+      "title": "Between Shelves",
+      "musicalRole": "Cello and viola form a warm contrapuntal duet, with piano appearing only as a restrained harmonic frame.",
+      "instruments": [
+        "acoustic piano",
+        "viola",
+        "cello"
+      ],
+      "groove": "Gentle 3/2, long legato beats with staggered entrances.",
+      "harmony": "G minor moving through G Dorian and related modal regions, avoiding strong dominant closure.",
+      "development": "Viola begins with a sustained rising figure; cello answers beneath it. Piano enters with widely spaced chords, and the strings gradually trade shorter versions of the figure. Bring the voices into a calm unison, then separate them into descending lines as the piano fades to a quiet open sonority.",
+      "targetSeconds": 155
+    },
+    {
+      "number": 7,
+      "title": "A Page Turned Slowly",
+      "musicalRole": "Piano and violin share a simple motif, alternating foreground and background without dramatic contrast.",
+      "instruments": [
+        "acoustic piano",
+        "violin"
+      ],
+      "groove": "2/2 at a gentle walking pace, lightly articulated repeated eighth notes.",
+      "harmony": "B-flat minor with occasional Dorian sixths and chromatic passing basses.",
+      "development": "Piano presents the motif alone; violin repeats it in longer notes. Develop through imitation and small rhythmic elongations, briefly placing violin in the upper middle register while piano moves below. Return to the original exchange, soften articulation, and end on a suspended chord.",
+      "targetSeconds": 130
+    },
+    {
+      "number": 8,
+      "title": "Midnight Concordance",
+      "musicalRole": "Piano, viola, and cello create the album’s deepest reflective chamber texture through slow-moving counterpoint.",
+      "instruments": [
+        "acoustic piano",
+        "viola",
+        "cello"
+      ],
+      "groove": "Free-feeling 4/4 with a barely perceptible pulse and long phrase arcs.",
+      "harmony": "E-flat minor with octatonic-adjacent chromatic color used sparingly, plus suspended ninths.",
+      "development": "Open with cello’s low sustained tone under isolated piano intervals. Viola introduces a questioning two-note cell; piano gradually connects the voices with inner motion. Allow a denser but still quiet convergence, then remove layers in reverse order until cello and one piano interval remain.",
+      "targetSeconds": 175
+    },
+    {
+      "number": 9,
+      "title": "Marginalia in Blue",
+      "musicalRole": "Solo piano balances a lucid upper melody against a repeating bass pattern, maintaining focus through gentle asymmetry.",
+      "instruments": [
+        "acoustic piano"
+      ],
+      "groove": "7/8 grouped 3+2+2, smooth motor rhythm without accent-heavy meter.",
+      "harmony": "C-sharp minor with Lydian inflections over a persistent tonic pedal.",
+      "development": "Establish the asymmetrical bass and a concise melody. Shift the melody across bar lines, add a quiet middle voice, and briefly suspend the bass pattern while the harmony opens. Restore the original pattern with fewer notes and close on a softened added-sixth sonority.",
+      "targetSeconds": 125
+    },
+    {
+      "number": 10,
+      "title": "The Clock Without Hands",
+      "musicalRole": "A cello-led miniature uses piano resonance as a still backdrop, emphasizing patience and suspended time.",
+      "instruments": [
+        "acoustic piano",
+        "cello"
+      ],
+      "groove": "Slow 3/4, broad legato phrases with occasional rests between gestures.",
+      "harmony": "D-flat major shadowed by minor sixths, modal mixture, and unresolved stepwise bass motion.",
+      "development": "Piano lays down three quiet chordal landmarks; cello answers with a descending lament figure. Expand the figure into a longer arch, then let piano briefly carry its inversion while cello sustains above. Return to the opening cello descent and finish in a calm, translucent major-minor ambiguity.",
+      "targetSeconds": 150
+    },
+    {
+      "number": 11,
+      "title": "Quiet Corrections",
+      "musicalRole": "Piano and viola use restrained pizzicato-to-arco contrast to represent thought becoming clarified, without breaking the calm.",
+      "instruments": [
+        "acoustic piano",
+        "viola"
+      ],
+      "groove": "4/4 with lightly detached offbeat piano figures and spacious viola entrances.",
+      "harmony": "A major moving through A Mixolydian and borrowed minor chords, with restrained tension and release.",
+      "development": "Piano begins with a short repeating figure; viola first answers with soft pizzicato, then restates it arco. Develop by interlocking the figures and lengthening the viola’s phrases, keeping dynamics modest. Remove pizzicato, return to legato, and close with piano alone on a gently voiced suspended chord.",
+      "targetSeconds": 135
+    },
+    {
+      "number": 12,
+      "title": "The Lower Gallery",
+      "musicalRole": "A small string trio explores low-register blended sonority while piano provides slow harmonic illumination.",
+      "instruments": [
+        "acoustic piano",
+        "violin",
+        "viola",
+        "cello"
+      ],
+      "groove": "Adagio 6/4, sustained pulse with overlapping bow changes and no rhythmic insistence.",
+      "harmony": "F minor with Phrygian inflections, descending chromatic inner lines, and rare clear cadences.",
+      "development": "Cello and viola establish a dark sustained foundation; violin enters with a narrow, luminous line and piano adds widely spaced tones. Let the upper line pass between violin and piano as the lower strings subtly change voicings. Thin the texture to cello, viola, and one final piano chord, ending quietly.",
+      "targetSeconds": 180
+    },
+    {
+      "number": 13,
+      "title": "Last Notes Before Closing",
+      "musicalRole": "Solo piano revisits the album’s study language in a more spacious, nearly weightless form.",
+      "instruments": [
+        "acoustic piano"
+      ],
+      "groove": "Slow 4/4 with broken chords separated by generous silence.",
+      "harmony": "G minor opening toward G Dorian and an understated final major sixth.",
+      "development": "Begin with isolated low-to-middle-register intervals and a simple descending motif. Gradually connect them into a flowing but sparse accompaniment, then let the melody rise briefly before receding. Remove bass support and leave the motif incomplete, ending with a soft resonant upper chord.",
+      "targetSeconds": 120
+    },
+    {
+      "number": 14,
+      "title": "Lights Out in the Library",
+      "musicalRole": "Piano, viola, and cello provide a final gentle synthesis, recalling earlier motifs without becoming grand or conclusive.",
+      "instruments": [
+        "acoustic piano",
+        "viola",
+        "cello"
+      ],
+      "groove": "Very slow 3/4, rocking sustained accompaniment with flexible rubato at phrase endings.",
+      "harmony": "D minor gradually softened by Dorian sixths, open fifths, and suspended resolutions.",
+      "development": "Piano opens with a quiet version of the arrival motif; viola recalls the narrow lyrical gesture while cello anchors the lower register. Bring the three voices together in a warm, restrained counterpoint, then gradually remove viola and cello activity. Let piano repeat the motif more slowly and end on a low open fifth with natural decay.",
+      "targetSeconds": 165
+    }
+  ],
+  "schemaVersion": "1.0"
+}

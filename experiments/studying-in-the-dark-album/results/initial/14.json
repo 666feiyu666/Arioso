@@ -1,0 +1,90 @@
+{
+  "schemaVersion": "1.0",
+  "title": "Lights Out in the Library",
+  "intent": "A quiet closing chamber miniature: piano, viola, and cello gently synthesize reflective study motifs before dissolving into stillness.",
+  "genres": [
+    "contemporary acoustic neoclassical chamber music",
+    "minimalist piano trio"
+  ],
+  "moods": [
+    "hushed arrival",
+    "warm reflection",
+    "softened repose"
+  ],
+  "tempo": {
+    "bpm": 48,
+    "feel": "Very slow 3/4 with a gentle rocking pulse and flexible rubato at phrase endings."
+  },
+  "tonality": {
+    "tonic": "D",
+    "mode": "D minor gradually softened by Dorian sixths, open fifths, and suspended resolutions"
+  },
+  "meter": "3/4",
+  "instrumentation": [
+    {
+      "name": "acoustic piano",
+      "role": "Introduces and closes the recurring three-note arrival motif; provides sparse rocking harmony and final low open fifth.",
+      "timbre": "Warm, intimate, lightly pedaled, spaciously voiced, with natural resonance."
+    },
+    {
+      "name": "viola",
+      "role": "Carries a narrow lyrical gesture, then joins the piano in restrained inner counterpoint before receding.",
+      "timbre": "Soft legato arco, warm middle register, understated vibrato."
+    },
+    {
+      "name": "cello",
+      "role": "Anchors the lower register with sustained tones and quiet counterlines, then gradually withdraws.",
+      "timbre": "Warm, rounded legato arco with gentle bow pressure and restrained vibrato."
+    }
+  ],
+  "structure": [
+    {
+      "section": "Intro",
+      "durationSeconds": 30,
+      "direction": "Sparse piano states a quiet three-note arrival motif over open D-minor sonorities; very gentle rocking 3/4 pulse, ample silence."
+    },
+    {
+      "section": "Development",
+      "durationSeconds": 55,
+      "direction": "Viola enters with a narrow lyrical gesture; cello establishes sustained low support. The trio develops warm, restrained counterpoint with Dorian sixths, suspended tones, and subtle inner-voice motion."
+    },
+    {
+      "section": "Recollection",
+      "durationSeconds": 40,
+      "direction": "All three instruments briefly converge in calm chamber interplay. Keep dynamics modest, melodic lines clear, and avoid any grand climax."
+    },
+    {
+      "section": "Dissolution",
+      "durationSeconds": 40,
+      "direction": "Viola and cello gradually reduce activity and fall silent. Piano repeats the arrival motif more slowly, with widening rests and softer resonance, ending on a low open fifth with natural decay."
+    }
+  ],
+  "vocals": {
+    "enabled": false,
+    "language": null,
+    "style": null,
+    "lyricalTheme": null
+  },
+  "production": "Intimate acoustic chamber recording with close, clear separation and restrained natural room reverberation. Preserve warm piano resonance, blended viola and cello presence, gentle dynamics, smooth transients and controlled peaks. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.",
+  "avoid": [
+    "vocals",
+    "humming",
+    "spoken words",
+    "choir",
+    "environmental sound layers",
+    "page sounds",
+    "rain",
+    "vinyl crackle",
+    "heavy percussion",
+    "forceful climaxes",
+    "clipping",
+    "crackling",
+    "digital distortion"
+  ],
+  "assumptions": [
+    "Set a slow 48 BPM pulse to realize the requested very slow 3/4 feel.",
+    "Treat the arrival motif as a concise three-note piano figure.",
+    "Use arco strings throughout for a continuous, softened chamber texture."
+  ],
+  "lyriaPrompt": "Instrumental only, no vocals.\n\nAim for approximately 165 seconds, with a self-contained beginning, development and ending.\n\nInstrumental only, no vocals, humming, spoken words or choir. Contemporary acoustic neoclassical chamber music for calm solitary study, with clear melodic writing, restrained dynamics and modest scale. Intimate acoustic space with restrained natural room reverberation and clear instrumental separation. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion; no environmental sound layers, page sounds, rain, vinyl crackle, heavy percussion, horror effects or forceful climaxes.\n\ncontemporary acoustic neoclassical chamber music, minimalist piano trio. hushed arrival, warm reflection, softened repose\n\nRhythm: 48 BPM; Very slow 3/4 with a gentle rocking pulse and flexible rubato at phrase endings.; 3/4 meter.\n\nHarmony: D; D minor gradually softened by Dorian sixths, open fifths, and suspended resolutions.\n\nInstrumentation and interaction:\nacoustic piano: Introduces and closes the recurring three-note arrival motif; provides sparse rocking harmony and final low open fifth. Tone: Warm, intimate, lightly pedaled, spaciously voiced, with natural resonance.\nviola: Carries a narrow lyrical gesture, then joins the piano in restrained inner counterpoint before receding. Tone: Soft legato arco, warm middle register, understated vibrato.\ncello: Anchors the lower register with sustained tones and quiet counterlines, then gradually withdraws. Tone: Warm, rounded legato arco with gentle bow pressure and restrained vibrato.\n\nDevelopment:\n[Intro] Approximately 30s. Sparse piano states a quiet three-note arrival motif over open D-minor sonorities; very gentle rocking 3/4 pulse, ample silence.\n[Development] Approximately 55s. Viola enters with a narrow lyrical gesture; cello establishes sustained low support. The trio develops warm, restrained counterpoint with Dorian sixths, suspended tones, and subtle inner-voice motion.\n[Recollection] Approximately 40s. All three instruments briefly converge in calm chamber interplay. Keep dynamics modest, melodic lines clear, and avoid any grand climax.\n[Dissolution] Approximately 40s. Viola and cello gradually reduce activity and fall silent. Piano repeats the arrival motif more slowly, with widening rests and softer resonance, ending on a low open fifth with natural decay.\n\nProduction: Intimate acoustic chamber recording with close, clear separation and restrained natural room reverberation. Preserve warm piano resonance, blended viola and cello presence, gentle dynamics, smooth transients and controlled peaks. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.\n\nAvoid: vocals; humming; spoken words; choir; environmental sound layers; page sounds; rain; vinyl crackle; heavy percussion; forceful climaxes; clipping; crackling; digital distortion."
+}

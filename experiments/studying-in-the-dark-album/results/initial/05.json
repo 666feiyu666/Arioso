@@ -1,0 +1,81 @@
+{
+  "schemaVersion": "1.0",
+  "title": "Index of Shadows",
+  "intent": "A restrained solo-piano study of inward concentration, shaped by low-register resonance, asymmetrical pulse, and gradually thinning musical thought.",
+  "genres": [
+    "contemporary acoustic neoclassical",
+    "minimalist solo piano",
+    "chamber study music"
+  ],
+  "moods": [
+    "quietly focused",
+    "shadowed and contemplative",
+    "inward",
+    "softly unresolved"
+  ],
+  "tempo": {
+    "bpm": 58,
+    "feel": "Sparse, unaccented 5/4 grouped 2+3; measured pacing with gentle breathing room and no angular emphasis."
+  },
+  "tonality": {
+    "tonic": "F-sharp",
+    "mode": "minor with Aeolian color"
+  },
+  "meter": "5/4, gradually dissolving into freer spacing",
+  "instrumentation": [
+    {
+      "name": "acoustic piano",
+      "role": "Sole instrument; low-register bass notes establish resonance, treble phrases carry the principal melody, and a restrained middle voice emerges during the development.",
+      "timbre": "Warm, intimate, naturally resonant acoustic tone; soft legato touch, carefully spaced notes, restrained pedal, and clear register separation."
+    }
+  ],
+  "structure": [
+    {
+      "section": "Intro",
+      "durationSeconds": 25,
+      "direction": "Sparse low bass notes establish F-sharp minor and the 2+3 pulse, followed by widely spaced treble phrases with suspended harmonic motion."
+    },
+    {
+      "section": "Development",
+      "durationSeconds": 55,
+      "direction": "Extend the melody through subtle registral displacement; gradually introduce a quiet middle-register second voice while preserving low density and slow harmonic rhythm."
+    },
+    {
+      "section": "Dissolution",
+      "durationSeconds": 35,
+      "direction": "Allow the 5/4 grouping to loosen into freer spacing. Reduce rhythmic definition and let the melody become more inward and fragmentary without increasing volume."
+    },
+    {
+      "section": "Outro",
+      "durationSeconds": 30,
+      "direction": "Return quietly to the opening low bass resonance, simplify the texture, and end on a soft unresolved minor-third sonority with natural decay."
+    }
+  ],
+  "vocals": {
+    "enabled": false,
+    "language": null,
+    "style": null,
+    "lyricalTheme": null
+  },
+  "production": "Intimate acoustic piano recording in a quiet, modest room with restrained natural reverberation, clear separation between low, middle, and treble registers, controlled dynamics, and generous silence between phrases. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.",
+  "avoid": [
+    "vocals",
+    "humming",
+    "spoken words",
+    "choir",
+    "heavy percussion",
+    "environmental sound layers",
+    "page sounds",
+    "rain",
+    "vinyl crackle",
+    "forceful climaxes",
+    "clipping",
+    "crackling",
+    "digital distortion"
+  ],
+  "assumptions": [
+    "The target tempo is set near 58 BPM to support the sparse 5/4 pulse without sounding mechanical.",
+    "The ending remains gently unresolved through a soft minor-third sonority rather than a full cadence."
+  ],
+  "lyriaPrompt": "Instrumental only, no vocals.\n\nAim for approximately 145 seconds, with a self-contained beginning, development and ending.\n\nInstrumental only, no vocals, humming, spoken words or choir. Contemporary acoustic neoclassical chamber music for calm solitary study, with clear melodic writing, restrained dynamics and modest scale. Intimate acoustic space with restrained natural room reverberation and clear instrumental separation. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion; no environmental sound layers, page sounds, rain, vinyl crackle, heavy percussion, horror effects or forceful climaxes.\n\ncontemporary acoustic neoclassical, minimalist solo piano, chamber study music. quietly focused, shadowed and contemplative, inward, softly unresolved\n\nRhythm: 58 BPM; Sparse, unaccented 5/4 grouped 2+3; measured pacing with gentle breathing room and no angular emphasis.; 5/4, gradually dissolving into freer spacing meter.\n\nHarmony: F-sharp; minor with Aeolian color.\n\nInstrumentation and interaction:\nacoustic piano: Sole instrument; low-register bass notes establish resonance, treble phrases carry the principal melody, and a restrained middle voice emerges during the development. Tone: Warm, intimate, naturally resonant acoustic tone; soft legato touch, carefully spaced notes, restrained pedal, and clear register separation.\n\nDevelopment:\n[Intro] Approximately 25s. Sparse low bass notes establish F-sharp minor and the 2+3 pulse, followed by widely spaced treble phrases with suspended harmonic motion.\n[Development] Approximately 55s. Extend the melody through subtle registral displacement; gradually introduce a quiet middle-register second voice while preserving low density and slow harmonic rhythm.\n[Dissolution] Approximately 35s. Allow the 5/4 grouping to loosen into freer spacing. Reduce rhythmic definition and let the melody become more inward and fragmentary without increasing volume.\n[Outro] Approximately 30s. Return quietly to the opening low bass resonance, simplify the texture, and end on a soft unresolved minor-third sonority with natural decay.\n\nProduction: Intimate acoustic piano recording in a quiet, modest room with restrained natural reverberation, clear separation between low, middle, and treble registers, controlled dynamics, and generous silence between phrases. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.\n\nAvoid: vocals; humming; spoken words; choir; heavy percussion; environmental sound layers; page sounds; rain; vinyl crackle; forceful climaxes; clipping; crackling; digital distortion."
+}

@@ -1,0 +1,31 @@
+{
+  "taskId": "c92f722d-2212-4e82-9499-178b479b552f",
+  "createdAt": "2026-10-04T09:24:26.028Z",
+  "archivedAt": "2026-10-04T09:55:14.7445942Z",
+  "timezone": "Asia/Shanghai",
+  "composerModel": "gpt-5.6-luna",
+  "lyriaModel": "lyria-3.5",
+  "sourceWorkflow": "Existing Arioso product album task; archived after completion",
+  "sourceTaskPath": "../../../outputs/tasks/04-album/c92f722d-2212-4e82-9499-178b479b552f/task.json",
+  "sourceTaskSha256": "bcedae708ba7bc10eded0d6209ab9a937ce3e944d5393d012852d690aa1f6f53",
+  "revisedTrackNumbers": [
+    12,
+    14
+  ],
+  "historicalInputs": "Exact submitted album request retained; per-call model inputs and invalid final-review response were not captured.",
+  "sourceTaskUpdatedAt": "2026-10-04T09:43:24.018Z",
+  "generationCompletedAtFromEarlierObservation": "2026-10-04T09:43:24.018Z",
+  "admissionCountsAtArchive": [
+    {
+      "state": "included",
+      "count": 14
+    }
+  ],
+  "initialSnapshot": {
+    "path": "observed-before-repair-task.json",
+    "sha256": "7081b8a114ebec20ba83e6e133294bc5224264a98417cd4abe7f88c0a6e6214a",
+    "sourceTaskUpdatedAt": "2026-10-04T09:27:33.817Z",
+    "observationTimeSeparatelyRecorded": false,
+    "canonicalTaskHashVerifiedAgainstCache": true
+  }
+}

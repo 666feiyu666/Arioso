@@ -1,0 +1,86 @@
+{
+  "schemaVersion": "1.0",
+  "title": "The Clock Without Hands",
+  "intent": "A patient, suspended-time chamber miniature led by cello over still piano resonance.",
+  "genres": [
+    "contemporary acoustic neoclassical chamber music",
+    "minimalist chamber music"
+  ],
+  "moods": [
+    "patient and suspended",
+    "quietly melancholic",
+    "translucent and unresolved"
+  ],
+  "tempo": {
+    "bpm": 52,
+    "feel": "Slow 3/4 with broad legato phrases, flexible rubato at phrase endings, and occasional rests."
+  },
+  "tonality": {
+    "tonic": "D-flat",
+    "mode": "major with minor-sixth shadowing and modal mixture"
+  },
+  "meter": "3/4",
+  "instrumentation": [
+    {
+      "name": "acoustic piano",
+      "role": "Still harmonic backdrop; places three quiet chordal landmarks, later presents an inverted form of the cello motif.",
+      "timbre": "Soft, resonant, widely spaced voicings with gentle attack and natural decay."
+    },
+    {
+      "name": "cello",
+      "role": "Primary melodic voice; answers the piano with a descending lament figure, expands it into a long arch, then returns to the opening gesture.",
+      "timbre": "Warm, intimate arco tone with restrained vibrato, sustained upper notes, and expressive legato."
+    }
+  ],
+  "structure": [
+    {
+      "section": "Intro",
+      "durationSeconds": 25,
+      "direction": "Sparse piano establishes three quiet chordal landmarks in D-flat major, with unresolved stepwise bass motion and generous silence."
+    },
+    {
+      "section": "Development",
+      "durationSeconds": 65,
+      "direction": "Cello answers with a descending lament figure and expands it into a longer arch. Keep the pulse broad, the counterpoint sparse, and dynamics restrained."
+    },
+    {
+      "section": "Inversion",
+      "durationSeconds": 35,
+      "direction": "Piano briefly carries an understated inversion of the cello figure while cello sustains above, creating a calm, suspended convergence."
+    },
+    {
+      "section": "Outro",
+      "durationSeconds": 25,
+      "direction": "Return to the opening cello descent over thinning piano resonance. End in translucent major-minor ambiguity with natural decay."
+    }
+  ],
+  "vocals": {
+    "enabled": false,
+    "language": null,
+    "style": null,
+    "lyricalTheme": null
+  },
+  "production": "Intimate acoustic chamber recording with close, clear separation between piano and cello, restrained natural room reverberation, warm cello presence, and spacious piano decay. Keep dynamics controlled and the perspective patient and unobtrusive. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.",
+  "avoid": [
+    "vocals",
+    "humming",
+    "spoken words",
+    "choir",
+    "environmental sound layers",
+    "page sounds",
+    "rain",
+    "vinyl crackle",
+    "heavy percussion",
+    "forceful climaxes",
+    "horror effects",
+    "clipping",
+    "crackling",
+    "digital distortion"
+  ],
+  "assumptions": [
+    "Set a restrained 52 BPM to support the requested slow 3/4 pacing.",
+    "Use arco cello throughout for a continuous legato lament character.",
+    "Treat the 150-second target as four flexible developmental sections."
+  ],
+  "lyriaPrompt": "Instrumental only, no vocals.\n\nAim for approximately 150 seconds, with a self-contained beginning, development and ending.\n\nInstrumental only, no vocals, humming, spoken words or choir. Contemporary acoustic neoclassical chamber music for calm solitary study, with clear melodic writing, restrained dynamics and modest scale. Intimate acoustic space with restrained natural room reverberation and clear instrumental separation. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion; no environmental sound layers, page sounds, rain, vinyl crackle, heavy percussion, horror effects or forceful climaxes.\n\ncontemporary acoustic neoclassical chamber music, minimalist chamber music. patient and suspended, quietly melancholic, translucent and unresolved\n\nRhythm: 52 BPM; Slow 3/4 with broad legato phrases, flexible rubato at phrase endings, and occasional rests.; 3/4 meter.\n\nHarmony: D-flat; major with minor-sixth shadowing and modal mixture.\n\nInstrumentation and interaction:\nacoustic piano: Still harmonic backdrop; places three quiet chordal landmarks, later presents an inverted form of the cello motif. Tone: Soft, resonant, widely spaced voicings with gentle attack and natural decay.\ncello: Primary melodic voice; answers the piano with a descending lament figure, expands it into a long arch, then returns to the opening gesture. Tone: Warm, intimate arco tone with restrained vibrato, sustained upper notes, and expressive legato.\n\nDevelopment:\n[Intro] Approximately 25s. Sparse piano establishes three quiet chordal landmarks in D-flat major, with unresolved stepwise bass motion and generous silence.\n[Development] Approximately 65s. Cello answers with a descending lament figure and expands it into a longer arch. Keep the pulse broad, the counterpoint sparse, and dynamics restrained.\n[Inversion] Approximately 35s. Piano briefly carries an understated inversion of the cello figure while cello sustains above, creating a calm, suspended convergence.\n[Outro] Approximately 25s. Return to the opening cello descent over thinning piano resonance. End in translucent major-minor ambiguity with natural decay.\n\nProduction: Intimate acoustic chamber recording with close, clear separation between piano and cello, restrained natural room reverberation, warm cello presence, and spacious piano decay. Keep dynamics controlled and the perspective patient and unobtrusive. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.\n\nAvoid: vocals; humming; spoken words; choir; environmental sound layers; page sounds; rain; vinyl crackle; heavy percussion; forceful climaxes; horror effects; clipping; crackling; digital distortion."
+}

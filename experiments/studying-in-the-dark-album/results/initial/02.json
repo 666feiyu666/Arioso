@@ -1,0 +1,85 @@
+{
+  "schemaVersion": "1.0",
+  "title": "Dust in the Lamplight",
+  "intent": "A quiet solo-piano study miniature portraying concentration settling into stillness through delicate repetition and gradual thinning.",
+  "genres": [
+    "contemporary acoustic neoclassical",
+    "intimate solo piano"
+  ],
+  "moods": [
+    "calm focus",
+    "inward reflection",
+    "soft repose"
+  ],
+  "tempo": {
+    "bpm": 54,
+    "feel": "Slow rocking 6/8 with an understated left-hand ostinato and spacious, unhurried phrasing."
+  },
+  "tonality": {
+    "tonic": "E",
+    "mode": "natural minor with brief B Phrygian color and added-tone ambiguity"
+  },
+  "meter": "6/8",
+  "instrumentation": [
+    {
+      "name": "acoustic piano",
+      "role": "Carries a transparent two-bar arpeggiated ostinato, then introduces a restrained singing melody and subtle inner-voice variations.",
+      "timbre": "Warm, clear, intimate felt-like tone; lightly articulated arpeggios, gentle legato melody, restrained pedal resonance."
+    }
+  ],
+  "structure": [
+    {
+      "section": "Intro",
+      "durationSeconds": 24,
+      "direction": "Sparse two-bar arpeggiated figure in the middle register, with quiet left-hand rocking pulse and generous space."
+    },
+    {
+      "section": "Development",
+      "durationSeconds": 48,
+      "direction": "Introduce a simple singing melody above the repeating figure. Vary the final notes of the pattern and add slowly shifting tones without increasing volume."
+    },
+    {
+      "section": "Darkening",
+      "durationSeconds": 30,
+      "direction": "Briefly deepen the bass register and introduce subtle B Phrygian color while maintaining the same calm dynamic and restrained pulse."
+    },
+    {
+      "section": "Reprise",
+      "durationSeconds": 21,
+      "direction": "Thin the texture, leaving a partial return of the opening figure with fewer notes and more silence."
+    },
+    {
+      "section": "Outro",
+      "durationSeconds": 12,
+      "direction": "Let the final upper tones and pedal resonance decay naturally, without a forceful cadence."
+    }
+  ],
+  "vocals": {
+    "enabled": false,
+    "language": null,
+    "style": null,
+    "lyricalTheme": null
+  },
+  "production": "Intimate acoustic piano recording in a quiet, modest room with restrained natural reverberation, clear separation of bass, middle, and treble registers, and controlled dynamics. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.",
+  "avoid": [
+    "vocals",
+    "humming",
+    "spoken words",
+    "choir",
+    "environmental sound layers",
+    "page sounds",
+    "rain",
+    "vinyl crackle",
+    "heavy percussion",
+    "forceful climax",
+    "excessive sustain",
+    "clipping",
+    "crackling",
+    "digital distortion"
+  ],
+  "assumptions": [
+    "A gentle 54 BPM pulse supports the requested slow 6/8 rocking feel.",
+    "The piano remains solo throughout, with development created through register, voicing, harmony, and density."
+  ],
+  "lyriaPrompt": "Instrumental only, no vocals.\n\nAim for approximately 135 seconds, with a self-contained beginning, development and ending.\n\nInstrumental only, no vocals, humming, spoken words or choir. Contemporary acoustic neoclassical chamber music for calm solitary study, with clear melodic writing, restrained dynamics and modest scale. Intimate acoustic space with restrained natural room reverberation and clear instrumental separation. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion; no environmental sound layers, page sounds, rain, vinyl crackle, heavy percussion, horror effects or forceful climaxes.\n\ncontemporary acoustic neoclassical, intimate solo piano. calm focus, inward reflection, soft repose\n\nRhythm: 54 BPM; Slow rocking 6/8 with an understated left-hand ostinato and spacious, unhurried phrasing.; 6/8 meter.\n\nHarmony: E; natural minor with brief B Phrygian color and added-tone ambiguity.\n\nInstrumentation and interaction:\nacoustic piano: Carries a transparent two-bar arpeggiated ostinato, then introduces a restrained singing melody and subtle inner-voice variations. Tone: Warm, clear, intimate felt-like tone; lightly articulated arpeggios, gentle legato melody, restrained pedal resonance.\n\nDevelopment:\n[Intro] Approximately 24s. Sparse two-bar arpeggiated figure in the middle register, with quiet left-hand rocking pulse and generous space.\n[Development] Approximately 48s. Introduce a simple singing melody above the repeating figure. Vary the final notes of the pattern and add slowly shifting tones without increasing volume.\n[Darkening] Approximately 30s. Briefly deepen the bass register and introduce subtle B Phrygian color while maintaining the same calm dynamic and restrained pulse.\n[Reprise] Approximately 21s. Thin the texture, leaving a partial return of the opening figure with fewer notes and more silence.\n[Outro] Approximately 12s. Let the final upper tones and pedal resonance decay naturally, without a forceful cadence.\n\nProduction: Intimate acoustic piano recording in a quiet, modest room with restrained natural reverberation, clear separation of bass, middle, and treble registers, and controlled dynamics. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.\n\nAvoid: vocals; humming; spoken words; choir; environmental sound layers; page sounds; rain; vinyl crackle; heavy percussion; forceful climax; excessive sustain; clipping; crackling; digital distortion."
+}

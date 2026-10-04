@@ -1,0 +1,163 @@
+{
+  "verdict": "needs-work",
+  "albumFindings": [
+    "All rendered prompts are standalone and retain the shared instrumental, intimate chamber, and audio-quality directions.",
+    "The album has strong planned variation in meter, subdivision, foreground instrument, density, and ensemble size, but several solo-piano and piano/cello pieces reuse closely related sparse low-register, unresolved, thinning arcs.",
+    "Track 12's rendered prompt repeats “Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks” and “No clipping, crackling or digital distortion” in both Production and Avoid; this is harmless but redundant.",
+    "Track 14 repeats the quality wording in Production and again at the end of Production, creating avoidable prompt duplication."
+  ],
+  "similarities": [
+    {
+      "first": 1,
+      "second": 14,
+      "evidence": "Both use a “three-note” piano arrival motif, D-minor language, very slow/quiet 3/4-or-walking arrival framing, restrained piano-and-strings counterpoint, and a final open or unresolved sonority.",
+      "judgment": "Recurrence supports the stated arrival/closing strategy, but Track 14 should make its transformation more explicit rather than closely restating Track 1’s motif and piano-led arc."
+    },
+    {
+      "first": 2,
+      "second": 13,
+      "evidence": "Both are solo acoustic-piano studies with sparse repeating/broken figures, minor/modal color, gradual thinning, generous space, and natural-decay endings.",
+      "judgment": "This is appropriate partly as a concentration-to-closing contrast, but their phrase density and developmental behavior are very close; preserve both only if Track 2 emphasizes ostinato variation while Track 13 remains substantially freer and more fragmentary."
+    },
+    {
+      "first": 8,
+      "second": 12,
+      "evidence": "Both center on piano with viola and cello, low-register shadows, slow or barely perceptible pulse, sustained counterpoint, restrained chromatic/modal ambiguity, and reverse-layer thinning.",
+      "judgment": "The recurrence fits the album’s middle-group deepening, but Track 12’s four-instrument blended foundation and Track 8’s three-voice cell-based counterpoint should remain clearly differentiated in the prompts."
+    },
+    {
+      "first": 3,
+      "second": 11,
+      "evidence": "Both pair piano and viola, use restrained motif exchange, modest dynamics, modal color, and a piano-led quiet suspended ending.",
+      "judgment": "Useful variation exists through Track 3’s flexible 3/4 held-tone dialogue versus Track 11’s 4/4 offbeat figure and pizzicato-to-arco transformation; no edit required."
+    }
+  ],
+  "candidates": [
+    {
+      "number": 1,
+      "verdict": "ready",
+      "evidence": [
+        "Rendered prompt specifies “cello: Quiet shadow voice” and develops it through “briefly overlap in calm, transparent counterpoint.”",
+        "The independent 150-second arc returns to a “lower, quieter register” and retains the shared quality constraint."
+      ],
+      "revisionBrief": null
+    },
+    {
+      "number": 2,
+      "verdict": "ready",
+      "evidence": [
+        "The rendered prompt clearly realizes the solo-piano ostinato, singing melody, bass darkening, thinning, and natural decay.",
+        "“Slow rocking 6/8” and “understated left-hand ostinato” provide a distinct pulse and concentration role."
+      ],
+      "revisionBrief": null
+    },
+    {
+      "number": 3,
+      "verdict": "ready",
+      "evidence": [
+        "“Viola: Primary lyrical voice” and “Piano answers beneath it” accurately realize the intended foreground/background relationship.",
+        "The narrow-register dialogue, parallel sixths, and held-tone ending provide coherent development."
+      ],
+      "revisionBrief": null
+    },
+    {
+      "number": 4,
+      "verdict": "ready",
+      "evidence": [
+        "The prompt assigns distinct roles to piano pattern, cello bass foundation, and violin motif exchange.",
+        "“Quiet continuous eighth-note motion” and the gradual removal of violin create substantial proportional development."
+      ],
+      "revisionBrief": null
+    },
+    {
+      "number": 5,
+      "verdict": "ready",
+      "evidence": [
+        "The prompt explicitly realizes “Sparse, unaccented 5/4 grouped 2+3” and the later dissolution into freer spacing.",
+        "Low-register resonance, middle-register second voice, and unresolved minor-third ending match the outline."
+      ],
+      "revisionBrief": null
+    },
+    {
+      "number": 6,
+      "verdict": "ready",
+      "evidence": [
+        "The rendered arrangement correctly makes viola the opening voice, cello the answering low voice, and piano a later harmonic frame.",
+        "The convergence into unison and separation into descending lines provide a clear independent arc."
+      ],
+      "revisionBrief": null
+    },
+    {
+      "number": 7,
+      "verdict": "ready",
+      "evidence": [
+        "The prompt clearly specifies motif exchange through imitation, rhythmic elongation, and alternating foreground/background roles.",
+        "Its 2/2 repeated-eighth-note motion distinguishes it from the more flexible neighboring chamber pieces."
+      ],
+      "revisionBrief": null
+    },
+    {
+      "number": 8,
+      "verdict": "ready",
+      "evidence": [
+        "The “questioning two-note cell,” low sustained cello foundation, and layered convergence are explicitly realized.",
+        "Reverse-order withdrawal of piano motion, viola, then cello gives the 175-second form a coherent release."
+      ],
+      "revisionBrief": null
+    },
+    {
+      "number": 9,
+      "verdict": "ready",
+      "evidence": [
+        "The prompt concretely realizes the 7/8 grouping “3+2+2,” cross-bar melody shifts, suspended bass pattern, and simplified reprise.",
+        "The solo-piano role is distinct through motor asymmetry and Lydian opening."
+      ],
+      "revisionBrief": null
+    },
+    {
+      "number": 10,
+      "verdict": "ready",
+      "evidence": [
+        "“Cello: Primary melodic voice” and the piano’s “three quiet chordal landmarks” accurately establish the intended suspended-time relationship.",
+        "The inversion section and translucent major-minor ending provide useful development without a climax."
+      ],
+      "revisionBrief": null
+    },
+    {
+      "number": 11,
+      "verdict": "ready",
+      "evidence": [
+        "The rendered prompt preserves the specific “soft pizzicato” to “smooth legato arco” transformation.",
+        "Offbeat piano figures and borrowed-minor color give this piano/viola piece a distinct rhythmic and articulation profile."
+      ],
+      "revisionBrief": null
+    },
+    {
+      "number": 12,
+      "verdict": "needs-work",
+      "evidence": [
+        "The rendered Production repeats the quality clause and then repeats “No clipping, crackling or digital distortion,” creating unnecessary duplication.",
+        "The four-instrument low-register texture is musically coherent, but the prompt's production wording is less concise than the other candidates."
+      ],
+      "revisionBrief": "Remove the duplicated quality wording from Production; retain one instance of “Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks” and keep artifact exclusions only in Avoid."
+    },
+    {
+      "number": 13,
+      "verdict": "ready",
+      "evidence": [
+        "The prompt clearly differentiates isolated intervals, sparse broken-chord accompaniment, upper-register rise, bass removal, and incomplete return.",
+        "Its 120-second weightless dissolution supports the album’s final thinning group."
+      ],
+      "revisionBrief": null
+    },
+    {
+      "number": 14,
+      "verdict": "needs-work",
+      "evidence": [
+        "Production contains duplicated quality wording: “smooth transients and controlled peaks” appears twice in the same field.",
+        "Its three-note arrival motif and piano-led quiet return closely parallel Track 1’s arrival/reprise design, though the closing role supports album cohesion."
+      ],
+      "revisionBrief": "Remove the repeated phrase from Production and sharpen the transformation from Track 1: specify that the returning motif is slower, harmonically softened by Dorian sixths, and integrated into the trio’s final open-fifth dissolution rather than presented as a near-restatement."
+    }
+  ]
+}

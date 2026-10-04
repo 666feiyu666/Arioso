@@ -1,0 +1,91 @@
+{
+  "schemaVersion": "1.0",
+  "title": "Between Shelves",
+  "intent": "A warm, inward chamber miniature for viola, cello, and restrained piano, shaped by gentle contrapuntal exchange and quiet modal suspension.",
+  "genres": [
+    "contemporary acoustic neoclassical chamber music",
+    "minimalist chamber music"
+  ],
+  "moods": [
+    "warm",
+    "reflective",
+    "patient",
+    "quietly unresolved"
+  ],
+  "tempo": {
+    "bpm": null,
+    "feel": "Gentle 3/2, long legato beats with staggered entrances and flexible phrase endings."
+  },
+  "tonality": {
+    "tonic": "G",
+    "mode": "G minor with G Dorian inflections and related modal regions"
+  },
+  "meter": "3/2",
+  "instrumentation": [
+    {
+      "name": "acoustic piano",
+      "role": "Restrained harmonic frame, entering after the strings with widely spaced chords and fading into the final sonority.",
+      "timbre": "Soft, resonant, lightly pedaled, spacious voicings with clear natural decay."
+    },
+    {
+      "name": "viola",
+      "role": "Primary opening voice, presenting a sustained rising figure and later trading shortened motifs with the cello.",
+      "timbre": "Warm, intimate arco tone in the middle register; smooth legato and restrained vibrato."
+    },
+    {
+      "name": "cello",
+      "role": "Low answering voice and grounding counterpoint beneath the viola, later joining and separating from it in descending lines.",
+      "timbre": "Dark, rounded arco tone with patient phrasing, moderate vibrato, and clear low-register resonance."
+    }
+  ],
+  "structure": [
+    {
+      "section": "Intro",
+      "durationSeconds": 25,
+      "direction": "Solo viola begins with a sustained rising figure in a sparse G-minor/Dorian space; cello answers quietly beneath it, leaving generous air between phrases."
+    },
+    {
+      "section": "Development",
+      "durationSeconds": 55,
+      "direction": "Piano enters as a distant harmonic frame with widely spaced chords. Viola and cello exchange shorter versions of the opening figure in calm, legato counterpoint while modal harmony shifts without dominant emphasis."
+    },
+    {
+      "section": "Convergence",
+      "durationSeconds": 40,
+      "direction": "The two strings gradually narrow their phrases and meet in a calm unison, supported by sparse piano resonance. Keep dynamics controlled and intimate."
+    },
+    {
+      "section": "Release",
+      "durationSeconds": 35,
+      "direction": "Viola and cello separate into descending lines; piano recedes to a quiet open sonority. End softly with natural decay and no strong cadence."
+    }
+  ],
+  "vocals": {
+    "enabled": false,
+    "language": null,
+    "style": null,
+    "lyricalTheme": null
+  },
+  "production": "Intimate acoustic chamber recording with clear separation and modest natural room reverberation. Keep piano secondary to the viola and cello, with warm close detail, gentle dynamics, and spacious stereo depth. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.",
+  "avoid": [
+    "vocals",
+    "humming",
+    "spoken words",
+    "choir",
+    "heavy percussion",
+    "forceful climax",
+    "strong dominant cadence",
+    "environmental sound layers",
+    "page sounds",
+    "rain",
+    "vinyl crackle",
+    "clipping",
+    "crackling",
+    "digital distortion"
+  ],
+  "assumptions": [
+    "Flexible rubato is limited to phrase endings while the 3/2 pulse remains perceptible.",
+    "The 155-second form is divided into four developmental sections."
+  ],
+  "lyriaPrompt": "Instrumental only, no vocals.\n\nAim for approximately 155 seconds, with a self-contained beginning, development and ending.\n\nInstrumental only, no vocals, humming, spoken words or choir. Contemporary acoustic neoclassical chamber music for calm solitary study, with clear melodic writing, restrained dynamics and modest scale. Intimate acoustic space with restrained natural room reverberation and clear instrumental separation. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion; no environmental sound layers, page sounds, rain, vinyl crackle, heavy percussion, horror effects or forceful climaxes.\n\ncontemporary acoustic neoclassical chamber music, minimalist chamber music. warm, reflective, patient, quietly unresolved\n\nRhythm: Gentle 3/2, long legato beats with staggered entrances and flexible phrase endings.; 3/2 meter.\n\nHarmony: G; G minor with G Dorian inflections and related modal regions.\n\nInstrumentation and interaction:\nacoustic piano: Restrained harmonic frame, entering after the strings with widely spaced chords and fading into the final sonority. Tone: Soft, resonant, lightly pedaled, spacious voicings with clear natural decay.\nviola: Primary opening voice, presenting a sustained rising figure and later trading shortened motifs with the cello. Tone: Warm, intimate arco tone in the middle register; smooth legato and restrained vibrato.\ncello: Low answering voice and grounding counterpoint beneath the viola, later joining and separating from it in descending lines. Tone: Dark, rounded arco tone with patient phrasing, moderate vibrato, and clear low-register resonance.\n\nDevelopment:\n[Intro] Approximately 25s. Solo viola begins with a sustained rising figure in a sparse G-minor/Dorian space; cello answers quietly beneath it, leaving generous air between phrases.\n[Development] Approximately 55s. Piano enters as a distant harmonic frame with widely spaced chords. Viola and cello exchange shorter versions of the opening figure in calm, legato counterpoint while modal harmony shifts without dominant emphasis.\n[Convergence] Approximately 40s. The two strings gradually narrow their phrases and meet in a calm unison, supported by sparse piano resonance. Keep dynamics controlled and intimate.\n[Release] Approximately 35s. Viola and cello separate into descending lines; piano recedes to a quiet open sonority. End softly with natural decay and no strong cadence.\n\nProduction: Intimate acoustic chamber recording with clear separation and modest natural room reverberation. Keep piano secondary to the viola and cello, with warm close detail, gentle dynamics, and spacious stereo depth. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.\n\nAvoid: vocals; humming; spoken words; choir; heavy percussion; forceful climax; strong dominant cadence; environmental sound layers; page sounds; rain; vinyl crackle; clipping; crackling; digital distortion."
+}

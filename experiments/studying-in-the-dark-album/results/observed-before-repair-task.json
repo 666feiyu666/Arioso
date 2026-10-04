@@ -1,0 +1,1816 @@
+{
+  "provenance": {
+    "recordType": "observed-task-snapshot",
+    "source": {
+      "method": "GET",
+      "url": "http://127.0.0.1:4173/api/tasks/c92f722d-2212-4e82-9499-178b479b552f"
+    },
+    "phase": "after-initial-batch-review-before-selective-repair",
+    "description": "Copied from the real in-session GET observation cached as album_readonly_snapshot_1. This is an observed application task snapshot, not an original model response, exact model-call input, or generated run checkpoint.",
+    "taskTimestampSemantics": {
+      "createdAt": "Task creation timestamp supplied by the API.",
+      "updatedAt": "Last task update timestamp supplied by the API; it is not the HTTP observation timestamp."
+    },
+    "httpObservationTimestamp": null,
+    "httpObservationTimestampNote": "The exact GET observation time was not separately recorded. No observation time has been inferred from task.updatedAt.",
+    "absentTaskFields": [
+      "albumFinalReview",
+      "albumRevisedTrackNumbers",
+      "albumPromptsReady"
+    ],
+    "verification": {
+      "candidateCount": 14,
+      "initialMusicSpecCount": 14,
+      "selectiveRepairsNotYetRecorded": true,
+      "comparisonWithCompletedTask": [
+        {
+          "number": 12,
+          "different": true,
+          "promptDifferent": true,
+          "changedFields": [
+            "intent",
+            "tempo",
+            "instrumentation",
+            "structure",
+            "production",
+            "assumptions",
+            "lyriaPrompt"
+          ]
+        },
+        {
+          "number": 14,
+          "different": true,
+          "promptDifferent": true,
+          "changedFields": [
+            "intent",
+            "tonality",
+            "instrumentation",
+            "structure",
+            "assumptions",
+            "lyriaPrompt"
+          ]
+        }
+      ],
+      "noCredentialFieldsIncluded": true
+    },
+    "materialization": {
+      "method": "Cached pre-repair metadata and changed candidate 12/14 MusicSpecs, plus byte-equivalent unchanged MusicSpecs and shared plan/review read from the completed task; each source is verified against canonical SHA256 computed from the original cached observation before writing.",
+      "canonicalJsonRule": "Recursive object-key sorting, preserved array order, JSON.stringify primitive values, SHA256 over UTF-8.",
+      "expectedCachedTaskCanonicalSha256": "7ef73e35a4029fecdc4545d25c1d05478797134b358ed0496d90aefe770249e3",
+      "unchangedCandidateNumbers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        13
+      ]
+    }
+  },
+  "task": {
+    "id": "c92f722d-2212-4e82-9499-178b479b552f",
+    "title": "Studying in the Dark",
+    "status": "composing",
+    "createdAt": "2026-10-04T09:24:26.028Z",
+    "updatedAt": "2026-10-04T09:27:33.817Z",
+    "description": "Create a new instrumental neoclassical album titled Studying in the Dark. Theme: studying alone late at night in an old library, with a dark academia atmosphere. The listener has chosen a calm, slightly melancholic mood. Interpret neoclassical here as contemporary acoustic piano and intimate chamber music, with melodic clarity, restrained counterpoint, repeating figures and subtle harmonic evolution. The primary purpose is sustained reading and study.\n\nAlbum mind: moving from arrival at an old library after dusk, into sustained concentration, through a deeper reflective middle, toward a quiet late-night close. Let darkness emerge through lower registers, minor and modal colors, suspended resolutions and gently moving inner voices. Keep the feeling contemplative, composed, solitary and quietly humane. Dynamics and transitions should support uninterrupted study. Give every piece its own gentle entrance, meaningful small-scale development and softened ending.\n\nLet the album composer choose and explain its own cohesion strategy. Piano is the main anchor, with selected cello, viola and small chamber-string combinations. Some tracks can be solo piano; others can be duets or small chamber pieces. Across 14 candidates vary foreground voice, instrument interaction, pulse or meter, articulation, register, harmonic rhythm, motif shape and development method. Each track needs an audible identity beyond a different name, key or tempo. Maintain continuity with controlled dynamics, modest ensemble scale and related harmonic sensibility. Subtle tension and release are welcome within the calm mood. Avoid busy virtuosity, forceful dramatic climaxes, large orchestral swells, sudden accents, heavy percussion, suspense or horror effects.\n\nUse acoustic musical sound without environmental sound layers: no rain recordings, page rustling, library foley, vinyl crackle or deliberately noisy lo-fi texture. Piano should have a clear, gently rounded tone with restrained upper-register brightness and natural decay. Strings should be smooth and softly articulated, without abrasive bow effects. Use a coherent intimate acoustic space with restrained natural room reverberation and clear instrumental separation.\n\nMandatory audio quality requirement for every candidate: Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion. Put these instructions into the shared sound contract and every actual audio-generation prompt, with appropriate production and avoid fields; do not leave them only in the album rationale.\n\nInstrumental only: no singing, humming, spoken words or choir. Generate 14 complete, self-contained candidate pieces, each approximately 60 to 180 seconds with at least three distinct intended durations. Aim at approximately 35 minutes across the candidates, allowing natural variation in length. Review the complete candidate prompt set for theme fit, study suitability, meaningful musical differences, playable development and audio-quality requirements; revise concrete problems before audio generation. Retain all generated pieces as candidates for the user's listening and admission decisions. Use English titles and music-generation prompts.",
+    "mode": "generate",
+    "workflowType": "04-album",
+    "vocalMode": "instrumental",
+    "corpusMode": "none",
+    "compositionMode": "album",
+    "composerModel": "gpt-5.6-luna",
+    "lyriaModel": "lyria-3.5",
+    "albumCandidateCount": 14,
+    "albumTargetTotalMinutes": 35,
+    "albumPlaylist": [],
+    "albumPlan": {
+      "albumTitle": "Studying in the Dark",
+      "albumMind": "A quietly continuous night in an old library: dusk arrival, settled concentration, inward reflection, and a softened closing hour. Contemporary acoustic piano and intimate strings use clear motifs, restrained counterpoint, low-register shadows, modal color, and gentle harmonic motion to support sustained reading without demanding attention.",
+      "cohesionStrategy": "Piano anchors every candidate, while the foreground rotates among solo piano, cello, viola, and small string groupings. The first group favors clear pulse and arrival gestures; the middle group deepens counterpoint, modal ambiguity, and lower-register focus; the final group thins toward repose. Meter, articulation, motif shape, harmonic rhythm, register, and chamber interaction vary substantially, but dynamics remain controlled and spaces remain intimate. Each piece is independently shaped with a gentle opening, modest development, and softened ending.",
+      "sharedSoundContract": "Instrumental only, no vocals, humming, spoken words or choir. Contemporary acoustic neoclassical chamber music for calm solitary study, with clear melodic writing, restrained dynamics and modest scale. Intimate acoustic space with restrained natural room reverberation and clear instrumental separation. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion; no environmental sound layers, page sounds, rain, vinyl crackle, heavy percussion, horror effects or forceful climaxes.",
+      "tracks": [
+        {
+          "number": 1,
+          "title": "Dusk at the Reading Room",
+          "musicalRole": "Piano introduces the library’s arrival through a measured walking motif; cello enters as a quiet shadow rather than a lead.",
+          "instruments": [
+            "acoustic piano",
+            "cello"
+          ],
+          "groove": "Slow 4/4, evenly spaced quarter-note pulse with gently breathing rests.",
+          "harmony": "D minor with Dorian inflections, suspended fourths, and gradual inner-voice changes.",
+          "development": "Begin with sparse low-to-middle piano chords and a three-note motif. Add legato cello responses, then let piano and cello briefly overlap in calm counterpoint before returning to the opening motif in a lower, quieter register and ending on a soft unresolved sixth.",
+          "targetSeconds": 150
+        },
+        {
+          "number": 2,
+          "title": "Dust in the Lamplight",
+          "musicalRole": "Solo piano studies a delicate repeating figure whose small variations suggest settling into concentration.",
+          "instruments": [
+            "acoustic piano"
+          ],
+          "groove": "6/8, slow rocking compound pulse with understated left-hand ostinato.",
+          "harmony": "E minor, colored by B Phrygian touches and slowly shifting added tones.",
+          "development": "Open with a transparent two-bar arpeggiated figure. Gradually place a singing melody above it, alter the figure’s final notes, and briefly darken the bass without increasing volume. Thin the texture until only a partial reprise remains, ending with natural decay.",
+          "targetSeconds": 135
+        },
+        {
+          "number": 3,
+          "title": "First Margins",
+          "musicalRole": "Viola carries a restrained lyrical line while piano supplies spacious, non-percussive annotations beneath it.",
+          "instruments": [
+            "acoustic piano",
+            "viola"
+          ],
+          "groove": "Unhurried 3/4 with flexible phrase lengths and no emphatic downbeats.",
+          "harmony": "A minor with modal mixture, chromatic inner pedals, and delayed cadences.",
+          "development": "Piano begins with widely spaced intervals; viola enters in a narrow, speech-like register. The instruments exchange the motif, then join briefly in parallel sixths before separating. Close by reducing the viola to held tones over isolated piano notes.",
+          "targetSeconds": 140
+        },
+        {
+          "number": 4,
+          "title": "The Long Table",
+          "musicalRole": "A small piano trio creates sustained concentration through interlocking lines rather than a dominant melody.",
+          "instruments": [
+            "acoustic piano",
+            "violin",
+            "cello"
+          ],
+          "groove": "4/4, quiet continuous eighth-note motion distributed across the ensemble.",
+          "harmony": "C minor with modal ambiguity, pedal bass, and gently descending inner voices.",
+          "development": "Piano establishes a repeating four-note pattern, cello adds a patient bass line, and violin enters with a narrow motif. Shift the motif between violin and cello while the piano subtly changes its voicings. Reduce the violin first, then let cello and piano settle into a hushed open fifth.",
+          "targetSeconds": 165
+        },
+        {
+          "number": 5,
+          "title": "Index of Shadows",
+          "musicalRole": "Solo piano foregrounds low-register resonance and a clear melody that gradually becomes more inward.",
+          "instruments": [
+            "acoustic piano"
+          ],
+          "groove": "Sparse 5/4 grouped 2+3, smooth and unaccented rather than angular.",
+          "harmony": "F-sharp minor with Aeolian color, suspended resolutions, and slow harmonic rhythm.",
+          "development": "Start with low bass notes followed by carefully spaced treble phrases. Extend the melody through subtle registral displacement, then introduce a second voice in the middle register. Let the 5/4 grouping dissolve into freer spacing before a quiet return of the opening bass and a soft minor-third ending.",
+          "targetSeconds": 145
+        },
+        {
+          "number": 6,
+          "title": "Between Shelves",
+          "musicalRole": "Cello and viola form a warm contrapuntal duet, with piano appearing only as a restrained harmonic frame.",
+          "instruments": [
+            "acoustic piano",
+            "viola",
+            "cello"
+          ],
+          "groove": "Gentle 3/2, long legato beats with staggered entrances.",
+          "harmony": "G minor moving through G Dorian and related modal regions, avoiding strong dominant closure.",
+          "development": "Viola begins with a sustained rising figure; cello answers beneath it. Piano enters with widely spaced chords, and the strings gradually trade shorter versions of the figure. Bring the voices into a calm unison, then separate them into descending lines as the piano fades to a quiet open sonority.",
+          "targetSeconds": 155
+        },
+        {
+          "number": 7,
+          "title": "A Page Turned Slowly",
+          "musicalRole": "Piano and violin share a simple motif, alternating foreground and background without dramatic contrast.",
+          "instruments": [
+            "acoustic piano",
+            "violin"
+          ],
+          "groove": "2/2 at a gentle walking pace, lightly articulated repeated eighth notes.",
+          "harmony": "B-flat minor with occasional Dorian sixths and chromatic passing basses.",
+          "development": "Piano presents the motif alone; violin repeats it in longer notes. Develop through imitation and small rhythmic elongations, briefly placing violin in the upper middle register while piano moves below. Return to the original exchange, soften articulation, and end on a suspended chord.",
+          "targetSeconds": 130
+        },
+        {
+          "number": 8,
+          "title": "Midnight Concordance",
+          "musicalRole": "Piano, viola, and cello create the album’s deepest reflective chamber texture through slow-moving counterpoint.",
+          "instruments": [
+            "acoustic piano",
+            "viola",
+            "cello"
+          ],
+          "groove": "Free-feeling 4/4 with a barely perceptible pulse and long phrase arcs.",
+          "harmony": "E-flat minor with octatonic-adjacent chromatic color used sparingly, plus suspended ninths.",
+          "development": "Open with cello’s low sustained tone under isolated piano intervals. Viola introduces a questioning two-note cell; piano gradually connects the voices with inner motion. Allow a denser but still quiet convergence, then remove layers in reverse order until cello and one piano interval remain.",
+          "targetSeconds": 175
+        },
+        {
+          "number": 9,
+          "title": "Marginalia in Blue",
+          "musicalRole": "Solo piano balances a lucid upper melody against a repeating bass pattern, maintaining focus through gentle asymmetry.",
+          "instruments": [
+            "acoustic piano"
+          ],
+          "groove": "7/8 grouped 3+2+2, smooth motor rhythm without accent-heavy meter.",
+          "harmony": "C-sharp minor with Lydian inflections over a persistent tonic pedal.",
+          "development": "Establish the asymmetrical bass and a concise melody. Shift the melody across bar lines, add a quiet middle voice, and briefly suspend the bass pattern while the harmony opens. Restore the original pattern with fewer notes and close on a softened added-sixth sonority.",
+          "targetSeconds": 125
+        },
+        {
+          "number": 10,
+          "title": "The Clock Without Hands",
+          "musicalRole": "A cello-led miniature uses piano resonance as a still backdrop, emphasizing patience and suspended time.",
+          "instruments": [
+            "acoustic piano",
+            "cello"
+          ],
+          "groove": "Slow 3/4, broad legato phrases with occasional rests between gestures.",
+          "harmony": "D-flat major shadowed by minor sixths, modal mixture, and unresolved stepwise bass motion.",
+          "development": "Piano lays down three quiet chordal landmarks; cello answers with a descending lament figure. Expand the figure into a longer arch, then let piano briefly carry its inversion while cello sustains above. Return to the opening cello descent and finish in a calm, translucent major-minor ambiguity.",
+          "targetSeconds": 150
+        },
+        {
+          "number": 11,
+          "title": "Quiet Corrections",
+          "musicalRole": "Piano and viola use restrained pizzicato-to-arco contrast to represent thought becoming clarified, without breaking the calm.",
+          "instruments": [
+            "acoustic piano",
+            "viola"
+          ],
+          "groove": "4/4 with lightly detached offbeat piano figures and spacious viola entrances.",
+          "harmony": "A major moving through A Mixolydian and borrowed minor chords, with restrained tension and release.",
+          "development": "Piano begins with a short repeating figure; viola first answers with soft pizzicato, then restates it arco. Develop by interlocking the figures and lengthening the viola’s phrases, keeping dynamics modest. Remove pizzicato, return to legato, and close with piano alone on a gently voiced suspended chord.",
+          "targetSeconds": 135
+        },
+        {
+          "number": 12,
+          "title": "The Lower Gallery",
+          "musicalRole": "A small string trio explores low-register blended sonority while piano provides slow harmonic illumination.",
+          "instruments": [
+            "acoustic piano",
+            "violin",
+            "viola",
+            "cello"
+          ],
+          "groove": "Adagio 6/4, sustained pulse with overlapping bow changes and no rhythmic insistence.",
+          "harmony": "F minor with Phrygian inflections, descending chromatic inner lines, and rare clear cadences.",
+          "development": "Cello and viola establish a dark sustained foundation; violin enters with a narrow, luminous line and piano adds widely spaced tones. Let the upper line pass between violin and piano as the lower strings subtly change voicings. Thin the texture to cello, viola, and one final piano chord, ending quietly.",
+          "targetSeconds": 180
+        },
+        {
+          "number": 13,
+          "title": "Last Notes Before Closing",
+          "musicalRole": "Solo piano revisits the album’s study language in a more spacious, nearly weightless form.",
+          "instruments": [
+            "acoustic piano"
+          ],
+          "groove": "Slow 4/4 with broken chords separated by generous silence.",
+          "harmony": "G minor opening toward G Dorian and an understated final major sixth.",
+          "development": "Begin with isolated low-to-middle-register intervals and a simple descending motif. Gradually connect them into a flowing but sparse accompaniment, then let the melody rise briefly before receding. Remove bass support and leave the motif incomplete, ending with a soft resonant upper chord.",
+          "targetSeconds": 120
+        },
+        {
+          "number": 14,
+          "title": "Lights Out in the Library",
+          "musicalRole": "Piano, viola, and cello provide a final gentle synthesis, recalling earlier motifs without becoming grand or conclusive.",
+          "instruments": [
+            "acoustic piano",
+            "viola",
+            "cello"
+          ],
+          "groove": "Very slow 3/4, rocking sustained accompaniment with flexible rubato at phrase endings.",
+          "harmony": "D minor gradually softened by Dorian sixths, open fifths, and suspended resolutions.",
+          "development": "Piano opens with a quiet version of the arrival motif; viola recalls the narrow lyrical gesture while cello anchors the lower register. Bring the three voices together in a warm, restrained counterpoint, then gradually remove viola and cello activity. Let piano repeat the motif more slowly and end on a low open fifth with natural decay.",
+          "targetSeconds": 165
+        }
+      ],
+      "schemaVersion": "1.0"
+    },
+    "albumTracks": [
+      {
+        "id": "2240aeef-75ed-49b6-96e1-df2e33e3cd1f",
+        "order": 1,
+        "title": "Dusk at the Reading Room",
+        "targetDurationSeconds": 150,
+        "admission": "candidate",
+        "status": "queued",
+        "createdAt": "2026-10-04T09:24:52.777Z",
+        "updatedAt": "2026-10-04T09:25:02.572Z",
+        "musicSpec": {
+          "schemaVersion": "1.0",
+          "title": "Dusk at the Reading Room",
+          "intent": "An intimate instrumental chamber miniature depicting quiet arrival and settling concentration in a library at dusk.",
+          "genres": [
+            "contemporary acoustic neoclassical chamber music"
+          ],
+          "moods": [
+            "quiet arrival",
+            "focused calm",
+            "inward reflection",
+            "soft unresolved repose"
+          ],
+          "tempo": {
+            "bpm": 64,
+            "feel": "Slow, evenly spaced quarter-note walking pulse with gently breathing rests."
+          },
+          "tonality": {
+            "tonic": "D",
+            "mode": "Dorian-inflected minor"
+          },
+          "meter": "4/4",
+          "instrumentation": [
+            {
+              "name": "acoustic piano",
+              "role": "Primary motif, sparse harmonic frame, low-to-middle-register walking chords, and final return of the motif.",
+              "timbre": "Clear, intimate, lightly resonant, restrained attack with spacious pedaling."
+            },
+            {
+              "name": "cello",
+              "role": "Quiet shadow voice answering and briefly intertwining with the piano without becoming a lead.",
+              "timbre": "Warm, legato, soft bow pressure, mostly low-to-middle register."
+            }
+          ],
+          "structure": [
+            {
+              "section": "Intro",
+              "durationSeconds": 30,
+              "direction": "Sparse piano low-to-middle-register chords establish a measured quarter-note pulse with breathing rests and a concise three-note motif in D minor."
+            },
+            {
+              "section": "Development",
+              "durationSeconds": 45,
+              "direction": "Cello enters with gentle legato responses. Piano gradually introduces suspended fourths and subtle inner-voice movement while both instruments remain restrained."
+            },
+            {
+              "section": "Counterpoint",
+              "durationSeconds": 40,
+              "direction": "Piano and cello briefly overlap in calm, transparent counterpoint, trading fragments of the motif with modest density and no dramatic climax."
+            },
+            {
+              "section": "Reprise",
+              "durationSeconds": 25,
+              "direction": "Return to the opening motif in a lower, quieter register. Reduce activity and let the cello recede behind the piano."
+            },
+            {
+              "section": "Outro",
+              "durationSeconds": 10,
+              "direction": "End on a soft unresolved sixth with natural resonance and a gentle decay."
+            }
+          ],
+          "vocals": {
+            "enabled": false,
+            "language": null,
+            "style": null,
+            "lyricalTheme": null
+          },
+          "production": "Intimate acoustic chamber recording with clear separation between piano and cello, restrained natural room reverberation, warm close perspective, controlled dynamics, and no forceful climax. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.",
+          "avoid": [
+            "vocals",
+            "humming",
+            "spoken words",
+            "choir",
+            "heavy percussion",
+            "environmental sound layers",
+            "page sounds",
+            "rain",
+            "vinyl crackle",
+            "horror effects",
+            "forceful climaxes",
+            "clipping",
+            "crackling",
+            "digital distortion"
+          ],
+          "assumptions": [
+            "64 BPM chosen to realize the specified slow walking pulse.",
+            "Cello remains primarily responsive and supportive rather than taking a sustained solo.",
+            "The unresolved sixth is treated as a quiet Dorian-colored closing sonority."
+          ],
+          "lyriaPrompt": "Instrumental only, no vocals.\n\nAim for approximately 150 seconds, with a self-contained beginning, development and ending.\n\nInstrumental only, no vocals, humming, spoken words or choir. Contemporary acoustic neoclassical chamber music for calm solitary study, with clear melodic writing, restrained dynamics and modest scale. Intimate acoustic space with restrained natural room reverberation and clear instrumental separation. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion; no environmental sound layers, page sounds, rain, vinyl crackle, heavy percussion, horror effects or forceful climaxes.\n\ncontemporary acoustic neoclassical chamber music. quiet arrival, focused calm, inward reflection, soft unresolved repose\n\nRhythm: 64 BPM; Slow, evenly spaced quarter-note walking pulse with gently breathing rests.; 4/4 meter.\n\nHarmony: D; Dorian-inflected minor.\n\nInstrumentation and interaction:\nacoustic piano: Primary motif, sparse harmonic frame, low-to-middle-register walking chords, and final return of the motif. Tone: Clear, intimate, lightly resonant, restrained attack with spacious pedaling.\ncello: Quiet shadow voice answering and briefly intertwining with the piano without becoming a lead. Tone: Warm, legato, soft bow pressure, mostly low-to-middle register.\n\nDevelopment:\n[Intro] Approximately 30s. Sparse piano low-to-middle-register chords establish a measured quarter-note pulse with breathing rests and a concise three-note motif in D minor.\n[Development] Approximately 45s. Cello enters with gentle legato responses. Piano gradually introduces suspended fourths and subtle inner-voice movement while both instruments remain restrained.\n[Counterpoint] Approximately 40s. Piano and cello briefly overlap in calm, transparent counterpoint, trading fragments of the motif with modest density and no dramatic climax.\n[Reprise] Approximately 25s. Return to the opening motif in a lower, quieter register. Reduce activity and let the cello recede behind the piano.\n[Outro] Approximately 10s. End on a soft unresolved sixth with natural resonance and a gentle decay.\n\nProduction: Intimate acoustic chamber recording with clear separation between piano and cello, restrained natural room reverberation, warm close perspective, controlled dynamics, and no forceful climax. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.\n\nAvoid: vocals; humming; spoken words; choir; heavy percussion; environmental sound layers; page sounds; rain; vinyl crackle; horror effects; forceful climaxes; clipping; crackling; digital distortion."
+        }
+      },
+      {
+        "id": "4ab84c45-6b09-4932-82b1-630845add5f6",
+        "order": 2,
+        "title": "Dust in the Lamplight",
+        "targetDurationSeconds": 135,
+        "admission": "candidate",
+        "status": "queued",
+        "createdAt": "2026-10-04T09:24:52.777Z",
+        "updatedAt": "2026-10-04T09:25:12.614Z",
+        "musicSpec": {
+          "schemaVersion": "1.0",
+          "title": "Dust in the Lamplight",
+          "intent": "A quiet solo-piano study miniature portraying concentration settling into stillness through delicate repetition and gradual thinning.",
+          "genres": [
+            "contemporary acoustic neoclassical",
+            "intimate solo piano"
+          ],
+          "moods": [
+            "calm focus",
+            "inward reflection",
+            "soft repose"
+          ],
+          "tempo": {
+            "bpm": 54,
+            "feel": "Slow rocking 6/8 with an understated left-hand ostinato and spacious, unhurried phrasing."
+          },
+          "tonality": {
+            "tonic": "E",
+            "mode": "natural minor with brief B Phrygian color and added-tone ambiguity"
+          },
+          "meter": "6/8",
+          "instrumentation": [
+            {
+              "name": "acoustic piano",
+              "role": "Carries a transparent two-bar arpeggiated ostinato, then introduces a restrained singing melody and subtle inner-voice variations.",
+              "timbre": "Warm, clear, intimate felt-like tone; lightly articulated arpeggios, gentle legato melody, restrained pedal resonance."
+            }
+          ],
+          "structure": [
+            {
+              "section": "Intro",
+              "durationSeconds": 24,
+              "direction": "Sparse two-bar arpeggiated figure in the middle register, with quiet left-hand rocking pulse and generous space."
+            },
+            {
+              "section": "Development",
+              "durationSeconds": 48,
+              "direction": "Introduce a simple singing melody above the repeating figure. Vary the final notes of the pattern and add slowly shifting tones without increasing volume."
+            },
+            {
+              "section": "Darkening",
+              "durationSeconds": 30,
+              "direction": "Briefly deepen the bass register and introduce subtle B Phrygian color while maintaining the same calm dynamic and restrained pulse."
+            },
+            {
+              "section": "Reprise",
+              "durationSeconds": 21,
+              "direction": "Thin the texture, leaving a partial return of the opening figure with fewer notes and more silence."
+            },
+            {
+              "section": "Outro",
+              "durationSeconds": 12,
+              "direction": "Let the final upper tones and pedal resonance decay naturally, without a forceful cadence."
+            }
+          ],
+          "vocals": {
+            "enabled": false,
+            "language": null,
+            "style": null,
+            "lyricalTheme": null
+          },
+          "production": "Intimate acoustic piano recording in a quiet, modest room with restrained natural reverberation, clear separation of bass, middle, and treble registers, and controlled dynamics. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.",
+          "avoid": [
+            "vocals",
+            "humming",
+            "spoken words",
+            "choir",
+            "environmental sound layers",
+            "page sounds",
+            "rain",
+            "vinyl crackle",
+            "heavy percussion",
+            "forceful climax",
+            "excessive sustain",
+            "clipping",
+            "crackling",
+            "digital distortion"
+          ],
+          "assumptions": [
+            "A gentle 54 BPM pulse supports the requested slow 6/8 rocking feel.",
+            "The piano remains solo throughout, with development created through register, voicing, harmony, and density."
+          ],
+          "lyriaPrompt": "Instrumental only, no vocals.\n\nAim for approximately 135 seconds, with a self-contained beginning, development and ending.\n\nInstrumental only, no vocals, humming, spoken words or choir. Contemporary acoustic neoclassical chamber music for calm solitary study, with clear melodic writing, restrained dynamics and modest scale. Intimate acoustic space with restrained natural room reverberation and clear instrumental separation. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion; no environmental sound layers, page sounds, rain, vinyl crackle, heavy percussion, horror effects or forceful climaxes.\n\ncontemporary acoustic neoclassical, intimate solo piano. calm focus, inward reflection, soft repose\n\nRhythm: 54 BPM; Slow rocking 6/8 with an understated left-hand ostinato and spacious, unhurried phrasing.; 6/8 meter.\n\nHarmony: E; natural minor with brief B Phrygian color and added-tone ambiguity.\n\nInstrumentation and interaction:\nacoustic piano: Carries a transparent two-bar arpeggiated ostinato, then introduces a restrained singing melody and subtle inner-voice variations. Tone: Warm, clear, intimate felt-like tone; lightly articulated arpeggios, gentle legato melody, restrained pedal resonance.\n\nDevelopment:\n[Intro] Approximately 24s. Sparse two-bar arpeggiated figure in the middle register, with quiet left-hand rocking pulse and generous space.\n[Development] Approximately 48s. Introduce a simple singing melody above the repeating figure. Vary the final notes of the pattern and add slowly shifting tones without increasing volume.\n[Darkening] Approximately 30s. Briefly deepen the bass register and introduce subtle B Phrygian color while maintaining the same calm dynamic and restrained pulse.\n[Reprise] Approximately 21s. Thin the texture, leaving a partial return of the opening figure with fewer notes and more silence.\n[Outro] Approximately 12s. Let the final upper tones and pedal resonance decay naturally, without a forceful cadence.\n\nProduction: Intimate acoustic piano recording in a quiet, modest room with restrained natural reverberation, clear separation of bass, middle, and treble registers, and controlled dynamics. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.\n\nAvoid: vocals; humming; spoken words; choir; environmental sound layers; page sounds; rain; vinyl crackle; heavy percussion; forceful climax; excessive sustain; clipping; crackling; digital distortion."
+        }
+      },
+      {
+        "id": "b0703831-4f3b-4ddc-8bfd-a7f70b9b6f9b",
+        "order": 3,
+        "title": "First Margins",
+        "targetDurationSeconds": 140,
+        "admission": "candidate",
+        "status": "queued",
+        "createdAt": "2026-10-04T09:24:52.777Z",
+        "updatedAt": "2026-10-04T09:25:22.367Z",
+        "musicSpec": {
+          "schemaVersion": "1.0",
+          "title": "First Margins",
+          "intent": "A restrained chamber miniature for viola and acoustic piano, evoking focused solitary reading through spacious dialogue and delayed harmonic resolution.",
+          "genres": [
+            "contemporary acoustic neoclassical chamber music"
+          ],
+          "moods": [
+            "quietly attentive",
+            "introspective",
+            "warmly unresolved",
+            "softly fading"
+          ],
+          "tempo": {
+            "bpm": null,
+            "feel": "Unhurried 3/4 with flexible phrase lengths, gentle pulse, and no emphatic downbeats."
+          },
+          "tonality": {
+            "tonic": "A",
+            "mode": "minor with modal mixture and chromatic inner pedals"
+          },
+          "meter": "3/4",
+          "instrumentation": [
+            {
+              "name": "Acoustic piano",
+              "role": "Spacious harmonic annotations, isolated intervals, and occasional motif statements beneath the viola.",
+              "timbre": "Natural, warm, lightly resonant, non-percussive touch with generous silence."
+            },
+            {
+              "name": "Viola",
+              "role": "Primary lyrical voice in a narrow, speech-like register; later sustains the closing tones.",
+              "timbre": "Intimate, soft legato arco with restrained vibrato and warm alto resonance."
+            }
+          ],
+          "structure": [
+            {
+              "section": "Intro",
+              "durationSeconds": 25,
+              "direction": "Sparse piano presents widely spaced intervals in A minor, with chromatic inner-pedal color and delayed cadential motion."
+            },
+            {
+              "section": "Development",
+              "durationSeconds": 55,
+              "direction": "Viola enters with a narrow lyrical motif. Piano answers beneath it, then the instruments exchange and gently overlap the motif without increasing intensity."
+            },
+            {
+              "section": "Bridge",
+              "durationSeconds": 30,
+              "direction": "Bring viola and piano briefly together in calm parallel sixths, then separate into independent, spacious lines as the harmony remains suspended."
+            },
+            {
+              "section": "Outro",
+              "durationSeconds": 30,
+              "direction": "Reduce the viola to long held tones over isolated piano notes. Thin the register and end with a quiet delayed cadence and natural decay."
+            }
+          ],
+          "vocals": {
+            "enabled": false,
+            "language": null,
+            "style": null,
+            "lyricalTheme": null
+          },
+          "production": "Intimate acoustic chamber recording with clear separation, modest natural room reverberation, close but spacious perspective, restrained dynamics, and warm natural acoustic timbres. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.",
+          "avoid": [
+            "vocals",
+            "humming",
+            "spoken words",
+            "choir",
+            "heavy percussion",
+            "forceful climaxes",
+            "environmental sound layers",
+            "page sounds",
+            "rain",
+            "vinyl crackle",
+            "clipping",
+            "crackling",
+            "digital distortion"
+          ],
+          "assumptions": [
+            "Flexible phrase timing is favored over a strict metronomic pulse.",
+            "The viola remains the foreground instrument while piano functions primarily as harmonic and motivic support."
+          ],
+          "lyriaPrompt": "Instrumental only, no vocals.\n\nAim for approximately 140 seconds, with a self-contained beginning, development and ending.\n\nInstrumental only, no vocals, humming, spoken words or choir. Contemporary acoustic neoclassical chamber music for calm solitary study, with clear melodic writing, restrained dynamics and modest scale. Intimate acoustic space with restrained natural room reverberation and clear instrumental separation. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion; no environmental sound layers, page sounds, rain, vinyl crackle, heavy percussion, horror effects or forceful climaxes.\n\ncontemporary acoustic neoclassical chamber music. quietly attentive, introspective, warmly unresolved, softly fading\n\nRhythm: Unhurried 3/4 with flexible phrase lengths, gentle pulse, and no emphatic downbeats.; 3/4 meter.\n\nHarmony: A; minor with modal mixture and chromatic inner pedals.\n\nInstrumentation and interaction:\nAcoustic piano: Spacious harmonic annotations, isolated intervals, and occasional motif statements beneath the viola. Tone: Natural, warm, lightly resonant, non-percussive touch with generous silence.\nViola: Primary lyrical voice in a narrow, speech-like register; later sustains the closing tones. Tone: Intimate, soft legato arco with restrained vibrato and warm alto resonance.\n\nDevelopment:\n[Intro] Approximately 25s. Sparse piano presents widely spaced intervals in A minor, with chromatic inner-pedal color and delayed cadential motion.\n[Development] Approximately 55s. Viola enters with a narrow lyrical motif. Piano answers beneath it, then the instruments exchange and gently overlap the motif without increasing intensity.\n[Bridge] Approximately 30s. Bring viola and piano briefly together in calm parallel sixths, then separate into independent, spacious lines as the harmony remains suspended.\n[Outro] Approximately 30s. Reduce the viola to long held tones over isolated piano notes. Thin the register and end with a quiet delayed cadence and natural decay.\n\nProduction: Intimate acoustic chamber recording with clear separation, modest natural room reverberation, close but spacious perspective, restrained dynamics, and warm natural acoustic timbres. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.\n\nAvoid: vocals; humming; spoken words; choir; heavy percussion; forceful climaxes; environmental sound layers; page sounds; rain; vinyl crackle; clipping; crackling; digital distortion."
+        }
+      },
+      {
+        "id": "a7586077-0da5-4587-96f1-88228c1862fd",
+        "order": 4,
+        "title": "The Long Table",
+        "targetDurationSeconds": 165,
+        "admission": "candidate",
+        "status": "queued",
+        "createdAt": "2026-10-04T09:24:52.777Z",
+        "updatedAt": "2026-10-04T09:25:33.496Z",
+        "musicSpec": {
+          "schemaVersion": "1.0",
+          "title": "The Long Table",
+          "intent": "Instrumental chamber study in sustained concentration, built from interlocking piano, violin, and cello lines rather than a dominant melody.",
+          "genres": [
+            "contemporary acoustic neoclassical chamber music",
+            "minimalist chamber music"
+          ],
+          "moods": [
+            "focused",
+            "quietly contemplative",
+            "inward",
+            "softly resolved"
+          ],
+          "tempo": {
+            "bpm": 66,
+            "feel": "Quiet, steady 4/4 with continuous eighth-note motion distributed across the trio; restrained dynamics and patient phrasing."
+          },
+          "tonality": {
+            "tonic": "C",
+            "mode": "minor with modal ambiguity"
+          },
+          "meter": "4/4",
+          "instrumentation": [
+            {
+              "name": "acoustic piano",
+              "role": "Establishes the repeating four-note pattern, supplies harmonic support, and subtly changes voicings around a sustained pedal bass.",
+              "timbre": "Warm, clear, lightly resonant, measured touch; spacious middle register with occasional low-register support."
+            },
+            {
+              "name": "cello",
+              "role": "Provides the patient pedal-bass foundation, answers and later shares the central motif with the violin, then settles with piano into the closing open fifth.",
+              "timbre": "Warm, legato, rounded low-to-middle register; restrained vibrato and connected bowing."
+            },
+            {
+              "name": "violin",
+              "role": "Enters with a narrow lyrical motif, exchanges it with cello through quiet imitation, then gradually recedes before the ending.",
+              "timbre": "Intimate, focused middle register, soft legato articulation, modest vibrato, never virtuosic."
+            }
+          ],
+          "structure": [
+            {
+              "section": "Intro",
+              "durationSeconds": 25,
+              "direction": "Sparse piano introduces the repeating four-note pattern over a quiet C pedal, with open space and gently descending inner voices."
+            },
+            {
+              "section": "Development",
+              "durationSeconds": 85,
+              "direction": "Cello adds a patient bass line; violin enters with a narrow motif. Build restrained interlocking counterpoint, passing the motif between violin and cello while piano changes voicings subtly without becoming dominant."
+            },
+            {
+              "section": "Reduction",
+              "durationSeconds": 35,
+              "direction": "Thin the texture gradually, removing violin first. Let piano and cello continue the pattern more sparsely, with softened register and dynamics."
+            },
+            {
+              "section": "Outro",
+              "durationSeconds": 20,
+              "direction": "Resolve into a hushed open fifth shared by cello and piano, allowing natural resonance and a quiet, non-grand ending."
+            }
+          ],
+          "vocals": {
+            "enabled": false,
+            "language": null,
+            "style": null,
+            "lyricalTheme": null
+          },
+          "production": "Intimate acoustic chamber recording with clear separation, modest natural room reverberation, and a close but spacious perspective. Preserve the trio's restrained dynamics and natural blend. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.",
+          "avoid": [
+            "vocals",
+            "humming",
+            "spoken words",
+            "choir",
+            "environmental sound layers",
+            "page sounds",
+            "rain",
+            "vinyl crackle",
+            "heavy percussion",
+            "horror effects",
+            "forceful climaxes",
+            "clipping",
+            "crackling",
+            "digital distortion"
+          ],
+          "assumptions": [
+            "Set the quiet 4/4 pulse to approximately 66 BPM.",
+            "Use a restrained acoustic chamber balance with piano supportive rather than dominant.",
+            "Treat the ending open fifth as softly unresolved rather than fully cadential."
+          ],
+          "lyriaPrompt": "Instrumental only, no vocals.\n\nAim for approximately 165 seconds, with a self-contained beginning, development and ending.\n\nInstrumental only, no vocals, humming, spoken words or choir. Contemporary acoustic neoclassical chamber music for calm solitary study, with clear melodic writing, restrained dynamics and modest scale. Intimate acoustic space with restrained natural room reverberation and clear instrumental separation. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion; no environmental sound layers, page sounds, rain, vinyl crackle, heavy percussion, horror effects or forceful climaxes.\n\ncontemporary acoustic neoclassical chamber music, minimalist chamber music. focused, quietly contemplative, inward, softly resolved\n\nRhythm: 66 BPM; Quiet, steady 4/4 with continuous eighth-note motion distributed across the trio; restrained dynamics and patient phrasing.; 4/4 meter.\n\nHarmony: C; minor with modal ambiguity.\n\nInstrumentation and interaction:\nacoustic piano: Establishes the repeating four-note pattern, supplies harmonic support, and subtly changes voicings around a sustained pedal bass. Tone: Warm, clear, lightly resonant, measured touch; spacious middle register with occasional low-register support.\ncello: Provides the patient pedal-bass foundation, answers and later shares the central motif with the violin, then settles with piano into the closing open fifth. Tone: Warm, legato, rounded low-to-middle register; restrained vibrato and connected bowing.\nviolin: Enters with a narrow lyrical motif, exchanges it with cello through quiet imitation, then gradually recedes before the ending. Tone: Intimate, focused middle register, soft legato articulation, modest vibrato, never virtuosic.\n\nDevelopment:\n[Intro] Approximately 25s. Sparse piano introduces the repeating four-note pattern over a quiet C pedal, with open space and gently descending inner voices.\n[Development] Approximately 85s. Cello adds a patient bass line; violin enters with a narrow motif. Build restrained interlocking counterpoint, passing the motif between violin and cello while piano changes voicings subtly without becoming dominant.\n[Reduction] Approximately 35s. Thin the texture gradually, removing violin first. Let piano and cello continue the pattern more sparsely, with softened register and dynamics.\n[Outro] Approximately 20s. Resolve into a hushed open fifth shared by cello and piano, allowing natural resonance and a quiet, non-grand ending.\n\nProduction: Intimate acoustic chamber recording with clear separation, modest natural room reverberation, and a close but spacious perspective. Preserve the trio's restrained dynamics and natural blend. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.\n\nAvoid: vocals; humming; spoken words; choir; environmental sound layers; page sounds; rain; vinyl crackle; heavy percussion; horror effects; forceful climaxes; clipping; crackling; digital distortion."
+        }
+      },
+      {
+        "id": "198db7f4-89a9-4765-bc15-2aeb4c61051d",
+        "order": 5,
+        "title": "Index of Shadows",
+        "targetDurationSeconds": 145,
+        "admission": "candidate",
+        "status": "queued",
+        "createdAt": "2026-10-04T09:24:52.777Z",
+        "updatedAt": "2026-10-04T09:25:44.273Z",
+        "musicSpec": {
+          "schemaVersion": "1.0",
+          "title": "Index of Shadows",
+          "intent": "A restrained solo-piano study of inward concentration, shaped by low-register resonance, asymmetrical pulse, and gradually thinning musical thought.",
+          "genres": [
+            "contemporary acoustic neoclassical",
+            "minimalist solo piano",
+            "chamber study music"
+          ],
+          "moods": [
+            "quietly focused",
+            "shadowed and contemplative",
+            "inward",
+            "softly unresolved"
+          ],
+          "tempo": {
+            "bpm": 58,
+            "feel": "Sparse, unaccented 5/4 grouped 2+3; measured pacing with gentle breathing room and no angular emphasis."
+          },
+          "tonality": {
+            "tonic": "F-sharp",
+            "mode": "minor with Aeolian color"
+          },
+          "meter": "5/4, gradually dissolving into freer spacing",
+          "instrumentation": [
+            {
+              "name": "acoustic piano",
+              "role": "Sole instrument; low-register bass notes establish resonance, treble phrases carry the principal melody, and a restrained middle voice emerges during the development.",
+              "timbre": "Warm, intimate, naturally resonant acoustic tone; soft legato touch, carefully spaced notes, restrained pedal, and clear register separation."
+            }
+          ],
+          "structure": [
+            {
+              "section": "Intro",
+              "durationSeconds": 25,
+              "direction": "Sparse low bass notes establish F-sharp minor and the 2+3 pulse, followed by widely spaced treble phrases with suspended harmonic motion."
+            },
+            {
+              "section": "Development",
+              "durationSeconds": 55,
+              "direction": "Extend the melody through subtle registral displacement; gradually introduce a quiet middle-register second voice while preserving low density and slow harmonic rhythm."
+            },
+            {
+              "section": "Dissolution",
+              "durationSeconds": 35,
+              "direction": "Allow the 5/4 grouping to loosen into freer spacing. Reduce rhythmic definition and let the melody become more inward and fragmentary without increasing volume."
+            },
+            {
+              "section": "Outro",
+              "durationSeconds": 30,
+              "direction": "Return quietly to the opening low bass resonance, simplify the texture, and end on a soft unresolved minor-third sonority with natural decay."
+            }
+          ],
+          "vocals": {
+            "enabled": false,
+            "language": null,
+            "style": null,
+            "lyricalTheme": null
+          },
+          "production": "Intimate acoustic piano recording in a quiet, modest room with restrained natural reverberation, clear separation between low, middle, and treble registers, controlled dynamics, and generous silence between phrases. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.",
+          "avoid": [
+            "vocals",
+            "humming",
+            "spoken words",
+            "choir",
+            "heavy percussion",
+            "environmental sound layers",
+            "page sounds",
+            "rain",
+            "vinyl crackle",
+            "forceful climaxes",
+            "clipping",
+            "crackling",
+            "digital distortion"
+          ],
+          "assumptions": [
+            "The target tempo is set near 58 BPM to support the sparse 5/4 pulse without sounding mechanical.",
+            "The ending remains gently unresolved through a soft minor-third sonority rather than a full cadence."
+          ],
+          "lyriaPrompt": "Instrumental only, no vocals.\n\nAim for approximately 145 seconds, with a self-contained beginning, development and ending.\n\nInstrumental only, no vocals, humming, spoken words or choir. Contemporary acoustic neoclassical chamber music for calm solitary study, with clear melodic writing, restrained dynamics and modest scale. Intimate acoustic space with restrained natural room reverberation and clear instrumental separation. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion; no environmental sound layers, page sounds, rain, vinyl crackle, heavy percussion, horror effects or forceful climaxes.\n\ncontemporary acoustic neoclassical, minimalist solo piano, chamber study music. quietly focused, shadowed and contemplative, inward, softly unresolved\n\nRhythm: 58 BPM; Sparse, unaccented 5/4 grouped 2+3; measured pacing with gentle breathing room and no angular emphasis.; 5/4, gradually dissolving into freer spacing meter.\n\nHarmony: F-sharp; minor with Aeolian color.\n\nInstrumentation and interaction:\nacoustic piano: Sole instrument; low-register bass notes establish resonance, treble phrases carry the principal melody, and a restrained middle voice emerges during the development. Tone: Warm, intimate, naturally resonant acoustic tone; soft legato touch, carefully spaced notes, restrained pedal, and clear register separation.\n\nDevelopment:\n[Intro] Approximately 25s. Sparse low bass notes establish F-sharp minor and the 2+3 pulse, followed by widely spaced treble phrases with suspended harmonic motion.\n[Development] Approximately 55s. Extend the melody through subtle registral displacement; gradually introduce a quiet middle-register second voice while preserving low density and slow harmonic rhythm.\n[Dissolution] Approximately 35s. Allow the 5/4 grouping to loosen into freer spacing. Reduce rhythmic definition and let the melody become more inward and fragmentary without increasing volume.\n[Outro] Approximately 30s. Return quietly to the opening low bass resonance, simplify the texture, and end on a soft unresolved minor-third sonority with natural decay.\n\nProduction: Intimate acoustic piano recording in a quiet, modest room with restrained natural reverberation, clear separation between low, middle, and treble registers, controlled dynamics, and generous silence between phrases. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.\n\nAvoid: vocals; humming; spoken words; choir; heavy percussion; environmental sound layers; page sounds; rain; vinyl crackle; forceful climaxes; clipping; crackling; digital distortion."
+        }
+      },
+      {
+        "id": "954421cf-3ba8-4ea3-a121-1cfab10b622b",
+        "order": 6,
+        "title": "Between Shelves",
+        "targetDurationSeconds": 155,
+        "admission": "candidate",
+        "status": "queued",
+        "createdAt": "2026-10-04T09:24:52.777Z",
+        "updatedAt": "2026-10-04T09:25:54.138Z",
+        "musicSpec": {
+          "schemaVersion": "1.0",
+          "title": "Between Shelves",
+          "intent": "A warm, inward chamber miniature for viola, cello, and restrained piano, shaped by gentle contrapuntal exchange and quiet modal suspension.",
+          "genres": [
+            "contemporary acoustic neoclassical chamber music",
+            "minimalist chamber music"
+          ],
+          "moods": [
+            "warm",
+            "reflective",
+            "patient",
+            "quietly unresolved"
+          ],
+          "tempo": {
+            "bpm": null,
+            "feel": "Gentle 3/2, long legato beats with staggered entrances and flexible phrase endings."
+          },
+          "tonality": {
+            "tonic": "G",
+            "mode": "G minor with G Dorian inflections and related modal regions"
+          },
+          "meter": "3/2",
+          "instrumentation": [
+            {
+              "name": "acoustic piano",
+              "role": "Restrained harmonic frame, entering after the strings with widely spaced chords and fading into the final sonority.",
+              "timbre": "Soft, resonant, lightly pedaled, spacious voicings with clear natural decay."
+            },
+            {
+              "name": "viola",
+              "role": "Primary opening voice, presenting a sustained rising figure and later trading shortened motifs with the cello.",
+              "timbre": "Warm, intimate arco tone in the middle register; smooth legato and restrained vibrato."
+            },
+            {
+              "name": "cello",
+              "role": "Low answering voice and grounding counterpoint beneath the viola, later joining and separating from it in descending lines.",
+              "timbre": "Dark, rounded arco tone with patient phrasing, moderate vibrato, and clear low-register resonance."
+            }
+          ],
+          "structure": [
+            {
+              "section": "Intro",
+              "durationSeconds": 25,
+              "direction": "Solo viola begins with a sustained rising figure in a sparse G-minor/Dorian space; cello answers quietly beneath it, leaving generous air between phrases."
+            },
+            {
+              "section": "Development",
+              "durationSeconds": 55,
+              "direction": "Piano enters as a distant harmonic frame with widely spaced chords. Viola and cello exchange shorter versions of the opening figure in calm, legato counterpoint while modal harmony shifts without dominant emphasis."
+            },
+            {
+              "section": "Convergence",
+              "durationSeconds": 40,
+              "direction": "The two strings gradually narrow their phrases and meet in a calm unison, supported by sparse piano resonance. Keep dynamics controlled and intimate."
+            },
+            {
+              "section": "Release",
+              "durationSeconds": 35,
+              "direction": "Viola and cello separate into descending lines; piano recedes to a quiet open sonority. End softly with natural decay and no strong cadence."
+            }
+          ],
+          "vocals": {
+            "enabled": false,
+            "language": null,
+            "style": null,
+            "lyricalTheme": null
+          },
+          "production": "Intimate acoustic chamber recording with clear separation and modest natural room reverberation. Keep piano secondary to the viola and cello, with warm close detail, gentle dynamics, and spacious stereo depth. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.",
+          "avoid": [
+            "vocals",
+            "humming",
+            "spoken words",
+            "choir",
+            "heavy percussion",
+            "forceful climax",
+            "strong dominant cadence",
+            "environmental sound layers",
+            "page sounds",
+            "rain",
+            "vinyl crackle",
+            "clipping",
+            "crackling",
+            "digital distortion"
+          ],
+          "assumptions": [
+            "Flexible rubato is limited to phrase endings while the 3/2 pulse remains perceptible.",
+            "The 155-second form is divided into four developmental sections."
+          ],
+          "lyriaPrompt": "Instrumental only, no vocals.\n\nAim for approximately 155 seconds, with a self-contained beginning, development and ending.\n\nInstrumental only, no vocals, humming, spoken words or choir. Contemporary acoustic neoclassical chamber music for calm solitary study, with clear melodic writing, restrained dynamics and modest scale. Intimate acoustic space with restrained natural room reverberation and clear instrumental separation. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion; no environmental sound layers, page sounds, rain, vinyl crackle, heavy percussion, horror effects or forceful climaxes.\n\ncontemporary acoustic neoclassical chamber music, minimalist chamber music. warm, reflective, patient, quietly unresolved\n\nRhythm: Gentle 3/2, long legato beats with staggered entrances and flexible phrase endings.; 3/2 meter.\n\nHarmony: G; G minor with G Dorian inflections and related modal regions.\n\nInstrumentation and interaction:\nacoustic piano: Restrained harmonic frame, entering after the strings with widely spaced chords and fading into the final sonority. Tone: Soft, resonant, lightly pedaled, spacious voicings with clear natural decay.\nviola: Primary opening voice, presenting a sustained rising figure and later trading shortened motifs with the cello. Tone: Warm, intimate arco tone in the middle register; smooth legato and restrained vibrato.\ncello: Low answering voice and grounding counterpoint beneath the viola, later joining and separating from it in descending lines. Tone: Dark, rounded arco tone with patient phrasing, moderate vibrato, and clear low-register resonance.\n\nDevelopment:\n[Intro] Approximately 25s. Solo viola begins with a sustained rising figure in a sparse G-minor/Dorian space; cello answers quietly beneath it, leaving generous air between phrases.\n[Development] Approximately 55s. Piano enters as a distant harmonic frame with widely spaced chords. Viola and cello exchange shorter versions of the opening figure in calm, legato counterpoint while modal harmony shifts without dominant emphasis.\n[Convergence] Approximately 40s. The two strings gradually narrow their phrases and meet in a calm unison, supported by sparse piano resonance. Keep dynamics controlled and intimate.\n[Release] Approximately 35s. Viola and cello separate into descending lines; piano recedes to a quiet open sonority. End softly with natural decay and no strong cadence.\n\nProduction: Intimate acoustic chamber recording with clear separation and modest natural room reverberation. Keep piano secondary to the viola and cello, with warm close detail, gentle dynamics, and spacious stereo depth. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.\n\nAvoid: vocals; humming; spoken words; choir; heavy percussion; forceful climax; strong dominant cadence; environmental sound layers; page sounds; rain; vinyl crackle; clipping; crackling; digital distortion."
+        }
+      },
+      {
+        "id": "7fc6639b-d6ed-43ed-be85-9213e2d97a4a",
+        "order": 7,
+        "title": "A Page Turned Slowly",
+        "targetDurationSeconds": 130,
+        "admission": "candidate",
+        "status": "queued",
+        "createdAt": "2026-10-04T09:24:52.777Z",
+        "updatedAt": "2026-10-04T09:26:03.828Z",
+        "musicSpec": {
+          "schemaVersion": "1.0",
+          "title": "A Page Turned Slowly",
+          "intent": "A restrained chamber miniature for piano and violin, portraying patient concentration through a simple exchanged motif and gentle rhythmic continuity.",
+          "genres": [
+            "contemporary acoustic neoclassical chamber music"
+          ],
+          "moods": [
+            "quietly focused",
+            "reflective",
+            "softly suspended"
+          ],
+          "tempo": {
+            "bpm": 76,
+            "feel": "Gentle walking pace in 2/2, lightly articulated repeated eighth notes with no dramatic accents."
+          },
+          "tonality": {
+            "tonic": "B-flat",
+            "mode": "minor with occasional Dorian sixths"
+          },
+          "meter": "2/2",
+          "instrumentation": [
+            {
+              "name": "acoustic piano",
+              "role": "Introduces the central motif, provides the lower harmonic foundation, and alternates foreground with violin through understated repeated eighth notes.",
+              "timbre": "Clear, intimate, lightly articulated, with restrained resonance and spacious voicings."
+            },
+            {
+              "name": "violin",
+              "role": "Restates and gradually transforms the piano motif in longer notes, then briefly occupies the upper-middle register before returning to the exchange.",
+              "timbre": "Warm, narrow-range legato with soft bow changes and restrained vibrato."
+            }
+          ],
+          "structure": [
+            {
+              "section": "Intro",
+              "durationSeconds": 18,
+              "direction": "Solo piano presents a simple motif over sparse B-flat minor harmony, with gentle repeated eighth-note motion and chromatic passing basses."
+            },
+            {
+              "section": "Development",
+              "durationSeconds": 52,
+              "direction": "Violin answers in longer notes. Piano and violin alternate foreground and background through imitation, small rhythmic elongations, and subtle Dorian sixth color; maintain modest dynamics and no dramatic contrast."
+            },
+            {
+              "section": "Reprise",
+              "durationSeconds": 42,
+              "direction": "Return to the original motif exchange, with softened articulation and slightly wider space between phrases. Keep the violin in a warm upper-middle register while piano supports below."
+            },
+            {
+              "section": "Outro",
+              "durationSeconds": 18,
+              "direction": "Thin the texture and settle onto a quiet suspended chord, allowing natural piano and violin resonance to decay without a forceful cadence."
+            }
+          ],
+          "vocals": {
+            "enabled": false,
+            "language": null,
+            "style": null,
+            "lyricalTheme": null
+          },
+          "production": "Intimate acoustic chamber recording with close but natural piano and violin separation, restrained natural room reverberation, gentle stereo depth, controlled dynamics, and a calm foreground/background perspective. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.",
+          "avoid": [
+            "vocals",
+            "humming",
+            "spoken words",
+            "choir",
+            "heavy percussion",
+            "forceful climaxes",
+            "dramatic rhythmic accents",
+            "environmental sound layers",
+            "page-turning sounds",
+            "rain",
+            "vinyl crackle",
+            "clipping",
+            "crackling",
+            "digital distortion"
+          ],
+          "assumptions": [
+            "Set the gentle walking pace to approximately 76 BPM.",
+            "Use a four-part arc totaling approximately 130 seconds."
+          ],
+          "lyriaPrompt": "Instrumental only, no vocals.\n\nAim for approximately 130 seconds, with a self-contained beginning, development and ending.\n\nInstrumental only, no vocals, humming, spoken words or choir. Contemporary acoustic neoclassical chamber music for calm solitary study, with clear melodic writing, restrained dynamics and modest scale. Intimate acoustic space with restrained natural room reverberation and clear instrumental separation. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion; no environmental sound layers, page sounds, rain, vinyl crackle, heavy percussion, horror effects or forceful climaxes.\n\ncontemporary acoustic neoclassical chamber music. quietly focused, reflective, softly suspended\n\nRhythm: 76 BPM; Gentle walking pace in 2/2, lightly articulated repeated eighth notes with no dramatic accents.; 2/2 meter.\n\nHarmony: B-flat; minor with occasional Dorian sixths.\n\nInstrumentation and interaction:\nacoustic piano: Introduces the central motif, provides the lower harmonic foundation, and alternates foreground with violin through understated repeated eighth notes. Tone: Clear, intimate, lightly articulated, with restrained resonance and spacious voicings.\nviolin: Restates and gradually transforms the piano motif in longer notes, then briefly occupies the upper-middle register before returning to the exchange. Tone: Warm, narrow-range legato with soft bow changes and restrained vibrato.\n\nDevelopment:\n[Intro] Approximately 18s. Solo piano presents a simple motif over sparse B-flat minor harmony, with gentle repeated eighth-note motion and chromatic passing basses.\n[Development] Approximately 52s. Violin answers in longer notes. Piano and violin alternate foreground and background through imitation, small rhythmic elongations, and subtle Dorian sixth color; maintain modest dynamics and no dramatic contrast.\n[Reprise] Approximately 42s. Return to the original motif exchange, with softened articulation and slightly wider space between phrases. Keep the violin in a warm upper-middle register while piano supports below.\n[Outro] Approximately 18s. Thin the texture and settle onto a quiet suspended chord, allowing natural piano and violin resonance to decay without a forceful cadence.\n\nProduction: Intimate acoustic chamber recording with close but natural piano and violin separation, restrained natural room reverberation, gentle stereo depth, controlled dynamics, and a calm foreground/background perspective. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.\n\nAvoid: vocals; humming; spoken words; choir; heavy percussion; forceful climaxes; dramatic rhythmic accents; environmental sound layers; page-turning sounds; rain; vinyl crackle; clipping; crackling; digital distortion."
+        }
+      },
+      {
+        "id": "ebf338f4-47c7-4ca7-9647-3fb23266860a",
+        "order": 8,
+        "title": "Midnight Concordance",
+        "targetDurationSeconds": 175,
+        "admission": "candidate",
+        "status": "queued",
+        "createdAt": "2026-10-04T09:24:52.777Z",
+        "updatedAt": "2026-10-04T09:26:17.683Z",
+        "musicSpec": {
+          "schemaVersion": "1.0",
+          "title": "Midnight Concordance",
+          "intent": "A deeply reflective chamber miniature for piano, viola, and cello, shaped by slow-moving counterpoint and a quiet midnight atmosphere.",
+          "genres": [
+            "contemporary acoustic neoclassical chamber music"
+          ],
+          "moods": [
+            "introspective",
+            "shadowed",
+            "quietly convergent",
+            "softly unresolved"
+          ],
+          "tempo": {
+            "bpm": null,
+            "feel": "Free-feeling 4/4 with a barely perceptible pulse, long legato phrase arcs, and flexible breathing between gestures."
+          },
+          "tonality": {
+            "tonic": "E-flat",
+            "mode": "minor with restrained octatonic-adjacent chromatic color and suspended ninths"
+          },
+          "meter": "4/4",
+          "instrumentation": [
+            {
+              "name": "acoustic piano",
+              "role": "Begins with isolated intervals, later connects the ensemble through sparse inner motion and harmonic illumination.",
+              "timbre": "Quiet, resonant, rounded attack with generous space between notes."
+            },
+            {
+              "name": "viola",
+              "role": "Introduces a questioning two-note cell and becomes the central connective countervoice.",
+              "timbre": "Warm, dark, intimate arco tone with restrained vibrato."
+            },
+            {
+              "name": "cello",
+              "role": "Provides the low sustained foundation, then participates in the quiet convergence before returning to a solitary final presence.",
+              "timbre": "Deep, mellow legato bowing with soft sustained resonance."
+            }
+          ],
+          "structure": [
+            {
+              "section": "Intro",
+              "durationSeconds": 35,
+              "direction": "Low sustained cello tone beneath isolated piano intervals; sparse E-flat minor sonority, spacious and nearly pulse-free."
+            },
+            {
+              "section": "Development",
+              "durationSeconds": 55,
+              "direction": "Viola introduces a questioning two-note cell. Piano gradually adds delicate inner motion, while cello sustains and subtly reshapes the harmonic floor."
+            },
+            {
+              "section": "Convergence",
+              "durationSeconds": 50,
+              "direction": "The three instruments form denser but still quiet counterpoint. Motifs overlap across registers, with suspended ninths and restrained chromatic tension; never become forceful."
+            },
+            {
+              "section": "Release",
+              "durationSeconds": 35,
+              "direction": "Remove layers in reverse order: piano motion recedes, viola withdraws, and cello remains with a final isolated piano interval. End softly, without a firm dominant resolution."
+            }
+          ],
+          "vocals": {
+            "enabled": false,
+            "language": null,
+            "style": null,
+            "lyricalTheme": null
+          },
+          "production": "Intimate acoustic chamber recording with clear separation, close but natural perspective, restrained natural room reverberation, and controlled dynamics. Preserve the warm natural timbres of piano, viola, and cello; keep the stereo image modest and spacious. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.",
+          "avoid": [
+            "vocals",
+            "humming",
+            "spoken words",
+            "choir",
+            "environmental sound layers",
+            "page sounds",
+            "rain",
+            "vinyl crackle",
+            "heavy percussion",
+            "horror effects",
+            "forceful climaxes",
+            "clipping",
+            "crackling",
+            "digital distortion"
+          ],
+          "assumptions": [
+            "The supplied free-feeling 4/4 is realized as flexible chamber pulse rather than strict metric repetition.",
+            "The octave-adjacent chromatic color remains sparse and subordinate to the E-flat minor tonal center."
+          ],
+          "lyriaPrompt": "Instrumental only, no vocals.\n\nAim for approximately 175 seconds, with a self-contained beginning, development and ending.\n\nInstrumental only, no vocals, humming, spoken words or choir. Contemporary acoustic neoclassical chamber music for calm solitary study, with clear melodic writing, restrained dynamics and modest scale. Intimate acoustic space with restrained natural room reverberation and clear instrumental separation. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion; no environmental sound layers, page sounds, rain, vinyl crackle, heavy percussion, horror effects or forceful climaxes.\n\ncontemporary acoustic neoclassical chamber music. introspective, shadowed, quietly convergent, softly unresolved\n\nRhythm: Free-feeling 4/4 with a barely perceptible pulse, long legato phrase arcs, and flexible breathing between gestures.; 4/4 meter.\n\nHarmony: E-flat; minor with restrained octatonic-adjacent chromatic color and suspended ninths.\n\nInstrumentation and interaction:\nacoustic piano: Begins with isolated intervals, later connects the ensemble through sparse inner motion and harmonic illumination. Tone: Quiet, resonant, rounded attack with generous space between notes.\nviola: Introduces a questioning two-note cell and becomes the central connective countervoice. Tone: Warm, dark, intimate arco tone with restrained vibrato.\ncello: Provides the low sustained foundation, then participates in the quiet convergence before returning to a solitary final presence. Tone: Deep, mellow legato bowing with soft sustained resonance.\n\nDevelopment:\n[Intro] Approximately 35s. Low sustained cello tone beneath isolated piano intervals; sparse E-flat minor sonority, spacious and nearly pulse-free.\n[Development] Approximately 55s. Viola introduces a questioning two-note cell. Piano gradually adds delicate inner motion, while cello sustains and subtly reshapes the harmonic floor.\n[Convergence] Approximately 50s. The three instruments form denser but still quiet counterpoint. Motifs overlap across registers, with suspended ninths and restrained chromatic tension; never become forceful.\n[Release] Approximately 35s. Remove layers in reverse order: piano motion recedes, viola withdraws, and cello remains with a final isolated piano interval. End softly, without a firm dominant resolution.\n\nProduction: Intimate acoustic chamber recording with clear separation, close but natural perspective, restrained natural room reverberation, and controlled dynamics. Preserve the warm natural timbres of piano, viola, and cello; keep the stereo image modest and spacious. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.\n\nAvoid: vocals; humming; spoken words; choir; environmental sound layers; page sounds; rain; vinyl crackle; heavy percussion; horror effects; forceful climaxes; clipping; crackling; digital distortion."
+        }
+      },
+      {
+        "id": "69c688ac-74a2-4e6c-849c-55eb70e3c93a",
+        "order": 9,
+        "title": "Marginalia in Blue",
+        "targetDurationSeconds": 125,
+        "admission": "candidate",
+        "status": "queued",
+        "createdAt": "2026-10-04T09:24:52.777Z",
+        "updatedAt": "2026-10-04T09:26:27.66Z",
+        "musicSpec": {
+          "schemaVersion": "1.0",
+          "title": "Marginalia in Blue",
+          "intent": "A focused solo-piano study miniature built around lucid melody, gentle asymmetry, and gradual harmonic opening.",
+          "genres": [
+            "contemporary acoustic neoclassical",
+            "minimalist chamber piano"
+          ],
+          "moods": [
+            "lucid concentration",
+            "quiet inwardness",
+            "soft release"
+          ],
+          "tempo": {
+            "bpm": 66,
+            "feel": "Smooth 7/8 motor pulse grouped 3+2+2, evenly articulated without accent-heavy meter."
+          },
+          "tonality": {
+            "tonic": "C-sharp",
+            "mode": "minor with Lydian inflections"
+          },
+          "meter": "7/8",
+          "instrumentation": [
+            {
+              "name": "acoustic piano",
+              "role": "Carries the repeating bass pattern, lucid upper melody, and restrained middle-voice counterpoint.",
+              "timbre": "Natural, intimate concert-grand tone; clear but gentle attacks, resonant low register, lightly pedaled legato."
+            }
+          ],
+          "structure": [
+            {
+              "section": "Intro",
+              "durationSeconds": 18,
+              "direction": "Establish a persistent C-sharp pedal bass in smooth 3+2+2 groupings with sparse upper-register fragments and generous clarity."
+            },
+            {
+              "section": "Development",
+              "durationSeconds": 45,
+              "direction": "Introduce a concise singing melody, shift its entrances across bar lines, and add a quiet middle voice while preserving the understated motor pulse."
+            },
+            {
+              "section": "Opening",
+              "durationSeconds": 30,
+              "direction": "Temporarily suspend the bass pattern; let the harmony broaden through Lydian-colored added tones and more spacious melodic phrasing without increasing volume."
+            },
+            {
+              "section": "Reprise",
+              "durationSeconds": 22,
+              "direction": "Restore the 7/8 bass pattern with fewer notes, allowing the upper melody to return in a simplified, softened form."
+            },
+            {
+              "section": "Outro",
+              "durationSeconds": 10,
+              "direction": "Resolve into a gentle added-sixth sonority with natural piano decay, avoiding a strongly conclusive cadence."
+            }
+          ],
+          "vocals": {
+            "enabled": false,
+            "language": null,
+            "style": null,
+            "lyricalTheme": null
+          },
+          "production": "Intimate acoustic piano recording with clear separation, restrained natural room reverberation, and controlled dynamics. Preserve low-register resonance while keeping the melody transparent. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.",
+          "avoid": [
+            "vocals",
+            "humming",
+            "spoken words",
+            "choir",
+            "environmental sound layers",
+            "page sounds",
+            "rain",
+            "vinyl crackle",
+            "heavy percussion",
+            "forceful climaxes",
+            "accent-heavy 7/8",
+            "clipping",
+            "crackling",
+            "digital distortion"
+          ],
+          "assumptions": [
+            "66 BPM provides a calm, readable 7/8 pulse for the 125-second form.",
+            "The opening and closing use restrained Lydian color rather than a strong tonal resolution."
+          ],
+          "lyriaPrompt": "Instrumental only, no vocals.\n\nAim for approximately 125 seconds, with a self-contained beginning, development and ending.\n\nInstrumental only, no vocals, humming, spoken words or choir. Contemporary acoustic neoclassical chamber music for calm solitary study, with clear melodic writing, restrained dynamics and modest scale. Intimate acoustic space with restrained natural room reverberation and clear instrumental separation. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion; no environmental sound layers, page sounds, rain, vinyl crackle, heavy percussion, horror effects or forceful climaxes.\n\ncontemporary acoustic neoclassical, minimalist chamber piano. lucid concentration, quiet inwardness, soft release\n\nRhythm: 66 BPM; Smooth 7/8 motor pulse grouped 3+2+2, evenly articulated without accent-heavy meter.; 7/8 meter.\n\nHarmony: C-sharp; minor with Lydian inflections.\n\nInstrumentation and interaction:\nacoustic piano: Carries the repeating bass pattern, lucid upper melody, and restrained middle-voice counterpoint. Tone: Natural, intimate concert-grand tone; clear but gentle attacks, resonant low register, lightly pedaled legato.\n\nDevelopment:\n[Intro] Approximately 18s. Establish a persistent C-sharp pedal bass in smooth 3+2+2 groupings with sparse upper-register fragments and generous clarity.\n[Development] Approximately 45s. Introduce a concise singing melody, shift its entrances across bar lines, and add a quiet middle voice while preserving the understated motor pulse.\n[Opening] Approximately 30s. Temporarily suspend the bass pattern; let the harmony broaden through Lydian-colored added tones and more spacious melodic phrasing without increasing volume.\n[Reprise] Approximately 22s. Restore the 7/8 bass pattern with fewer notes, allowing the upper melody to return in a simplified, softened form.\n[Outro] Approximately 10s. Resolve into a gentle added-sixth sonority with natural piano decay, avoiding a strongly conclusive cadence.\n\nProduction: Intimate acoustic piano recording with clear separation, restrained natural room reverberation, and controlled dynamics. Preserve low-register resonance while keeping the melody transparent. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.\n\nAvoid: vocals; humming; spoken words; choir; environmental sound layers; page sounds; rain; vinyl crackle; heavy percussion; forceful climaxes; accent-heavy 7/8; clipping; crackling; digital distortion."
+        }
+      },
+      {
+        "id": "88c73e4b-edd4-4b3c-94d5-60043d0cbc27",
+        "order": 10,
+        "title": "The Clock Without Hands",
+        "targetDurationSeconds": 150,
+        "admission": "candidate",
+        "status": "queued",
+        "createdAt": "2026-10-04T09:24:52.777Z",
+        "updatedAt": "2026-10-04T09:26:37.4Z",
+        "musicSpec": {
+          "schemaVersion": "1.0",
+          "title": "The Clock Without Hands",
+          "intent": "A patient, suspended-time chamber miniature led by cello over still piano resonance.",
+          "genres": [
+            "contemporary acoustic neoclassical chamber music",
+            "minimalist chamber music"
+          ],
+          "moods": [
+            "patient and suspended",
+            "quietly melancholic",
+            "translucent and unresolved"
+          ],
+          "tempo": {
+            "bpm": 52,
+            "feel": "Slow 3/4 with broad legato phrases, flexible rubato at phrase endings, and occasional rests."
+          },
+          "tonality": {
+            "tonic": "D-flat",
+            "mode": "major with minor-sixth shadowing and modal mixture"
+          },
+          "meter": "3/4",
+          "instrumentation": [
+            {
+              "name": "acoustic piano",
+              "role": "Still harmonic backdrop; places three quiet chordal landmarks, later presents an inverted form of the cello motif.",
+              "timbre": "Soft, resonant, widely spaced voicings with gentle attack and natural decay."
+            },
+            {
+              "name": "cello",
+              "role": "Primary melodic voice; answers the piano with a descending lament figure, expands it into a long arch, then returns to the opening gesture.",
+              "timbre": "Warm, intimate arco tone with restrained vibrato, sustained upper notes, and expressive legato."
+            }
+          ],
+          "structure": [
+            {
+              "section": "Intro",
+              "durationSeconds": 25,
+              "direction": "Sparse piano establishes three quiet chordal landmarks in D-flat major, with unresolved stepwise bass motion and generous silence."
+            },
+            {
+              "section": "Development",
+              "durationSeconds": 65,
+              "direction": "Cello answers with a descending lament figure and expands it into a longer arch. Keep the pulse broad, the counterpoint sparse, and dynamics restrained."
+            },
+            {
+              "section": "Inversion",
+              "durationSeconds": 35,
+              "direction": "Piano briefly carries an understated inversion of the cello figure while cello sustains above, creating a calm, suspended convergence."
+            },
+            {
+              "section": "Outro",
+              "durationSeconds": 25,
+              "direction": "Return to the opening cello descent over thinning piano resonance. End in translucent major-minor ambiguity with natural decay."
+            }
+          ],
+          "vocals": {
+            "enabled": false,
+            "language": null,
+            "style": null,
+            "lyricalTheme": null
+          },
+          "production": "Intimate acoustic chamber recording with close, clear separation between piano and cello, restrained natural room reverberation, warm cello presence, and spacious piano decay. Keep dynamics controlled and the perspective patient and unobtrusive. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.",
+          "avoid": [
+            "vocals",
+            "humming",
+            "spoken words",
+            "choir",
+            "environmental sound layers",
+            "page sounds",
+            "rain",
+            "vinyl crackle",
+            "heavy percussion",
+            "forceful climaxes",
+            "horror effects",
+            "clipping",
+            "crackling",
+            "digital distortion"
+          ],
+          "assumptions": [
+            "Set a restrained 52 BPM to support the requested slow 3/4 pacing.",
+            "Use arco cello throughout for a continuous legato lament character.",
+            "Treat the 150-second target as four flexible developmental sections."
+          ],
+          "lyriaPrompt": "Instrumental only, no vocals.\n\nAim for approximately 150 seconds, with a self-contained beginning, development and ending.\n\nInstrumental only, no vocals, humming, spoken words or choir. Contemporary acoustic neoclassical chamber music for calm solitary study, with clear melodic writing, restrained dynamics and modest scale. Intimate acoustic space with restrained natural room reverberation and clear instrumental separation. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion; no environmental sound layers, page sounds, rain, vinyl crackle, heavy percussion, horror effects or forceful climaxes.\n\ncontemporary acoustic neoclassical chamber music, minimalist chamber music. patient and suspended, quietly melancholic, translucent and unresolved\n\nRhythm: 52 BPM; Slow 3/4 with broad legato phrases, flexible rubato at phrase endings, and occasional rests.; 3/4 meter.\n\nHarmony: D-flat; major with minor-sixth shadowing and modal mixture.\n\nInstrumentation and interaction:\nacoustic piano: Still harmonic backdrop; places three quiet chordal landmarks, later presents an inverted form of the cello motif. Tone: Soft, resonant, widely spaced voicings with gentle attack and natural decay.\ncello: Primary melodic voice; answers the piano with a descending lament figure, expands it into a long arch, then returns to the opening gesture. Tone: Warm, intimate arco tone with restrained vibrato, sustained upper notes, and expressive legato.\n\nDevelopment:\n[Intro] Approximately 25s. Sparse piano establishes three quiet chordal landmarks in D-flat major, with unresolved stepwise bass motion and generous silence.\n[Development] Approximately 65s. Cello answers with a descending lament figure and expands it into a longer arch. Keep the pulse broad, the counterpoint sparse, and dynamics restrained.\n[Inversion] Approximately 35s. Piano briefly carries an understated inversion of the cello figure while cello sustains above, creating a calm, suspended convergence.\n[Outro] Approximately 25s. Return to the opening cello descent over thinning piano resonance. End in translucent major-minor ambiguity with natural decay.\n\nProduction: Intimate acoustic chamber recording with close, clear separation between piano and cello, restrained natural room reverberation, warm cello presence, and spacious piano decay. Keep dynamics controlled and the perspective patient and unobtrusive. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.\n\nAvoid: vocals; humming; spoken words; choir; environmental sound layers; page sounds; rain; vinyl crackle; heavy percussion; forceful climaxes; horror effects; clipping; crackling; digital distortion."
+        }
+      },
+      {
+        "id": "f861cd25-5565-49e1-8c8d-b93b1c7c0d4f",
+        "order": 11,
+        "title": "Quiet Corrections",
+        "targetDurationSeconds": 135,
+        "admission": "candidate",
+        "status": "queued",
+        "createdAt": "2026-10-04T09:24:52.777Z",
+        "updatedAt": "2026-10-04T09:26:46.961Z",
+        "musicSpec": {
+          "schemaVersion": "1.0",
+          "title": "Quiet Corrections",
+          "intent": "A calm chamber miniature in which piano and viola move from lightly detached thought to clarified, sustained lyricism.",
+          "genres": [
+            "contemporary acoustic neoclassical chamber music"
+          ],
+          "moods": [
+            "quietly focused",
+            "gently searching",
+            "clarified",
+            "restful"
+          ],
+          "tempo": {
+            "bpm": 68,
+            "feel": "Unhurried 4/4 with lightly detached offbeat piano figures, spacious viola entrances, and modest dynamic motion."
+          },
+          "tonality": {
+            "tonic": "A",
+            "mode": "A major with Mixolydian inflections and restrained borrowed minor chords"
+          },
+          "meter": "4/4",
+          "instrumentation": [
+            {
+              "name": "acoustic piano",
+              "role": "Provides the opening offbeat repeating figure, harmonic frame, interlocking counterpoint, and final suspended sonority.",
+              "timbre": "Clear, intimate, lightly detached articulation; spacious voicings with restrained resonance."
+            },
+            {
+              "name": "viola",
+              "role": "Answers the piano first with soft pizzicato, then carries the motif arco in longer lyrical phrases and understated counterpoint.",
+              "timbre": "Warm, close-miked alto register; gentle pizzicato transitioning into smooth legato arco."
+            }
+          ],
+          "structure": [
+            {
+              "section": "Intro",
+              "durationSeconds": 18,
+              "direction": "Sparse acoustic piano establishes a short, lightly detached offbeat figure in A major, with generous space and no dramatic emphasis."
+            },
+            {
+              "section": "Development",
+              "durationSeconds": 48,
+              "direction": "Viola answers with soft pizzicato, gradually restates the figure arco, and lengthens its phrases. Piano and viola interlock through subtle Mixolydian color and borrowed minor chords while dynamics remain restrained."
+            },
+            {
+              "section": "Repose",
+              "durationSeconds": 42,
+              "direction": "Pizzicato disappears; viola and piano continue in smooth legato, exchanging the motif with gently increasing warmth but no climax."
+            },
+            {
+              "section": "Outro",
+              "durationSeconds": 27,
+              "direction": "Viola recedes, leaving piano alone to slow the figure and close on a softly voiced suspended chord with natural decay."
+            }
+          ],
+          "vocals": {
+            "enabled": false,
+            "language": null,
+            "style": null,
+            "lyricalTheme": null
+          },
+          "production": "Intimate acoustic chamber recording with clear separation between piano and viola, restrained natural room reverberation, warm close perspective, controlled dynamics, and natural acoustic timbres. Clean studio recording, smooth transients and controlled peaks.",
+          "avoid": [
+            "vocals",
+            "humming",
+            "spoken words",
+            "choir",
+            "environmental sound layers",
+            "page sounds",
+            "rain",
+            "vinyl crackle",
+            "heavy percussion",
+            "forceful climaxes",
+            "clipping",
+            "crackling",
+            "digital distortion"
+          ],
+          "assumptions": [
+            "Set the tempo near 68 BPM to support spacious offbeat piano figures and legato viola entrances.",
+            "Use a compact four-part arc totaling approximately 135 seconds."
+          ],
+          "lyriaPrompt": "Instrumental only, no vocals.\n\nAim for approximately 135 seconds, with a self-contained beginning, development and ending.\n\nInstrumental only, no vocals, humming, spoken words or choir. Contemporary acoustic neoclassical chamber music for calm solitary study, with clear melodic writing, restrained dynamics and modest scale. Intimate acoustic space with restrained natural room reverberation and clear instrumental separation. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion; no environmental sound layers, page sounds, rain, vinyl crackle, heavy percussion, horror effects or forceful climaxes.\n\ncontemporary acoustic neoclassical chamber music. quietly focused, gently searching, clarified, restful\n\nRhythm: 68 BPM; Unhurried 4/4 with lightly detached offbeat piano figures, spacious viola entrances, and modest dynamic motion.; 4/4 meter.\n\nHarmony: A; A major with Mixolydian inflections and restrained borrowed minor chords.\n\nInstrumentation and interaction:\nacoustic piano: Provides the opening offbeat repeating figure, harmonic frame, interlocking counterpoint, and final suspended sonority. Tone: Clear, intimate, lightly detached articulation; spacious voicings with restrained resonance.\nviola: Answers the piano first with soft pizzicato, then carries the motif arco in longer lyrical phrases and understated counterpoint. Tone: Warm, close-miked alto register; gentle pizzicato transitioning into smooth legato arco.\n\nDevelopment:\n[Intro] Approximately 18s. Sparse acoustic piano establishes a short, lightly detached offbeat figure in A major, with generous space and no dramatic emphasis.\n[Development] Approximately 48s. Viola answers with soft pizzicato, gradually restates the figure arco, and lengthens its phrases. Piano and viola interlock through subtle Mixolydian color and borrowed minor chords while dynamics remain restrained.\n[Repose] Approximately 42s. Pizzicato disappears; viola and piano continue in smooth legato, exchanging the motif with gently increasing warmth but no climax.\n[Outro] Approximately 27s. Viola recedes, leaving piano alone to slow the figure and close on a softly voiced suspended chord with natural decay.\n\nProduction: Intimate acoustic chamber recording with clear separation between piano and viola, restrained natural room reverberation, warm close perspective, controlled dynamics, and natural acoustic timbres. Clean studio recording, smooth transients and controlled peaks.\n\nAvoid: vocals; humming; spoken words; choir; environmental sound layers; page sounds; rain; vinyl crackle; heavy percussion; forceful climaxes; clipping; crackling; digital distortion."
+        }
+      },
+      {
+        "id": "bbd6c95d-f113-4756-a2c9-d49059847dfc",
+        "order": 12,
+        "title": "The Lower Gallery",
+        "targetDurationSeconds": 180,
+        "admission": "candidate",
+        "status": "queued",
+        "createdAt": "2026-10-04T09:24:52.777Z",
+        "updatedAt": "2026-10-04T09:26:58.401Z",
+        "musicSpec": {
+          "schemaVersion": "1.0",
+          "title": "The Lower Gallery",
+          "intent": "A quiet chamber study miniature for piano and strings, focused on blended low-register sonority, suspended time, and gradual thinning toward repose.",
+          "genres": [
+            "contemporary acoustic neoclassical chamber music",
+            "minimalist chamber music"
+          ],
+          "moods": [
+            "dark and contemplative",
+            "patient and inward",
+            "softly luminous",
+            "quietly unresolved"
+          ],
+          "tempo": {
+            "bpm": 48,
+            "feel": "Adagio 6/4 with a sustained, flexible pulse, overlapping bow changes, and no rhythmic insistence."
+          },
+          "tonality": {
+            "tonic": "F",
+            "mode": "minor with Phrygian inflections"
+          },
+          "meter": "6/4",
+          "instrumentation": [
+            {
+              "name": "acoustic piano",
+              "role": "Slow harmonic illumination through widely spaced, softly voiced tones; later gives the final sonority.",
+              "timbre": "Warm, natural, resonant, lightly pedaled, with restrained attack."
+            },
+            {
+              "name": "violin",
+              "role": "Narrow luminous upper melody that passes between violin and piano without becoming dramatic.",
+              "timbre": "Soft legato arco, intimate upper-middle register, delicate vibrato."
+            },
+            {
+              "name": "viola",
+              "role": "Supports the low blended foundation and connects inner harmonic changes.",
+              "timbre": "Warm, dark arco with smooth sustained bowing."
+            },
+            {
+              "name": "cello",
+              "role": "Deep anchor and principal low-register foundation, sustaining long tones beneath the ensemble.",
+              "timbre": "Rich, rounded arco, restrained vibrato, spacious phrasing."
+            }
+          ],
+          "structure": [
+            {
+              "section": "Intro",
+              "durationSeconds": 30,
+              "direction": "Cello and viola establish a dark sustained F-minor foundation with overlapping bow changes and subtle descending inner motion."
+            },
+            {
+              "section": "Development I",
+              "durationSeconds": 45,
+              "direction": "Violin enters with a narrow luminous line; piano adds widely spaced, quiet harmonic tones. Keep the texture sparse and blended."
+            },
+            {
+              "section": "Development II",
+              "durationSeconds": 55,
+              "direction": "Pass the upper melodic focus gently between violin and piano while cello and viola alter their voicings through descending chromatic inner lines. Allow only rare, softened cadential clarity."
+            },
+            {
+              "section": "Repose",
+              "durationSeconds": 30,
+              "direction": "Reduce melodic activity and density; let the string trio sustain longer tones while piano becomes more occasional and transparent."
+            },
+            {
+              "section": "Outro",
+              "durationSeconds": 20,
+              "direction": "Thin to cello and viola with one final softly voiced piano chord. End quietly with natural resonance and no emphatic resolution."
+            }
+          ],
+          "vocals": {
+            "enabled": false,
+            "language": null,
+            "style": null,
+            "lyricalTheme": null
+          },
+          "production": "Intimate acoustic chamber recording with close but natural instrumental separation, restrained room reverberation, warm low-register detail, and gentle stereo depth. Preserve the natural blend of piano and bowed strings. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion.",
+          "avoid": [
+            "vocals",
+            "humming",
+            "spoken words",
+            "choir",
+            "heavy percussion",
+            "forceful climaxes",
+            "environmental sound layers",
+            "page sounds",
+            "rain",
+            "horror effects",
+            "excessive vibrato",
+            "bright aggressive piano attack",
+            "clipping",
+            "crackling",
+            "digital distortion"
+          ],
+          "assumptions": [
+            "Set the slow pulse near 48 BPM to support the specified Adagio 6/4 character.",
+            "Use a restrained arco performance throughout; no pizzicato is introduced.",
+            "Treat the ending as softly unresolved rather than fully cadential."
+          ],
+          "lyriaPrompt": "Instrumental only, no vocals.\n\nAim for approximately 180 seconds, with a self-contained beginning, development and ending.\n\nInstrumental only, no vocals, humming, spoken words or choir. Contemporary acoustic neoclassical chamber music for calm solitary study, with clear melodic writing, restrained dynamics and modest scale. Intimate acoustic space with restrained natural room reverberation and clear instrumental separation. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion; no environmental sound layers, page sounds, rain, vinyl crackle, heavy percussion, horror effects or forceful climaxes.\n\ncontemporary acoustic neoclassical chamber music, minimalist chamber music. dark and contemplative, patient and inward, softly luminous, quietly unresolved\n\nRhythm: 48 BPM; Adagio 6/4 with a sustained, flexible pulse, overlapping bow changes, and no rhythmic insistence.; 6/4 meter.\n\nHarmony: F; minor with Phrygian inflections.\n\nInstrumentation and interaction:\nacoustic piano: Slow harmonic illumination through widely spaced, softly voiced tones; later gives the final sonority. Tone: Warm, natural, resonant, lightly pedaled, with restrained attack.\nviolin: Narrow luminous upper melody that passes between violin and piano without becoming dramatic. Tone: Soft legato arco, intimate upper-middle register, delicate vibrato.\nviola: Supports the low blended foundation and connects inner harmonic changes. Tone: Warm, dark arco with smooth sustained bowing.\ncello: Deep anchor and principal low-register foundation, sustaining long tones beneath the ensemble. Tone: Rich, rounded arco, restrained vibrato, spacious phrasing.\n\nDevelopment:\n[Intro] Approximately 30s. Cello and viola establish a dark sustained F-minor foundation with overlapping bow changes and subtle descending inner motion.\n[Development I] Approximately 45s. Violin enters with a narrow luminous line; piano adds widely spaced, quiet harmonic tones. Keep the texture sparse and blended.\n[Development II] Approximately 55s. Pass the upper melodic focus gently between violin and piano while cello and viola alter their voicings through descending chromatic inner lines. Allow only rare, softened cadential clarity.\n[Repose] Approximately 30s. Reduce melodic activity and density; let the string trio sustain longer tones while piano becomes more occasional and transparent.\n[Outro] Approximately 20s. Thin to cello and viola with one final softly voiced piano chord. End quietly with natural resonance and no emphatic resolution.\n\nProduction: Intimate acoustic chamber recording with close but natural instrumental separation, restrained room reverberation, warm low-register detail, and gentle stereo depth. Preserve the natural blend of piano and bowed strings. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion.\n\nAvoid: vocals; humming; spoken words; choir; heavy percussion; forceful climaxes; environmental sound layers; page sounds; rain; horror effects; excessive vibrato; bright aggressive piano attack; clipping; crackling; digital distortion."
+        }
+      },
+      {
+        "id": "b0fd1a50-122d-44c1-b722-b14eda102e75",
+        "order": 13,
+        "title": "Last Notes Before Closing",
+        "targetDurationSeconds": 120,
+        "admission": "candidate",
+        "status": "queued",
+        "createdAt": "2026-10-04T09:24:52.777Z",
+        "updatedAt": "2026-10-04T09:27:07.463Z",
+        "musicSpec": {
+          "schemaVersion": "1.0",
+          "title": "Last Notes Before Closing",
+          "intent": "A spacious solo-piano study miniature that gradually dissolves into the closing hush of a reading session.",
+          "genres": [
+            "contemporary acoustic neoclassical",
+            "minimalist piano"
+          ],
+          "moods": [
+            "weightless concentration",
+            "quiet introspection",
+            "soft repose"
+          ],
+          "tempo": {
+            "bpm": 52,
+            "feel": "Slow 4/4 with gently separated broken chords, generous silence, and flexible phrase endings."
+          },
+          "tonality": {
+            "tonic": "G",
+            "mode": "natural minor opening toward G Dorian, ending with an understated major sixth color"
+          },
+          "meter": "4/4",
+          "instrumentation": [
+            {
+              "name": "acoustic piano",
+              "role": "Sole voice; presents isolated intervals, descending motif, sparse accompaniment, and final incomplete melodic gesture.",
+              "timbre": "Warm, intimate, lightly voiced, natural sustain, restrained touch, low-to-middle register with a brief luminous upper-register rise."
+            }
+          ],
+          "structure": [
+            {
+              "section": "Intro",
+              "durationSeconds": 25,
+              "direction": "Isolated low-to-middle-register intervals establish spaciousness, followed by a simple descending three-note motif with ample silence."
+            },
+            {
+              "section": "Development",
+              "durationSeconds": 40,
+              "direction": "Gradually connect the intervals into a flowing but sparse broken-chord accompaniment. Keep dynamics controlled and let the motif recur in subtly varied registers."
+            },
+            {
+              "section": "Release",
+              "durationSeconds": 30,
+              "direction": "Allow the melody to rise briefly into the upper register, then recede. Reduce harmonic density and remove bass support, leaving more space between gestures."
+            },
+            {
+              "section": "Outro",
+              "durationSeconds": 25,
+              "direction": "Present an incomplete return of the descending motif, ending on a soft resonant upper chord colored by G Dorian and a gentle major sixth; allow natural decay."
+            }
+          ],
+          "vocals": {
+            "enabled": false,
+            "language": null,
+            "style": null,
+            "lyricalTheme": null
+          },
+          "production": "Intimate acoustic piano recording in a quiet, modest room with restrained natural reverberation, clear articulation, warm resonance, and generous silence between phrases. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.",
+          "avoid": [
+            "vocals",
+            "humming",
+            "spoken words",
+            "choir",
+            "environmental sound layers",
+            "page sounds",
+            "rain",
+            "heavy percussion",
+            "forceful climaxes",
+            "clipping",
+            "crackling",
+            "digital distortion"
+          ],
+          "assumptions": [
+            "A gentle 52 BPM pulse supports the requested spacious 4/4 pacing.",
+            "The final major sixth is treated as a subtle G-Dorian color rather than a bright full resolution."
+          ],
+          "lyriaPrompt": "Instrumental only, no vocals.\n\nAim for approximately 120 seconds, with a self-contained beginning, development and ending.\n\nInstrumental only, no vocals, humming, spoken words or choir. Contemporary acoustic neoclassical chamber music for calm solitary study, with clear melodic writing, restrained dynamics and modest scale. Intimate acoustic space with restrained natural room reverberation and clear instrumental separation. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion; no environmental sound layers, page sounds, rain, vinyl crackle, heavy percussion, horror effects or forceful climaxes.\n\ncontemporary acoustic neoclassical, minimalist piano. weightless concentration, quiet introspection, soft repose\n\nRhythm: 52 BPM; Slow 4/4 with gently separated broken chords, generous silence, and flexible phrase endings.; 4/4 meter.\n\nHarmony: G; natural minor opening toward G Dorian, ending with an understated major sixth color.\n\nInstrumentation and interaction:\nacoustic piano: Sole voice; presents isolated intervals, descending motif, sparse accompaniment, and final incomplete melodic gesture. Tone: Warm, intimate, lightly voiced, natural sustain, restrained touch, low-to-middle register with a brief luminous upper-register rise.\n\nDevelopment:\n[Intro] Approximately 25s. Isolated low-to-middle-register intervals establish spaciousness, followed by a simple descending three-note motif with ample silence.\n[Development] Approximately 40s. Gradually connect the intervals into a flowing but sparse broken-chord accompaniment. Keep dynamics controlled and let the motif recur in subtly varied registers.\n[Release] Approximately 30s. Allow the melody to rise briefly into the upper register, then recede. Reduce harmonic density and remove bass support, leaving more space between gestures.\n[Outro] Approximately 25s. Present an incomplete return of the descending motif, ending on a soft resonant upper chord colored by G Dorian and a gentle major sixth; allow natural decay.\n\nProduction: Intimate acoustic piano recording in a quiet, modest room with restrained natural reverberation, clear articulation, warm resonance, and generous silence between phrases. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.\n\nAvoid: vocals; humming; spoken words; choir; environmental sound layers; page sounds; rain; heavy percussion; forceful climaxes; clipping; crackling; digital distortion."
+        }
+      },
+      {
+        "id": "b0160d4b-87c7-4c68-a67f-938a32036f83",
+        "order": 14,
+        "title": "Lights Out in the Library",
+        "targetDurationSeconds": 165,
+        "admission": "candidate",
+        "status": "queued",
+        "createdAt": "2026-10-04T09:24:52.777Z",
+        "updatedAt": "2026-10-04T09:27:18.569Z",
+        "musicSpec": {
+          "schemaVersion": "1.0",
+          "title": "Lights Out in the Library",
+          "intent": "A quiet closing chamber miniature: piano, viola, and cello gently synthesize reflective study motifs before dissolving into stillness.",
+          "genres": [
+            "contemporary acoustic neoclassical chamber music",
+            "minimalist piano trio"
+          ],
+          "moods": [
+            "hushed arrival",
+            "warm reflection",
+            "softened repose"
+          ],
+          "tempo": {
+            "bpm": 48,
+            "feel": "Very slow 3/4 with a gentle rocking pulse and flexible rubato at phrase endings."
+          },
+          "tonality": {
+            "tonic": "D",
+            "mode": "D minor gradually softened by Dorian sixths, open fifths, and suspended resolutions"
+          },
+          "meter": "3/4",
+          "instrumentation": [
+            {
+              "name": "acoustic piano",
+              "role": "Introduces and closes the recurring three-note arrival motif; provides sparse rocking harmony and final low open fifth.",
+              "timbre": "Warm, intimate, lightly pedaled, spaciously voiced, with natural resonance."
+            },
+            {
+              "name": "viola",
+              "role": "Carries a narrow lyrical gesture, then joins the piano in restrained inner counterpoint before receding.",
+              "timbre": "Soft legato arco, warm middle register, understated vibrato."
+            },
+            {
+              "name": "cello",
+              "role": "Anchors the lower register with sustained tones and quiet counterlines, then gradually withdraws.",
+              "timbre": "Warm, rounded legato arco with gentle bow pressure and restrained vibrato."
+            }
+          ],
+          "structure": [
+            {
+              "section": "Intro",
+              "durationSeconds": 30,
+              "direction": "Sparse piano states a quiet three-note arrival motif over open D-minor sonorities; very gentle rocking 3/4 pulse, ample silence."
+            },
+            {
+              "section": "Development",
+              "durationSeconds": 55,
+              "direction": "Viola enters with a narrow lyrical gesture; cello establishes sustained low support. The trio develops warm, restrained counterpoint with Dorian sixths, suspended tones, and subtle inner-voice motion."
+            },
+            {
+              "section": "Recollection",
+              "durationSeconds": 40,
+              "direction": "All three instruments briefly converge in calm chamber interplay. Keep dynamics modest, melodic lines clear, and avoid any grand climax."
+            },
+            {
+              "section": "Dissolution",
+              "durationSeconds": 40,
+              "direction": "Viola and cello gradually reduce activity and fall silent. Piano repeats the arrival motif more slowly, with widening rests and softer resonance, ending on a low open fifth with natural decay."
+            }
+          ],
+          "vocals": {
+            "enabled": false,
+            "language": null,
+            "style": null,
+            "lyricalTheme": null
+          },
+          "production": "Intimate acoustic chamber recording with close, clear separation and restrained natural room reverberation. Preserve warm piano resonance, blended viola and cello presence, gentle dynamics, smooth transients and controlled peaks. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.",
+          "avoid": [
+            "vocals",
+            "humming",
+            "spoken words",
+            "choir",
+            "environmental sound layers",
+            "page sounds",
+            "rain",
+            "vinyl crackle",
+            "heavy percussion",
+            "forceful climaxes",
+            "clipping",
+            "crackling",
+            "digital distortion"
+          ],
+          "assumptions": [
+            "Set a slow 48 BPM pulse to realize the requested very slow 3/4 feel.",
+            "Treat the arrival motif as a concise three-note piano figure.",
+            "Use arco strings throughout for a continuous, softened chamber texture."
+          ],
+          "lyriaPrompt": "Instrumental only, no vocals.\n\nAim for approximately 165 seconds, with a self-contained beginning, development and ending.\n\nInstrumental only, no vocals, humming, spoken words or choir. Contemporary acoustic neoclassical chamber music for calm solitary study, with clear melodic writing, restrained dynamics and modest scale. Intimate acoustic space with restrained natural room reverberation and clear instrumental separation. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion; no environmental sound layers, page sounds, rain, vinyl crackle, heavy percussion, horror effects or forceful climaxes.\n\ncontemporary acoustic neoclassical chamber music, minimalist piano trio. hushed arrival, warm reflection, softened repose\n\nRhythm: 48 BPM; Very slow 3/4 with a gentle rocking pulse and flexible rubato at phrase endings.; 3/4 meter.\n\nHarmony: D; D minor gradually softened by Dorian sixths, open fifths, and suspended resolutions.\n\nInstrumentation and interaction:\nacoustic piano: Introduces and closes the recurring three-note arrival motif; provides sparse rocking harmony and final low open fifth. Tone: Warm, intimate, lightly pedaled, spaciously voiced, with natural resonance.\nviola: Carries a narrow lyrical gesture, then joins the piano in restrained inner counterpoint before receding. Tone: Soft legato arco, warm middle register, understated vibrato.\ncello: Anchors the lower register with sustained tones and quiet counterlines, then gradually withdraws. Tone: Warm, rounded legato arco with gentle bow pressure and restrained vibrato.\n\nDevelopment:\n[Intro] Approximately 30s. Sparse piano states a quiet three-note arrival motif over open D-minor sonorities; very gentle rocking 3/4 pulse, ample silence.\n[Development] Approximately 55s. Viola enters with a narrow lyrical gesture; cello establishes sustained low support. The trio develops warm, restrained counterpoint with Dorian sixths, suspended tones, and subtle inner-voice motion.\n[Recollection] Approximately 40s. All three instruments briefly converge in calm chamber interplay. Keep dynamics modest, melodic lines clear, and avoid any grand climax.\n[Dissolution] Approximately 40s. Viola and cello gradually reduce activity and fall silent. Piano repeats the arrival motif more slowly, with widening rests and softer resonance, ending on a low open fifth with natural decay.\n\nProduction: Intimate acoustic chamber recording with close, clear separation and restrained natural room reverberation. Preserve warm piano resonance, blended viola and cello presence, gentle dynamics, smooth transients and controlled peaks. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks.\n\nAvoid: vocals; humming; spoken words; choir; environmental sound layers; page sounds; rain; vinyl crackle; heavy percussion; forceful climaxes; clipping; crackling; digital distortion."
+        }
+      }
+    ],
+    "albumReview": {
+      "verdict": "needs-work",
+      "albumFindings": [
+        "All rendered prompts are standalone and retain the shared instrumental, intimate chamber, and audio-quality directions.",
+        "The album has strong planned variation in meter, subdivision, foreground instrument, density, and ensemble size, but several solo-piano and piano/cello pieces reuse closely related sparse low-register, unresolved, thinning arcs.",
+        "Track 12's rendered prompt repeats “Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks” and “No clipping, crackling or digital distortion” in both Production and Avoid; this is harmless but redundant.",
+        "Track 14 repeats the quality wording in Production and again at the end of Production, creating avoidable prompt duplication."
+      ],
+      "similarities": [
+        {
+          "first": 1,
+          "second": 14,
+          "evidence": "Both use a “three-note” piano arrival motif, D-minor language, very slow/quiet 3/4-or-walking arrival framing, restrained piano-and-strings counterpoint, and a final open or unresolved sonority.",
+          "judgment": "Recurrence supports the stated arrival/closing strategy, but Track 14 should make its transformation more explicit rather than closely restating Track 1’s motif and piano-led arc."
+        },
+        {
+          "first": 2,
+          "second": 13,
+          "evidence": "Both are solo acoustic-piano studies with sparse repeating/broken figures, minor/modal color, gradual thinning, generous space, and natural-decay endings.",
+          "judgment": "This is appropriate partly as a concentration-to-closing contrast, but their phrase density and developmental behavior are very close; preserve both only if Track 2 emphasizes ostinato variation while Track 13 remains substantially freer and more fragmentary."
+        },
+        {
+          "first": 8,
+          "second": 12,
+          "evidence": "Both center on piano with viola and cello, low-register shadows, slow or barely perceptible pulse, sustained counterpoint, restrained chromatic/modal ambiguity, and reverse-layer thinning.",
+          "judgment": "The recurrence fits the album’s middle-group deepening, but Track 12’s four-instrument blended foundation and Track 8’s three-voice cell-based counterpoint should remain clearly differentiated in the prompts."
+        },
+        {
+          "first": 3,
+          "second": 11,
+          "evidence": "Both pair piano and viola, use restrained motif exchange, modest dynamics, modal color, and a piano-led quiet suspended ending.",
+          "judgment": "Useful variation exists through Track 3’s flexible 3/4 held-tone dialogue versus Track 11’s 4/4 offbeat figure and pizzicato-to-arco transformation; no edit required."
+        }
+      ],
+      "candidates": [
+        {
+          "number": 1,
+          "verdict": "ready",
+          "evidence": [
+            "Rendered prompt specifies “cello: Quiet shadow voice” and develops it through “briefly overlap in calm, transparent counterpoint.”",
+            "The independent 150-second arc returns to a “lower, quieter register” and retains the shared quality constraint."
+          ],
+          "revisionBrief": null
+        },
+        {
+          "number": 2,
+          "verdict": "ready",
+          "evidence": [
+            "The rendered prompt clearly realizes the solo-piano ostinato, singing melody, bass darkening, thinning, and natural decay.",
+            "“Slow rocking 6/8” and “understated left-hand ostinato” provide a distinct pulse and concentration role."
+          ],
+          "revisionBrief": null
+        },
+        {
+          "number": 3,
+          "verdict": "ready",
+          "evidence": [
+            "“Viola: Primary lyrical voice” and “Piano answers beneath it” accurately realize the intended foreground/background relationship.",
+            "The narrow-register dialogue, parallel sixths, and held-tone ending provide coherent development."
+          ],
+          "revisionBrief": null
+        },
+        {
+          "number": 4,
+          "verdict": "ready",
+          "evidence": [
+            "The prompt assigns distinct roles to piano pattern, cello bass foundation, and violin motif exchange.",
+            "“Quiet continuous eighth-note motion” and the gradual removal of violin create substantial proportional development."
+          ],
+          "revisionBrief": null
+        },
+        {
+          "number": 5,
+          "verdict": "ready",
+          "evidence": [
+            "The prompt explicitly realizes “Sparse, unaccented 5/4 grouped 2+3” and the later dissolution into freer spacing.",
+            "Low-register resonance, middle-register second voice, and unresolved minor-third ending match the outline."
+          ],
+          "revisionBrief": null
+        },
+        {
+          "number": 6,
+          "verdict": "ready",
+          "evidence": [
+            "The rendered arrangement correctly makes viola the opening voice, cello the answering low voice, and piano a later harmonic frame.",
+            "The convergence into unison and separation into descending lines provide a clear independent arc."
+          ],
+          "revisionBrief": null
+        },
+        {
+          "number": 7,
+          "verdict": "ready",
+          "evidence": [
+            "The prompt clearly specifies motif exchange through imitation, rhythmic elongation, and alternating foreground/background roles.",
+            "Its 2/2 repeated-eighth-note motion distinguishes it from the more flexible neighboring chamber pieces."
+          ],
+          "revisionBrief": null
+        },
+        {
+          "number": 8,
+          "verdict": "ready",
+          "evidence": [
+            "The “questioning two-note cell,” low sustained cello foundation, and layered convergence are explicitly realized.",
+            "Reverse-order withdrawal of piano motion, viola, then cello gives the 175-second form a coherent release."
+          ],
+          "revisionBrief": null
+        },
+        {
+          "number": 9,
+          "verdict": "ready",
+          "evidence": [
+            "The prompt concretely realizes the 7/8 grouping “3+2+2,” cross-bar melody shifts, suspended bass pattern, and simplified reprise.",
+            "The solo-piano role is distinct through motor asymmetry and Lydian opening."
+          ],
+          "revisionBrief": null
+        },
+        {
+          "number": 10,
+          "verdict": "ready",
+          "evidence": [
+            "“Cello: Primary melodic voice” and the piano’s “three quiet chordal landmarks” accurately establish the intended suspended-time relationship.",
+            "The inversion section and translucent major-minor ending provide useful development without a climax."
+          ],
+          "revisionBrief": null
+        },
+        {
+          "number": 11,
+          "verdict": "ready",
+          "evidence": [
+            "The rendered prompt preserves the specific “soft pizzicato” to “smooth legato arco” transformation.",
+            "Offbeat piano figures and borrowed-minor color give this piano/viola piece a distinct rhythmic and articulation profile."
+          ],
+          "revisionBrief": null
+        },
+        {
+          "number": 12,
+          "verdict": "needs-work",
+          "evidence": [
+            "The rendered Production repeats the quality clause and then repeats “No clipping, crackling or digital distortion,” creating unnecessary duplication.",
+            "The four-instrument low-register texture is musically coherent, but the prompt's production wording is less concise than the other candidates."
+          ],
+          "revisionBrief": "Remove the duplicated quality wording from Production; retain one instance of “Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks” and keep artifact exclusions only in Avoid."
+        },
+        {
+          "number": 13,
+          "verdict": "ready",
+          "evidence": [
+            "The prompt clearly differentiates isolated intervals, sparse broken-chord accompaniment, upper-register rise, bass removal, and incomplete return.",
+            "Its 120-second weightless dissolution supports the album’s final thinning group."
+          ],
+          "revisionBrief": null
+        },
+        {
+          "number": 14,
+          "verdict": "needs-work",
+          "evidence": [
+            "Production contains duplicated quality wording: “smooth transients and controlled peaks” appears twice in the same field.",
+            "Its three-note arrival motif and piano-led quiet return closely parallel Track 1’s arrival/reprise design, though the closing role supports album cohesion."
+          ],
+          "revisionBrief": "Remove the repeated phrase from Production and sharpen the transformation from Track 1: specify that the returning motif is slower, harmonically softened by Dorian sixths, and integrated into the trio’s final open-fifth dissolution rather than presented as a near-restatement."
+        }
+      ]
+    }
+  }
+}

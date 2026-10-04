@@ -1,0 +1,13 @@
+{
+  "status": "completed",
+  "phase": "archived",
+  "trackCount": 14,
+  "finalReview": "needs-work",
+  "admittedTrackCount": 14,
+  "admissionCounts": [
+    {
+      "state": "included",
+      "count": 14
+    }
+  ]
+}
