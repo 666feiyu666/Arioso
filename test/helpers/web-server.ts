@@ -35,8 +35,9 @@ export async function withWebServer(
     await test({ root, server, baseUrl });
   } finally {
     if (server?.listening) {
+      const closed = once(server, "close");
       server.close();
-      await once(server, "close");
+      await closed;
     }
     await rm(root, { recursive: true, force: true });
   }

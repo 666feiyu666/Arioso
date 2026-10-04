@@ -56,7 +56,6 @@ button:focus-visible, textarea:focus-visible, select:focus-visible, input:focus-
 .task-state-dot.running { background: var(--accent); box-shadow: 0 0 0 4px rgba(204, 90, 52, 0.1); animation: pulse 1.4s infinite; }
 .task-state-dot.completed { background: var(--moss); }
 .task-state-dot.failed { background: #a44038; }
-.empty-tasks { padding: 22px 12px; color: var(--muted); font-size: 12px; line-height: 1.7; }
 .sidebar-foot { margin-top: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 14px 7px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
 .sidebar-foot small { margin-left: auto; }
 .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #77906f; box-shadow: 0 0 0 4px rgba(119, 144, 111, 0.12); }
@@ -240,7 +239,6 @@ button:focus-visible, textarea:focus-visible, select:focus-visible, input:focus-
 .movement-details { display: grid; gap: 20px; }
 .movement-details details { border-top: 1px solid var(--line); padding-top: 16px; }
 .movement-details summary { margin-bottom: 14px; color: var(--muted); font-size: 11px; font-weight: 700; cursor: pointer; }
-.movement-play { margin-top: 18px; color: var(--ink); border-color: var(--line); background: #eeeae2; }
 .movement-error { margin: 10px 0 0; color: #8a342f; font-size: 11px; line-height: 1.6; }
 
 @keyframes pulse { 50% { opacity: .45; } }
@@ -419,7 +417,6 @@ button:focus-visible, textarea:focus-visible, select:focus-visible, input:focus-
   .album-track-copy h3 { font-size: 12px; }
   .admission-actions button { padding: 6px 8px; font-size: 9px; }
   .global-player:has(.playlist-controls:not([hidden])) { grid-template-columns: 44px minmax(0, 1fr) 70px; }
-  .global-player audio { grid-column: 1 / -1; }
 }
 @media (max-width: 400px) {
   .album-grid { grid-template-columns: 1fr; }

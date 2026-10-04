@@ -1,12 +1,10 @@
-import { once } from "node:events";
 import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
-import type { AddressInfo } from "node:net";
 import os from "node:os";
 import path from "node:path";
 
 import { afterEach, describe, expect, it } from "vitest";
 
-import { createAriosoServer } from "../src/web/server.js";
+import { withWebServer } from "./helpers/web-server.js";
 import { inferWorkflowType, organizeTaskStorage } from "../src/web/task-store.js";
 
 const roots: string[] = [];
@@ -83,39 +81,27 @@ describe("task storage organization", () => {
   });
 
   it("preserves a no-corpus Jazz task through migration and server reload", async () => {
-    const root = await mkdtemp(path.join(os.tmpdir(), "arioso-corpus-choice-"));
-    const outputDirectory = path.join(root, "outputs");
-    const directory = path.join(outputDirectory, "tasks");
     const id = "22222222-2222-4222-8222-222222222222";
-    await mkdir(directory, { recursive: true });
-    await writeFile(path.join(directory, `${id}.json`), JSON.stringify({
-      id,
-      workflowType: "02-jazz",
-      compositionMode: "single",
-      corpusMode: "none",
-      status: "completed",
-      description: 'Create instrumental jazz inspired by "So What".',
-      updatedAt: "2026-01-01T00:00:00.000Z",
-    }));
-    await organizeTaskStorage(directory);
-    const stored = JSON.parse(await readFile(path.join(directory, "02-jazz", id, "task.json"), "utf8"));
-    expect(stored).toMatchObject({ workflowType: "02-jazz", corpusMode: "none" });
-
-    const server = await createAriosoServer({
-      envPath: path.join(root, ".env"),
-      preferencesPath: path.join(root, "settings.json"),
-      environment: { ARIOSO_OUTPUT_DIR: outputDirectory },
-    });
-    server.listen(0, "127.0.0.1");
-    await once(server, "listening");
-    const address = server.address() as AddressInfo;
-    try {
-      const tasks = await fetch(`http://127.0.0.1:${address.port}/api/tasks`).then((response) => response.json());
+    await withWebServer(async ({ baseUrl }) => {
+      const tasks = await fetch(`${baseUrl}/api/tasks`).then((response) => response.json());
       expect(tasks).toEqual([expect.objectContaining({ id, workflowType: "02-jazz", corpusMode: "none" })]);
-    } finally {
-      server.close();
-      await once(server, "close");
-      await rm(root, { recursive: true, force: true });
-    }
+    }, {
+      prepare: async (root) => {
+        const directory = path.join(root, "outputs", "tasks");
+        await mkdir(directory, { recursive: true });
+        await writeFile(path.join(directory, `${id}.json`), JSON.stringify({
+          id,
+          workflowType: "02-jazz",
+          compositionMode: "single",
+          corpusMode: "none",
+          status: "completed",
+          description: 'Create instrumental jazz inspired by "So What".',
+          updatedAt: "2026-01-01T00:00:00.000Z",
+        }));
+        await organizeTaskStorage(directory);
+        const stored = JSON.parse(await readFile(path.join(directory, "02-jazz", id, "task.json"), "utf8"));
+        expect(stored).toMatchObject({ workflowType: "02-jazz", corpusMode: "none" });
+      },
+    });
   });
 });
