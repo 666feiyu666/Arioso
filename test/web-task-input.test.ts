@@ -1,8 +1,20 @@
 import { describe, expect, it } from "vitest";
 
-import { inferWorkflowType, parseTaskInput } from "../src/web/server.js";
+import { inferWorkflowType, parseTaskInput } from "../src/web/task-store.js";
 
 describe("web task input", () => {
+  it.each([null, [], "request", 42])("rejects non-object requests: %j", (value) => {
+    expect(() => parseTaskInput(value)).toThrow("A task request is required.");
+  });
+
+  it.each([
+    [{ mode: "preview" }, "Unsupported task mode."],
+    [{ vocalMode: "choir" }, "Unsupported vocal mode."],
+    [{ lyriaModel: "unknown-model" }, "Unsupported Lyria model."],
+  ])("rejects invalid explicit options: %j", (options, message) => {
+    expect(() => parseTaskInput({ description: "warm piano", ...options })).toThrow(message);
+  });
+
   it("defaults existing clients to the no-corpus workflow", () => {
     expect(parseTaskInput({ description: "warm piano", mode: "compose" })).toEqual({
       description: "warm piano",

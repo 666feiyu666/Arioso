@@ -4,9 +4,23 @@ import type { AddressInfo } from "node:net";
 import os from "node:os";
 import path from "node:path";
 
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 
-import { createAriosoServer, inferWorkflowType, organizeTaskStorage } from "../src/web/server.js";
+import { createAriosoServer } from "../src/web/server.js";
+import { inferWorkflowType, organizeTaskStorage } from "../src/web/task-store.js";
+
+const roots: string[] = [];
+afterEach(async () => {
+  await Promise.all(roots.splice(0).map((root) => rm(root, { recursive: true, force: true })));
+});
+
+async function temporaryTaskDirectory(): Promise<string> {
+  const root = await mkdtemp(path.join(os.tmpdir(), "arioso-task-storage-"));
+  roots.push(root);
+  const directory = path.join(root, "tasks");
+  await mkdir(directory);
+  return directory;
+}
 
 describe("task storage organization", () => {
   it("recognizes legacy multi-movement descriptions without workflow metadata", () => {
@@ -19,7 +33,7 @@ describe("task storage organization", () => {
   });
 
   it("migrates a flat task and audio into its workflow directory", async () => {
-    const directory = await mkdtemp(path.join(os.tmpdir(), "arioso-task-storage-"));
+    const directory = await temporaryTaskDirectory();
     const id = "11111111-1111-4111-8111-111111111111";
     const task = {
       id,
@@ -60,7 +74,7 @@ describe("task storage organization", () => {
   });
 
   it("creates all workflow roots even when there are no tasks", async () => {
-    const directory = await mkdtemp(path.join(os.tmpdir(), "arioso-task-storage-"));
+    const directory = await temporaryTaskDirectory();
     await organizeTaskStorage(directory);
 
     for (const workflow of ["01-general", "02-jazz", "03-orchestral", "04-album"]) {

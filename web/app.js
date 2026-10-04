@@ -61,6 +61,9 @@ const translations = {
     queued: "等待开始", composing: "正在整理编曲", generating: "Lyria 正在生成", assembling: "正在组合完整作品", completed: "已完成",
     failed: "生成失败", pause: "暂停", play: "播放", pausePlayback: "暂停播放", resumePlayback: "继续播放",
     playInPlayer: "在播放器中播放", thisMusic: "这首音乐", finishedTrack: "完整成品",
+    playMusic: "播放音乐", playNamed: "播放《{title}》", pauseNamed: "暂停《{title}》",
+    clickRecord: "点击唱片，听听你的作品。", readyToPlay: "待播放", playbackLoading: "正在加载音频…",
+    playbackPaused: "已暂停", playbackEnded: "播放结束", playbackError: "播放失败", replay: "重新播放",
     audioPlaybackFailed: "音频播放失败。", audioLoadFailed: "音频加载失败，请重启本地服务后重试。",
     unnamedWork: "未命名作品", thinking: "正在构思…", lyriaPrompt: "Lyria 生成提示", musicalDirection: "音乐方向",
     genre: "风格", mood: "情绪", tempo: "速度", tonality: "调性", instrumentation: "编制", vocals: "人声",
@@ -139,6 +142,9 @@ const translations = {
     queued: "Waiting to start", composing: "Composing", generating: "Lyria is generating", assembling: "Assembling complete work", completed: "Completed",
     failed: "Generation failed", pause: "Pause ", play: "Play ", pausePlayback: "Pause", resumePlayback: "Resume",
     playInPlayer: "Play in player", thisMusic: "this music", finishedTrack: "Finished track",
+    playMusic: "Play music", playNamed: "Play {title}", pauseNamed: "Pause {title}",
+    clickRecord: "Click the record to hear your music.", readyToPlay: "Ready to play", playbackLoading: "Loading audio…",
+    playbackPaused: "Paused", playbackEnded: "Playback finished", playbackError: "Playback failed", replay: "Play again",
     audioPlaybackFailed: "Audio playback failed.", audioLoadFailed: "Audio failed to load. Restart the local server and try again.",
     unnamedWork: "Untitled work", thinking: "Thinking…", lyriaPrompt: "Lyria generation prompt", musicalDirection: "Musical direction",
     genre: "Genre", mood: "Mood", tempo: "Tempo", tonality: "Tonality", instrumentation: "Instrumentation", vocals: "Vocals",
@@ -276,6 +282,8 @@ const state = {
   selectedTaskId: null,
   playingTaskId: null,
   playingMovementId: null,
+  playbackStatus: "ready",
+  playbackRequest: 0,
   corpusMode: "none",
   compositionMode: "single",
   workflowType: "01-general",
@@ -322,6 +330,8 @@ const elements = {
   audio: document.querySelector("#audio-player"),
   playerTitle: document.querySelector("#player-title"),
   playerMeta: document.querySelector("#player-meta"),
+  playerToggle: document.querySelector("#player-toggle"),
+  playerStatus: document.querySelector("#player-status"),
   settingsDialog: document.querySelector("#settings-dialog"),
   settingsForm: document.querySelector("#settings-form"),
   settingsMessage: document.querySelector("#settings-message"),
@@ -478,47 +488,119 @@ function taskIsPlaying(id) {
   return state.playingTaskId === id
     && !state.playingMovementId
     && !elements.audio.paused
-    && !elements.audio.ended;
+    && !elements.audio.ended
+    && !elements.audio.error;
 }
 
 function movementIsPlaying(taskId, movementId) {
   return state.playingTaskId === taskId
     && state.playingMovementId === movementId
     && !elements.audio.paused
-    && !elements.audio.ended;
+    && !elements.audio.ended
+    && !elements.audio.error;
+}
+
+function playbackStatus(selected) {
+  if (!selected) return "ready";
+  if (elements.audio.error || state.playbackStatus === "error") return "error";
+  if (elements.audio.ended) return "ended";
+  if (state.playbackStatus === "loading") return "loading";
+  return elements.audio.paused ? "paused" : "playing";
+}
+
+function playbackStatusLabel(status) {
+  return t({ ready: "readyToPlay", loading: "playbackLoading", playing: "nowPlaying", paused: "playbackPaused", ended: "playbackEnded", error: "playbackError" }[status]);
+}
+
+function syncRecordControl(button, selected, playing, title) {
+  const status = playbackStatus(selected);
+  button.dataset.playbackState = status;
+  button.querySelector(".playback-icon").textContent = playing ? "Ⅱ" : "▶";
+  button.setAttribute("aria-label", t(playing ? "pauseNamed" : "playNamed", { title }));
+  button.setAttribute("aria-pressed", String(playing));
+  button.title = button.getAttribute("aria-label");
+}
+
+function renderAudioPanel(task, movement) {
+  const attributes = movement
+    ? `data-parent-task="${escapeHtml(task.id)}" data-play-movement="${escapeHtml(movement.id)}"`
+    : `data-play-task="${escapeHtml(task.id)}"`;
+  const title = movement ? `${movement.order}. ${movement.title}` : task.title || task.description;
+  return `
+    <section class="panel audio-panel${movement ? " movement-audio" : ""}" data-audio-task="${escapeHtml(task.id)}" data-audio-movement="${escapeHtml(movement?.id || "")}">
+      <button class="record-control" type="button" ${attributes}>
+        <span class="record-disc" aria-hidden="true"><span class="record-label"></span></span>
+        <span class="playback-icon" aria-hidden="true">▶</span>
+      </button>
+      <div class="audio-copy">
+        <p class="eyebrow">${t("listen")}</p>
+        <h3>${escapeHtml(title)}</h3>
+        <p>${t("clickRecord")}</p>
+        <span class="audio-status" data-playback-status>${t("readyToPlay")}</span>
+      </div>
+      <button class="listen-button" type="button" ${attributes}></button>
+    </section>
+  `;
 }
 
 function syncPlaybackControls() {
   document.querySelectorAll("[data-play-task]").forEach((button) => {
     const task = state.tasks.find((item) => item.id === button.dataset.playTask);
     const playing = taskIsPlaying(button.dataset.playTask);
+    const selected = state.playingTaskId === button.dataset.playTask && !state.playingMovementId;
     const title = task?.title || task?.description || t("thisMusic");
 
-    if (button.classList.contains("task-play")) {
+    if (button.classList.contains("record-control")) {
+      syncRecordControl(button, selected, playing, title);
+    } else if (button.classList.contains("task-play")) {
       button.textContent = playing ? "Ⅱ" : "▶";
       button.setAttribute("aria-label", `${playing ? t("pause") : t("play")}${title}`);
       button.title = `${playing ? t("pause") : t("play")}${title}`;
     } else {
       button.textContent = playing
         ? t("pausePlayback")
-        : state.playingTaskId === button.dataset.playTask
-          ? t("resumePlayback")
-          : t("playInPlayer");
+        : selected && elements.audio.ended ? t("replay")
+          : selected && !elements.audio.error && state.playbackStatus !== "error" ? t("resumePlayback")
+            : t("playMusic");
     }
   });
   document.querySelectorAll("[data-play-movement]").forEach((button) => {
     const playing = movementIsPlaying(button.dataset.parentTask, button.dataset.playMovement);
-    button.textContent = playing ? t("pausePlayback") : t("playInPlayer");
+    const selected = state.playingTaskId === button.dataset.parentTask && state.playingMovementId === button.dataset.playMovement;
+    const task = state.tasks.find((item) => item.id === button.dataset.parentTask);
+    const movement = task?.movements?.find((item) => item.id === button.dataset.playMovement);
+    if (button.classList.contains("record-control")) {
+      syncRecordControl(button, selected, playing, movement?.title || t("thisMusic"));
+    } else {
+      button.textContent = playing ? t("pausePlayback")
+        : selected && elements.audio.ended ? t("replay")
+          : selected && !elements.audio.error && state.playbackStatus !== "error" ? t("resumePlayback")
+            : t("playMusic");
+    }
   });
+  document.querySelectorAll("[data-audio-task]").forEach((panel) => {
+    const selected = panel.dataset.audioTask === state.playingTaskId
+      && (panel.dataset.audioMovement || null) === state.playingMovementId;
+    panel.querySelector("[data-playback-status]").textContent = playbackStatusLabel(playbackStatus(selected));
+  });
+  if (state.playingTaskId) {
+    const playing = !elements.audio.paused && !elements.audio.ended && !elements.audio.error;
+    syncRecordControl(elements.playerToggle, true, playing, elements.playerTitle.textContent);
+    elements.playerStatus.textContent = playbackStatusLabel(playbackStatus(true));
+    elements.composerDock.hidden = false;
+  }
 }
 
 async function playTask(id) {
   const task = state.tasks.find((item) => item.id === id);
   if (!task?.audioFile) return;
+  const request = ++state.playbackRequest;
 
   try {
-    if (state.playingTaskId === id && !state.playingMovementId) {
+    elements.message.textContent = "";
+    if (state.playingTaskId === id && !state.playingMovementId && !elements.audio.error && state.playbackStatus !== "error") {
       if (elements.audio.paused) {
+        if (elements.audio.ended) elements.audio.currentTime = 0;
         await elements.audio.play();
       } else {
         elements.audio.pause();
@@ -528,13 +610,17 @@ async function playTask(id) {
 
     state.playingTaskId = id;
     state.playingMovementId = null;
+    state.playbackStatus = "loading";
     elements.playerTitle.textContent = task.title || task.description;
     elements.playerMeta.textContent = `${task.lyriaModel} · ${t("finishedTrack")}`;
     elements.globalPlayer.hidden = false;
     elements.audio.src = `/api/tasks/${encodeURIComponent(task.id)}/audio`;
     elements.audio.load();
+    syncPlaybackControls();
     await elements.audio.play();
   } catch (error) {
+    if (request !== state.playbackRequest || error?.name === "AbortError") return;
+    state.playbackStatus = "error";
     elements.message.textContent = error instanceof Error ? error.message : t("audioPlaybackFailed");
   } finally {
     syncPlaybackControls();
@@ -545,23 +631,31 @@ async function playMovement(taskId, movementId) {
   const task = state.tasks.find((item) => item.id === taskId);
   const movement = task?.movements?.find((item) => item.id === movementId);
   if (!movement?.audioFile) return;
+  const request = ++state.playbackRequest;
 
   try {
-    if (state.playingTaskId === taskId && state.playingMovementId === movementId) {
-      if (elements.audio.paused) await elements.audio.play();
-      else elements.audio.pause();
+    elements.message.textContent = "";
+    if (state.playingTaskId === taskId && state.playingMovementId === movementId && !elements.audio.error && state.playbackStatus !== "error") {
+      if (elements.audio.paused) {
+        if (elements.audio.ended) elements.audio.currentTime = 0;
+        await elements.audio.play();
+      } else elements.audio.pause();
       return;
     }
 
     state.playingTaskId = taskId;
     state.playingMovementId = movementId;
+    state.playbackStatus = "loading";
     elements.playerTitle.textContent = `${movement.order}. ${movement.title}`;
     elements.playerMeta.textContent = `${task.lyriaModel} · ${task.title || task.description}`;
     elements.globalPlayer.hidden = false;
     elements.audio.src = `/api/tasks/${encodeURIComponent(taskId)}/movements/${encodeURIComponent(movementId)}/audio`;
     elements.audio.load();
+    syncPlaybackControls();
     await elements.audio.play();
   } catch (error) {
+    if (request !== state.playbackRequest || error?.name === "AbortError") return;
+    state.playbackStatus = "error";
     elements.message.textContent = error instanceof Error ? error.message : t("audioPlaybackFailed");
   } finally {
     syncPlaybackControls();
@@ -722,7 +816,7 @@ function renderOrchestralTaskDetail(task) {
           <span class="status-pill ${statusClass(movement.status)}">${escapeHtml(statusLabel(movement.status))}</span>
         </header>
         ${details}${movementError}
-        ${movement.audioFile ? `<button class="listen-button movement-play" type="button" data-parent-task="${task.id}" data-play-movement="${movement.id}">${t("playInPlayer")}</button>` : ""}
+        ${movement.audioFile ? renderAudioPanel(task, movement) : ""}
       </article>
     `;
   }).join("");
@@ -750,7 +844,7 @@ function renderOrchestralTaskDetail(task) {
       </div>
       <span class="status-pill ${statusClass(task.status)}">${escapeHtml(statusLabel(task.status))}</span>
     </header>
-    ${progress}${error}${task.audioFile ? `<button class="listen-button" type="button" data-play-task="${task.id}">${t("playInPlayer")}</button>` : ""}${referencePanel}${contractPanel}
+    ${progress}${error}${task.audioFile ? renderAudioPanel(task) : ""}${referencePanel}${contractPanel}
     ${movements.length ? `<section class="movement-list"><h2>${t("movements")}</h2>${movementCards}</section>` : ""}
   `;
   elements.taskDetail.querySelectorAll("[data-play-movement]").forEach((button) => {
@@ -801,12 +895,7 @@ function renderTaskDetail(task) {
       </div>
     </div>
   ` : "";
-  const audioPanel = task.audioFile ? `
-    <div class="panel audio-panel">
-      <div><h3>${t("listen")}</h3><p>${escapeHtml(task.lyriaModel)} · MP3</p></div>
-      <button class="listen-button" type="button" data-play-task="${task.id}"></button>
-    </div>
-  ` : "";
+  const audioPanel = task.audioFile ? renderAudioPanel(task) : "";
   const progress = running ? `
     <div class="progress-card">
       <p class="eyebrow accent">${t("inProgress")}</p>
@@ -835,7 +924,8 @@ function renderTaskDetail(task) {
       <span class="status-pill ${statusClass(task.status)}">${escapeHtml(statusLabel(task.status))}</span>
     </header>
     ${progress}${error}
-    ${spec || retrievalPanel ? `<div class="result-grid">${promptPanel}${retrievalPanel}${audioPanel}</div>` : ""}
+    ${audioPanel}
+    ${spec || retrievalPanel ? `<div class="result-grid">${promptPanel}${retrievalPanel}</div>` : ""}
   `;
   elements.taskDetail.querySelectorAll("[data-play-task]").forEach((button) => {
     button.addEventListener("click", () => playTask(button.dataset.playTask));
@@ -852,7 +942,8 @@ function showEntry() {
   elements.developmentView.hidden = true;
   elements.homeView.hidden = true;
   elements.taskView.hidden = true;
-  elements.composerDock.hidden = true;
+  elements.composerDock.hidden = !state.playingTaskId;
+  elements.form.hidden = true;
   renderTaskList();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -872,6 +963,7 @@ function showComposer(
   elements.homeView.hidden = false;
   elements.taskView.hidden = true;
   elements.composerDock.hidden = false;
+  elements.form.hidden = false;
   renderComposerContext();
   renderExamples();
   if (state.compositionMode === "orchestral") {
@@ -888,7 +980,8 @@ function showDevelopment() {
   elements.developmentView.hidden = false;
   elements.homeView.hidden = true;
   elements.taskView.hidden = true;
-  elements.composerDock.hidden = true;
+  elements.composerDock.hidden = !state.playingTaskId;
+  elements.form.hidden = true;
   renderTaskList();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -908,6 +1001,7 @@ function selectTask(id) {
   elements.homeView.hidden = true;
   elements.taskView.hidden = false;
   elements.composerDock.hidden = false;
+  elements.form.hidden = false;
   renderTaskList();
   renderTaskDetail(task);
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1156,6 +1250,10 @@ async function clearCredential(provider, button) {
 }
 
 elements.form.addEventListener("submit", submitTask);
+new ResizeObserver(() => {
+  const height = elements.composerDock.getBoundingClientRect().height;
+  document.documentElement.style.setProperty("--dock-space", `${Math.max(230, height + 50)}px`);
+}).observe(elements.composerDock);
 elements.corpusMode.addEventListener("change", () => {
   state.corpusMode = normalizeCorpusMode(elements.corpusMode.value);
   renderComposerContext();
@@ -1164,10 +1262,18 @@ elements.orchestralReference.addEventListener("change", () => {
   state.orchestralReferenceId = elements.orchestralReference.value;
 });
 elements.settingsForm.addEventListener("submit", saveSettings);
-elements.audio.addEventListener("play", syncPlaybackControls);
-elements.audio.addEventListener("pause", syncPlaybackControls);
-elements.audio.addEventListener("ended", syncPlaybackControls);
+elements.playerToggle.addEventListener("click", () => {
+  if (state.playingMovementId) playMovement(state.playingTaskId, state.playingMovementId);
+  else if (state.playingTaskId) playTask(state.playingTaskId);
+});
+for (const [event, status] of Object.entries({ loadstart: "loading", play: "loading", waiting: "loading", playing: "playing", pause: "paused", ended: "ended", emptied: "ready" })) {
+  elements.audio.addEventListener(event, () => {
+    state.playbackStatus = status;
+    syncPlaybackControls();
+  });
+}
 elements.audio.addEventListener("error", () => {
+  state.playbackStatus = "error";
   elements.message.textContent = t("audioLoadFailed");
   syncPlaybackControls();
 });
@@ -1214,6 +1320,7 @@ document.querySelectorAll("[data-clear-provider]").forEach((button) => {
   button.addEventListener("click", () => clearCredential(button.dataset.clearProvider, button));
 });
 
+elements.form.hidden = true;
 try {
   await loadCapabilities();
   await loadSettings();

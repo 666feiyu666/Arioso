@@ -19,7 +19,13 @@ export function loadComposerSkill(mode: ComposerSkillMode = "single"): Promise<s
     mode === "orchestral"
       ? readFile(path.join(SKILL_DIRECTORY, "references", "orchestral-workflow.md"), "utf8")
       : Promise.resolve(""),
-  ]).then((parts) => parts.map((part) => part.trim()).filter(Boolean).join("\n\n"));
+  ])
+    .then((parts) => parts.map((part) => part.trim()).filter(Boolean).join("\n\n"))
+    .catch((error: unknown) => {
+      // Keep successful and pending reads cached, but allow a failed read to recover.
+      cachedSkills.delete(mode);
+      throw error;
+    });
 
   cachedSkills.set(mode, loaded);
   return loaded;

@@ -1,7 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   createJazzRetriever,
+  loadJazzRetriever,
   type NormalizedJazzRecord,
 } from "../src/retrieval/jazz-retriever.js";
 
@@ -167,5 +172,89 @@ describe("jazz retriever", () => {
     expect(localRetriever.search("same title", 5, "title").map((item) => item.id)).toEqual(["one", "two"]);
     expect(localRetriever.search("same title", 1, "title").map((item) => item.id)).toEqual(["one"]);
     expect(localRetriever.search("???", 5, "title")).toEqual([]);
+  });
+});
+
+describe("jazz corpus loading", () => {
+  const temporaryDirectories: string[] = [];
+
+  afterEach(async () => {
+    vi.unstubAllEnvs();
+    await Promise.all(temporaryDirectories.splice(0).map((directory) =>
+      rm(directory, { recursive: true, force: true }),
+    ));
+  });
+
+  async function corpusFile(filename = "corpus.jsonl"): Promise<string> {
+    const directory = await mkdtemp(path.join(os.tmpdir(), "arioso-jazz-loader-"));
+    temporaryDirectories.push(directory);
+    return path.join(directory, filename);
+  }
+
+  it("retries a corpus that becomes available after its first load failed", async () => {
+    const corpusPath = await corpusFile();
+    vi.stubEnv("ARIOSO_JAZZ_CORPUS", corpusPath);
+    await expect(loadJazzRetriever()).rejects.toMatchObject({ code: "ENOENT" });
+
+    await writeFile(corpusPath, JSON.stringify(record("available", "Available", "A modal piano piece.")));
+    const loaded = loadJazzRetriever();
+    expect(loadJazzRetriever()).toBe(loaded);
+    expect((await loaded).search("Available", 5, "title")).toEqual([
+      expect.objectContaining({ id: "available" }),
+    ]);
+  });
+
+  it("uses the configured corpus path instead of a previously cached corpus", async () => {
+    const firstPath = await corpusFile("first.jsonl");
+    const secondPath = await corpusFile("second.jsonl");
+    await writeFile(firstPath, JSON.stringify(record("first", "First", "A piano ballad.")));
+    await writeFile(secondPath, JSON.stringify(record("second", "Second", "A brass swing piece.")));
+
+    vi.stubEnv("ARIOSO_JAZZ_CORPUS", firstPath);
+    const first = await loadJazzRetriever();
+    vi.stubEnv("ARIOSO_JAZZ_CORPUS", secondPath);
+    const second = await loadJazzRetriever();
+    expect(second.search("Second", 5, "title")[0]?.id).toBe("second");
+    expect(second.search("First", 5, "title")).toEqual([]);
+    vi.stubEnv("ARIOSO_JAZZ_CORPUS", firstPath);
+    expect(await loadJazzRetriever()).toBe(first);
+  });
+
+  it("reports the file and original line for invalid JSON and retries after repair", async () => {
+    const corpusPath = await corpusFile();
+    const validLine = JSON.stringify(record("valid", "Valid", "A gentle ballad."));
+    await writeFile(corpusPath, `${validLine}\n\n{invalid}\n`);
+    vi.stubEnv("ARIOSO_JAZZ_CORPUS", corpusPath);
+    await expect(loadJazzRetriever()).rejects.toThrow(`Invalid JSON in jazz corpus ${corpusPath} at line 3.`);
+
+    await writeFile(corpusPath, `${validLine}\n`);
+    expect((await loadJazzRetriever()).search("Valid", 5, "title")[0]?.id).toBe("valid");
+  });
+
+  it("rejects malformed records before creating the search index", async () => {
+    const corpusPath = await corpusFile();
+    await writeFile(corpusPath, JSON.stringify({
+      ...record("invalid", "Invalid", "A piano piece."),
+      source: { article_url: 42 },
+    }));
+    vi.stubEnv("ARIOSO_JAZZ_CORPUS", corpusPath);
+    await expect(loadJazzRetriever()).rejects.toThrow(`Invalid jazz corpus record in ${corpusPath} at line 1: source.article_url:`);
+  });
+
+  it("accepts a UTF-8 BOM and blank lines while preserving source provenance", async () => {
+    const corpusPath = await corpusFile();
+    const source = {
+      article_url: null,
+      type: "book",
+      author: "Example author",
+      license: { redistribution_allowed: false },
+      pages: { pdf_start: 10, pdf_end: 11, printed_start: "3", printed_end: "4" },
+    };
+    await writeFile(corpusPath, `\uFEFF\n${JSON.stringify({
+      ...record("provenance", "Provenance", "A restrained piano trio."), source,
+    })}\r\n\r\n`);
+    vi.stubEnv("ARIOSO_JAZZ_CORPUS", corpusPath);
+    const reference = (await loadJazzRetriever()).search("Provenance", 5, "title")[0];
+    expect(reference?.source).toEqual(source);
   });
 });

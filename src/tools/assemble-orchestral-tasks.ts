@@ -2,7 +2,7 @@ import "dotenv/config";
 
 import path from "node:path";
 
-import { assembleCompletedOrchestralTasks } from "../web/server.js";
+import { assembleCompletedOrchestralTasks } from "../web/task-store.js";
 
 const outputDirectory = process.env.ARIOSO_OUTPUT_DIR ?? "outputs";
 const taskDirectory = path.resolve(outputDirectory, "tasks");

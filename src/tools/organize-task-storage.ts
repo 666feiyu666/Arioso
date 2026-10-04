@@ -1,6 +1,6 @@
 import path from "node:path";
 
-import { organizeTaskStorage } from "../web/server.js";
+import { organizeTaskStorage } from "../web/task-store.js";
 
 const outputDirectory = process.env.ARIOSO_OUTPUT_DIR ?? "outputs";
 const taskDirectory = path.resolve(outputDirectory, "tasks");

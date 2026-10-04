@@ -1,10 +1,15 @@
-import { mkdir, mkdtemp, readFile, stat, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 
-import { assembleCompletedOrchestralTasks } from "../src/web/server.js";
+import { assembleCompletedOrchestralTasks } from "../src/web/task-store.js";
+
+const roots: string[] = [];
+afterEach(async () => {
+  await Promise.all(roots.splice(0).map((root) => rm(root, { recursive: true, force: true })));
+});
 
 function testMp3(frameCount: number): Buffer {
   const tag = Buffer.from([0x49, 0x44, 0x33, 0x03, 0, 0, 0, 0, 0, 0]);
@@ -19,6 +24,7 @@ function testMp3(frameCount: number): Buffer {
 describe("completed orchestral task assembly", () => {
   it("backfills one reusable parent audio artifact without changing movement files", async () => {
     const root = await mkdtemp(path.join(os.tmpdir(), "arioso-orchestral-assembly-"));
+    roots.push(root);
     const id = "11111111-1111-4111-8111-111111111111";
     const taskDirectory = path.join(root, "03-orchestral", id);
     const movementDirectory = path.join(taskDirectory, "movements");

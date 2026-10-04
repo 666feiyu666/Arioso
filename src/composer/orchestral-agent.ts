@@ -1,14 +1,14 @@
-import { Agent, OpenAIProvider, Runner, run } from "@openai/agents";
+import { Agent } from "@openai/agents";
 
 import {
   OrchestralMovementDraftSchema,
   OrchestralMovementPlanSchema,
   OrchestralWorkPlanSchema,
-  type OrchestralMovementDraft,
   type OrchestralMovementPlan,
   type OrchestralWorkPlan,
 } from "../schema/orchestral-plan.js";
 import { loadComposerSkill } from "./composer-skill.js";
+import { runComposerAgent } from "./agent-runner.js";
 import type { OrchestralKnowledgeCard } from "../retrieval/orchestral-cards.js";
 import {
   buildOrchestralLyriaPrompt,
@@ -71,25 +71,6 @@ export interface OrchestralAgentOptions {
   referenceCard?: OrchestralKnowledgeCard;
 }
 
-async function runAgent<T>(
-  agent: Agent<unknown, any>,
-  input: string,
-  apiKey?: string,
-): Promise<T> {
-  const provider = apiKey ? new OpenAIProvider({ apiKey }) : undefined;
-  try {
-    const result = apiKey && provider
-      ? await new Runner({ modelProvider: provider, tracing: { apiKey } }).run(agent, input)
-      : await run(agent, input);
-    if (!result.finalOutput) {
-      throw new Error("The orchestral agent returned no structured plan.");
-    }
-    return result.finalOutput as T;
-  } finally {
-    await provider?.close();
-  }
-}
-
 export async function planOrchestralWork(
   description: string,
   options: OrchestralAgentOptions = {},
@@ -110,8 +91,9 @@ export async function planOrchestralWork(
     outputType: OrchestralWorkPlanSchema,
   });
 
-  const result = await runAgent<OrchestralWorkPlan>(
-    agent, withKnowledgeCard(input, options.referenceCard), options.apiKey,
+  const result = await runComposerAgent(
+    agent, withKnowledgeCard(input, options.referenceCard),
+    "The orchestral agent returned no structured plan.", options.apiKey,
   );
   return OrchestralWorkPlanSchema.parse(result);
 }
@@ -143,8 +125,9 @@ export async function composeOrchestralMovement(
     `\nDevelop only movement ${movementOrder}: ${outline.title}. Its complete target duration is ${outline.targetDurationMinutes} minutes, not the duration of the whole work.`,
   ].join("\n");
   const draft = OrchestralMovementDraftSchema.parse(
-    await runAgent<OrchestralMovementDraft>(
-      agent, withKnowledgeCard(input, options.referenceCard), options.apiKey,
+    await runComposerAgent(
+      agent, withKnowledgeCard(input, options.referenceCard),
+      "The orchestral agent returned no structured plan.", options.apiKey,
     ),
   );
   return OrchestralMovementPlanSchema.parse({

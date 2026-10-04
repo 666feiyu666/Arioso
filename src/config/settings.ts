@@ -1,6 +1,7 @@
 import { parse } from "dotenv";
-import { mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
-import path from "node:path";
+import { readFile } from "node:fs/promises";
+
+import { writeTextFileAtomic } from "../utils/files.js";
 
 export const SUPPORTED_LANGUAGES = ["zh-CN", "en"] as const;
 export type InterfaceLanguage = (typeof SUPPORTED_LANGUAGES)[number];
@@ -52,17 +53,6 @@ async function readDotEnv(envPath: string): Promise<Record<string, string>> {
   }
 }
 
-async function atomicWrite(filePath: string, content: string): Promise<void> {
-  await mkdir(path.dirname(filePath), { recursive: true });
-  const temporaryPath = `${filePath}.${crypto.randomUUID()}.tmp`;
-  try {
-    await writeFile(temporaryPath, content, "utf8");
-    await rename(temporaryPath, filePath);
-  } finally {
-    await unlink(temporaryPath).catch(() => undefined);
-  }
-}
-
 async function updateDotEnvValue(
   envPath: string,
   name: string,
@@ -98,7 +88,7 @@ async function updateDotEnvValue(
   }
 
   const content = output.join("\n").trimEnd();
-  await atomicWrite(envPath, content ? `${content}\n` : "");
+  await writeTextFileAtomic(envPath, content ? `${content}\n` : "");
 }
 
 export class SettingsStore {
@@ -106,6 +96,7 @@ export class SettingsStore {
   readonly #envPath: string;
   readonly #environment: NodeJS.ProcessEnv;
   readonly #sessionCredentials = new Map<ApiProvider, string>();
+  #credentialUpdates = Promise.resolve();
 
   constructor(options: SettingsStoreOptions) {
     this.#preferencesPath = options.preferencesPath;
@@ -128,7 +119,7 @@ export class SettingsStore {
     if (!isLanguage(language)) {
       throw new Error(`Unsupported interface language: ${String(language)}`);
     }
-    await atomicWrite(
+    await writeTextFileAtomic(
       this.#preferencesPath,
       `${JSON.stringify({ language }, null, 2)}\n`,
     );
@@ -159,15 +150,25 @@ export class SettingsStore {
       throw new Error("API keys cannot contain line breaks.");
     }
 
-    if (remember) {
-      await updateDotEnvValue(this.#envPath, CREDENTIAL_NAMES[provider], normalized);
-    }
-    this.#sessionCredentials.set(provider, normalized);
+    await this.updateCredentials(async () => {
+      if (remember) {
+        await updateDotEnvValue(this.#envPath, CREDENTIAL_NAMES[provider], normalized);
+      }
+      this.#sessionCredentials.set(provider, normalized);
+    });
   }
 
   async clearCredential(provider: ApiProvider): Promise<void> {
-    this.#sessionCredentials.delete(provider);
-    await updateDotEnvValue(this.#envPath, CREDENTIAL_NAMES[provider], null);
+    await this.updateCredentials(async () => {
+      await updateDotEnvValue(this.#envPath, CREDENTIAL_NAMES[provider], null);
+      this.#sessionCredentials.delete(provider);
+    });
+  }
+
+  private updateCredentials(operation: () => Promise<void>): Promise<void> {
+    const update = this.#credentialUpdates.then(operation);
+    this.#credentialUpdates = update.catch(() => undefined);
+    return update;
   }
 
   async runtimeEnvironment(): Promise<NodeJS.ProcessEnv> {

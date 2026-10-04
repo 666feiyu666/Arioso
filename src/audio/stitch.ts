@@ -9,7 +9,7 @@ import {
   type PcmAudio,
 } from "./wav.js";
 
-export interface StitchWavResult {
+export interface StitchAudioResult {
   outputPath: string;
   durationSeconds: number;
   sampleRate: number;
@@ -17,15 +17,8 @@ export interface StitchWavResult {
   segmentDurationsSeconds: number[];
 }
 
-export interface StitchMp3Result {
-  outputPath: string;
-  durationSeconds: number;
-  sampleRate: number;
-  channels: number;
-  segmentDurationsSeconds: number[];
-}
-
-export type StitchAudioResult = StitchWavResult | StitchMp3Result;
+export type StitchWavResult = StitchAudioResult;
+export type StitchMp3Result = StitchAudioResult;
 
 interface Mp3FrameInfo {
   version: 1 | 2 | 2.5;
@@ -126,10 +119,16 @@ function mp3AudioEnd(data: Buffer): number {
     : data.length;
 }
 
-function isVbrMetadataFrame(frame: Buffer): boolean {
-  return frame.includes(Buffer.from("Xing", "ascii"))
-    || frame.includes(Buffer.from("Info", "ascii"))
-    || frame.includes(Buffer.from("VBRI", "ascii"));
+function isVbrMetadataFrame(frame: Buffer, info: Mp3FrameInfo): boolean {
+  const sideInfoLength = info.version === 1
+    ? (info.channels === 1 ? 17 : 32)
+    : (info.channels === 1 ? 9 : 17);
+  // Xing/Info follows the MPEG header and side information; VBRI has a fixed offset.
+  const xingOffset = 4 + sideInfoLength;
+  const xingTag = frame.toString("latin1", xingOffset, xingOffset + 4);
+  return xingTag === "Xing"
+    || xingTag === "Info"
+    || frame.toString("latin1", 36, 40) === "VBRI";
 }
 
 function parseMp3Segment(data: Uint8Array): ParsedMp3Segment {
@@ -168,7 +167,7 @@ function parseMp3Segment(data: Uint8Array): ParsedMp3Segment {
 
   const first = frames[0]!;
   const firstFrame = buffer.subarray(first.offset, first.offset + first.info.frameLength);
-  const audioFrames = isVbrMetadataFrame(firstFrame) ? frames.slice(1) : frames;
+  const audioFrames = isVbrMetadataFrame(firstFrame, first.info) ? frames.slice(1) : frames;
   if (audioFrames.length === 0) throw new Error("MP3 file contains metadata but no audio frames.");
 
   const durationSeconds = audioFrames.reduce(

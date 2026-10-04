@@ -1,6 +1,8 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
+import { z } from "zod";
+
 export interface NormalizedJazzRecord {
   id: string;
   title: string;
@@ -115,11 +117,38 @@ function weightsFor(
   return weights;
 }
 
-function parseJsonLines(text: string): NormalizedJazzRecord[] {
-  return text
-    .split(/\r?\n/)
-    .filter((line) => line.trim())
-    .map((line) => JSON.parse(line) as NormalizedJazzRecord);
+const JazzRecordSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  year: z.number().nullable(),
+  period: z.string().nullable(),
+  musical_description: z.string(),
+  normalization_status: z.enum(["complete", "insufficient_musical_evidence"]),
+  source: z.object({ article_url: z.string().nullable() }).passthrough(),
+}).passthrough();
+
+function parseJsonLines(text: string, corpusPath: string): NormalizedJazzRecord[] {
+  const records: NormalizedJazzRecord[] = [];
+  const lines = text.replace(/^\uFEFF/, "").split(/\r?\n/);
+  for (const [index, line] of lines.entries()) {
+    if (!line.trim()) continue;
+    const location = `${corpusPath} at line ${index + 1}`;
+    let value: unknown;
+    try {
+      value = JSON.parse(line);
+    } catch (error) {
+      throw new Error(`Invalid JSON in jazz corpus ${location}.`, { cause: error });
+    }
+    const parsed = JazzRecordSchema.safeParse(value);
+    if (!parsed.success) {
+      const issues = parsed.error.issues.map((issue) =>
+        `${issue.path.join(".") || "record"}: ${issue.message}`,
+      ).join("; ");
+      throw new Error(`Invalid jazz corpus record in ${location}: ${issues}`);
+    }
+    records.push(parsed.data);
+  }
+  return records;
 }
 
 export interface JazzRetriever {
@@ -194,15 +223,22 @@ export function createJazzRetriever(records: NormalizedJazzRecord[]): JazzRetrie
   };
 }
 
-let cachedRetriever: Promise<JazzRetriever> | undefined;
+const cachedRetrievers = new Map<string, Promise<JazzRetriever>>();
 
 export function loadJazzRetriever(): Promise<JazzRetriever> {
   const corpusPath = path.resolve(
     process.env.ARIOSO_JAZZ_CORPUS ??
       path.join("corpus", "jazz", "jazz_standards.combined.normalized.jsonl"),
   );
-  cachedRetriever ??= readFile(corpusPath, "utf8").then((text) =>
-    createJazzRetriever(parseJsonLines(text)),
-  );
-  return cachedRetriever;
+  const cached = cachedRetrievers.get(corpusPath);
+  if (cached) return cached;
+
+  const loaded = readFile(corpusPath, "utf8")
+    .then((text) => createJazzRetriever(parseJsonLines(text, corpusPath)))
+    .catch((error: unknown) => {
+      cachedRetrievers.delete(corpusPath);
+      throw error;
+    });
+  cachedRetrievers.set(corpusPath, loaded);
+  return loaded;
 }

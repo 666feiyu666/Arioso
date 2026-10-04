@@ -1,4 +1,4 @@
-import { Agent, OpenAIProvider, Runner, run, tool } from "@openai/agents";
+import { Agent, tool } from "@openai/agents";
 import { z } from "zod";
 
 import {
@@ -6,6 +6,7 @@ import {
   type RetrievedJazzReference,
 } from "../retrieval/jazz-retriever.js";
 import { MusicSpecSchema, type MusicSpec } from "../schema/music-spec.js";
+import { runComposerAgent } from "./agent-runner.js";
 import { loadComposerSkill } from "./composer-skill.js";
 
 const COMPOSER_INSTRUCTIONS = `
@@ -146,26 +147,8 @@ export async function composeMusic(
     outputType: MusicSpecSchema,
   });
 
-  const apiKey = options.apiKey;
-  const provider = apiKey ? new OpenAIProvider({ apiKey }) : undefined;
-  let result;
-  try {
-    if (apiKey && provider) {
-      const runner = new Runner({
-        modelProvider: provider,
-        tracing: { apiKey },
-      });
-      result = await runner.run(agent, input);
-    } else {
-      result = await run(agent, input);
-    }
-  } finally {
-    await provider?.close();
-  }
-
-  if (!result.finalOutput) {
-    throw new Error("The Composer Agent returned no MusicSpec.");
-  }
-
-  return MusicSpecSchema.parse(result.finalOutput);
+  const output = await runComposerAgent(
+    agent, input, "The Composer Agent returned no MusicSpec.", options.apiKey,
+  );
+  return MusicSpecSchema.parse(output);
 }

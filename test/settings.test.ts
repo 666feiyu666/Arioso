@@ -76,4 +76,31 @@ describe("SettingsStore", () => {
       expect(cleared).not.toContain("OPENAI_API_KEY");
     });
   });
+
+  it("preserves both providers when remembered credentials are saved concurrently", async () => {
+    await withSettings(async (store, _root, envPath) => {
+      await Promise.all([
+        store.saveCredential("openai", "test-openai", true),
+        store.saveCredential("gemini", "test-gemini", true),
+      ]);
+      const saved = await readFile(envPath, "utf8");
+      expect(saved).toContain('OPENAI_API_KEY="test-openai"');
+      expect(saved).toContain('GEMINI_API_KEY="test-gemini"');
+    });
+  });
+
+  it("keeps the latest session credential after overlapping persistent and temporary saves", async () => {
+    await withSettings(async (store) => {
+      await Promise.all([
+        store.saveCredential("openai", "test-remembered", true),
+        store.saveCredential("openai", "test-session", false),
+      ]);
+      expect(await store.resolveCredential("openai")).toBe("test-session");
+      await Promise.all([
+        store.clearCredential("openai"),
+        store.saveCredential("openai", "test-after-clear", false),
+      ]);
+      expect(await store.resolveCredential("openai")).toBe("test-after-clear");
+    });
+  });
 });

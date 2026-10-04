@@ -158,8 +158,12 @@
 
         <div class="composer-dock" id="composer-dock" hidden>
           <div class="global-player" id="global-player" hidden>
+            <button class="record-control record-control-small" id="player-toggle" type="button" aria-label="播放音乐" data-i18n-aria-label="playMusic">
+              <span class="record-disc" aria-hidden="true"><span class="record-label"></span></span>
+              <span class="playback-icon" aria-hidden="true">▶</span>
+            </button>
             <div class="player-now">
-              <span data-i18n="nowPlaying">正在播放</span>
+              <span id="player-status" role="status" data-i18n="readyToPlay">待播放</span>
               <strong id="player-title" data-i18n="noMusicSelected">未选择音乐</strong>
               <small id="player-meta"></small>
             </div>
