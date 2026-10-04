@@ -13,3 +13,4 @@ export {
   type RetrievedJazzReference,
 } from "./retrieval/jazz-retriever.js";
 export { MusicSpecSchema, type MusicSpec } from "./schema/music-spec.js";
+export { runBackgroundMusicProducer } from "./producer/background-music-producer.js";

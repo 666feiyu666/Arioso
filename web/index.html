@@ -122,6 +122,7 @@
               </label>
               <label id="album-count-setting" hidden><span data-i18n="candidateCount">候选曲数</span><select id="album-count-select"><option value="12">12</option><option value="13">13</option><option value="14" selected>14</option><option value="15">15</option></select></label>
               <label id="album-duration-setting" hidden><span data-i18n="albumTargetDuration">目标总时长</span><select id="album-duration-select"><option value="30">30 min</option><option value="35" selected>35 min</option><option value="40">40 min</option></select></label>
+              <label id="album-production-setting" hidden><span data-i18n="albumProductionMode">制作流程</span><select id="album-production-select"><option value="off" data-i18n="albumGenerationOnly">生成候选曲</option><option value="producer" data-i18n="backgroundMusicProducer">Background Music Producer · 生成并降噪</option></select></label>
               <label id="jazz-corpus-setting" hidden>
                 <span data-i18n="corpusSetting">语料</span>
                 <select id="corpus-mode-select" aria-describedby="jazz-corpus-help">
@@ -137,6 +138,7 @@
               </label>
             </div>
             <p id="album-generation-help" class="reference-help" data-i18n="albumGenerationHelp" hidden>纯器乐 · 每首约 1–3 分钟。整批构思、回看并生成，之后由你选择收录。</p>
+            <p id="album-production-help" class="reference-help" data-i18n="albumProductionHelp" hidden>制作人流程会保留原始音频，将未排除的候选曲降噪并导出单声道 WAV 与 MP4。完成后仍需试听确认。</p>
             <p id="jazz-corpus-help" class="reference-help" hidden></p>
             <p id="orchestral-reference-help" class="reference-help" hidden></p>
           </div>

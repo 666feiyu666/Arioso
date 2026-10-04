@@ -12,6 +12,7 @@ describe("web capabilities API", () => {
         workflows: ["01-general", "02-jazz", "03-orchestral", "04-album"],
         albumPlaylist: true,
         albumExport: true,
+        backgroundMusicProducer: { denoiser: "denoising-historical-recordings", outputChannels: 1, listeningReview: "required" },
         albumCandidates: { minimum: 12, maximum: 15, default: 14 },
         jazzCorpusToggle: true,
         orchestralAssembly: true,

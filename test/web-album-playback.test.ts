@@ -83,7 +83,7 @@ async function interfaceHarness(initial = album()) {
     const body = options.body ? JSON.parse(options.body) : undefined;
     requests.push({ url, method, body });
     let result: unknown = {};
-    if (url === "/api/capabilities") result = { apiVersion: 5, workflows: ["01-general", "02-jazz", "03-orchestral", "04-album"] };
+    if (url === "/api/capabilities") result = { apiVersion: 5, workflows: ["01-general", "02-jazz", "03-orchestral", "04-album"], backgroundMusicProducer: { denoiser: "denoising-historical-recordings" } };
     else if (url === "/api/settings") result = { language: "zh-CN", credentials: { openai: { configured: false }, gemini: { configured: false } } };
     else if (url === "/api/tasks" && method === "GET") result = [stored];
     else if (url === "/api/tasks" && method === "POST") result = stored;
@@ -107,6 +107,26 @@ async function interfaceHarness(initial = album()) {
 }
 
 describe("album listening interface", () => {
+  it("blocks producer creation against an older server", async () => {
+    const { api, requests } = await interfaceHarness();
+    api.showComposer("none", "album", "04-album");
+    api.state.supportsBackgroundMusicProducer = false;
+    api.elements.albumProduction.value = "producer";
+    await api.submitTask({ preventDefault() {} });
+    expect(requests.some((item) => item.url === "/api/tasks" && item.method === "POST")).toBe(false);
+  });
+  it("submits the producer choice and explains the mono output", async () => {
+    const { api, requests } = await interfaceHarness();
+    api.showComposer("none", "album", "04-album");
+    api.elements.albumProduction.value = "producer";
+    await api.elements.albumProduction.emit("change");
+    expect(api.elements.albumProductionHelp.hidden).toBe(false);
+    api.elements.input.value = "Quiet reading background music";
+    api.elements.albumCount.value = "14";
+    api.elements.albumDuration.value = "35";
+    await api.submitTask({ preventDefault() {} });
+    expect(requests.find((item) => item.url === "/api/tasks" && item.method === "POST")?.body).toMatchObject({ produceAlbum: true });
+  });
   it("opens a generated album as candidates without silently admitting tracks", async () => {
     const { api, audio } = await interfaceHarness();
     await api.openAlbum("album");

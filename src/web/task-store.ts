@@ -10,9 +10,10 @@ import { AlbumPlanSchema, type AlbumPlan, type AlbumReview } from "../schema/alb
 import type { OrchestralMovementPlan, OrchestralWorkPlan } from "../schema/orchestral-plan.js";
 import { writeTextFileAtomic } from "../utils/files.js";
 import { isRecord } from "../utils/validation.js";
+import { isProductionRunId, type AlbumProduction } from "../producer/types.js";
 
 export type TaskMode = "compose" | "generate";
-export type TaskStatus = "queued" | "composing" | "generating" | "assembling" | "completed" | "failed";
+export type TaskStatus = "queued" | "composing" | "generating" | "assembling" | "processing" | "completed" | "failed";
 export type VocalMode = "auto" | "instrumental" | "vocals";
 export type CorpusMode = "none" | "jazz";
 export type CompositionMode = "single" | "orchestral" | "album";
@@ -127,6 +128,7 @@ export interface MusicTask {
   albumPlaylist?: string[];
   albumCandidateCount?: number;
   albumTargetTotalMinutes?: number;
+  albumProduction?: AlbumProduction;
   orchestralPlan?: OrchestralWorkPlan;
   orchestralReference?: OrchestralKnowledgeCard;
   movements?: OrchestralMovementTask[];
@@ -147,6 +149,7 @@ export interface CreateTaskInput {
   orchestralReferenceId?: string;
   candidateCount?: number;
   targetTotalMinutes?: number;
+  produceAlbum?: boolean;
 }
 
 function isSafeFileName(value: unknown): value is string {
@@ -161,10 +164,10 @@ function isSafeFileName(value: unknown): value is string {
 }
 
 const TASK_STATUSES: readonly TaskStatus[] = [
-  "queued", "composing", "generating", "assembling", "completed", "failed",
+  "queued", "composing", "generating", "assembling", "processing", "completed", "failed",
 ];
 const ACTIVE_TASK_STATUSES: readonly TaskStatus[] = [
-  "queued", "composing", "generating", "assembling",
+  "queued", "composing", "generating", "assembling", "processing",
 ];
 
 // Older records may omit newer settings, but must be safe to index and display.
@@ -195,7 +198,13 @@ function isTaskRecord(value: unknown): value is MusicTask {
   const playlistValid = value.albumPlaylist === undefined || (Array.isArray(value.albumPlaylist)
     && value.albumPlaylist.every((id: unknown) => isSafeFileName(id)));
   const albumPlanValid = value.albumPlan === undefined || AlbumPlanSchema.safeParse(value.albumPlan).success;
-  return movementsValid && tracksValid && playlistValid && albumPlanValid;
+  const production = value.albumProduction;
+  const productionValid = production === undefined || (isRecord(production)
+    && production.role === "background_music_producer"
+    && ["pending", "checking", "composing", "processing", "completed", "failed"].includes(String(production.status))
+    && ["runtime", "composition", "postproduction", "delivery"].includes(String(production.stage))
+    && (production.runId === undefined || isProductionRunId(production.runId)));
+  return movementsValid && tracksValid && playlistValid && albumPlanValid && productionValid;
 }
 
 function safeAudioName(value: string | undefined, fallback: string): string {
@@ -433,6 +442,9 @@ export class TaskStore {
           };
         });
       }
+      if (interrupted && task.albumProduction && task.albumProduction.status !== "completed") {
+        task.albumProduction = { ...task.albumProduction, status: "failed", error: task.error };
+      }
       this.#tasks.set(task.id, task);
       this.#taskDirectories.set(task.id, path.dirname(recordPath));
       if (interrupted) await this.save(task);
@@ -468,6 +480,10 @@ export class TaskStore {
         albumPlaylist: [],
       } : {}),
       ...(orchestralReference ? { orchestralReference } : {}),
+      ...(input.produceAlbum ? { albumProduction: {
+        role: "background_music_producer" as const, status: "pending" as const,
+        stage: "runtime" as const, listeningReview: "pending" as const,
+      } } : {}),
       status: "queued",
       composerModel: config.openAiModel,
       lyriaModel: input.lyriaModel ?? config.lyriaModel,
@@ -795,7 +811,7 @@ export class TaskStore {
     );
   }
 
-  private taskDirectory(task: MusicTask): string {
+  taskDirectory(task: MusicTask): string {
     return this.#taskDirectories.get(task.id)
       ?? path.join(this.#directory, task.workflowType, task.id);
   }
@@ -893,6 +909,12 @@ export function parseTaskInput(value: unknown): CreateTaskInput {
     : workflowType === "04-album" ? "album" : "single";
   const candidateCount = candidate.candidateCount ?? 14;
   const targetTotalMinutes = candidate.targetTotalMinutes ?? 35;
+  if (candidate.produceAlbum !== undefined && typeof candidate.produceAlbum !== "boolean") {
+    throw new Error("produceAlbum must be a boolean.");
+  }
+  if (candidate.produceAlbum === true && (compositionMode !== "album" || mode !== "generate")) {
+    throw new Error("Background Music Producer requires album generation mode.");
+  }
   if (compositionMode === "album") {
     if (!Number.isInteger(candidateCount) || Number(candidateCount) < 12 || Number(candidateCount) > 15) {
       throw new Error("Album candidate count must be an integer from 12 to 15.");
@@ -930,6 +952,7 @@ export function parseTaskInput(value: unknown): CreateTaskInput {
     description, mode,
     vocalMode: compositionMode === "album" ? "instrumental" : vocalMode,
     corpusMode, compositionMode, workflowType,
+    ...(candidate.produceAlbum === true ? { produceAlbum: true } : {}),
     ...(compositionMode === "album" ? {
       candidateCount: Number(candidateCount), targetTotalMinutes: Number(targetTotalMinutes),
       lyriaModel: "lyria-3.5",

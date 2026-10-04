@@ -14,6 +14,9 @@ import { listOrchestralKnowledgeCards } from "../retrieval/orchestral-cards.js";
 import { TaskStore, parseTaskInput, type AlbumAdmission, type AlbumAudioExport, type MusicTask } from "./task-store.js";
 import { HttpError, readJsonBody, sendAudio, sendJson, serveStatic } from "./http.js";
 import { isRecord } from "../utils/validation.js";
+import { runBackgroundMusicProducer } from "../producer/background-music-producer.js";
+import { productionArtifactPath } from "../producer/pipeline.js";
+import { PRODUCTION_ARTIFACTS, type ProductionArtifact } from "../producer/types.js";
 
 async function sendAlbumExport(request: IncomingMessage, response: ServerResponse, exported: AlbumAudioExport): Promise<void> {
   const encodedName = encodeURIComponent(exported.fileName)
@@ -68,7 +71,11 @@ async function runTask(
 ): Promise<void> {
   try {
     if (task.compositionMode === "album") {
-      await runAlbumTask(store, task, config, albumTrackId);
+      if (task.albumProduction) {
+        await runBackgroundMusicProducer(store, task, config, () => runAlbumTask(store, store.get(task.id) ?? task, config, albumTrackId));
+      } else {
+        await runAlbumTask(store, task, config, albumTrackId);
+      }
       return;
     }
     if (task.compositionMode === "orchestral") {
@@ -426,6 +433,7 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
       const albumExportAudioMatch = /^\/api\/tasks\/([^/]+)\/album\/exports\/([a-f0-9]{64})\/(audio|timestamps)$/.exec(url.pathname);
       const albumExportMatch = /^\/api\/tasks\/([^/]+)\/album\/export$/.exec(url.pathname);
       const albumPlaylistMatch = /^\/api\/tasks\/([^/]+)\/album\/playlist$/.exec(url.pathname);
+      const productionArtifactMatch = /^\/api\/tasks\/([^/]+)\/production\/(audio|video|tracklist|manifest)$/.exec(url.pathname);
       const retryMatch = /^\/api\/tasks\/([^/]+)\/retry$/.exec(url.pathname);
       const credentialMatch = /^\/api\/settings\/credentials\/(openai|gemini)$/.exec(url.pathname);
       if (request.method === "GET" && url.pathname === "/api/capabilities") {
@@ -434,6 +442,7 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
           workflows: ["01-general", "02-jazz", "03-orchestral", "04-album"],
           albumPlaylist: true,
           albumExport: true,
+          backgroundMusicProducer: { denoiser: "denoising-historical-recordings", outputChannels: 1, listeningReview: "required" },
           albumCandidates: { minimum: 12, maximum: 15, default: 14 },
           jazzCorpusToggle: true,
           orchestralAssembly: true,
@@ -549,6 +558,16 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
         const task = await store.create(input, config);
         startTask(task, config);
         sendJson(response, 202, task);
+        return;
+      }
+
+      if ((request.method === "GET" || request.method === "HEAD") && productionArtifactMatch?.[1] && productionArtifactMatch[2]) {
+        const task = store.get(productionArtifactMatch[1]);
+        const artifact = productionArtifactMatch[2] as ProductionArtifact;
+        const file = task ? productionArtifactPath(store, task, artifact) : undefined;
+        if (!file) throw new HttpError(404, "Production artifact is not available.");
+        response.setHeader("Content-Disposition", `attachment; filename="${PRODUCTION_ARTIFACTS[artifact]}"`);
+        await sendAudio(request, response, file);
         return;
       }
 

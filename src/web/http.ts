@@ -89,7 +89,7 @@ export async function sendAudio(
   const baseHeaders = {
     "Accept-Ranges": "bytes",
     "Cache-Control": "private, no-cache",
-    "Content-Type": "audio/mpeg",
+    "Content-Type": ({ ".wav": "audio/wav", ".mp4": "video/mp4", ".txt": "text/plain; charset=utf-8", ".json": "application/json" } as Record<string, string>)[path.extname(filePath).toLowerCase()] ?? "audio/mpeg",
   };
 
   if (request.method === "HEAD") {

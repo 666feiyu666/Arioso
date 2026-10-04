@@ -14,6 +14,8 @@ export interface AriosoConfig {
   geminiApiKey: string | undefined;
   lyriaModel: string;
   outputDirectory: string;
+  pipelinePython?: string;
+  pipelineConfig?: string;
 }
 
 export function loadConfig(
@@ -37,5 +39,7 @@ export function loadConfig(
     geminiApiKey: parsed.data.GEMINI_API_KEY,
     lyriaModel: parsed.data.LYRIA_MODEL,
     outputDirectory: parsed.data.ARIOSO_OUTPUT_DIR,
+    ...(environment.ARIOSO_PIPELINE_PYTHON ? { pipelinePython: environment.ARIOSO_PIPELINE_PYTHON } : {}),
+    ...(environment.ARIOSO_PIPELINE_CONFIG ? { pipelineConfig: environment.ARIOSO_PIPELINE_CONFIG } : {}),
   };
 }

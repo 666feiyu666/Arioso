@@ -10,16 +10,23 @@ import { composeMusic } from "./composer/composer-agent.js";
 import { loadConfig } from "./config/env.js";
 import { LyriaClient } from "./lyria/lyria-client.js";
 import { stitchAudioFiles } from "./audio/stitch.js";
+import { TaskStore, parseTaskInput } from "./web/task-store.js";
+import { runAlbumTask } from "./web/server.js";
+import { runBackgroundMusicProducer } from "./producer/background-music-producer.js";
+import { productionArtifactPath } from "./producer/pipeline.js";
 
 const USAGE = `
 Usage:
   pnpm dev compose "<music description>"
   pnpm dev generate "<music description>"
+  pnpm dev produce-album "<background music album description>"
+  pnpm dev produce-album --resume "<task-id>"
   pnpm dev stitch "<output.wav|mp3>" "<part-1>" "<part-2>" [...more]
 
 Commands:
   compose   Produce and print a validated MusicSpec without calling Lyria.
   generate  Compose a MusicSpec, call Lyria, and save audio plus metadata.
+  produce-album  Plan, review, generate, denoise, and export a background music album.
   stitch    Concatenate compatible WAV or MP3 files in order without trimming or overlap.
 `.trim();
 
@@ -61,6 +68,26 @@ async function main(): Promise<void> {
     return;
   }
 
+  if (command === "produce-album") {
+    const config = loadConfig(true);
+    const store = new TaskStore(path.resolve(config.outputDirectory, "tasks"));
+    // A CLI run must not mark unrelated active browser tasks interrupted.
+    await store.initialize({ markInterrupted: false });
+    const resume = descriptionParts[0] === "--resume";
+    const task = resume ? store.get(descriptionParts[1] ?? "") : await store.create(parseTaskInput({
+      description: descriptionParts.join(" "), workflowType: "04-album", produceAlbum: true,
+    }), config);
+    if (!task?.albumProduction || (resume && !["failed", "completed"].includes(task.status))) {
+      throw new Error("Resume requires an idle Background Music Producer task.");
+    }
+    console.log(`Task: ${task.id}`);
+    await runBackgroundMusicProducer(store, task, config, () => runAlbumTask(store, store.get(task.id)!, config));
+    const completed = store.get(task.id)!;
+    console.log(`Album master: ${productionArtifactPath(store, completed, "audio")}`);
+    console.log(`Album video: ${productionArtifactPath(store, completed, "video")}`);
+    console.log("Mono denoising completed; compare with the originals before admitting tracks.");
+    return;
+  }
   if (command !== "compose" && command !== "generate") {
     throw new Error(`Unknown command: ${command}\n\n${USAGE}`);
   }

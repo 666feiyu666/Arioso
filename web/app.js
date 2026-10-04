@@ -1,5 +1,12 @@
 const translations = {
   "zh-CN": {
+    albumProductionMode: "制作流程", albumGenerationOnly: "生成候选曲",
+    backgroundMusicProducer: "Background Music Producer · 生成并降噪",
+    albumProductionHelp: "制作人流程会保留原始音频，将未排除的候选曲降噪并导出单声道 WAV 与 MP4。完成后仍需试听确认。",
+    productionTitle: "Background Music Producer", productionReview: "单声道降噪版本 · 请与原始候选曲对比试听后再决定收录。",
+    productionAudio: "下载降噪专辑 WAV", productionVideo: "下载专辑 MP4", productionTracklist: "下载曲目时间戳", productionManifest: "下载处理记录",
+    processing: "正在降噪与制作专辑", productionWorking: "正在检查环境并准备专辑制作。",
+    productionChecking: "正在检查音频处理环境。",
     pageTitle: "Arioso · AI 音乐工坊",
     newTask: "新建任务", tasks: "任务", musicTasks: "音乐任务", settings: "设置",
     entryEyebrow: "CHOOSE A WORKFLOW", entryTitle: "选择音乐的<br />创作方式。",
@@ -105,6 +112,13 @@ const translations = {
     restoring: "正在恢复…", restoreFailed: "无法恢复任务。", createFailed: "无法创建任务。",
   },
   en: {
+    albumProductionMode: "Production workflow", albumGenerationOnly: "Generate candidates",
+    backgroundMusicProducer: "Background Music Producer · generate and denoise",
+    albumProductionHelp: "Preserve originals, denoise non-excluded candidates, and export a mono WAV album and MP4. Listening review is still required.",
+    productionTitle: "Background Music Producer", productionReview: "Mono denoised version · compare with the original candidates before selecting tracks.",
+    productionAudio: "Download denoised album WAV", productionVideo: "Download album MP4", productionTracklist: "Download timestamps", productionManifest: "Download processing record",
+    processing: "Denoising and producing album", productionWorking: "Checking the runtime and preparing album production.",
+    productionChecking: "Checking the audio processing runtime.",
     pageTitle: "Arioso · AI Music Studio",
     newTask: "New task", tasks: "Tasks", musicTasks: "Music tasks", settings: "Settings",
     entryEyebrow: "CHOOSE A WORKFLOW", entryTitle: "Choose how to<br />create your music.",
@@ -366,6 +380,7 @@ const state = {
   supportedWorkflows: new Set(["01-general", "02-jazz"]),
   supportsOrchestralCards: false,
   supportsJazzCorpusToggle: false,
+  supportsBackgroundMusicProducer: false,
   orchestralCards: [],
   orchestralCardsError: false,
   orchestralReferenceId: "",
@@ -400,6 +415,9 @@ const elements = {
   albumCount: document.querySelector("#album-count-select"),
   albumDurationSetting: document.querySelector("#album-duration-setting"),
   albumDuration: document.querySelector("#album-duration-select"),
+  albumProductionSetting: document.querySelector("#album-production-setting"),
+  albumProduction: document.querySelector("#album-production-select"),
+  albumProductionHelp: document.querySelector("#album-production-help"),
   albumGenerationHelp: document.querySelector("#album-generation-help"),
   corpusMode: document.querySelector("#corpus-mode-select"),
   jazzCorpusSetting: document.querySelector("#jazz-corpus-setting"),
@@ -495,6 +513,8 @@ function renderComposerContext() {
   elements.lyriaSetting.hidden = isAlbum;
   elements.albumCountSetting.hidden = !isAlbum;
   elements.albumDurationSetting.hidden = !isAlbum;
+  elements.albumProductionSetting.hidden = !isAlbum;
+  elements.albumProductionHelp.hidden = !isAlbum || elements.albumProduction.value !== "producer";
   elements.albumGenerationHelp.hidden = !isAlbum;
   elements.jazzCorpusSetting.hidden = !isJazz;
   elements.corpusMode.value = state.corpusMode;
@@ -571,7 +591,7 @@ function escapeHtml(value = "") {
 }
 
 function statusClass(status) {
-  if (["queued", "composing", "generating", "assembling"].includes(status)) return "running";
+  if (["queued", "composing", "generating", "assembling", "processing"].includes(status)) return "running";
   return status;
 }
 
@@ -974,6 +994,11 @@ async function exportAlbum(taskId, scope, button) {
 }
 
 function renderAlbumDetail(task) {
+  const production = task.albumProduction;
+  const productionBase = `/api/tasks/${encodeURIComponent(task.id)}/production/`;
+  const productionPanel = production ? `<section class="album-idea"><h3>${t("productionTitle")}</h3>
+    <p role="status">${t(production.status === "completed" ? "completed" : production.status === "failed" ? "taskInterrupted" : production.stage === "runtime" ? "productionChecking" : production.stage === "composition" ? "albumPreparing" : "processing")}</p>
+    ${production.status === "completed" ? `<p>${t("productionReview")}</p><audio controls preload="none" src="${productionBase}audio"></audio><p>${[["audio", "productionAudio"], ["video", "productionVideo"], ["tracklist", "productionTracklist"], ["manifest", "productionManifest"]].map(([artifact, label]) => `<a class="secondary-button" href="${productionBase}${artifact}" download>${t(label)}</a>`).join(" ")}</p>` : ""}</section>` : "";
   const scope = state.albumViewScope;
   const tracks = albumTracks(task, scope);
   const all = task.albumTracks || [];
@@ -994,6 +1019,7 @@ function renderAlbumDetail(task) {
     <span class="status-pill ${statusClass(task.status)}">${escapeHtml(statusLabel(task.status))}</span>
   </header>
   <details class="album-idea"><summary>${escapeHtml(t("albumIdea"))}</summary><p class="album-mind">${escapeHtml(task.albumPlan?.albumMind || task.description)}</p></details>
+  ${productionPanel}
   ${running ? `<p class="album-progress" role="status">${escapeHtml(t(task.status === "generating" ? "albumGenerating" : "albumPreparing", { completed: ready, total: all.length || task.albumCandidateCount || 14 }))}</p>` : ""}
   ${task.status === "failed" ? `<div class="error-box"><div><strong>${t("taskInterrupted")}</strong><p>${escapeHtml(task.error || t("taskFailedFallback"))}</p></div><button class="retry-button" type="button" data-retry-task="${escapeHtml(task.id)}">${t("continueTask")}</button></div>` : ""}
   <section class="album-playlist"><div class="album-playlist-toolbar"><div class="album-tabs" role="group" aria-label="${escapeHtml(t("albumTitle"))}"><button type="button" data-album-scope="candidate" aria-pressed="${scope === "candidate"}">${t("albumCandidates")} <small>${all.length}</small></button><button type="button" data-album-scope="included" aria-pressed="${scope === "included"}">${t("albumIncluded")} <small>${included.length}</small></button></div>
@@ -1141,7 +1167,7 @@ function renderTaskList() {
 }
 
 function renderOrchestralTaskDetail(task) {
-  const running = ["queued", "composing", "generating", "assembling"].includes(task.status);
+  const running = ["queued", "composing", "generating", "assembling", "processing"].includes(task.status);
   const plan = task.orchestralPlan;
   const movements = task.movements || [];
   const referencePanel = `
@@ -1464,6 +1490,11 @@ async function submitTask(event) {
     elements.message.textContent = t("serverRestartRequired");
     return;
   }
+  if (state.compositionMode === "album" && elements.albumProduction.value === "producer"
+    && !state.supportsBackgroundMusicProducer) {
+    elements.message.textContent = t("serverRestartRequired");
+    return;
+  }
   if (state.workflowType === "02-jazz" && state.corpusMode === "none"
     && !state.supportsJazzCorpusToggle) {
     elements.message.textContent = t("jazzCorpusRestartRequired");
@@ -1493,6 +1524,7 @@ async function submitTask(event) {
         ...(state.compositionMode === "album" ? {
           candidateCount: Number(elements.albumCount.value),
           targetTotalMinutes: Number(elements.albumDuration.value),
+          ...(elements.albumProduction.value === "producer" ? { produceAlbum: true } : {}),
         } : {}),
         ...(state.compositionMode === "orchestral" && state.orchestralReferenceId
           ? { orchestralReferenceId: state.orchestralReferenceId } : {}),
@@ -1548,6 +1580,7 @@ async function loadCapabilities() {
     if (result.apiVersion < 2 || !Array.isArray(result.workflows)) return;
     state.supportedWorkflows = new Set(result.workflows);
     state.supportsJazzCorpusToggle = result.jazzCorpusToggle === true;
+    state.supportsBackgroundMusicProducer = result.backgroundMusicProducer?.denoiser === "denoising-historical-recordings";
     state.supportsOrchestralCards = result.orchestralKnowledgeCards === true;
     if (state.supportsOrchestralCards) {
       try {
@@ -1740,4 +1773,8 @@ try {
   applyTranslations();
 }
 refreshTasks();
+elements.albumProduction.addEventListener("change", () => {
+  elements.albumProductionHelp.hidden = state.compositionMode !== "album" || elements.albumProduction.value !== "producer";
+});
+
 setInterval(refreshTasks, 1500);
