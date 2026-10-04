@@ -14,6 +14,8 @@ Give each outline a distinct musical role and concrete instrument interaction, g
 
 sharedSoundContract contains only concise audible directions that apply to every candidate. Keep variation, grouping, ordering and distribution rules in cohesionStrategy and realize them through each candidate's arrangement. Never copy commands such as "vary instrumentation across tracks" into an individual music prompt.
 
+Include the shared audio quality constraint in [SKILL.md](../SKILL.md) in sharedSoundContract. Each candidate and selective revision must also retain the positive quality directions in MusicSpec.production and the unwanted artifacts in MusicSpec.avoid so the actual rendered prompt carries the constraint. Preserve the album author's instrumentation, room perspective, production character and dynamic choices.
+
 The Composer receives the entire album context and one selected outline. It implements the author's decisions through structured MusicSpec fields. Preserve the selected duration and purely instrumental setting. Use accurate instrument names, roles and compatible techniques; do not attach guitar construction terms such as hollow-body to a piano.
 
 The application renders each final Lyria prompt from common audible directions and the candidate's genre, mood, rhythm, harmony, instrumentation, development, production and exclusions. AlbumMind, cohesionStrategy, titles, track numbers and assumptions remain composition context. Every musical field must be understandable independently of other pieces.
@@ -21,6 +23,8 @@ The application renders each final Lyria prompt from common audible directions a
 ## Review actual candidate prompts together
 
 Inspect all rendered prompts and structured specifications against albumMind and cohesionStrategy. Compare instrument roles and interaction, subdivision, melodic phrase density, harmonic rhythm, texture trajectory and development, including how similarities are distributed through the batch.
+
+Verify that every rendered candidate prompt explicitly retains the shared audio quality constraint. Missing or contradictory quality directions require a concrete prompt revision; checking prompt wording does not establish that generated audio is free of artifacts.
 
 Judge consistency and difference by the author's intention and the requested listening purpose. Do not impose a uniform ensemble, room or dynamic scheme. Do not mistake a new title, key or BPM for a resolved musical duplicate.
 

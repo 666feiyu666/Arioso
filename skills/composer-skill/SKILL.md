@@ -11,6 +11,16 @@ Preserve explicit choices. Treat upstream selections such as target model, durat
 
 For instrumental requests, make the final prompt explicitly say "instrumental only, no vocals".
 
+## Audio quality constraint
+
+Apply this requirement to every single piece, orchestral movement and album candidate. Include it explicitly in the final Lyria prompt, adapting the wording to the requested instrumentation and prompt language:
+
+> Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion.
+
+Request natural acoustic timbres for acoustic instruments; preserve the intended timbres of electronic or amplified instruments. This constraint excludes unintended audio artifacts while preserving the requested instrumentation, production character and musical dynamics.
+
+When the application renders prompts from structured fields, carry the quality directions in the production or shared sound fields and the unwanted artifacts in the exclusion fields. Guidance present only in assumptions or discarded prompt prose does not satisfy the constraint.
+
 ## Compose the prompt
 
 1. Identify the target model and compose at the appropriate scale:

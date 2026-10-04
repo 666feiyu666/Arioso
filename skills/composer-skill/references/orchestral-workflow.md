@@ -8,6 +8,8 @@ Define the work's identity before developing individual movements. Preserve the 
 
 The identity motif should be concrete enough to transform through augmentation, inversion, fragmentation, register, orchestral transfer, reharmonization, or rhythmic displacement. It must remain original and must not reproduce an identifiable theme.
 
+Carry the shared audio quality constraint in [SKILL.md](../SKILL.md) through sharedContract: describe clean recording and natural acoustic timbres in acousticSpace, smooth transients and controlled peaks in dynamicLanguage, and unintended clipping, crackling and digital distortion in exclusions. Every independently generated movement must retain these directions, including dense passages and climaxes, without weakening its intended dynamic arc.
+
 ## Movement architecture
 
 Give every movement a complete internal dramatic arc and a distinct function in the whole work. Develop a movement through audible musical behavior rather than generic narrative labels: motif treatment, tonal direction, meter and pulse, orchestral density, register, articulation, contrapuntal activity, dynamics, and texture.

@@ -155,6 +155,8 @@ Useful controls include:
 
 Production directions should reinforce the composition and arrangement.
 
+Apply the shared audio quality constraint in [SKILL.md](../SKILL.md) to every final prompt. In MusicSpec, express the positive quality directions in production and the unwanted artifacts in avoid so structured rendering retains both. Preserve intentional instrumental timbres and production effects while excluding accidental clipping, crackling and digital distortion.
+
 Avoid mastering terminology, technical specifications, or studio jargon that does not meaningfully change the musical result.
 
 ## Model-aware composition
@@ -218,5 +220,6 @@ Before returning the Lyria prompt, verify that:
 - tempo, harmony, mood, form, and production do not contradict one another
 - no unnecessary precision has been invented
 - exclusions are brief and actionable
+- the shared audio quality constraint is explicit in the final prompt and retained in the structured fields used to render it
 - every remaining detail has a plausible audible consequence
 - the prompt stands on its own without implementation notes or explanatory commentary
