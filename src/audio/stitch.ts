@@ -185,6 +185,16 @@ function parseMp3Segment(data: Uint8Array): ParsedMp3Segment {
   };
 }
 
+export function measureAudioDuration(data: Uint8Array): number {
+  const buffer = Buffer.from(data.buffer, data.byteOffset, data.byteLength);
+  if (
+    buffer.toString("ascii", 0, 4) === "RIFF"
+    && buffer.toString("ascii", 8, 12) === "WAVE"
+  ) {
+    return durationSeconds(decodeWav16(buffer));
+  }
+  return parseMp3Segment(buffer).durationSeconds;
+}
 export async function stitchWavFiles(
   outputFile: string,
   inputFiles: readonly string[],

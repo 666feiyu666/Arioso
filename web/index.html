@@ -79,22 +79,21 @@
               <span class="workflow-copy">
                 <span class="workflow-tag" data-i18n="sameThemeTracks">同一主题 · 多曲目</span>
                 <strong data-i18n="albumTitle">专辑作曲</strong>
-                <span data-i18n="albumDescription">围绕同一音乐身份规划多首独立曲目，保持主题、音色与制作风格的一致性。</span>
+                <span data-i18n="albumDescription">一次生成整批候选曲，试听并选择收录，组成可以连续播放的专辑。</span>
               </span>
-              <span class="workflow-action" data-i18n="viewAlbumDevelopment">查看开发进度 →</span>
+              <span class="workflow-action" data-i18n="enterAlbums">打开专辑 →</span>
             </button>
           </div>
           <p class="entry-message" id="entry-message" role="status"></p>
         </section>
 
-        <section id="development-view" class="view development-view" hidden>
-          <button class="back-button" id="back-development" type="button" data-i18n="backEntry">← 返回生成方式选择</button>
-          <div class="development-card">
-            <p class="eyebrow accent">04 · ALBUM COMPOSITION</p>
-            <span class="development-status" data-i18n="inDevelopment">正在开发中</span>
-            <h2 data-i18n="albumDevelopmentTitle">让一组作品，拥有同一种声音。</h2>
-            <p data-i18n="albumDevelopmentCopy">专辑作曲将复用管弦乐工作流中的共享音乐契约与多曲目任务模型。在 03 成熟后开放。</p>
-          </div>
+        <section id="album-view" class="view album-view" hidden>
+          <button class="back-button" id="back-albums-entry" type="button" data-i18n="backEntry">← 返回生成方式选择</button>
+          <header class="album-shelf-header">
+            <div><p class="eyebrow accent">04 · ALBUMS</p><h2 data-i18n="yourAlbums">你的专辑。</h2><p data-i18n="albumShelfCopy">打开一张专辑，听听候选曲，再选出你想收录的声音。</p></div>
+            <button class="primary-button" id="create-album" type="button" data-i18n="newAlbum">＋ 新建专辑</button>
+          </header>
+          <div class="album-grid" id="album-grid"></div>
         </section>
 
         <section id="home-view" class="view home-view" hidden>
@@ -107,20 +106,22 @@
             <h2 id="hero-title">把一个念头，<br />写成一段音乐。</h2>
             <p class="hero-copy" id="hero-copy">描述场景、情绪或声音。Arioso 会先整理成完整乐曲规格，再交给 Lyria 生成。</p>
             <div class="model-settings" aria-label="生成设置" data-i18n-aria-label="generationSettings">
-              <label>
+              <label id="generation-mode-setting">
                 <span data-i18n="generationMode">生成模式</span>
                 <select id="mode-select">
                   <option value="generate" data-i18n="modeGenerate">编曲并生成音乐</option>
                   <option value="compose" data-i18n="modeCompose">仅生成编曲提示</option>
                 </select>
               </label>
-              <label>
+              <label id="lyria-model-setting">
                 <span data-i18n="lyriaModel">Lyria 模型</span>
                 <select id="lyria-model-select">
                   <option value="lyria-3-clip-preview" data-i18n="lyriaClip">Lyria 3 Clip · 30 秒</option>
                   <option value="lyria-3.5" data-i18n="lyriaFull">Lyria 3.5 · 完整歌曲</option>
                 </select>
               </label>
+              <label id="album-count-setting" hidden><span data-i18n="candidateCount">候选曲数</span><select id="album-count-select"><option value="12">12</option><option value="13">13</option><option value="14" selected>14</option><option value="15">15</option></select></label>
+              <label id="album-duration-setting" hidden><span data-i18n="albumTargetDuration">目标总时长</span><select id="album-duration-select"><option value="30">30 min</option><option value="35" selected>35 min</option><option value="40">40 min</option></select></label>
               <label id="jazz-corpus-setting" hidden>
                 <span data-i18n="corpusSetting">语料</span>
                 <select id="corpus-mode-select" aria-describedby="jazz-corpus-help">
@@ -135,6 +136,7 @@
                 </select>
               </label>
             </div>
+            <p id="album-generation-help" class="reference-help" data-i18n="albumGenerationHelp" hidden>纯器乐 · 每首约 1–3 分钟。整批构思、回看并生成，之后由你选择收录。</p>
             <p id="jazz-corpus-help" class="reference-help" hidden></p>
             <p id="orchestral-reference-help" class="reference-help" hidden></p>
           </div>
@@ -167,6 +169,7 @@
               <strong id="player-title" data-i18n="noMusicSelected">未选择音乐</strong>
               <small id="player-meta"></small>
             </div>
+            <div class="playlist-controls" id="playlist-controls" hidden><button id="player-previous" type="button" data-i18n-aria-label="previousTrack" aria-label="上一首">⏮</button><button id="player-next" type="button" data-i18n-aria-label="nextTrack" aria-label="下一首">⏭</button></div>
             <audio id="audio-player" controls preload="metadata"></audio>
           </div>
           <form id="composer-form" class="composer-form">

@@ -1,0 +1,98 @@
+{
+  "inputSha256": "bf28e0580993d1e399658d528b905b4ef2433026cf37c3dcbba30e909325de24",
+  "spec": {
+    "schemaVersion": "1.0",
+    "title": "Afterimage in Brass",
+    "intent": "A self-contained late-night noir jazz study for relaxation, built from spacious piano and muted trombone phrases over a nearly motionless rhythm foundation.",
+    "genres": [
+      "late-night noir jazz",
+      "cool jazz",
+      "ambient jazz"
+    ],
+    "moods": [
+      "shadowed",
+      "unhurried",
+      "intimate",
+      "quietly unresolved"
+    ],
+    "tempo": {
+      "bpm": 48,
+      "feel": "Very slow 4/4 with spacious, behind-the-beat swing and occasional held bars that suspend forward motion."
+    },
+    "tonality": {
+      "tonic": null,
+      "mode": "minor-centered, chromatically ambiguous"
+    },
+    "meter": "4/4",
+    "instrumentation": [
+      {
+        "name": "piano",
+        "role": "States the harmonic frame and trades broad phrases with the trombone.",
+        "timbre": "Soft, resonant, spacious voicings with restrained attack."
+      },
+      {
+        "name": "muted trombone",
+        "role": "Carries a wide descending melody and answers the piano.",
+        "timbre": "Veiled, breathy, rounded brass tone with gentle falls and sustained notes."
+      },
+      {
+        "name": "upright bass",
+        "role": "Provides stable roots and a nearly motionless low-register foundation.",
+        "timbre": "Warm, woody pizzicato with occasional sustained resonance."
+      },
+      {
+        "name": "brushes",
+        "role": "Maintains a barely moving pulse and marks phrase transitions.",
+        "timbre": "Soft circular swishes, sparse cymbal shimmer, no strong backbeat."
+      }
+    ],
+    "structure": [
+      {
+        "section": "Intro",
+        "durationSeconds": 25,
+        "direction": "Piano alone presents sparse minor, dominant-sus, and ambiguous major sonorities with chromatic descending inner voices."
+      },
+      {
+        "section": "Theme",
+        "durationSeconds": 35,
+        "direction": "Muted trombone enters with a broad descending line; bass and brushes join quietly beneath the piano."
+      },
+      {
+        "section": "Dialogue",
+        "durationSeconds": 50,
+        "direction": "Piano and trombone trade spacious phrases, gradually increasing motivic density without increasing volume; keep roots stable while inner voices descend chromatically."
+      },
+      {
+        "section": "Coda",
+        "durationSeconds": 25,
+        "direction": "Phrases shorten and soften as piano and trombone converge on an open interval over a restrained bass resonance."
+      },
+      {
+        "section": "Outro",
+        "durationSeconds": 15,
+        "direction": "Let the final open sonority decay naturally, softened and unresolved rather than cadential."
+      }
+    ],
+    "vocals": {
+      "enabled": false,
+      "language": null,
+      "style": null,
+      "lyricalTheme": null
+    },
+    "production": "Intimate acoustic room, warm low-register presence, soft dynamics, moderate stereo width, gentle natural reverberation, clear separation between piano and muted trombone, no dramatic buildup.",
+    "avoid": [
+      "vocals",
+      "bright brass tone",
+      "flashy solos",
+      "strong backbeat",
+      "abrupt ending",
+      "cinematic bombast",
+      "loud dynamics"
+    ],
+    "assumptions": [
+      "Target tempo set near 48 BPM to support the specified very slow swing.",
+      "The tonic remains deliberately unspecified to preserve harmonic ambiguity."
+    ],
+    "lyriaPrompt": "Late-night noir jazz for relaxation, 150 seconds, very slow 4/4 at about 48 BPM with spacious behind-the-beat swing and occasional held bars. Instrumental only, no vocals. Intimate acoustic quartet: soft resonant piano presents the harmonic frame, muted trombone answers with broad breathy descending phrases, upright bass holds stable roots, and sparse brushes create a nearly motionless pulse. Use minor-centered harmony with chromatic descending inner voices, dominant-sus chords, and ambiguous major sonorities; sustain tension without harshness. [Intro] Piano alone, spacious and shadowed. [Theme] Add bass, brushes, and muted trombone. [Dialogue] Trade broad phrases and gradually increase density without getting louder. [Coda] Converge on a quiet open interval. [Outro] Let it decay into a softened unresolved ending. Warm, restrained, tactile acoustic production with gentle room reverb; avoid bright brass, flashy virtuosity, strong backbeat, abrupt transitions, vocals, and cinematic bombast."
+  }
+}

@@ -4,7 +4,7 @@ import path from "node:path";
 
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { stitchAudioFiles, stitchMp3Files } from "../src/audio/stitch.js";
+import { measureAudioDuration, stitchAudioFiles, stitchMp3Files } from "../src/audio/stitch.js";
 import { decodeWav16, encodeWav16 } from "../src/audio/wav.js";
 
 const MPEG1_192K_44100_STEREO = Buffer.from([0xff, 0xfb, 0xb0, 0x44]);
@@ -116,5 +116,21 @@ describe("WAV file assembly", () => {
     expect([...combined.channelData[0]!]).toEqual([-1, 0, 1]);
     expect(result.durationSeconds).toBe(3 / 8_000);
     expect(result.segmentDurationsSeconds).toEqual([2 / 8_000, 1 / 8_000]);
+  });
+});
+
+describe("Audio duration", () => {
+  it("measures MP3 audio while excluding its VBR metadata frame", () => {
+    const metadata = mp3Frame();
+    metadata.write("Xing", 36, "ascii");
+    expect(measureAudioDuration(Buffer.concat([
+      EMPTY_ID3V2_TAG, metadata, mp3Frame(), mp3Frame(),
+    ]))).toBeCloseTo(2 * 1_152 / 44_100, 8);
+  });
+
+  it("measures WAV frames and rejects truncated audio", () => {
+    const wav = encodeWav16({ sampleRate: 8_000, channelData: [new Float32Array(4_000)] });
+    expect(measureAudioDuration(wav)).toBe(0.5);
+    expect(() => measureAudioDuration(mp3Frame().subarray(0, 100))).toThrow("truncated");
   });
 });

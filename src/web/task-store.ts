@@ -4,7 +4,8 @@ import path from "node:path";
 import { stitchAudioFiles } from "../audio/stitch.js";
 import type { AriosoConfig } from "../config/env.js";
 import { isOrchestralCardId, loadOrchestralKnowledgeCard, type OrchestralKnowledgeCard } from "../retrieval/orchestral-cards.js";
-import type { MusicSpec } from "../schema/music-spec.js";
+import { MusicSpecSchema, type MusicSpec } from "../schema/music-spec.js";
+import { AlbumPlanSchema, type AlbumPlan, type AlbumReview } from "../schema/album-plan.js";
 import type { OrchestralMovementPlan, OrchestralWorkPlan } from "../schema/orchestral-plan.js";
 import { writeTextFileAtomic } from "../utils/files.js";
 import { isRecord } from "../utils/validation.js";
@@ -13,7 +14,7 @@ export type TaskMode = "compose" | "generate";
 export type TaskStatus = "queued" | "composing" | "generating" | "assembling" | "completed" | "failed";
 export type VocalMode = "auto" | "instrumental" | "vocals";
 export type CorpusMode = "none" | "jazz";
-export type CompositionMode = "single" | "orchestral";
+export type CompositionMode = "single" | "orchestral" | "album";
 export type WorkflowType = "01-general" | "02-jazz" | "03-orchestral" | "04-album";
 
 const WORKFLOW_TYPES: readonly WorkflowType[] = [
@@ -40,6 +41,7 @@ export function inferWorkflowType(task: {
 }): WorkflowType {
   if (isWorkflowType(task.workflowType)) return task.workflowType;
   if (task.compositionMode === "orchestral") return "03-orchestral";
+  if (task.compositionMode === "album") return "04-album";
   if (
     typeof task.description === "string"
     && /(?:[二三四五六2-6]\s*(?:个)?乐章|(?:two|three|four|five|six|multi)[-\s]movement)/iu
@@ -62,6 +64,31 @@ interface OrchestralMovementTask {
   generatedText?: string | null;
   audioFile?: string;
   error?: string | undefined;
+}
+
+export type AlbumAdmission = "candidate" | "included" | "excluded";
+
+export interface AlbumTrackTask {
+  id: string;
+  order: number;
+  title: string;
+  status: TaskStatus;
+  createdAt: string;
+  updatedAt: string;
+  targetDurationSeconds: number;
+  musicSpec?: MusicSpec;
+  generatedText?: string | null;
+  audioFile?: string;
+  durationSeconds?: number;
+  admission: AlbumAdmission;
+  error?: string | undefined;
+}
+
+export interface PreparedAlbumTrack {
+  order: number;
+  title: string;
+  targetDurationSeconds: number;
+  musicSpec: MusicSpec;
 }
 
 interface OrchestralAssembly {
@@ -90,6 +117,15 @@ export interface MusicTask {
   retrievalQuery?: string;
   retrievedReferenceIds?: string[];
   musicSpec?: MusicSpec;
+  albumPlan?: AlbumPlan;
+  albumTracks?: AlbumTrackTask[];
+  albumReview?: AlbumReview;
+  albumFinalReview?: AlbumReview;
+  albumRevisedTrackNumbers?: number[];
+  albumPromptsReady?: boolean;
+  albumPlaylist?: string[];
+  albumCandidateCount?: number;
+  albumTargetTotalMinutes?: number;
   orchestralPlan?: OrchestralWorkPlan;
   orchestralReference?: OrchestralKnowledgeCard;
   movements?: OrchestralMovementTask[];
@@ -108,6 +144,8 @@ export interface CreateTaskInput {
   workflowType: WorkflowType;
   lyriaModel?: string;
   orchestralReferenceId?: string;
+  candidateCount?: number;
+  targetTotalMinutes?: number;
 }
 
 function isSafeFileName(value: unknown): value is string {
@@ -138,12 +176,25 @@ function isTaskRecord(value: unknown): value is MusicTask {
     || (value.title !== undefined && typeof value.title !== "string")) {
     return false;
   }
-  return value.movements === undefined || (Array.isArray(value.movements)
+  const movementsValid = value.movements === undefined || (Array.isArray(value.movements)
     && value.movements.every((movement: unknown) => isRecord(movement)
       && typeof movement.id === "string"
       && Number.isInteger(movement.order) && Number(movement.order) > 0
       && typeof movement.title === "string"
       && TASK_STATUSES.includes(movement.status as TaskStatus)));
+  const tracksValid = value.albumTracks === undefined || (Array.isArray(value.albumTracks)
+    && value.albumTracks.every((track: unknown) => isRecord(track)
+      && isSafeFileName(track.id)
+      && Number.isInteger(track.order) && Number(track.order) > 0
+      && typeof track.title === "string"
+      && TASK_STATUSES.includes(track.status as TaskStatus)
+      && typeof track.targetDurationSeconds === "number" && track.targetDurationSeconds > 0
+      && typeof track.admission === "string"
+      && ["candidate", "included", "excluded"].includes(track.admission)));
+  const playlistValid = value.albumPlaylist === undefined || (Array.isArray(value.albumPlaylist)
+    && value.albumPlaylist.every((id: unknown) => isSafeFileName(id)));
+  const albumPlanValid = value.albumPlan === undefined || AlbumPlanSchema.safeParse(value.albumPlan).success;
+  return movementsValid && tracksValid && playlistValid && albumPlanValid;
 }
 
 function safeAudioName(value: string | undefined, fallback: string): string {
@@ -224,7 +275,8 @@ export async function organizeTaskStorage(
       throw error;
     }
     task.workflowType = inferWorkflowType(task);
-    task.compositionMode = task.workflowType === "03-orchestral" ? "orchestral" : "single";
+    task.compositionMode = task.workflowType === "03-orchestral" ? "orchestral"
+      : task.workflowType === "04-album" ? "album" : "single";
     task.corpusMode = corpusModeForWorkflow(task.workflowType, task.corpusMode);
     const taskDirectory = path.join(directory, task.workflowType, task.id);
     const recordPath = path.join(taskDirectory, "task.json");
@@ -280,6 +332,23 @@ export async function organizeTaskStorage(
   return { migratedTasks, migratedAudioFiles };
 }
 
+function validatePreparedAlbum(plan: AlbumPlan, tracks: PreparedAlbumTrack[]): void {
+  AlbumPlanSchema.parse(plan);
+  if (tracks.length !== plan.tracks.length
+    || new Set(tracks.map((track) => track.order)).size !== tracks.length) {
+    throw new Error("Prepared candidates must match the album plan exactly once.");
+  }
+  for (const track of tracks) {
+    const outline = plan.tracks.find((candidate) => candidate.number === track.order);
+    if (!outline || track.targetDurationSeconds !== outline.targetSeconds) {
+      throw new Error("Prepared candidate timing must match its album outline.");
+    }
+    const spec = MusicSpecSchema.parse(track.musicSpec);
+    if (spec.vocals.enabled) throw new Error("Album candidates must be instrumental.");
+    if (!track.title.trim() || !spec.lyriaPrompt.trim()) throw new Error("A candidate title and prompt are required.");
+  }
+}
+
 export class TaskStore {
   readonly #directory: string;
   readonly #tasks = new Map<string, MusicTask>();
@@ -307,7 +376,8 @@ export class TaskStore {
       if (!isTaskRecord(value)) continue;
       const task = value;
       task.workflowType = inferWorkflowType(task);
-      task.compositionMode = task.workflowType === "03-orchestral" ? "orchestral" : "single";
+      task.compositionMode = task.workflowType === "03-orchestral" ? "orchestral"
+      : task.workflowType === "04-album" ? "album" : "single";
       task.corpusMode = corpusModeForWorkflow(task.workflowType, task.corpusMode);
 
       let interrupted = false;
@@ -330,6 +400,20 @@ export class TaskStore {
             };
           });
         }
+      }
+      if (options.markInterrupted !== false && task.albumTracks) {
+        task.albumTracks = task.albumTracks.map((track) => {
+          if (!ACTIVE_TASK_STATUSES.includes(track.status)) return track;
+          interrupted = true;
+          task.status = "failed";
+          task.error = "The local server stopped before this album finished.";
+          return {
+            ...track,
+            status: "failed",
+            error: "The local server stopped before this candidate finished.",
+            updatedAt: new Date().toISOString(),
+          };
+        });
       }
       this.#tasks.set(task.id, task);
       this.#taskDirectories.set(task.id, path.dirname(recordPath));
@@ -360,6 +444,11 @@ export class TaskStore {
       corpusMode: input.corpusMode,
       compositionMode: input.compositionMode,
       workflowType: input.workflowType,
+      ...(input.compositionMode === "album" ? {
+        albumCandidateCount: input.candidateCount ?? 14,
+        albumTargetTotalMinutes: input.targetTotalMinutes ?? 35,
+        albumPlaylist: [],
+      } : {}),
       ...(orchestralReference ? { orchestralReference } : {}),
       status: "queued",
       composerModel: config.openAiModel,
@@ -371,6 +460,116 @@ export class TaskStore {
     this.#taskDirectories.set(task.id, this.taskDirectory(task));
     await this.save(task);
     return task;
+  }
+
+  async createPreparedAlbum(
+    input: { description: string; plan: AlbumPlan; tracks: PreparedAlbumTrack[] },
+    config: AriosoConfig,
+  ): Promise<MusicTask> {
+    validatePreparedAlbum(input.plan, input.tracks);
+    const task = await this.create({
+      description: input.description,
+      mode: "generate",
+      vocalMode: "instrumental",
+      corpusMode: "none",
+      compositionMode: "album",
+      workflowType: "04-album",
+      lyriaModel: "lyria-3.5",
+      candidateCount: input.tracks.length,
+    }, config);
+    return this.setPreparedAlbum(task.id, input.plan, input.tracks);
+  }
+
+  async setPreparedAlbum(
+    id: string,
+    plan: AlbumPlan,
+    tracks: PreparedAlbumTrack[],
+  ): Promise<MusicTask> {
+    validatePreparedAlbum(plan, tracks);
+    const task = this.get(id);
+    if (!task || task.compositionMode !== "album") throw new Error("Album task not found.");
+    if (task.albumTracks?.some((track) => track.audioFile)) {
+      throw new Error("Cannot replace an album plan after audio generation.");
+    }
+    const now = new Date().toISOString();
+    return this.update(id, {
+      title: plan.albumTitle,
+      albumPlan: plan,
+      albumPromptsReady: true,
+      albumPlaylist: [],
+      albumTracks: tracks.map((track) => ({
+        ...track, id: crypto.randomUUID(), admission: "candidate",
+        status: task.mode === "compose" ? "completed" : "queued",
+        createdAt: now, updatedAt: now,
+      })),
+    });
+  }
+
+  async updateAlbumTrack(
+    taskId: string,
+    trackId: string,
+    changes: Partial<AlbumTrackTask>,
+  ): Promise<MusicTask> {
+    const task = this.#tasks.get(taskId);
+    if (!task?.albumTracks?.some((track) => track.id === trackId)) {
+      throw new Error(`Unknown album track: ${trackId}`);
+    }
+    return this.update(taskId, {
+      albumTracks: task.albumTracks.map((track) => track.id === trackId
+        ? { ...track, ...changes, id: trackId, updatedAt: new Date().toISOString() }
+        : track),
+    });
+  }
+
+  async setAlbumAdmission(taskId: string, trackId: string, admission: AlbumAdmission): Promise<MusicTask> {
+    const task = this.#tasks.get(taskId);
+    const track = task?.albumTracks?.find((candidate) => candidate.id === trackId);
+    if (!task || !track) throw new Error("Album track not found.");
+    if (admission === "included" && (track.status !== "completed" || !track.audioFile)) {
+      throw new Error("Only completed audio candidates can be included.");
+    }
+    const albumPlaylist = (task.albumPlaylist ?? []).filter((id) => id !== trackId);
+    if (admission === "included") {
+      // Repeating an inclusion keeps its existing place in the playlist.
+      const currentIndex = task.albumPlaylist?.indexOf(trackId) ?? -1;
+      albumPlaylist.splice(currentIndex < 0 ? albumPlaylist.length : currentIndex, 0, trackId);
+    }
+    return this.update(taskId, {
+      albumTracks: task.albumTracks!.map((candidate) => candidate.id === trackId
+        ? { ...candidate, admission, updatedAt: new Date().toISOString() } : candidate),
+      albumPlaylist,
+    });
+  }
+
+  async setAlbumPlaylist(taskId: string, trackIds: string[]): Promise<MusicTask> {
+    const task = this.#tasks.get(taskId);
+    if (!task || task.compositionMode !== "album") throw new Error("Album task not found.");
+    const included = task.albumTracks?.filter((track) => track.admission === "included") ?? [];
+    if (new Set(trackIds).size !== trackIds.length
+      || trackIds.length !== included.length
+      || trackIds.some((id) => !included.some((track) => track.id === id))) {
+      throw new Error("Playlist must contain every included track exactly once.");
+    }
+    return this.update(taskId, { albumPlaylist: [...trackIds] });
+  }
+
+  albumTrackAudioPath(task: MusicTask, track: AlbumTrackTask): string | undefined {
+    return isSafeFileName(track.audioFile)
+      ? path.join(this.taskDirectory(task), "tracks", track.audioFile) : undefined;
+  }
+
+  async writeAlbumTrackAudio(
+    task: MusicTask,
+    track: Pick<AlbumTrackTask, "order" | "title">,
+    audio: Uint8Array,
+  ): Promise<string> {
+    const audioFile = safeAudioName(
+      `${String(track.order).padStart(2, "0")} - ${track.title}`, `track-${track.order}`,
+    );
+    const directory = path.join(this.taskDirectory(task), "tracks");
+    await mkdir(directory, { recursive: true });
+    await writeFile(path.join(directory, audioFile), audio);
+    return audioFile;
   }
 
   async update(id: string, changes: Partial<MusicTask>): Promise<MusicTask> {
@@ -575,17 +774,29 @@ export function parseTaskInput(value: unknown): CreateTaskInput {
   }
   if (candidate.compositionMode !== undefined
     && candidate.compositionMode !== "single"
-    && candidate.compositionMode !== "orchestral") {
+    && candidate.compositionMode !== "orchestral"
+    && candidate.compositionMode !== "album") {
     throw new Error("Unsupported composition mode.");
   }
   const workflowType = inferWorkflowType(candidate);
-  if (workflowType === "04-album") {
-    throw new Error("Album composition is still in development.");
-  }
   const corpusMode = corpusModeForWorkflow(workflowType, candidate.corpusMode);
   const compositionMode: CompositionMode = workflowType === "03-orchestral"
     ? "orchestral"
-    : "single";
+    : workflowType === "04-album" ? "album" : "single";
+  const candidateCount = candidate.candidateCount ?? 14;
+  const targetTotalMinutes = candidate.targetTotalMinutes ?? 35;
+  if (compositionMode === "album") {
+    if (!Number.isInteger(candidateCount) || Number(candidateCount) < 12 || Number(candidateCount) > 15) {
+      throw new Error("Album candidate count must be an integer from 12 to 15.");
+    }
+    if (typeof targetTotalMinutes !== "number" || !Number.isFinite(targetTotalMinutes)
+      || targetTotalMinutes < 30 || targetTotalMinutes > 40) {
+      throw new Error("Album target duration must be between 30 and 40 minutes.");
+    }
+    if (candidate.lyriaModel === "lyria-3-clip-preview") {
+      throw new Error("Album generation requires lyria-3.5.");
+    }
+  }
   const orchestralReferenceId = candidate.orchestralReferenceId;
   if (orchestralReferenceId !== undefined) {
     if (compositionMode !== "orchestral") {
@@ -608,8 +819,13 @@ export function parseTaskInput(value: unknown): CreateTaskInput {
   }
 
   return {
-    description, mode, vocalMode, corpusMode, compositionMode, workflowType,
-    ...(lyriaModel ? { lyriaModel } : {}),
+    description, mode,
+    vocalMode: compositionMode === "album" ? "instrumental" : vocalMode,
+    corpusMode, compositionMode, workflowType,
+    ...(compositionMode === "album" ? {
+      candidateCount: Number(candidateCount), targetTotalMinutes: Number(targetTotalMinutes),
+      lyriaModel: "lyria-3.5",
+    } : lyriaModel ? { lyriaModel } : {}),
     ...(orchestralReferenceId ? { orchestralReferenceId } : {}),
   };
 }

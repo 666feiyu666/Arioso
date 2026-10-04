@@ -1,0 +1,92 @@
+{
+  "schemaVersion": "1.0",
+  "title": "Rain on the Fire Escape",
+  "intent": "A self-contained late-night noir jazz meditation built around a repeating electric-piano ostinato, with vibraphone reflections and restrained upright bass movement.",
+  "genres": [
+    "late-night noir jazz",
+    "ambient jazz",
+    "instrumental jazz"
+  ],
+  "moods": [
+    "nocturnal",
+    "meditative",
+    "shadowed",
+    "quietly reflective",
+    "softly dissolving"
+  ],
+  "tempo": {
+    "bpm": 54,
+    "feel": "Slow, even 6/8 with a gentle lilt, continuous soft subdivision, and restrained dynamics."
+  },
+  "tonality": {
+    "tonic": "D",
+    "mode": "Dorian with bitonal upper structures"
+  },
+  "meter": "6/8",
+  "instrumentation": [
+    {
+      "name": "warm electric piano",
+      "role": "Establishes and sustains the repeating nocturnal ostinato; gradually becomes more sparse.",
+      "timbre": "Soft, rounded, slightly smoky, with a restrained electric warmth."
+    },
+    {
+      "name": "vibraphone",
+      "role": "Paints quiet reflections through widely spaced replies and overlapping tones.",
+      "timbre": "Delicate, glassy, muted resonance with gentle pedal sustain."
+    },
+    {
+      "name": "upright bass",
+      "role": "Provides a stable minor-centered foundation and subtle low-register counterlines.",
+      "timbre": "Warm, woody, understated pizzicato with occasional sustained notes."
+    },
+    {
+      "name": "brushes",
+      "role": "Maintains a nearly continuous, featherlight 6/8 subdivision beneath the harmony.",
+      "timbre": "Soft circular swirls, minimal cymbal brightness, intimate room sound."
+    }
+  ],
+  "structure": [
+    {
+      "section": "Intro",
+      "durationSeconds": 24,
+      "direction": "Electric piano alone introduces the repeating ostinato in a shadowed minor register, spacious and softly articulated."
+    },
+    {
+      "section": "Development",
+      "durationSeconds": 42,
+      "direction": "Upright bass enters beneath the ostinato; vibraphone answers with widely spaced tones and open fourths, keeping the texture restrained."
+    },
+    {
+      "section": "Climax",
+      "durationSeconds": 39,
+      "direction": "Brushes join with a gentle 6/8 lilt. Vibraphone tones overlap into a quiet halo while bitonal upper colors create mild, unresolved tension without increasing volume."
+    },
+    {
+      "section": "Outro",
+      "durationSeconds": 30,
+      "direction": "Remove brushes, then vibraphone and bass notes one by one. Let the electric-piano ostinato thin, slow, and fade on an incomplete added-sixth sonority."
+    }
+  ],
+  "vocals": {
+    "enabled": false,
+    "language": null,
+    "style": null,
+    "lyricalTheme": null
+  },
+  "production": "Intimate, warm acoustic room perspective with soft stereo width, rounded transients, clear separation between the electric-piano ostinato and vibraphone halo, gentle low-register presence, and a quiet natural decay. Keep dynamics restrained and the ending deliberately softened.",
+  "avoid": [
+    "vocals",
+    "abrupt drops",
+    "flashy virtuosity",
+    "harsh brightness",
+    "cinematic bombast",
+    "heavy backbeat",
+    "dense percussion"
+  ],
+  "assumptions": [
+    "D Dorian is used as a practical minor-centered tonal anchor.",
+    "A 54 BPM pulse supports the requested slow 6/8 relaxation.",
+    "The 135-second arc is divided into four gradual sections."
+  ],
+  "lyriaPrompt": "Late-night noir jazz meditation for relaxation, 135 seconds, slow even 6/8 at about 54 BPM with a gentle lilt and restrained dynamics. Instrumental only, no vocals. Warm electric piano establishes a repeating nocturnal ostinato over a stable D-minor/Dorian center. Add understated upright bass, then delicate vibraphone replies with widely spaced, overlapping bell tones. Use bitonal upper structures, open fourths, added-sixth chords, and partial resolutions for quiet noir tension. Introduce featherlight brushes and let the middle thicken through resonance rather than volume. Gradually remove brushes, vibraphone, and bass until the electric-piano ostinato becomes sparse and fades into an incomplete soft ending. Intimate warm room, tactile acoustic playing, gentle stereo depth, clear separation, no abrupt drops, flashy virtuosity, harsh brightness, heavy backbeat, or cinematic bombast."
+}

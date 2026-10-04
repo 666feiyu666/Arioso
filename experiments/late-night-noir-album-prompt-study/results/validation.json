@@ -1,0 +1,31 @@
+{
+  "count": 14,
+  "numbering": true,
+  "durationRangeSeconds": [
+    60,
+    180
+  ],
+  "durationTargets": [
+    150,
+    120,
+    135,
+    90,
+    165,
+    105,
+    150,
+    120,
+    135,
+    105,
+    180,
+    120,
+    150,
+    180
+  ],
+  "plannedBatchSeconds": 1905,
+  "instrumental": true,
+  "sharedContractIdentical": true,
+  "standaloneDependencyCheck": true,
+  "sectionTimingWarnings": [],
+  "finalReview": "needs-work",
+  "status": "candidate"
+}

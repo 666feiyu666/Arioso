@@ -1,0 +1,10 @@
+{
+  "taskId": "87345cb8-0bd9-4102-a7b4-30821093a5c7",
+  "importedAt": "2026-10-04T07:44:36.381Z",
+  "source": "final study MusicSpecs",
+  "changes": [
+    "Accurate acoustic-piano naming",
+    "Track-ready structured prompt rendering"
+  ],
+  "admission": "All tracks remain candidates"
+}

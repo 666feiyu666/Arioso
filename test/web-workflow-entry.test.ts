@@ -37,7 +37,9 @@ describe("workflow entry page", () => {
         { "data-workflow-type": "03-orchestral", "data-composition-mode": "orchestral", "data-corpus-mode": "none" },
         { "data-workflow-type": "04-album", "data-composition-mode": "album", "data-corpus-mode": "none" },
       ]);
-      expect(html).toMatch(/\bid=["']development-view["']/);
+      expect(html).toMatch(/\bid=["']album-view["']/);
+      expect(html).toMatch(/\bid=["']playlist-controls["']/);
+      expect(html).not.toMatch(/\bid=["']development-view["']/);
     } finally {
       const closed = once(server, "close");
       server.close();

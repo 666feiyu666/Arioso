@@ -3,13 +3,15 @@ import path from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 
+import { measureAudioDuration } from "../audio/stitch.js";
+import { planAlbum, composeAlbumTrack, reviewAlbumCandidates, reviseAlbumTrack } from "../composer/album-agent.js";
 import { composeMusic } from "../composer/composer-agent.js";
 import { composeOrchestralMovement, planOrchestralWork } from "../composer/orchestral-agent.js";
 import { loadConfig, type AriosoConfig } from "../config/env.js";
 import { SettingsStore, SUPPORTED_LANGUAGES, type ApiProvider, type InterfaceLanguage } from "../config/settings.js";
 import { LyriaClient } from "../lyria/lyria-client.js";
 import { listOrchestralKnowledgeCards } from "../retrieval/orchestral-cards.js";
-import { TaskStore, parseTaskInput, type MusicTask } from "./task-store.js";
+import { TaskStore, parseTaskInput, type AlbumAdmission, type MusicTask } from "./task-store.js";
 import { HttpError, readJsonBody, sendAudio, sendJson, serveStatic } from "./http.js";
 import { isRecord } from "../utils/validation.js";
 
@@ -53,8 +55,13 @@ async function runTask(
   store: TaskStore,
   task: MusicTask,
   config: AriosoConfig,
+  albumTrackId?: string,
 ): Promise<void> {
   try {
+    if (task.compositionMode === "album") {
+      await runAlbumTask(store, task, config, albumTrackId);
+      return;
+    }
     if (task.compositionMode === "orchestral") {
       await runOrchestralTask(store, task, config);
       return;
@@ -211,6 +218,135 @@ async function runOrchestralTask(
   });
 }
 
+export async function runAlbumTask(
+  store: TaskStore,
+  task: MusicTask,
+  config: AriosoConfig,
+  retryTrackId?: string,
+): Promise<void> {
+  let current = store.get(task.id) ?? task;
+  if (current.status === "completed" && current.albumPromptsReady
+    && current.albumTracks?.length && current.albumTracks.every((track) =>
+      track.status === "completed" && (current.mode === "compose" || Boolean(track.audioFile)))) return;
+  const generationTrackId = current.albumPromptsReady ? retryTrackId : undefined;
+  const options = {
+    apiKey: config.openAiApiKey,
+    model: current.composerModel,
+    lyriaModel: current.lyriaModel,
+  };
+  if (!current.albumPlan) {
+    await store.update(task.id, { status: "composing", error: undefined });
+    const plan = await planAlbum(current.description, {
+      ...options,
+      candidateCount: current.albumCandidateCount ?? 14,
+      targetTotalMinutes: current.albumTargetTotalMinutes ?? 35,
+    });
+    const now = new Date().toISOString();
+    current = await store.update(task.id, {
+      title: plan.albumTitle, albumPlan: plan, albumPlaylist: [],
+      albumTracks: plan.tracks.map((outline) => ({
+        id: crypto.randomUUID(), order: outline.number, title: outline.title,
+        targetDurationSeconds: outline.targetSeconds,
+        admission: "candidate", status: "queued", createdAt: now, updatedAt: now,
+      })),
+    });
+  }
+  const plan = current.albumPlan!;
+  if (!current.albumPromptsReady) {
+    await store.update(task.id, { status: "composing", error: undefined });
+    for (const track of current.albumTracks ?? []) {
+      if (track.musicSpec) continue;
+      await store.updateAlbumTrack(task.id, track.id, { status: "composing", error: undefined });
+      try {
+        const musicSpec = await composeAlbumTrack(plan, track.order, options);
+        current = await store.updateAlbumTrack(task.id, track.id, {
+          musicSpec, title: musicSpec.title, status: "queued", error: undefined,
+        });
+      } catch (error) {
+        await store.updateAlbumTrack(task.id, track.id, {
+          status: "failed", error: error instanceof Error ? error.message : String(error),
+        });
+        throw error;
+      }
+    }
+    const orderedSpecs = () => {
+      const tracks = [...(store.get(task.id)?.albumTracks ?? [])].sort((a, b) => a.order - b.order);
+      if (tracks.length !== plan.tracks.length || tracks.some((track) => !track.musicSpec)) {
+        throw new Error("Album candidate prompts are incomplete.");
+      }
+      return tracks.map((track) => track.musicSpec!);
+    };
+    current = store.get(task.id) ?? current;
+    if (!current.albumReview) {
+      const albumReview = await reviewAlbumCandidates(plan, orderedSpecs(), options);
+      current = await store.update(task.id, { albumReview });
+    }
+    for (const finding of current.albumReview!.candidates) {
+      if (finding.verdict !== "needs-work" || !finding.revisionBrief
+        || current.albumRevisedTrackNumbers?.includes(finding.number)) continue;
+      const track = current.albumTracks?.find((candidate) => candidate.order === finding.number);
+      if (!track?.musicSpec) throw new Error(`Missing candidate ${finding.number}.`);
+      const musicSpec = await reviseAlbumTrack(
+        plan, finding.number, track.musicSpec, finding.revisionBrief, orderedSpecs(), options,
+      );
+      current = store.get(task.id) ?? current;
+      current = await store.update(task.id, {
+        albumTracks: current.albumTracks!.map((candidate) => candidate.id === track.id
+          ? { ...candidate, musicSpec, title: musicSpec.title, updatedAt: new Date().toISOString() }
+          : candidate),
+        albumRevisedTrackNumbers: [...(current.albumRevisedTrackNumbers ?? []), finding.number],
+      });
+    }
+    if (!current.albumFinalReview) {
+      const albumFinalReview = await reviewAlbumCandidates(plan, orderedSpecs(), options);
+      current = await store.update(task.id, { albumFinalReview });
+    }
+    current = await store.update(task.id, { albumPromptsReady: true });
+  }
+  if (current.mode === "compose") {
+    for (const track of current.albumTracks ?? []) {
+      await store.updateAlbumTrack(task.id, track.id, { status: "completed", error: undefined });
+    }
+    await store.update(task.id, { status: "completed", error: undefined });
+    return;
+  }
+  if (!current.albumTracks?.length) throw new Error("Album candidate tracks are missing.");
+  await store.update(task.id, { status: "generating", error: undefined });
+  const client = new LyriaClient(config.geminiApiKey!);
+  for (const track of current.albumTracks) {
+    if (generationTrackId && track.id !== generationTrackId) continue;
+    if (track.audioFile && track.status === "completed") continue;
+    try {
+      if (!track.musicSpec) throw new Error("Candidate prompt is missing.");
+      await store.updateAlbumTrack(task.id, track.id, { status: "generating", error: undefined });
+      const generated = await withRequestRetry(() => client.generate(track.musicSpec!.lyriaPrompt, {
+        model: current.lyriaModel,
+      }));
+      const audioFile = await store.writeAlbumTrackAudio(current, track, generated.audio);
+      let durationSeconds: number | undefined;
+      try {
+        durationSeconds = measureAudioDuration(generated.audio);
+      } catch {
+        // Audio stays available when its duration cannot be measured locally.
+      }
+      await store.updateAlbumTrack(task.id, track.id, {
+        status: "completed", audioFile, generatedText: generated.generatedText,
+        ...(durationSeconds === undefined ? {} : { durationSeconds }), error: undefined,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      await store.updateAlbumTrack(task.id, track.id, { status: "failed", error: message });
+    }
+  }
+  const failures = (store.get(task.id)?.albumTracks ?? [])
+    .filter((track) => track.status !== "completed")
+    .map((track) => `Candidate ${track.order}: ${track.error ?? "Awaiting generation."}`);
+  await store.update(task.id, {
+    status: failures.length ? "failed" : "completed",
+    error: failures.length ? failures.join(" ") : undefined,
+  });
+}
+
 function isApiProvider(value: unknown): value is ApiProvider {
   return value === "openai" || value === "gemini";
 }
@@ -258,9 +394,9 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
   const store = new TaskStore(path.resolve(outputDirectory, "tasks"));
   await store.initialize();
   const activeTaskIds = new Set<string>();
-  const startTask = (task: MusicTask, config: AriosoConfig): void => {
+  const startTask = (task: MusicTask, config: AriosoConfig, albumTrackId?: string): void => {
     activeTaskIds.add(task.id);
-    void runTask(store, task, config)
+    void runTask(store, task, config, albumTrackId)
       .catch((error: unknown) => {
         const message = error instanceof Error ? error.message : String(error);
         console.error(`Unable to persist task ${task.id}: ${message}`);
@@ -275,12 +411,18 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
       const audioMatch = /^\/api\/tasks\/([^/]+)\/audio$/.exec(url.pathname);
       const movementAudioMatch = /^\/api\/tasks\/([^/]+)\/movements\/([^/]+)\/audio$/
         .exec(url.pathname);
+      const albumTrackMatch = /^\/api\/tasks\/([^/]+)\/album\/tracks\/([^/]+)$/.exec(url.pathname);
+      const albumTrackAudioMatch = /^\/api\/tasks\/([^/]+)\/album\/tracks\/([^/]+)\/audio$/.exec(url.pathname);
+      const albumTrackRetryMatch = /^\/api\/tasks\/([^/]+)\/album\/tracks\/([^/]+)\/retry$/.exec(url.pathname);
+      const albumPlaylistMatch = /^\/api\/tasks\/([^/]+)\/album\/playlist$/.exec(url.pathname);
       const retryMatch = /^\/api\/tasks\/([^/]+)\/retry$/.exec(url.pathname);
       const credentialMatch = /^\/api\/settings\/credentials\/(openai|gemini)$/.exec(url.pathname);
       if (request.method === "GET" && url.pathname === "/api/capabilities") {
         sendJson(response, 200, {
-          apiVersion: 4,
-          workflows: ["01-general", "02-jazz", "03-orchestral"],
+          apiVersion: 5,
+          workflows: ["01-general", "02-jazz", "03-orchestral", "04-album"],
+          albumPlaylist: true,
+          albumCandidates: { minimum: 12, maximum: 15, default: 14 },
           jazzCorpusToggle: true,
           orchestralAssembly: true,
           orchestralPromptFormat: "orchestral-v1",
@@ -398,6 +540,69 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
         return;
       }
 
+      if (request.method === "PATCH" && albumTrackMatch?.[1] && albumTrackMatch[2]) {
+        const task = store.get(albumTrackMatch[1]);
+        const track = task?.albumTracks?.find((candidate) => candidate.id === albumTrackMatch[2]);
+        if (!task || task.compositionMode !== "album" || !track) {
+          throw new HttpError(404, "Album track not found.");
+        }
+        const value = await readJsonBody(request);
+        if (!isRecord(value) || typeof value.admission !== "string"
+          || !["candidate", "included", "excluded"].includes(value.admission)) {
+          throw new HttpError(400, "Unsupported album admission.");
+        }
+        sendJson(response, 200, await store.setAlbumAdmission(task.id, track.id, value.admission as AlbumAdmission));
+        return;
+      }
+
+      if (request.method === "PUT" && albumPlaylistMatch?.[1]) {
+        const task = store.get(albumPlaylistMatch[1]);
+        if (!task || task.compositionMode !== "album") throw new HttpError(404, "Album task not found.");
+        const value = await readJsonBody(request);
+        if (!isRecord(value) || !Array.isArray(value.trackIds)
+          || !value.trackIds.every((id: unknown) => typeof id === "string")) {
+          throw new HttpError(400, "A playlist track ID array is required.");
+        }
+        sendJson(response, 200, await store.setAlbumPlaylist(task.id, value.trackIds as string[]));
+        return;
+      }
+
+      if (request.method === "POST" && albumTrackRetryMatch?.[1] && albumTrackRetryMatch[2]) {
+        const task = store.get(albumTrackRetryMatch[1]);
+        const track = task?.albumTracks?.find((candidate) => candidate.id === albumTrackRetryMatch[2]);
+        if (!task || task.compositionMode !== "album" || !track) {
+          throw new HttpError(404, "Album track not found.");
+        }
+        if (track.status !== "failed" || activeTaskIds.has(task.id)) {
+          throw new HttpError(409, "Only failed candidates in an idle album can be continued.");
+        }
+        const config = loadConfig(task.mode === "generate", await settings.runtimeEnvironment());
+        if (activeTaskIds.has(task.id) || store.get(task.id)?.albumTracks?.find((candidate) => candidate.id === track.id)?.status !== "failed") {
+          throw new HttpError(409, "Only failed candidates in an idle album can be continued.");
+        }
+        // Reserve this album before awaiting persistence to prevent double generation.
+        activeTaskIds.add(task.id);
+        let queued: MusicTask;
+        try {
+          queued = await store.update(task.id, { status: "queued", error: undefined });
+        } catch (error) {
+          activeTaskIds.delete(task.id);
+          throw error;
+        }
+        startTask(queued, config, track.id);
+        sendJson(response, 202, queued);
+        return;
+      }
+
+      if ((request.method === "GET" || request.method === "HEAD") && albumTrackAudioMatch?.[1] && albumTrackAudioMatch[2]) {
+        const task = store.get(albumTrackAudioMatch[1]);
+        const track = task?.albumTracks?.find((candidate) => candidate.id === albumTrackAudioMatch[2]);
+        const audioPath = task && track ? store.albumTrackAudioPath(task, track) : undefined;
+        if (!task || !track || !audioPath) throw new HttpError(404, "Candidate audio is not available.");
+        await sendAudio(request, response, audioPath);
+        return;
+      }
+
       if (request.method === "POST" && retryMatch?.[1]) {
         const task = store.get(retryMatch[1]);
         if (!task) {
@@ -417,7 +622,14 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
           sendJson(response, 409, { error: "Only failed tasks can be continued." });
           return;
         }
-        const queued = await store.update(task.id, { status: "queued", error: undefined });
+        activeTaskIds.add(task.id);
+        let queued: MusicTask;
+        try {
+          queued = await store.update(task.id, { status: "queued", error: undefined });
+        } catch (error) {
+          activeTaskIds.delete(task.id);
+          throw error;
+        }
         startTask(queued, config);
         sendJson(response, 202, queued);
         return;

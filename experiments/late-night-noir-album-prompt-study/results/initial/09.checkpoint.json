@@ -1,0 +1,103 @@
+{
+  "inputSha256": "1a58134f7b68feb09826ff3649597dc9b7fc8bba6cca2e4da659f7b2ee49ea76",
+  "spec": {
+    "schemaVersion": "1.0",
+    "title": "Neon Herbarium",
+    "intent": "A self-contained late-night noir jazz meditation built around a delicate vibraphone melody, understated ensemble replies, and a softened fade into unresolved calm.",
+    "genres": [
+      "late-night noir jazz",
+      "ambient jazz",
+      "cool jazz"
+    ],
+    "moods": [
+      "hushed",
+      "mysterious",
+      "weightless",
+      "gently contemplative"
+    ],
+    "tempo": {
+      "bpm": 72,
+      "feel": "Relaxed straight eighths with soft syncopation, no pronounced backbeat, and restrained dynamics."
+    },
+    "tonality": {
+      "tonic": null,
+      "mode": "Ambiguous minor-centered jazz harmony"
+    },
+    "meter": "4/4",
+    "instrumentation": [
+      {
+        "name": "Vibraphone",
+        "role": "Carries the delicate repeating melody and remains the primary foreground voice.",
+        "timbre": "Softly struck, warm, lightly damped, with a subtle nocturnal halo."
+      },
+      {
+        "name": "Flugelhorn",
+        "role": "Adds long, understated tones and reshapes fragments of the vibraphone melody.",
+        "timbre": "Muted-warm, breathy, rounded, and intimate."
+      },
+      {
+        "name": "Piano",
+        "role": "Provides sparse quartal color and quiet counter-rhythms beneath the lead voices.",
+        "timbre": "Dark, spacious, gently voiced, with restrained attack."
+      },
+      {
+        "name": "Upright bass",
+        "role": "Defines shifting harmonic roots and supports the floating pulse.",
+        "timbre": "Warm, woody, sustained, and unhurried."
+      },
+      {
+        "name": "Brushes",
+        "role": "Supply a nearly weightless rhythmic bed without a strong backbeat.",
+        "timbre": "Soft circular swishes, low density, tactile acoustic presence."
+      }
+    ],
+    "structure": [
+      {
+        "section": "Intro",
+        "durationSeconds": 20,
+        "direction": "Vibraphone alone presents a delicate repeating figure over open space; establish the nocturnal atmosphere quietly."
+      },
+      {
+        "section": "Development",
+        "durationSeconds": 35,
+        "direction": "Flugelhorn enters with long tones and understated replies. Upright bass introduces shifting roots while the vibraphone motif remains clear."
+      },
+      {
+        "section": "Middle Passage",
+        "durationSeconds": 40,
+        "direction": "Piano adds sparse quartal voicings and gentle counter-rhythms. Occasional minor-second friction resolves into transparent sixths; keep the energy calm and spacious."
+      },
+      {
+        "section": "Dissolution",
+        "durationSeconds": 25,
+        "direction": "Remove piano and then flugelhorn in reverse order. Let the vibraphone figure become more isolated while bass and brushes recede."
+      },
+      {
+        "section": "Outro",
+        "durationSeconds": 15,
+        "direction": "The vibraphone slows and fades over a final open, unresolved color; end softly without a firm cadence."
+      }
+    ],
+    "vocals": {
+      "enabled": false,
+      "language": null,
+      "style": null,
+      "lyricalTheme": null
+    },
+    "production": "Intimate acoustic room with moderate warmth, clear separation, soft stereo width, gentle sustain, and a restrained late-night dynamic ceiling. Preserve tactile instrument detail while keeping the background spacious and dim.",
+    "avoid": [
+      "vocals",
+      "pronounced backbeat",
+      "harsh brightness",
+      "flashy virtuosity",
+      "abrupt drops",
+      "cinematic bombast",
+      "strong final cadence"
+    ],
+    "assumptions": [
+      "4/4 meter and approximately 72 BPM suit the relaxed straight-eighth pulse.",
+      "The tonal center remains intentionally ambiguous rather than fixed to one key."
+    ],
+    "lyriaPrompt": "Late-night noir jazz meditation for approximately 135 seconds, relaxed around 72 BPM in 4/4 with a straight-eighth pulse, soft syncopation, and no pronounced backbeat. Instrumental only, no vocals. Begin with a softly struck vibraphone presenting a delicate repeating melody in spacious silence. Add warm upright bass on shifting roots, then breathy flugelhorn sustained tones and understated replies. Introduce dark piano quartal voicings and gentle counter-rhythms in the middle, with occasional minor-second friction resolving into transparent sixths. Keep the dynamics restrained, the phrasing spacious, and the acoustic room intimate. Remove layers in reverse order, leaving the vibraphone figure increasingly isolated as it slows and fades over an unresolved open color. Avoid harsh brightness, flashy virtuosity, abrupt drops, pronounced backbeat, and cinematic bombast."
+  }
+}

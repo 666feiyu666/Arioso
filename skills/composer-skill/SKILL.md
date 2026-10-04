@@ -1,6 +1,6 @@
 ---
 name: composer-skill
-description: Create or refine production-ready prompts for Google Lyria 3 Clip and Lyria 3.5 from natural-language music ideas, including single pieces and multi-movement orchestral works. Use for musical direction, arrangement, structure, lyric integration, orchestral continuity, and Lyria prompt optimization; do not use for editing or mastering existing audio.
+description: Create or refine production-ready prompts for Google Lyria 3 Clip and Lyria 3.5 from natural-language music ideas, including single pieces, multi-movement orchestral works, and reviewed album candidate batches. Use for musical direction, arrangement, structure, lyric integration, orchestral continuity, album authorship and Lyria prompt optimization; do not use for editing or mastering existing audio.
 ---
 
 # Lyria Composer
@@ -38,3 +38,5 @@ The final Lyria prompt should contain only information that helps determine the 
 For detailed composition and prompting guidance, read [references/lyria-prompting.md](references/lyria-prompting.md).
 
 For multi-movement orchestral planning or full-movement composition, also read [references/orchestral-workflow.md](references/orchestral-workflow.md). Express the result as an observable work or movement plan; do not expose private chain-of-thought or substitute hidden reasoning for musical directions.
+
+For album planning, candidate composition or batch prompt review, also read [references/album-workflow.md](references/album-workflow.md). The album author chooses the musical relationship between candidates; human selection determines the final playlist.

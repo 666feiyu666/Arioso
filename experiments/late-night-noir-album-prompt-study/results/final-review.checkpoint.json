@@ -1,0 +1,176 @@
+{
+  "inputSha256": "eee6d16cec6549fb433c6a7bca3a7f7639e25eca67744da4b5c55aa058af3e22",
+  "review": {
+    "verdict": "needs-work",
+    "albumFindings": [
+      "The album strongly realizes its late-night relaxation/noir concept: all rendered prompts are instrumental, restrained, spacious, and shaped toward softened endings. The shared preamble is repeated verbatim in every prompt, making each render less concise and adding generic variation instructions that are not track-specific.",
+      "The main cohesion risk is substantive overlap among several slow 4/4 piano-plus-muted/low-brass quartet studies, especially 2, 8, 11, and 13. Most other differences—waltz, free-time solo piano, 6/8 ostinato, half-time bass study, straight-eighth vibraphone, bossa pulse, 5/4 lullaby, and quintet transformation—serve the stated variation plan."
+    ],
+    "similarities": [
+      {
+        "first": 2,
+        "second": 13,
+        "evidence": "Both use a quiet 4/4 swing quartet with piano, bass, brushes, and muted brass foregrounding sparse descending/broad phrases over unresolved minor-centered harmony.",
+        "judgment": "Substantive overlap in ensemble role, phrase density, and arc; retain one as-is and differentiate the other."
+      },
+      {
+        "first": 8,
+        "second": 13,
+        "evidence": "Both place dark low brass against sparse piano, upright bass, and brushes, building overlapping low-register lines and ending on a hushed unresolved sonority.",
+        "judgment": "This serves the noir register but duplicates the central musical texture; one needs a clearer rhythmic or harmonic distinction."
+      },
+      {
+        "first": 11,
+        "second": 13,
+        "evidence": "Both are slow 4/4 piano-and-tenor/brass dialogues with spacious call-and-response, restrained density growth, and unresolved soft codas.",
+        "judgment": "The longer harmonic phases in 11 help distinguish it, but the shared dialogue profile remains close enough to warrant a targeted change."
+      },
+      {
+        "first": 3,
+        "second": 9,
+        "evidence": "Both center a repeating foreground figure, add vibraphone color and bass, and remove layers in reverse toward a fading unresolved ending.",
+        "judgment": "Useful cohesion through gentle repetition and halo-like texture; their 6/8 electric-piano ostinato versus straight-eighth vibraphone melody provides adequate contrast."
+      },
+      {
+        "first": 4,
+        "second": 6,
+        "evidence": "Both begin with sparse piano fragments, develop breath-like imitation or two-part material, and contract into a quiet unresolved ending.",
+        "judgment": "Serves the intimate-study concept; solo free rubato versus chamber imitation and sustained cello are meaningfully different."
+      },
+      {
+        "first": 1,
+        "second": 14,
+        "evidence": "Both begin with an intimate piano motif, add bass and brushes, broaden the harmony quietly, then return/recede to an unresolved final color.",
+        "judgment": "Appropriate bookend-like cohesion, with waltz trio versus 4/4 quintet transformation providing sufficient contrast."
+      }
+    ],
+    "candidates": [
+      {
+        "number": 1,
+        "verdict": "ready",
+        "evidence": [
+          "The rendered prompt clearly specifies a “slow 3/4” piano-led trio, “trade restrained fragments,” and a “softly incomplete suspended cadence.”",
+          "Its felted piano, floating bass cushion, and brush-circle waltz realize the intimate piano-centered variation."
+        ],
+        "revisionBrief": null
+      },
+      {
+        "number": 2,
+        "verdict": "needs-work",
+        "evidence": [
+          "The prompt uses “muted trumpet,” “hollow-body piano,” upright bass, and brushes in sparse 4/4 call-and-response with a softened unresolved ending.",
+          "Its descending brass theme and oblique minor-blues harmony overlap substantially with 13’s muted-brass/piano quartet study."
+        ],
+        "revisionBrief": "Differentiate the arrangement from 13 by making trumpet phrases shorter and more fragmented over longer silent bass/piano punctuations, and avoid a broad phrase-trading middle; preserve the minor-blues identity and 120-second duration."
+      },
+      {
+        "number": 3,
+        "verdict": "ready",
+        "evidence": [
+          "The prompt explicitly makes warm electric piano the repeating ostinato source in “slow even 6/8.”",
+          "Vibraphone replies overlap into a halo before bass, brushes, and vibraphone are removed, giving a clear gradual arc distinct from the swing studies."
+        ],
+        "revisionBrief": null
+      },
+      {
+        "number": 4,
+        "verdict": "ready",
+        "evidence": [
+          "“Solo upright piano” and “free rubato with an implied slow swing” directly realize the planned solitary study.",
+          "The recurring low-to-treble gesture and suspended final phrase use silence and decay as primary musical material."
+        ],
+        "revisionBrief": null
+      },
+      {
+        "number": 5,
+        "verdict": "ready",
+        "evidence": [
+          "The prompt makes bass and brushes “the main voices” in a half-time rhythmic conversation rather than a conventional melodic quartet.",
+          "Electric piano enters only for a harmonic turn and tenor saxophone is restricted to “brief breathy punctuation,” creating useful bass-led contrast."
+        ],
+        "revisionBrief": null
+      },
+      {
+        "number": 6,
+        "verdict": "ready",
+        "evidence": [
+          "Piano, bass clarinet, cello, and frame drum are assigned clear imitation, shadow-tone, and pulse roles.",
+          "The prompt develops from piano motif to lower clarinet echo and cello sustain, then contracts to a “shared unison whisper,” matching the chamber variation."
+        ],
+        "revisionBrief": null
+      },
+      {
+        "number": 7,
+        "verdict": "ready",
+        "evidence": [
+          "The rendered prompt centers a guitar four-note motif and alto saxophone reshaping rather than extended solos.",
+          "Its gentle medium-slow swing, short bass foreground interlude, and major-minor interchange distinguish it from the darker pedal and low-register studies."
+        ],
+        "revisionBrief": null
+      },
+      {
+        "number": 8,
+        "verdict": "needs-work",
+        "evidence": [
+          "The prompt foregrounds “low sustained counterlines” from baritone sax over felt piano, bass, and brushed 12/8 triplets.",
+          "Its low-register overlapping lines and unresolved sparse-piano coda are very close to 13’s broad muted-brass/piano dialogue."
+        ],
+        "revisionBrief": "Make the baritone a sustained pedal-shadow rather than an interwoven melodic counterline, and let the 12/8 brushes carry more of the piece’s motion; reserve the denser brass/piano exchange for 13."
+      },
+      {
+        "number": 9,
+        "verdict": "ready",
+        "evidence": [
+          "The prompt clearly establishes vibraphone as the foreground voice with a relaxed straight-eighth pulse and no pronounced backbeat.",
+          "Flugelhorn long tones, quartal piano counter-rhythms, and reverse-layer dissolution provide a distinct transparent texture."
+        ],
+        "revisionBrief": null
+      },
+      {
+        "number": 10,
+        "verdict": "ready",
+        "evidence": [
+          "The prompt specifies a “bossa-inflected 4/4 pulse” led by nylon guitar and interlocking piano.",
+          "Muted-trumpet punctuation and the guitar-and-bass receding coda supply a distinct groove-density variation without breaking the quiet arc."
+        ],
+        "revisionBrief": null
+      },
+      {
+        "number": 11,
+        "verdict": "ready",
+        "evidence": [
+          "Its 180-second form explicitly releases the opening two-note pedal into “contrasting upper-harmony phases” before returning to the pedal in the coda.",
+          "Long-breathed tenor/piano dialogue, fragmentation, and reserved pedal architecture provide more development than the shorter brass studies."
+        ],
+        "revisionBrief": null
+      },
+      {
+        "number": 12,
+        "verdict": "ready",
+        "evidence": [
+          "The prompt makes gently lilting “5/4 grouped 2+3” a central identity rather than decorative meter.",
+          "Bass repetition, airy flute phrases, sparse electric piano, and final harmonics create a clear asymmetrical lullaby variation."
+        ],
+        "revisionBrief": null
+      },
+      {
+        "number": 13,
+        "verdict": "needs-work",
+        "evidence": [
+          "The prompt is another slow 4/4 quartet built from piano, muted brass, bass, and brushes, with “broad breathy descending phrases” and an unresolved open-interval ending.",
+          "That arrangement overlaps with both 2’s muted-trumpet/piano exchange and 8’s low-register brass/piano layering."
+        ],
+        "revisionBrief": "Recast the middle as a piano-led harmonic study with trombone sustaining occasional long tones rather than trading broad phrases; emphasize descending inner voices and stable bass as the primary development, preserving the 150-second form."
+      },
+      {
+        "number": 14,
+        "verdict": "ready",
+        "evidence": [
+          "The prompt gives the album a useful closing transformation: piano motif moves from shadowed minor-ninth harmony toward relative-major inflections without cadence.",
+          "Late vibraphone halo and reverse subtraction from the quintet create a proportionate 180-second culmination distinct from the smaller studies."
+        ],
+        "revisionBrief": null
+      }
+    ]
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "schemaVersion": "1.0",
+  "title": "Dawn Without Arrival",
+  "intent": "A restrained late-night jazz quintet gradually shifts from shadowed minor toward softened, unresolved brightness, offering relaxation through spacious phrasing and gentle repetition.",
+  "genres": [
+    "late-night noir jazz",
+    "ambient jazz",
+    "cool jazz"
+  ],
+  "moods": [
+    "nocturnal and introspective",
+    "quietly hopeful",
+    "softly unresolved"
+  ],
+  "tempo": {
+    "bpm": 58,
+    "feel": "Slow, floating swing with spacious phrasing; increasingly sparse near the ending."
+  },
+  "tonality": {
+    "tonic": "D",
+    "mode": "minor with relative-major inflections and common-tone ambiguity"
+  },
+  "meter": "4/4",
+  "instrumentation": [
+    {
+      "name": "Piano",
+      "role": "States and develops the simple central motif; provides spacious harmonic voicings.",
+      "timbre": "Warm, intimate acoustic tone with restrained attack and occasional upper-register resonance."
+    },
+    {
+      "name": "Upright bass",
+      "role": "Creates a barely moving low-register foundation and supports the harmonic transformation.",
+      "timbre": "Soft, rounded pizzicato with occasional sustained notes."
+    },
+    {
+      "name": "Brush kit",
+      "role": "Maintains a subtle floating pulse without a pronounced backbeat.",
+      "timbre": "Whispered brushes, featherlight cymbal shimmer, low dynamic ceiling."
+    },
+    {
+      "name": "Flugelhorn",
+      "role": "Lengthens and gently transforms the piano motif into the emotional foreground.",
+      "timbre": "Muted-warm, breathy, lyrical, never forceful."
+    },
+    {
+      "name": "Vibraphone",
+      "role": "Adds a late luminous halo around the returning motif and final harmony.",
+      "timbre": "Sparse, softly damped notes with delicate sustained shimmer."
+    }
+  ],
+  "structure": [
+    {
+      "section": "Intro",
+      "durationSeconds": 25,
+      "direction": "Solo piano presents a simple, shadowed motif in minor-ninth and suspended colors, with generous silence."
+    },
+    {
+      "section": "Development",
+      "durationSeconds": 55,
+      "direction": "Upright bass and whispered brushes enter with a barely moving floating swing; piano broadens its voicings while preserving the motif."
+    },
+    {
+      "section": "Expansion",
+      "durationSeconds": 55,
+      "direction": "Flugelhorn enters in long, breath-like phrases, gradually introducing relative-major inflections without resolving the underlying ambiguity."
+    },
+    {
+      "section": "Halo",
+      "durationSeconds": 30,
+      "direction": "Vibraphone adds sparse, glowing tones around the flugelhorn and piano; density increases gently but never becomes dramatic."
+    },
+    {
+      "section": "Outro",
+      "durationSeconds": 15,
+      "direction": "Layers recede in reverse order, leaving piano, bass, and a final shared common tone that fades without a full cadence."
+    }
+  ],
+  "vocals": {
+    "enabled": false,
+    "language": null,
+    "style": null,
+    "lyricalTheme": null
+  },
+  "production": "Intimate acoustic room with warm, soft-edged recording, close piano and bass perspective, restrained stereo width, gentle natural reverb, clear separation, and preserved dynamic nuance. Avoid abrupt transitions; let entrances and exits feel breathed and deliberate.",
+  "avoid": [
+    "vocals",
+    "abrupt drops",
+    "flashy virtuosity",
+    "harsh brightness",
+    "pronounced backbeat",
+    "cinematic bombast",
+    "fully resolved cadence"
+  ],
+  "assumptions": [
+    "D minor is used as a flexible tonal center for the shadowed opening.",
+    "A slow 58 BPM pulse supports the requested floating swing and relaxation."
+  ],
+  "lyriaPrompt": "Late-night noir jazz quintet for relaxation, approximately 3 minutes, slow floating swing at 58 BPM in 4/4. Instrumental only, no vocals. Begin with intimate piano stating a simple motif in shadowed minor-ninth and suspended harmony, leaving generous silence. Gradually add soft upright bass and whispering brushes with a barely moving pulse. Let breathy flugelhorn lengthen and gently transform the motif, introducing subtle relative-major inflections while preserving unresolved common-tone ambiguity. Near the later section, add sparse, softly shimmering vibraphone as a luminous halo. Keep dynamics restrained, phrasing spacious, and the acoustic room warm and intimate. Recede by removing vibraphone, flugelhorn, brushes, and bass in turn, ending on a quiet shared common tone without a full cadence. Avoid abrupt drops, flashy virtuosity, harsh brightness, pronounced backbeat, cinematic bombast, and vocals."
+}

@@ -1,0 +1,231 @@
+{
+  "albumTitle": "Velvet After Midnight",
+  "albumMind": "A sequence of self-contained nocturnal jazz studies where relaxation comes from unhurried pulse, spacious voicings, and gentle repetition, while noir character emerges through unresolved color, low-register counterlines, and restrained melodic shadows. Each piece offers a different way to settle: some through drifting piano, some through brushed ensemble motion, some through bass-led stillness, yet every ending feels deliberately softened rather than abruptly concluded.",
+  "cohesionStrategy": "Keep a restrained late-night dynamic ceiling, instrumental-only writing, nuanced swing or slow pulse, and jazz harmony colored by extensions, suspended tones, and selective chromaticism. Vary the foreground instrument, groove density, ensemble size, room perspective, harmonic rhythm, and degree of motivic activity in small groups: intimate piano-centered tracks, bass-and-brush meditations, and darker ensemble sketches. This creates contrast without breaking the relaxation arc; noir comes from harmonic ambiguity and register, not from loud drama.",
+  "sharedSoundContract": "Instrumental only, no vocals. Late-night noir jazz for relaxation: restrained dynamics, spacious phrasing, tactile acoustic playing, and jazz harmony with tasteful extensions, suspensions, and gentle chromatic tension. Every piece must have a clear self-contained arc, quiet entrance, gradual development, and softened ending. Vary foreground instrument, ensemble size, room intimacy, groove density, and harmonic rhythm, but avoid abrupt drops, flashy virtuosity, harsh brightness, or cinematic bombast.",
+  "tracks": [
+    {
+      "number": 1,
+      "title": "Windowlight Waltz",
+      "musicalRole": "Piano states a simple nocturnal motif while bass and brushes provide a floating three-beat cushion; the trio gradually trades fragments before returning to the motif.",
+      "instruments": [
+        "felted piano: States the nocturnal motif, supplies spacious extended voicings, and returns as the final foreground voice.",
+        "upright bass: Provides a floating three-beat cushion, understated anticipation, and brief answering fragments.",
+        "brush kit: Shapes a quiet circular pulse and subtly broadens the middle section."
+      ],
+      "groove": "Slow, lightly swung 3/4 with flexible brush circles and understated bass anticipation.",
+      "harmony": "D Dorian minor",
+      "development": "Intro: Nearly solo felted piano introduces a simple nocturnal motif with sparse D-minor color, added ninths, and suspended tones.; Main Waltz: Upright bass and soft brushes enter after the opening phrase, establishing a flexible swung 3/4 cushion beneath the piano.; Development: The trio trades small fragments; piano voicings widen, chromatic passing chords add restrained noir tension, and dynamics remain subdued.; Return: The original piano motif returns with thinner bass and lighter brushes, allowing space between phrases.; Outro: Layers recede to piano, ending on a quiet incomplete cadence with suspended unresolved color.",
+      "targetSeconds": 150,
+      "status": "candidate"
+    },
+    {
+      "number": 2,
+      "title": "Blue Smoke Ledger",
+      "musicalRole": "Muted trumpet carries a sparse, descending theme while piano supplies dark intervallic punctuation and bass anchors the pauses.",
+      "instruments": [
+        "muted trumpet: Carries the sparse descending theme and gradually fragments into breath-like closing phrases.",
+        "hollow-body piano: Answers the trumpet with dark intervallic punctuation and oblique harmonic color.",
+        "upright bass: Anchors pauses with low, patient notes and understated connective motion.",
+        "soft brushes: Provides a barely-there pulse and gentle phrase transitions."
+      ],
+      "groove": "Unhurried 4/4 swing, slightly behind the beat, with long rests and minimal cymbal activity.",
+      "harmony": "C minor minor blues with altered dominant color",
+      "development": "Intro: Sparse piano chords and isolated low bass notes establish minor-sixth and minor-ninth colors; leave generous silence.; Theme: Muted trumpet enters with descending, widely spaced phrases. Piano answers briefly while bass anchors each pause.; Development: Increase call-and-response density without increasing volume. Use altered dominants, oblique resolutions, and subtle chromatic passing tones.; Dissolution: Thin the exchanges gradually. End with a low muted-trumpet breath, one resonant bass note, and a softened unresolved piano color.",
+      "targetSeconds": 120,
+      "status": "candidate"
+    },
+    {
+      "number": 3,
+      "title": "Rain on the Fire Escape",
+      "musicalRole": "Electric piano creates a repeating nocturnal ostinato while vibraphone and bass paint quiet reflections above it.",
+      "instruments": [
+        "warm electric piano: Establishes and sustains the repeating nocturnal ostinato; gradually becomes more sparse.",
+        "vibraphone: Paints quiet reflections through widely spaced replies and overlapping tones.",
+        "upright bass: Provides a stable minor-centered foundation and subtle low-register counterlines.",
+        "brushes: Maintains a nearly continuous, featherlight 6/8 subdivision beneath the harmony."
+      ],
+      "groove": "Slow, even 6/8 with a gentle lilt, continuous soft subdivision, and restrained dynamics.",
+      "harmony": "D Dorian with bitonal upper structures",
+      "development": "Intro: Electric piano alone introduces the repeating ostinato in a shadowed minor register, spacious and softly articulated.; Development: Upright bass enters beneath the ostinato; vibraphone answers with widely spaced tones and open fourths, keeping the texture restrained.; Climax: Brushes join with a gentle 6/8 lilt. Vibraphone tones overlap into a quiet halo while bitonal upper colors create mild, unresolved tension without increasing volume.; Outro: Remove brushes, then vibraphone and bass notes one by one. Let the electric-piano ostinato thin, slow, and fade on an incomplete added-sixth sonority.",
+      "targetSeconds": 135,
+      "status": "candidate"
+    },
+    {
+      "number": 4,
+      "title": "The Empty Booth",
+      "musicalRole": "Solo piano alternates between a low walking suggestion and fragile treble commentary, making silence part of the phrasing.",
+      "instruments": [
+        "upright piano: Sole voice, alternating low-register walking suggestions with fragile treble commentary."
+      ],
+      "groove": "Free rubato with an implied slow swing; spacious, non-metrical phrasing.",
+      "harmony": "Minor-major ambiguity with unresolved dominant colors",
+      "development": "Intro: Isolated low intervals emerge from silence, with generous decay and no fixed pulse.; Development: A recurring two-part gesture gradually takes shape: sparse low movement answered by delicate treble fragments. Let planed fourths, minor-major sonorities, and suspended dominant colors unfold with very slow harmonic rhythm.; Release: Move briefly into a more consonant, softly illuminated register without fully resolving the tension.; Outro: Thin the texture and leave the final phrase suspended, allowing the last piano resonance to fade naturally.",
+      "targetSeconds": 90,
+      "status": "candidate"
+    },
+    {
+      "number": 5,
+      "title": "Streetlamp Half-Time",
+      "musicalRole": "Bass and drums establish a calm half-time pocket while tenor saxophone develops a compact motif through repeated, slightly altered statements.",
+      "instruments": [
+        "upright bass: Leads the repeating pocket and develops a denser rhythmic conversation with the brushes.",
+        "brush kit with soft mallets: Answers and interlocks with the bass while marking understated phrase turns.",
+        "electric piano: Briefly transforms the harmony with spacious replies and dark connective voicings.",
+        "tenor saxophone: Provides brief breathy color and sparse punctuation rather than a long evolving melody."
+      ],
+      "groove": "Laid-back, behind-the-beat half-time swing with bass phrases crossing the bar line and gentle mallet accents.",
+      "harmony": "D Dorian with dark chromatic color",
+      "development": "Intro: Upright bass establishes a sparse Dorian vamp; brushes enter gradually with soft mallet accents and leave generous space.; Bass-Brush Dialogue: Develop a denser but quiet rhythmic conversation: bass phrases cross the bar line while brushes answer, echo, and subtly vary the half-time pocket.; Harmonic Turn: Electric piano enters briefly with dark spacious voicings, passing ii chords, and restrained tritone substitutions, transforming the vamp without creating a goal-driven cadence. Add only occasional breathy tenor-sax punctuation.; Recession: Withdraw electric piano and thin the brush conversation, leaving bass-led fragments and sparse saxophone color.; Outro: Return to the subdued vamp with bass and faint brushes, ending on a quiet incomplete harmony.",
+      "targetSeconds": 165,
+      "status": "candidate"
+    },
+    {
+      "number": 6,
+      "title": "Nocturne for Closed Curtains",
+      "musicalRole": "Clarinet and piano share a breath-like melody in imitation while cello supplies sustained shadow tones.",
+      "instruments": [
+        "piano: Introduces the main motif and provides sparse modal harmony.",
+        "bass clarinet: Echoes and reshapes the piano melody in a lower, breath-like register.",
+        "cello: Sustains shadow tones and gradually deepens the harmonic atmosphere.",
+        "soft frame drum: Provides a barely audible pulse and subtle phrase punctuation."
+      ],
+      "groove": "Slow pulse-based 4/4 with barely audible frame-drum emphasis and generous rubato at phrase endings.",
+      "harmony": "modal minor",
+      "development": "Intro: Nearly free piano introduces isolated fragments of the motif over silence; keep the room intimate and the dynamics very low.; Development: Bass clarinet answers the piano in imitation. Add sustained cello pedal tones, parallel sixths, and delayed modal resolutions; frame drum enters only as a faint pulse.; Contraction: Let piano and bass clarinet overlap more closely while cello lengthens the shadow tones. Increase density slightly without increasing volume, then thin the texture.; Outro: Reduce piano and bass clarinet to a shared unison whisper, with cello fading beneath them and the final harmony remaining gently unresolved.",
+      "targetSeconds": 105,
+      "status": "candidate"
+    },
+    {
+      "number": 7,
+      "title": "Last Train, Softly",
+      "musicalRole": "A brushed quartet maintains a quiet forward motion while guitar and saxophone exchange short motifs rather than taking extended solos.",
+      "instruments": [
+        "Hollow-body guitar: Introduces and restates the four-note motif with quiet chordal support.",
+        "Alto saxophone: Reshapes the guitar motif in longer answering phrases; no extended solo.",
+        "Upright bass: Provides a discreet walking foundation and briefly comes forward in the middle.",
+        "Brush kit: Maintains understated swing and supports transitions."
+      ],
+      "groove": "Gentle medium-slow swing with discreet walking bass, softened ride texture, and spacious phrasing.",
+      "harmony": "Lyrical major-minor interchange with chromatic mediant color",
+      "development": "Intro: Hollow-body guitar alone presents a simple four-note cell in spacious voicings; bass and faint brushes enter gradually.; Theme: The quartet settles into gentle medium-slow swing. Guitar states the motif while bass walks discreetly and brushes remain soft.; Exchange: Alto saxophone reshapes the motif in longer phrases; guitar answers with compact figures. Use lyrical major-minor interchange, secondary dominants, and brief chromatic mediant turns.; Bass Interlude: Thin the texture so upright bass briefly takes the foreground, with sparse guitar punctuations and nearly weightless brushes.; Final Statement: Saxophone and guitar reunite for a smaller, more spacious return of the motif, brightening briefly without becoming cheerful.",
+      "targetSeconds": 150,
+      "status": "candidate"
+    },
+    {
+      "number": 8,
+      "title": "Ashes in the Blue Hour",
+      "musicalRole": "Baritone saxophone provides low, sustained counterlines beneath sparse piano chords, creating weight without volume.",
+      "instruments": [
+        "felt piano: Sparse harmonic punctuation and opening atmosphere",
+        "baritone saxophone: Low sustained counterlines and dark melodic shadow",
+        "upright bass: Quiet pedal anchor and occasional low connective movement",
+        "brush kit: Subtle 12/8 pulse and gentle triplet motion"
+      ],
+      "groove": "Slow 12/8 blues pulse with brushed triplets, spacious phrasing, and broad breathing pauses.",
+      "harmony": "minor blues with flat-five coloration, suspended dominants, and long pedal tones",
+      "development": "Intro: Felt piano offers sparse minor-blues chords in open space; distant baritone saxophone enters with long, low tones.; Development: Upright bass joins as a quiet pedal anchor while brushes establish soft triplets; baritone and piano overlap in restrained counterpoint.; Climax: Low-register lines become slightly denser and more interwoven, using flat-five tension and suspended dominants without increasing volume or becoming dramatic.; Outro: Brushes and bass recede first; baritone leaves a final breath-like phrase over a sparse felt-piano chord, ending hushed and unresolved.",
+      "targetSeconds": 120,
+      "status": "candidate"
+    },
+    {
+      "number": 9,
+      "title": "Neon Herbarium",
+      "musicalRole": "Vibraphone carries a delicate repeating melody while flugelhorn and piano alter its contour through understated replies.",
+      "instruments": [
+        "Vibraphone: Carries the delicate repeating melody and remains the primary foreground voice.",
+        "Flugelhorn: Adds long, understated tones and reshapes fragments of the vibraphone melody.",
+        "Piano: Provides sparse quartal color and quiet counter-rhythms beneath the lead voices.",
+        "Upright bass: Defines shifting harmonic roots and supports the floating pulse.",
+        "Brushes: Supply a nearly weightless rhythmic bed without a strong backbeat."
+      ],
+      "groove": "Relaxed straight eighths with soft syncopation, no pronounced backbeat, and restrained dynamics.",
+      "harmony": "Ambiguous minor-centered jazz harmony",
+      "development": "Intro: Vibraphone alone presents a delicate repeating figure over open space; establish the nocturnal atmosphere quietly.; Development: Flugelhorn enters with long tones and understated replies. Upright bass introduces shifting roots while the vibraphone motif remains clear.; Middle Passage: Piano adds sparse quartal voicings and gentle counter-rhythms. Occasional minor-second friction resolves into transparent sixths; keep the energy calm and spacious.; Dissolution: Remove piano and then flugelhorn in reverse order. Let the vibraphone figure become more isolated while bass and brushes recede.; Outro: The vibraphone slows and fades over a final open, unresolved color; end softly without a firm cadence.",
+      "targetSeconds": 135,
+      "status": "candidate"
+    },
+    {
+      "number": 10,
+      "title": "Velvet Corridor",
+      "musicalRole": "Piano and guitar interlock a quiet chordal pattern while a muted trumpet comments in short, nocturnal punctuation.",
+      "instruments": [
+        "Nylon-string guitar: Establishes the soft syncopated pulse and repeating chordal pattern.",
+        "Piano: Interlocks with the guitar and fills the upper harmonic space.",
+        "Muted trumpet: Adds short nocturnal comments and clipped melodic punctuation.",
+        "Upright bass: Provides a gentle low-register foundation and supports deceptive harmonic turns.",
+        "Brush kit: Maintains a featherlight pulse and subtle transitions."
+      ],
+      "groove": "Slow, flexible bossa-inflected pulse with understated syncopation and no dance emphasis.",
+      "harmony": "D minor with major-seventh and suspended color",
+      "development": "Intro: Nylon-string guitar alone establishes the flexible bossa pulse with minor-key ii–V colors.; Theme: Piano enters with interlocking upper voicings; upright bass and very soft brushes join without increasing intensity.; Conversation: Muted trumpet introduces clipped, nocturnal motifs while guitar and piano answer in short phrases; use lush major-seventh side steps and deceptive cadences.; Receding Coda: Trumpet withdraws, leaving guitar and bass to soften the pattern; end on an unresolved, spacious color rather than a firm cadence.",
+      "targetSeconds": 105,
+      "status": "candidate"
+    },
+    {
+      "number": 11,
+      "title": "A Door Left Ajar",
+      "musicalRole": "Tenor saxophone sustains a single evolving melody over a pedal bass, with piano changing the surrounding harmonic light.",
+      "instruments": [
+        "tenor saxophone: Foreground melodic voice using spacious call-and-response phrases with piano, gradually ornamenting and fragmenting its material.",
+        "piano: Introduces contrasting upper-harmony phases and answers the saxophone with spacious voicings and short motifs.",
+        "upright bass: Establishes a calm two-note pedal in the opening, then supports the evolving harmony before returning to the pedal in the coda.",
+        "brush kit: Marks phrase turns and lightly supports the slow swing without a strong backbeat."
+      ],
+      "groove": "Sparse, slow behind-the-beat swing in 4/4, with brushes entering only at phrase turns.",
+      "harmony": "Modal minor with shifting upper harmony and pedal-point ambiguity",
+      "development": "Intro: Upright bass establishes the two-note pedal alone; piano adds isolated voicings. Keep the room quiet and spacious.; Theme: Tenor saxophone enters with a long-breathed phrase. Piano answers rather than merely accompanying; brushes appear only at phrase turns.; Harmonic Dialogue: Release the fixed pedal and let piano move through contrasting upper-harmony phases: suspended dominants, modal minor colors, upper triads, and restrained blues inflections. Saxophone responds in call-and-response, with gentle ornamentation and no flashy soloing.; Fragmentation: Shorten the exchanges, increase silence, and thin the brushes. Let saxophone fragments and piano replies pass through softer, more ambiguous harmonic colors.; Coda: Return the upright bass to the two-note pedal. Reduce the dialogue to a final saxophone breath, sparse piano voicing, and softly unresolved decay.",
+      "targetSeconds": 180,
+      "status": "candidate"
+    },
+    {
+      "number": 12,
+      "title": "Underpass Lullaby",
+      "musicalRole": "A small ensemble alternates between a low, repeating bass figure and a fragile flute melody, using silence as the main transition.",
+      "instruments": [
+        "upright bass: Establishes and sustains the low repeating lullaby figure; later exposes quiet harmonics.",
+        "warm electric piano: Adds sparse nocturnal harmony and subtle color around the bass figure.",
+        "flute: Carries the fragile foreground melody in short, breath-shaped phrases.",
+        "soft brushes: Provides barely audible pulse and phrase transitions without a strong backbeat."
+      ],
+      "groove": "Slow, gentle 5/4 grouped 2+3; lilting rather than mathematical, with spacious phrasing and soft brush motion.",
+      "harmony": "D Dorian minor with chromatic bass approaches",
+      "development": "Intro: Solo upright bass establishes the 5/4 figure, grouped 2+3, with silence between phrases and no fixed dramatic buildup.; Theme: Electric piano enters with sparse revolving minor-ninth colors and chromatic bass approaches; keep the register low and the dynamics restrained.; Development: Flute introduces short, fragile phrases. Let the ensemble alternate between bass-led repetition and open spaces, gradually widening the flute register without becoming busy.; Reprise: Flute and electric piano gently echo the central motif; occasional open fifths create brief release while preserving ambiguity.; Outro: Remove brushes and electric piano, leaving bass fragments and quiet harmonics surrounded by air; end softened and unresolved, never abruptly.",
+      "targetSeconds": 120,
+      "status": "candidate"
+    },
+    {
+      "number": 13,
+      "title": "Afterimage in Brass",
+      "musicalRole": "Muted trombone and piano trade broad phrases while bass and brushes maintain a soft, nearly motionless foundation.",
+      "instruments": [
+        "piano: States the harmonic frame and trades broad phrases with the trombone.",
+        "muted trombone: Carries a wide descending melody and answers the piano.",
+        "upright bass: Provides stable roots and a nearly motionless low-register foundation.",
+        "brushes: Maintains a barely moving pulse and marks phrase transitions."
+      ],
+      "groove": "Very slow 4/4 with spacious, behind-the-beat swing and occasional held bars that suspend forward motion.",
+      "harmony": "minor-centered, chromatically ambiguous",
+      "development": "Intro: Piano alone presents sparse minor, dominant-sus, and ambiguous major sonorities with chromatic descending inner voices.; Theme: Muted trombone enters with a broad descending line; bass and brushes join quietly beneath the piano.; Dialogue: Piano and trombone trade spacious phrases, gradually increasing motivic density without increasing volume; keep roots stable while inner voices descend chromatically.; Coda: Phrases shorten and soften as piano and trombone converge on an open interval over a restrained bass resonance.; Outro: Let the final open sonority decay naturally, softened and unresolved rather than cadential.",
+      "targetSeconds": 150,
+      "status": "candidate"
+    },
+    {
+      "number": 14,
+      "title": "Dawn Without Arrival",
+      "musicalRole": "A restrained quintet gradually transforms a simple piano motif from shadowed minor into softened, unresolved brightness.",
+      "instruments": [
+        "Piano: States and develops the simple central motif; provides spacious harmonic voicings.",
+        "Upright bass: Creates a barely moving low-register foundation and supports the harmonic transformation.",
+        "Brush kit: Maintains a subtle floating pulse without a pronounced backbeat.",
+        "Flugelhorn: Lengthens and gently transforms the piano motif into the emotional foreground.",
+        "Vibraphone: Adds a late luminous halo around the returning motif and final harmony."
+      ],
+      "groove": "Slow, floating swing with spacious phrasing; increasingly sparse near the ending.",
+      "harmony": "D minor with relative-major inflections and common-tone ambiguity",
+      "development": "Intro: Solo piano presents a simple, shadowed motif in minor-ninth and suspended colors, with generous silence.; Development: Upright bass and whispered brushes enter with a barely moving floating swing; piano broadens its voicings while preserving the motif.; Expansion: Flugelhorn enters in long, breath-like phrases, gradually introducing relative-major inflections without resolving the underlying ambiguity.; Halo: Vibraphone adds sparse, glowing tones around the flugelhorn and piano; density increases gently but never becomes dramatic.; Outro: Layers recede in reverse order, leaving piano, bass, and a final shared common tone that fades without a full cadence.",
+      "targetSeconds": 180,
+      "status": "candidate"
+    }
+  ]
+}

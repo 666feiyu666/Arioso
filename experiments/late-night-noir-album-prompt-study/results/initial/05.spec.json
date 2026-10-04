@@ -1,0 +1,97 @@
+{
+  "schemaVersion": "1.0",
+  "title": "Streetlamp Half-Time",
+  "intent": "A relaxed late-night noir jazz study built around a calm half-time pocket, a compact tenor saxophone motif, and understated cyclical development.",
+  "genres": [
+    "late-night noir jazz",
+    "modal jazz",
+    "half-time swing"
+  ],
+  "moods": [
+    "unhurried",
+    "shadowed",
+    "intimate",
+    "quietly hypnotic"
+  ],
+  "tempo": {
+    "bpm": 58,
+    "feel": "Laid-back half-time swing, behind the beat, with bass phrases crossing the bar line and gentle mallet accents."
+  },
+  "tonality": {
+    "tonic": "D",
+    "mode": "Dorian with dark chromatic color"
+  },
+  "meter": "4/4",
+  "instrumentation": [
+    {
+      "name": "upright bass",
+      "role": "Establishes the calm pocket with a repeating foundation and lyrical phrases extending across bar lines.",
+      "timbre": "Warm, woody, rounded, softly fingered."
+    },
+    {
+      "name": "brush kit with soft mallets",
+      "role": "Maintains sparse half-time motion and adds understated phrase-turn accents.",
+      "timbre": "Featherlight brushes with occasional muted mallet taps; restrained dynamics."
+    },
+    {
+      "name": "tenor saxophone",
+      "role": "Carries and gradually reshapes a compact recurring motif.",
+      "timbre": "Breathy, dusky, intimate, with restrained vibrato and no virtuosic display."
+    },
+    {
+      "name": "electric piano",
+      "role": "Enters during the second cycle with sparse harmonic replies and dark connective voicings.",
+      "timbre": "Warm, softly saturated, low-contrast, spacious."
+    }
+  ],
+  "structure": [
+    {
+      "section": "Intro",
+      "durationSeconds": 25,
+      "direction": "Upright bass establishes a sparse Dorian vamp; brushes and occasional soft mallet accents slowly define the half-time pocket."
+    },
+    {
+      "section": "Theme",
+      "durationSeconds": 40,
+      "direction": "Tenor saxophone enters with a compact, breathy motif, repeating it with small rhythmic and melodic changes over the bass-led groove."
+    },
+    {
+      "section": "Development",
+      "durationSeconds": 55,
+      "direction": "Electric piano adds sparse responses in the second cycle. Broaden the vamp with passing ii chords, restrained tritone substitutions, and cyclical rather than goal-driven harmonic motion; increase density gently without increasing volume."
+    },
+    {
+      "section": "Recession",
+      "durationSeconds": 25,
+      "direction": "Remove electric piano and thin the brushes. Let the saxophone use shorter, breathier fragments while bass remains the quiet anchor."
+    },
+    {
+      "section": "Outro",
+      "durationSeconds": 20,
+      "direction": "Return to the subdued vamp with bass, faint brush texture, and one final incomplete saxophone echo; soften into a quiet, unresolved ending."
+    }
+  ],
+  "vocals": {
+    "enabled": false,
+    "language": null,
+    "style": null,
+    "lyricalTheme": null
+  },
+  "production": "Tactile acoustic ensemble sound in an intimate, dimly lit room. Keep dynamics restrained, with warm low-mid presence, soft transients, clear separation, modest stereo width, and a short dark room reverb. Preserve silence and spacious phrasing; no abrupt ending.",
+  "avoid": [
+    "vocals",
+    "bright or aggressive saxophone tone",
+    "flashy solos",
+    "busy cymbals",
+    "strong backbeat",
+    "dramatic crescendos",
+    "cinematic bombast",
+    "abrupt drops",
+    "fully resolved cadence"
+  ],
+  "assumptions": [
+    "D Dorian is used as a practical tonal center for the dark modal vamp.",
+    "58 BPM gives the requested slow half-time feel while preserving gentle motion."
+  ],
+  "lyriaPrompt": "Late-night noir modal jazz for relaxation, approximately 165 seconds, around 58 BPM in 4/4 with a laid-back half-time swing, behind-the-beat feel, and bass phrases crossing the bar line. Instrumental only, no vocals. Begin with warm upright bass establishing a sparse Dorian vamp, joined by featherlight brushes and occasional soft mallet accents. Bring in a breathy, dusky tenor saxophone with a compact motif, repeating and slightly altering it rather than improvising a flashy solo. In the second cycle, add warm electric piano responses and spacious dark voicings. Use passing ii chords and restrained tritone substitutions, keeping the harmony cyclical and unresolved rather than goal-driven. Gradually reduce density: remove electric piano, thin the brushes, and leave breathy sax fragments over the bass before returning to a quiet vamp and incomplete final echo. Tactile acoustic room sound, restrained dynamics, gentle low-mid warmth, modest stereo width, soft dark reverb, clear silence between phrases, and a deliberately softened ending. Avoid bright aggression, busy cymbals, strong backbeat, dramatic crescendos, cinematic bombast, abrupt drops, and a fully resolved cadence."
+}

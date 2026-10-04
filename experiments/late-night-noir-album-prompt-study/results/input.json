@@ -1,0 +1,16 @@
+{
+  "theme": "late night noir jazz for relaxation",
+  "candidateCount": 14,
+  "vocalMode": "instrumental",
+  "corpusMode": "none",
+  "lyriaModel": "lyria-3.5",
+  "durationRangeSeconds": [
+    60,
+    180
+  ],
+  "batchTargetMinutes": [
+    30,
+    40
+  ],
+  "admission": "Every generated piece remains a candidate; the human decides admission later."
+}

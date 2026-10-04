@@ -1,0 +1,78 @@
+{
+  "inputSha256": "396506f4e2edee4053fac86ea8765883ea853fa22e5b5ef4c6409c8e5c07ae22",
+  "spec": {
+    "schemaVersion": "1.0",
+    "title": "The Empty Booth",
+    "intent": "A 90-second solo piano noir jazz study for late-night relaxation, shaped by silence, fragile commentary, and unresolved color.",
+    "genres": [
+      "late-night noir jazz",
+      "solo piano jazz",
+      "ambient jazz"
+    ],
+    "moods": [
+      "solitary",
+      "unhurried",
+      "shadowed",
+      "quietly suspended"
+    ],
+    "tempo": {
+      "bpm": null,
+      "feel": "Free rubato with an implied slow swing; spacious, non-metrical phrasing."
+    },
+    "tonality": {
+      "tonic": null,
+      "mode": "Minor-major ambiguity with unresolved dominant colors"
+    },
+    "meter": "Free time",
+    "instrumentation": [
+      {
+        "name": "upright piano",
+        "role": "Sole voice, alternating low-register walking suggestions with fragile treble commentary.",
+        "timbre": "Warm, slightly muted acoustic tone with soft attacks, audible resonance, and restrained dynamics."
+      }
+    ],
+    "structure": [
+      {
+        "section": "Intro",
+        "durationSeconds": 18,
+        "direction": "Isolated low intervals emerge from silence, with generous decay and no fixed pulse."
+      },
+      {
+        "section": "Development",
+        "durationSeconds": 42,
+        "direction": "A recurring two-part gesture gradually takes shape: sparse low movement answered by delicate treble fragments. Let planed fourths, minor-major sonorities, and suspended dominant colors unfold with very slow harmonic rhythm."
+      },
+      {
+        "section": "Release",
+        "durationSeconds": 18,
+        "direction": "Move briefly into a more consonant, softly illuminated register without fully resolving the tension."
+      },
+      {
+        "section": "Outro",
+        "durationSeconds": 12,
+        "direction": "Thin the texture and leave the final phrase suspended, allowing the last piano resonance to fade naturally."
+      }
+    ],
+    "vocals": {
+      "enabled": false,
+      "language": null,
+      "style": null,
+      "lyricalTheme": null
+    },
+    "production": "Intimate upright piano recorded in a quiet, dim room; close but natural perspective, warm low mids, gentle room resonance, wide pauses, and a restrained dynamic ceiling. Preserve silence and decay as part of the arrangement.",
+    "avoid": [
+      "vocals",
+      "drums or percussion",
+      "fixed metronomic pulse",
+      "flashy virtuosity",
+      "bright lyrical resolution",
+      "abrupt ending",
+      "cinematic bombast"
+    ],
+    "assumptions": [
+      "The piano remains entirely solo to preserve the candidate's stated role.",
+      "Free time is treated as the meter because silence and rubato define the phrasing."
+    ],
+    "lyriaPrompt": "Late-night noir jazz for relaxation, 90 seconds, solo upright piano, instrumental only, no vocals. Free rubato with an implied slow swing and no fixed metronomic pulse. Begin with isolated low intervals emerging from silence, then gradually form a recurring two-part gesture: a low walking suggestion answered by fragile treble commentary. Use sparse minor-major sonorities, planed fourths, suspended dominants, and very slow harmonic rhythm, keeping the harmony unresolved. Briefly reach a warmer, more consonant register, then thin the texture into a suspended final phrase. Warm, slightly muted acoustic piano in an intimate dim room, with natural resonance, spacious decay, restrained dynamics, and silence as part of the phrasing. No drums, percussion, bright resolution, flashy virtuosity, abrupt ending, or cinematic bombast."
+  }
+}

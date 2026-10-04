@@ -84,11 +84,20 @@ describe("web task input", () => {
     });
   });
 
-  it("rejects composition modes that are not implemented", () => {
-    expect(() => parseTaskInput({
-      description: "a concept album",
-      workflowType: "04-album",
-    })).toThrow("Album composition is still in development.");
+  it("accepts album candidates with instrumental defaults and the long-form generation model", () => {
+    expect(parseTaskInput({ description: "a concept album", workflowType: "04-album" }))
+      .toMatchObject({ compositionMode: "album", vocalMode: "instrumental", corpusMode: "none",
+        lyriaModel: "lyria-3.5", candidateCount: 14, targetTotalMinutes: 35 });
+  });
+
+  it.each([11, 16, 13.5, "14"])("rejects invalid album candidate counts: %s", (candidateCount) => {
+    expect(() => parseTaskInput({ description: "a concept album", workflowType: "04-album", candidateCount }))
+      .toThrow("Album candidate count must be an integer from 12 to 15.");
+  });
+
+  it("rejects the clip generation model for albums", () => {
+    expect(() => parseTaskInput({ description: "a concept album", workflowType: "04-album", lyriaModel: "lyria-3-clip-preview" }))
+      .toThrow("Album generation requires lyria-3.5.");
   });
 
   it("accepts an explicitly selected orchestral knowledge card", () => {

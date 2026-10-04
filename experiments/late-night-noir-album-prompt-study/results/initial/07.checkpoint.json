@@ -1,0 +1,99 @@
+{
+  "inputSha256": "b4a7a47f5e15342e2429264ece556a2988dafa781faa626e961186c3fd8dc647",
+  "spec": {
+    "schemaVersion": "1.0",
+    "title": "Last Train, Softly",
+    "intent": "A self-contained late-night noir jazz quartet for relaxation, maintaining gentle forward motion through understated swing and short motif exchanges.",
+    "genres": [
+      "late-night noir jazz",
+      "acoustic quartet jazz",
+      "relaxed swing"
+    ],
+    "moods": [
+      "nocturnal",
+      "tender",
+      "restrained",
+      "quietly wistful",
+      "softly unresolved"
+    ],
+    "tempo": {
+      "bpm": 82,
+      "feel": "Gentle medium-slow swing with discreet walking bass, softened ride texture, and spacious phrasing."
+    },
+    "tonality": {
+      "tonic": null,
+      "mode": "Lyrical major-minor interchange with chromatic mediant color"
+    },
+    "meter": "4/4",
+    "instrumentation": [
+      {
+        "name": "Hollow-body guitar",
+        "role": "Introduces and restates the four-note motif with quiet chordal support.",
+        "timbre": "Warm, woody, lightly amplified, clean fingerstyle articulation."
+      },
+      {
+        "name": "Alto saxophone",
+        "role": "Reshapes the guitar motif in longer answering phrases; no extended solo.",
+        "timbre": "Breathy, mellow, intimate, with restrained vibrato."
+      },
+      {
+        "name": "Upright bass",
+        "role": "Provides a discreet walking foundation and briefly comes forward in the middle.",
+        "timbre": "Round, woody, soft attack, lightly resonant."
+      },
+      {
+        "name": "Brush kit",
+        "role": "Maintains understated swing and supports transitions.",
+        "timbre": "Feathered snare brushes, softened ride, minimal cymbal brightness."
+      }
+    ],
+    "structure": [
+      {
+        "section": "Intro",
+        "durationSeconds": 20,
+        "direction": "Hollow-body guitar alone presents a simple four-note cell in spacious voicings; bass and faint brushes enter gradually."
+      },
+      {
+        "section": "Theme",
+        "durationSeconds": 35,
+        "direction": "The quartet settles into gentle medium-slow swing. Guitar states the motif while bass walks discreetly and brushes remain soft."
+      },
+      {
+        "section": "Exchange",
+        "durationSeconds": 40,
+        "direction": "Alto saxophone reshapes the motif in longer phrases; guitar answers with compact figures. Use lyrical major-minor interchange, secondary dominants, and brief chromatic mediant turns."
+      },
+      {
+        "section": "Bass Interlude",
+        "durationSeconds": 25,
+        "direction": "Thin the texture so upright bass briefly takes the foreground, with sparse guitar punctuations and nearly weightless brushes."
+      },
+      {
+        "section": "Final Statement",
+        "durationSeconds": 30,
+        "direction": "Saxophone and guitar reunite for a smaller, more spacious return of the motif, brightening briefly without becoming cheerful."
+      }
+    ],
+    "vocals": {
+      "enabled": false,
+      "language": null,
+      "style": null,
+      "lyricalTheme": null
+    },
+    "production": "Tactile acoustic quartet recording in an intimate, dimly lit room; warm close-miked guitar and bass, mellow centered saxophone, softly rounded brushes, restrained dynamics, moderate stereo width, gentle room ambience, and a deliberately softened unresolved ending.",
+    "avoid": [
+      "vocals",
+      "extended virtuosic solos",
+      "harsh brightness",
+      "heavy backbeat",
+      "abrupt drops",
+      "cinematic bombast",
+      "cheerful or triumphant resolution"
+    ],
+    "assumptions": [
+      "Target BPM set near 82 to realize the requested medium-slow swing.",
+      "The supplied 150-second arc is divided into five flexible sections."
+    ],
+    "lyriaPrompt": "Late-night noir jazz quartet for relaxation, 150 seconds, gentle medium-slow 4/4 swing around 82 BPM. Instrumental only, no vocals. Use warm hollow-body guitar, mellow breathy alto saxophone, round upright bass, and featherlight brush kit with softened ride. Begin quietly with guitar introducing a simple four-note motif; add discreet walking bass and brushed swing. Let alto saxophone reshape the motif in longer phrases while guitar answers with short figures rather than extended solos. Use lyrical major-minor interchange, secondary dominants, and occasional chromatic mediant turns that brighten briefly without becoming cheerful. Give upright bass a short foreground interlude, then return to a smaller guitar-and-sax statement. Keep spacious phrasing, restrained dynamics, tactile acoustic playing, intimate room ambience, and a softly unresolved ending. Avoid harsh brightness, heavy backbeat, flashy virtuosity, abrupt drops, cinematic bombast, and triumphant resolution."
+  }
+}

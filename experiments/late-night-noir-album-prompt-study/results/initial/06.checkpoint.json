@@ -1,0 +1,94 @@
+{
+  "inputSha256": "2a9b7383d67707c5ee625dbf6716d033bd8fdf886eec068e0c70659a2c625847",
+  "spec": {
+    "schemaVersion": "1.0",
+    "title": "Nocturne for Closed Curtains",
+    "intent": "A quiet nocturnal jazz chamber study in which piano and bass clarinet pass a breath-like motif above sustained cello shadows, gradually contracting into a whispered ending.",
+    "genres": [
+      "late-night noir jazz",
+      "jazz chamber music",
+      "ambient jazz"
+    ],
+    "moods": [
+      "veiled",
+      "intimate",
+      "unhurried",
+      "quietly unresolved"
+    ],
+    "tempo": {
+      "bpm": 56,
+      "feel": "Slow pulse-based 4/4 with barely audible frame-drum emphasis and generous rubato at phrase endings."
+    },
+    "tonality": {
+      "tonic": null,
+      "mode": "modal minor"
+    },
+    "meter": "4/4",
+    "instrumentation": [
+      {
+        "name": "piano",
+        "role": "Introduces the main motif and provides sparse modal harmony.",
+        "timbre": "Soft, close, lightly felted attack with spacious voicings."
+      },
+      {
+        "name": "bass clarinet",
+        "role": "Echoes and reshapes the piano melody in a lower, breath-like register.",
+        "timbre": "Warm, woody, intimate, with restrained legato phrasing."
+      },
+      {
+        "name": "cello",
+        "role": "Sustains shadow tones and gradually deepens the harmonic atmosphere.",
+        "timbre": "Muted arco, dark and smooth, with long gentle releases."
+      },
+      {
+        "name": "soft frame drum",
+        "role": "Provides a barely audible pulse and subtle phrase punctuation.",
+        "timbre": "Muted fingertip touches, sparse and organic."
+      }
+    ],
+    "structure": [
+      {
+        "section": "Intro",
+        "durationSeconds": 20,
+        "direction": "Nearly free piano introduces isolated fragments of the motif over silence; keep the room intimate and the dynamics very low."
+      },
+      {
+        "section": "Development",
+        "durationSeconds": 45,
+        "direction": "Bass clarinet answers the piano in imitation. Add sustained cello pedal tones, parallel sixths, and delayed modal resolutions; frame drum enters only as a faint pulse."
+      },
+      {
+        "section": "Contraction",
+        "durationSeconds": 25,
+        "direction": "Let piano and bass clarinet overlap more closely while cello lengthens the shadow tones. Increase density slightly without increasing volume, then thin the texture."
+      },
+      {
+        "section": "Outro",
+        "durationSeconds": 15,
+        "direction": "Reduce piano and bass clarinet to a shared unison whisper, with cello fading beneath them and the final harmony remaining gently unresolved."
+      }
+    ],
+    "vocals": {
+      "enabled": false,
+      "language": null,
+      "style": null,
+      "lyricalTheme": null
+    },
+    "production": "Tactile acoustic chamber recording in a small, dim room; close piano and bass clarinet, cello slightly behind them, soft natural reverberation, restrained dynamics, clear silence between phrases, and a warm low-register stereo image.",
+    "avoid": [
+      "vocals",
+      "bright or aggressive brass",
+      "fast swing",
+      "virtuosic soloing",
+      "heavy percussion",
+      "abrupt transitions",
+      "cinematic bombast",
+      "strong final cadence"
+    ],
+    "assumptions": [
+      "Targeted 56 BPM to support the slow pulse and 105-second arc.",
+      "Used an unspecified tonic to preserve the veiled modal character."
+    ],
+    "lyriaPrompt": "Late-night noir jazz chamber piece for relaxation, approximately 105 seconds, slow 56 BPM pulse in 4/4 with generous rubato at phrase endings. Modal minor harmony with pedal tones, parallel sixths, suspended color, and delayed resolutions; keep the tonal center veiled. [Intro] Soft intimate piano presents a breath-like motif in sparse, spacious voicings. [Development] Warm bass clarinet echoes and reshapes the motif in a lower register while muted arco cello sustains dark shadow tones; add a barely audible soft frame-drum pulse. [Contraction] Let piano and bass clarinet overlap in closer imitation, increasing density without increasing volume, then gradually remove layers. [Outro] Contract to a fragile shared unison whisper with fading cello and a gently unresolved final harmony. Tactile acoustic chamber recording, small dim room, close foreground detail, warm low-register stereo image, natural reverberation, restrained dynamics, and meaningful silence between phrases. Instrumental only, no vocals. Avoid bright aggression, virtuoso playing, heavy percussion, abrupt transitions, loud climaxes, and emphatic cadence."
+  }
+}

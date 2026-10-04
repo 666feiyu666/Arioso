@@ -1,0 +1,95 @@
+{
+  "inputSha256": "1006d4f3638c47ab2feac1754c800e1a8fc6cf4f27d8a3ba1841c0c822a66408",
+  "spec": {
+    "schemaVersion": "1.0",
+    "title": "Blue Smoke Ledger",
+    "intent": "A self-contained late-night noir jazz study for relaxation, built from sparse muted-trumpet phrases, dark piano punctuation, and spacious bass-led pauses.",
+    "genres": [
+      "late-night noir jazz",
+      "instrumental jazz",
+      "slow swing"
+    ],
+    "moods": [
+      "smoky and introspective",
+      "restrained tension",
+      "quiet dissolution"
+    ],
+    "tempo": {
+      "bpm": 58,
+      "feel": "Unhurried 4/4 swing, slightly behind the beat, with long rests and minimal cymbal activity."
+    },
+    "tonality": {
+      "tonic": "C minor",
+      "mode": "minor blues with altered dominant color"
+    },
+    "meter": "4/4",
+    "instrumentation": [
+      {
+        "name": "muted trumpet",
+        "role": "Carries the sparse descending theme and gradually fragments into breath-like closing phrases.",
+        "timbre": "Soft Harmon-muted, dusky, intimate, restrained vibrato."
+      },
+      {
+        "name": "hollow-body piano",
+        "role": "Answers the trumpet with dark intervallic punctuation and oblique harmonic color.",
+        "timbre": "Warm, woody, lightly damped, spacious voicings."
+      },
+      {
+        "name": "upright bass",
+        "role": "Anchors pauses with low, patient notes and understated connective motion.",
+        "timbre": "Round, resonant pizzicato with occasional sustained tones."
+      },
+      {
+        "name": "soft brushes",
+        "role": "Provides a barely-there pulse and gentle phrase transitions.",
+        "timbre": "Dry brush swirls, minimal cymbal shimmer, low dynamic ceiling."
+      }
+    ],
+    "structure": [
+      {
+        "section": "Intro",
+        "durationSeconds": 20,
+        "direction": "Sparse piano chords and isolated low bass notes establish minor-sixth and minor-ninth colors; leave generous silence."
+      },
+      {
+        "section": "Theme",
+        "durationSeconds": 35,
+        "direction": "Muted trumpet enters with descending, widely spaced phrases. Piano answers briefly while bass anchors each pause."
+      },
+      {
+        "section": "Development",
+        "durationSeconds": 40,
+        "direction": "Increase call-and-response density without increasing volume. Use altered dominants, oblique resolutions, and subtle chromatic passing tones."
+      },
+      {
+        "section": "Dissolution",
+        "durationSeconds": 25,
+        "direction": "Thin the exchanges gradually. End with a low muted-trumpet breath, one resonant bass note, and a softened unresolved piano color."
+      }
+    ],
+    "vocals": {
+      "enabled": false,
+      "language": null,
+      "style": null,
+      "lyricalTheme": null
+    },
+    "production": "Intimate small-room recording with warm analog softness, close but natural perspective, dark upper register, gentle stereo separation, audible breathing room, and restrained dynamics. Preserve silence between phrases; no abrupt ending.",
+    "avoid": [
+      "vocals",
+      "fixed twelve-bar blues repetition",
+      "bright brass tone",
+      "busy cymbals",
+      "fast swing",
+      "flashy solos",
+      "dramatic crescendos",
+      "cinematic bombast",
+      "abrupt drops"
+    ],
+    "assumptions": [
+      "C minor is used as a dark harmonic center.",
+      "Target tempo is set near 58 BPM to preserve spacious phrasing.",
+      "Section timing totals approximately 120 seconds."
+    ],
+    "lyriaPrompt": "Late-night noir jazz for relaxation, instrumental only, no vocals. About 58 BPM in unhurried 4/4 swing, slightly behind the beat, with long rests and minimal cymbal activity. A muted trumpet carries a sparse descending theme in a dark minor-blues language; hollow-body piano answers with woody, intervallic punctuation and spacious minor-ninth, major-sixth, suspended, and altered-dominant colors; upright bass anchors the pauses with patient low notes; soft brushes provide a barely audible pulse. [Intro] Begin with isolated piano colors and low bass notes. [Theme] Introduce the muted trumpet in widely spaced phrases, answered by short piano figures. [Development] Gradually make the call-and-response denser without getting louder, using gentle chromatic tension and oblique resolutions rather than a fixed twelve-bar pattern. [Outro] Dissolve into a low trumpet breath, one resonant bass note, and a softened unresolved piano color. Warm intimate small-room sound, tactile acoustic playing, dark upper register, restrained dynamics, clear silence between phrases, no abrupt ending. Avoid bright brass, busy cymbals, fast swing, flashy solos, dramatic crescendos, cinematic bombast, or vocals."
+  }
+}

@@ -24,8 +24,10 @@ describe("web capabilities API", () => {
       const response = await fetch(`http://127.0.0.1:${address.port}/api/capabilities`);
       expect(response.ok).toBe(true);
       expect(await response.json()).toEqual({
-        apiVersion: 4,
-        workflows: ["01-general", "02-jazz", "03-orchestral"],
+        apiVersion: 5,
+        workflows: ["01-general", "02-jazz", "03-orchestral", "04-album"],
+        albumPlaylist: true,
+        albumCandidates: { minimum: 12, maximum: 15, default: 14 },
         jazzCorpusToggle: true,
         orchestralAssembly: true,
         orchestralPromptFormat: "orchestral-v1",

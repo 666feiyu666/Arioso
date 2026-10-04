@@ -1,0 +1,91 @@
+{
+  "schemaVersion": "1.0",
+  "title": "Ashes in the Blue Hour",
+  "intent": "A self-contained late-night noir jazz meditation whose quiet weight comes from low-register baritone counterlines, sparse felt-piano harmony, and a slow blues pulse.",
+  "genres": [
+    "late-night noir jazz",
+    "slow minor blues",
+    "cool jazz"
+  ],
+  "moods": [
+    "hushed",
+    "smoky",
+    "weightless yet dark",
+    "quietly unresolved"
+  ],
+  "tempo": {
+    "bpm": 52,
+    "feel": "Slow 12/8 blues pulse with brushed triplets, spacious phrasing, and broad breathing pauses."
+  },
+  "tonality": {
+    "tonic": null,
+    "mode": "minor blues with flat-five coloration, suspended dominants, and long pedal tones"
+  },
+  "meter": "12/8",
+  "instrumentation": [
+    {
+      "name": "felt piano",
+      "role": "Sparse harmonic punctuation and opening atmosphere",
+      "timbre": "Muted, soft-edged, widely spaced voicings with restrained pedal resonance"
+    },
+    {
+      "name": "baritone saxophone",
+      "role": "Low sustained counterlines and dark melodic shadow",
+      "timbre": "Distant, breathy, warm, and subdued rather than forceful"
+    },
+    {
+      "name": "upright bass",
+      "role": "Quiet pedal anchor and occasional low connective movement",
+      "timbre": "Round, woody, softly bowed or lightly plucked"
+    },
+    {
+      "name": "brush kit",
+      "role": "Subtle 12/8 pulse and gentle triplet motion",
+      "timbre": "Whispered brushes with minimal cymbal brightness"
+    }
+  ],
+  "structure": [
+    {
+      "section": "Intro",
+      "durationSeconds": 24,
+      "direction": "Felt piano offers sparse minor-blues chords in open space; distant baritone saxophone enters with long, low tones."
+    },
+    {
+      "section": "Development",
+      "durationSeconds": 36,
+      "direction": "Upright bass joins as a quiet pedal anchor while brushes establish soft triplets; baritone and piano overlap in restrained counterpoint."
+    },
+    {
+      "section": "Climax",
+      "durationSeconds": 36,
+      "direction": "Low-register lines become slightly denser and more interwoven, using flat-five tension and suspended dominants without increasing volume or becoming dramatic."
+    },
+    {
+      "section": "Outro",
+      "durationSeconds": 24,
+      "direction": "Brushes and bass recede first; baritone leaves a final breath-like phrase over a sparse felt-piano chord, ending hushed and unresolved."
+    }
+  ],
+  "vocals": {
+    "enabled": false,
+    "language": null,
+    "style": null,
+    "lyricalTheme": null
+  },
+  "production": "Intimate acoustic quartet recording in a dim, softly reverberant room. Keep dynamics restrained, with close felt-piano detail, warm low-end separation, distant baritone depth, gentle stereo width, and a softened final decay.",
+  "avoid": [
+    "vocals",
+    "bright pop production",
+    "fast swing",
+    "flashy solos",
+    "harsh cymbals",
+    "abrupt drops",
+    "cinematic bombast",
+    "strong final cadence"
+  ],
+  "assumptions": [
+    "Target tempo set near 52 BPM to support the slow 12/8 pulse.",
+    "No fixed tonic chosen; the harmony remains deliberately veiled and pedal-oriented."
+  ],
+  "lyriaPrompt": "Late-night noir jazz meditation for relaxation, approximately 120 seconds. Instrumental only, no vocals. Slow 12/8 minor blues pulse around 52 BPM, with brushed triplets, broad breathing spaces, and restrained dynamics. Begin with sparse felt-piano chords and a distant, breathy baritone saxophone playing low sustained counterlines. Add warm upright bass as a quiet pedal anchor, then whispering brushes. Develop overlapping low-register baritone and piano lines using flat-five color, suspended dominants, and long pedal tones; increase density subtly without getting louder or dramatic. [Intro] spacious piano and distant baritone. [Development] bass and brushes enter, forming a hushed blues undercurrent. [Climax] gently interwoven low-register lines. [Outro] remove brushes and bass, leaving a final breath-like baritone phrase over a sparse unresolved piano chord. Intimate acoustic room, soft reverberation, warm low end, tactile felt-piano detail, and a deliberately softened ending. Avoid bright production, fast swing, flashy solos, harsh cymbals, abrupt drops, vocals, and cinematic bombast."
+}

@@ -1,0 +1,103 @@
+{
+  "inputSha256": "4e99ae951bfdd2d95a9f4d639f8b1655a94d7b40b2165f478df98d7ab535c51b",
+  "spec": {
+    "schemaVersion": "1.0",
+    "title": "Streetlamp Half-Time",
+    "intent": "A relaxed late-night noir jazz study led by upright bass and brushed half-time motion, developing through rhythmic conversation and a brief electric-piano harmonic shift.",
+    "genres": [
+      "late-night noir jazz",
+      "modal jazz",
+      "half-time swing"
+    ],
+    "moods": [
+      "unhurried",
+      "shadowed",
+      "intimate",
+      "quietly hypnotic"
+    ],
+    "tempo": {
+      "bpm": 58,
+      "feel": "Laid-back, behind-the-beat half-time swing with bass phrases crossing the bar line and gentle mallet accents."
+    },
+    "tonality": {
+      "tonic": "D",
+      "mode": "Dorian with dark chromatic color"
+    },
+    "meter": "4/4",
+    "instrumentation": [
+      {
+        "name": "upright bass",
+        "role": "Leads the repeating pocket and develops a denser rhythmic conversation with the brushes.",
+        "timbre": "Warm, woody, rounded, softly fingered."
+      },
+      {
+        "name": "brush kit with soft mallets",
+        "role": "Answers and interlocks with the bass while marking understated phrase turns.",
+        "timbre": "Featherlight brushes with muted mallet taps and restrained dynamics."
+      },
+      {
+        "name": "electric piano",
+        "role": "Briefly transforms the harmony with spacious replies and dark connective voicings.",
+        "timbre": "Warm, softly saturated, low-contrast, spacious."
+      },
+      {
+        "name": "tenor saxophone",
+        "role": "Provides brief breathy color and sparse punctuation rather than a long evolving melody.",
+        "timbre": "Dusky, intimate, restrained, with no virtuosic display."
+      }
+    ],
+    "structure": [
+      {
+        "section": "Intro",
+        "durationSeconds": 30,
+        "direction": "Upright bass establishes a sparse Dorian vamp; brushes enter gradually with soft mallet accents and leave generous space."
+      },
+      {
+        "section": "Bass-Brush Dialogue",
+        "durationSeconds": 50,
+        "direction": "Develop a denser but quiet rhythmic conversation: bass phrases cross the bar line while brushes answer, echo, and subtly vary the half-time pocket."
+      },
+      {
+        "section": "Harmonic Turn",
+        "durationSeconds": 45,
+        "direction": "Electric piano enters briefly with dark spacious voicings, passing ii chords, and restrained tritone substitutions, transforming the vamp without creating a goal-driven cadence. Add only occasional breathy tenor-sax punctuation."
+      },
+      {
+        "section": "Recession",
+        "durationSeconds": 25,
+        "direction": "Withdraw electric piano and thin the brush conversation, leaving bass-led fragments and sparse saxophone color."
+      },
+      {
+        "section": "Outro",
+        "durationSeconds": 15,
+        "direction": "Return to the subdued vamp with bass and faint brushes, ending on a quiet incomplete harmony."
+      }
+    ],
+    "vocals": {
+      "enabled": false,
+      "language": null,
+      "style": null,
+      "lyricalTheme": null
+    },
+    "production": "Tactile acoustic ensemble sound in an intimate dim room, with warm low-mid presence, soft transients, modest stereo width, short dark reverb, restrained dynamics, and clear space between phrases.",
+    "avoid": [
+      "vocals",
+      "long evolving tenor-sax melody",
+      "static pedal-point development",
+      "flashy solos",
+      "bright or aggressive saxophone",
+      "busy cymbals",
+      "strong backbeat",
+      "dramatic crescendos",
+      "cinematic bombast",
+      "abrupt drops",
+      "fully resolved cadence"
+    ],
+    "assumptions": [
+      "D Dorian remains the tonal center.",
+      "Tenor saxophone is reduced to brief textural punctuation.",
+      "The bass-brush exchange becomes the main developmental focus."
+    ],
+    "lyriaPrompt": "Late-night noir modal jazz for relaxation, approximately 165 seconds, around 58 BPM in 4/4 with a laid-back behind-the-beat half-time swing. Instrumental only, no vocals. Begin with warm upright bass establishing a sparse Dorian vamp, joined gradually by featherlight brushes and occasional soft mallet taps. Make the bass and brushes the main voices: develop a denser but still quiet rhythmic conversation, with bass phrases crossing the bar line and brushes answering through subtle variations in texture and accent. Briefly introduce warm electric piano to transform the harmony with spacious dark voicings, passing ii chords, restrained tritone substitutions, suspensions, and gentle chromatic color; keep the motion cyclical and unresolved. Use tenor saxophone only for brief breathy punctuation, not a long evolving melody or solo. Then remove electric piano, thin the brushes, and return to bass-led fragments before a quiet incomplete vamp ending. Tactile acoustic room sound, restrained dynamics, warm low-mid presence, modest stereo width, soft dark reverb, spacious phrasing, no abrupt ending. Avoid vocals, static pedal-harmony development, flashy solos, bright aggression, busy cymbals, strong backbeat, dramatic crescendos, cinematic bombast, and full cadence."
+  }
+}

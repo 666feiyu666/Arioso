@@ -1,0 +1,1618 @@
+{
+  "request": {
+    "theme": "late night noir jazz for relaxation",
+    "candidateCount": 14,
+    "vocalMode": "instrumental",
+    "corpusMode": "none",
+    "lyriaModel": "lyria-3.5",
+    "durationRangeSeconds": [
+      60,
+      180
+    ],
+    "batchTargetMinutes": [
+      30,
+      40
+    ],
+    "admission": "Every generated piece remains a candidate; the human decides admission later."
+  },
+  "plan": {
+    "albumTitle": "Velvet After Midnight",
+    "albumMind": "A sequence of self-contained nocturnal jazz studies where relaxation comes from unhurried pulse, spacious voicings, and gentle repetition, while noir character emerges through unresolved color, low-register counterlines, and restrained melodic shadows. Each piece offers a different way to settle: some through drifting piano, some through brushed ensemble motion, some through bass-led stillness, yet every ending feels deliberately softened rather than abruptly concluded.",
+    "cohesionStrategy": "Keep a restrained late-night dynamic ceiling, instrumental-only writing, nuanced swing or slow pulse, and jazz harmony colored by extensions, suspended tones, and selective chromaticism. Vary the foreground instrument, groove density, ensemble size, room perspective, harmonic rhythm, and degree of motivic activity in small groups: intimate piano-centered tracks, bass-and-brush meditations, and darker ensemble sketches. This creates contrast without breaking the relaxation arc; noir comes from harmonic ambiguity and register, not from loud drama.",
+    "sharedSoundContract": "Instrumental only, no vocals. Late-night noir jazz for relaxation: restrained dynamics, spacious phrasing, tactile acoustic playing, and jazz harmony with tasteful extensions, suspensions, and gentle chromatic tension. Every piece must have a clear self-contained arc, quiet entrance, gradual development, and softened ending. Vary foreground instrument, ensemble size, room intimacy, groove density, and harmonic rhythm, but avoid abrupt drops, flashy virtuosity, harsh brightness, or cinematic bombast.",
+    "tracks": [
+      {
+        "number": 1,
+        "title": "Windowlight Waltz",
+        "musicalRole": "Piano states a simple nocturnal motif while bass and brushes provide a floating three-beat cushion; the trio gradually trades fragments before returning to the motif.",
+        "instruments": [
+          "felted piano",
+          "upright bass",
+          "brush kit"
+        ],
+        "groove": "Slow, lightly swung 3/4 with flexible brush circles and understated bass anticipation.",
+        "harmony": "Minor-colored tonic with added ninths, suspended dominants, and occasional chromatic passing chords; moderate harmonic rhythm.",
+        "development": "Begin nearly solo, add bass and brushes after the first phrase, widen the piano voicings through a quiet middle passage, then thin back to piano and a final incomplete cadence.",
+        "targetSeconds": 150
+      },
+      {
+        "number": 2,
+        "title": "Blue Smoke Ledger",
+        "musicalRole": "Muted trumpet carries a sparse, descending theme while piano supplies dark intervallic punctuation and bass anchors the pauses.",
+        "instruments": [
+          "muted trumpet",
+          "upright bass",
+          "hollow-body piano",
+          "soft brushes"
+        ],
+        "groove": "Unhurried 4/4, behind-the-beat swing with long rests and minimal cymbal activity.",
+        "harmony": "Minor blues language without a fixed twelve-bar repetition; altered dominants resolve obliquely into major-sixth and minor-ninth colors.",
+        "development": "Introduce the trumpet in isolated phrases, let piano answer with shorter figures, intensify through denser call-and-response, then dissolve into a final low trumpet breath and bass note.",
+        "targetSeconds": 120
+      },
+      {
+        "number": 3,
+        "title": "Rain on the Fire Escape",
+        "musicalRole": "Electric piano creates a repeating nocturnal ostinato while vibraphone and bass paint quiet reflections above it.",
+        "instruments": [
+          "warm electric piano",
+          "vibraphone",
+          "upright bass",
+          "brushes"
+        ],
+        "groove": "Slow, even 6/8 with a gentle lilt and nearly continuous soft subdivision.",
+        "harmony": "Bitonal upper structures over a stable minor bass center, resolving only partially through open fourths and added-sixth chords.",
+        "development": "Establish the ostinato alone, introduce vibraphone as widely spaced replies, allow overlapping bell tones to thicken the center, then remove notes until the ostinato fades.",
+        "targetSeconds": 135
+      },
+      {
+        "number": 4,
+        "title": "The Empty Booth",
+        "musicalRole": "Solo piano alternates between a low walking suggestion and fragile treble commentary, making silence part of the phrasing.",
+        "instruments": [
+          "upright piano"
+        ],
+        "groove": "Free rubato with an implied slow swing, never fully settling into a metronomic pulse.",
+        "harmony": "Sparse minor-major sonorities, planed fourths, and unresolved dominant colors; very slow harmonic rhythm.",
+        "development": "Open with isolated low intervals, gradually form a recurring two-part gesture, briefly reach a more consonant register, then leave the final phrase suspended.",
+        "targetSeconds": 90
+      },
+      {
+        "number": 5,
+        "title": "Streetlamp Half-Time",
+        "musicalRole": "Bass and drums establish a calm half-time pocket while tenor saxophone develops a compact motif through repeated, slightly altered statements.",
+        "instruments": [
+          "tenor saxophone",
+          "upright bass",
+          "brushes with soft mallets",
+          "electric piano"
+        ],
+        "groove": "Laid-back half-time swing, with bass phrases extending across the bar line and gentle mallet accents.",
+        "harmony": "Dark modal vamp broadened by passing ii chords and restrained tritone substitutions; harmonic motion is cyclical rather than goal-driven.",
+        "development": "Start with bass and sparse drum texture, bring in the saxophone motif, add electric-piano responses in the second cycle, then reduce to bass, breathy sax fragments, and a quiet vamp ending.",
+        "targetSeconds": 165
+      },
+      {
+        "number": 6,
+        "title": "Nocturne for Closed Curtains",
+        "musicalRole": "Clarinet and piano share a breath-like melody in imitation while cello supplies sustained shadow tones.",
+        "instruments": [
+          "bass clarinet",
+          "piano",
+          "cello",
+          "soft frame drum"
+        ],
+        "groove": "Slow, pulse-based 4/4 with barely audible hand-drum emphasis and generous rubato at phrase endings.",
+        "harmony": "Modal minor with pedal tones, parallel sixths, and delayed resolutions that keep the center veiled.",
+        "development": "Piano presents the motif, bass clarinet echoes it lower, cello gradually lengthens the harmonic sustain, and the ensemble contracts into a final unison whisper.",
+        "targetSeconds": 105
+      },
+      {
+        "number": 7,
+        "title": "Last Train, Softly",
+        "musicalRole": "A brushed quartet maintains a quiet forward motion while guitar and saxophone exchange short motifs rather than taking extended solos.",
+        "instruments": [
+          "hollow-body guitar",
+          "alto saxophone",
+          "upright bass",
+          "brush kit"
+        ],
+        "groove": "Gentle medium-slow swing with a discreet walking bass and softened ride texture.",
+        "harmony": "Lyrical major-minor interchange, secondary dominants, and chromatic mediant turns that brighten briefly without becoming cheerful.",
+        "development": "Guitar introduces a four-note cell, alto sax reshapes it in longer phrases, the bass briefly takes the foreground, and the group settles into a smaller final statement.",
+        "targetSeconds": 150
+      },
+      {
+        "number": 8,
+        "title": "Ashes in the Blue Hour",
+        "musicalRole": "Baritone saxophone provides low, sustained counterlines beneath sparse piano chords, creating weight without volume.",
+        "instruments": [
+          "baritone saxophone",
+          "felt piano",
+          "upright bass",
+          "brushes"
+        ],
+        "groove": "Slow 12/8 blues pulse with brushed triplets and broad, breathing spaces.",
+        "harmony": "Blues-derived minor harmony with flat-five coloration, suspended dominants, and long pedal-point passages.",
+        "development": "Begin with piano and distant baritone, let bass join as a quiet anchor, build to overlapping low-register lines, then strip away the rhythm section for a hushed final chord.",
+        "targetSeconds": 120
+      },
+      {
+        "number": 9,
+        "title": "Neon Herbarium",
+        "musicalRole": "Vibraphone carries a delicate repeating melody while flugelhorn and piano alter its contour through understated replies.",
+        "instruments": [
+          "vibraphone",
+          "flugelhorn",
+          "piano",
+          "upright bass",
+          "brushes"
+        ],
+        "groove": "Relaxed straight-eighth pulse with soft syncopation and no pronounced backbeat.",
+        "harmony": "Open quartal voicings over shifting bass notes, with occasional minor-second friction resolving into transparent sixths.",
+        "development": "Present the vibraphone figure alone, add flugelhorn in long tones, let piano introduce counter-rhythms, then remove layers in reverse order while the figure slows and fades.",
+        "targetSeconds": 135
+      },
+      {
+        "number": 10,
+        "title": "Velvet Corridor",
+        "musicalRole": "Piano and guitar interlock a quiet chordal pattern while a muted trumpet comments in short, nocturnal punctuation.",
+        "instruments": [
+          "muted trumpet",
+          "nylon-string guitar",
+          "piano",
+          "upright bass",
+          "brushes"
+        ],
+        "groove": "Slow bossa-inflected jazz pulse, featherlight and flexible rather than dance-driven.",
+        "harmony": "Minor-key ii–V colors, lush major-seventh side steps, and deceptive cadences that avoid emphatic arrival.",
+        "development": "Guitar establishes the pulse, piano fills the upper space, trumpet enters with clipped motifs, the texture briefly becomes more conversational, then returns to guitar and bass.",
+        "targetSeconds": 105
+      },
+      {
+        "number": 11,
+        "title": "A Door Left Ajar",
+        "musicalRole": "Tenor saxophone sustains a single evolving melody over a pedal bass, with piano changing the surrounding harmonic light.",
+        "instruments": [
+          "tenor saxophone",
+          "piano",
+          "upright bass",
+          "brushes"
+        ],
+        "groove": "Sparse, slow swing with the bass repeating a calm two-note figure and drums entering only at phrase turns.",
+        "harmony": "Long pedal-point foundation supporting shifting upper triads, suspended dominants, and occasional blues inflections.",
+        "development": "Open with bass pedal and piano voicing, introduce the sax melody in long breaths, gradually ornament its returns, then let the melody fragment while the pedal remains unresolved.",
+        "targetSeconds": 180
+      },
+      {
+        "number": 12,
+        "title": "Underpass Lullaby",
+        "musicalRole": "A small ensemble alternates between a low, repeating bass figure and a fragile flute melody, using silence as the main transition.",
+        "instruments": [
+          "flute",
+          "upright bass",
+          "electric piano",
+          "soft brushes"
+        ],
+        "groove": "Slow 5/4 grouped gently as 2+3, with the asymmetry felt as a lilt rather than a puzzle.",
+        "harmony": "Revolving minor ninth sonorities and chromatic bass approaches, with occasional open fifths to release density.",
+        "development": "Bass establishes the uneven lullaby, electric piano adds sparse color, flute enters in short phrases, the middle doubles the motif in wider register, and the ending leaves only bass harmonics and air.",
+        "targetSeconds": 120
+      },
+      {
+        "number": 13,
+        "title": "Afterimage in Brass",
+        "musicalRole": "Muted trombone and piano trade broad phrases while bass and brushes maintain a soft, nearly motionless foundation.",
+        "instruments": [
+          "muted trombone",
+          "piano",
+          "upright bass",
+          "brushes"
+        ],
+        "groove": "Very slow 4/4 with spacious swing and occasional held bars that suspend forward motion.",
+        "harmony": "Chromatic descending inner voices beneath stable roots, moving between minor, dominant-sus, and ambiguous major sonorities.",
+        "development": "Piano presents the harmonic frame, trombone enters with a wide descending line, the exchange becomes denser without getting louder, then both instruments converge on a quiet open interval.",
+        "targetSeconds": 150
+      },
+      {
+        "number": 14,
+        "title": "Dawn Without Arrival",
+        "musicalRole": "A restrained quintet gradually transforms a simple piano motif from shadowed minor into softened, unresolved brightness.",
+        "instruments": [
+          "piano",
+          "flugelhorn",
+          "upright bass",
+          "vibraphone",
+          "brushes"
+        ],
+        "groove": "Slow, floating swing that becomes increasingly sparse near the end.",
+        "harmony": "Begins with minor ninth and suspended colors, introduces relative-major inflections, then avoids a full cadence through common-tone voicings.",
+        "development": "Piano states the motif, bass and brushes establish a barely moving bed, flugelhorn lengthens the melody, vibraphone adds a late halo, and the ensemble recedes into a final common tone.",
+        "targetSeconds": 180
+      }
+    ]
+  },
+  "phase": "final",
+  "validationWarnings": [],
+  "candidates": [
+    {
+      "number": 1,
+      "targetSeconds": 150,
+      "spec": {
+        "schemaVersion": "1.0",
+        "title": "Windowlight Waltz",
+        "intent": "A self-contained late-night noir jazz waltz for relaxation, led by a simple felted-piano motif and softened by spacious trio interplay.",
+        "genres": [
+          "late-night noir jazz",
+          "jazz waltz",
+          "ambient jazz"
+        ],
+        "moods": [
+          "nocturnal",
+          "unhurried",
+          "intimate",
+          "gently unresolved"
+        ],
+        "tempo": {
+          "bpm": 64,
+          "feel": "Slow, lightly swung 3/4 with flexible brush circles and understated bass anticipation."
+        },
+        "tonality": {
+          "tonic": "D",
+          "mode": "Dorian minor"
+        },
+        "meter": "3/4",
+        "instrumentation": [
+          {
+            "name": "felted piano",
+            "role": "States the nocturnal motif, supplies spacious extended voicings, and returns as the final foreground voice.",
+            "timbre": "Soft, close, lightly muted attack with warm low mids and delicate treble resonance."
+          },
+          {
+            "name": "upright bass",
+            "role": "Provides a floating three-beat cushion, understated anticipation, and brief answering fragments.",
+            "timbre": "Warm woody pizzicato, restrained sustain, intimate low-register presence."
+          },
+          {
+            "name": "brush kit",
+            "role": "Shapes a quiet circular pulse and subtly broadens the middle section.",
+            "timbre": "Dry, soft brushes with minimal cymbal wash and gentle tactile motion."
+          }
+        ],
+        "structure": [
+          {
+            "section": "Intro",
+            "durationSeconds": 24,
+            "direction": "Nearly solo felted piano introduces a simple nocturnal motif with sparse D-minor color, added ninths, and suspended tones."
+          },
+          {
+            "section": "Main Waltz",
+            "durationSeconds": 42,
+            "direction": "Upright bass and soft brushes enter after the opening phrase, establishing a flexible swung 3/4 cushion beneath the piano."
+          },
+          {
+            "section": "Development",
+            "durationSeconds": 48,
+            "direction": "The trio trades small fragments; piano voicings widen, chromatic passing chords add restrained noir tension, and dynamics remain subdued."
+          },
+          {
+            "section": "Return",
+            "durationSeconds": 24,
+            "direction": "The original piano motif returns with thinner bass and lighter brushes, allowing space between phrases."
+          },
+          {
+            "section": "Outro",
+            "durationSeconds": 12,
+            "direction": "Layers recede to piano, ending on a quiet incomplete cadence with suspended unresolved color."
+          }
+        ],
+        "vocals": {
+          "enabled": false,
+          "language": null,
+          "style": null,
+          "lyricalTheme": null
+        },
+        "production": "Intimate acoustic trio recording in a dim, softly reverberant room; close felt-piano detail, warm centered bass, restrained stereo brush movement, low dynamic ceiling, spacious phrasing, and a gently softened ending.",
+        "avoid": [
+          "vocals",
+          "abrupt drops",
+          "flashy virtuosity",
+          "harsh brightness",
+          "cinematic bombast",
+          "heavy cymbals",
+          "busy drum fills"
+        ],
+        "assumptions": [
+          "D Dorian provides a minor-colored but relaxed harmonic center.",
+          "64 BPM supports the requested floating, lightly swung waltz feel."
+        ],
+        "lyriaPrompt": "Late-night noir jazz waltz for relaxation, 150 seconds, slow 3/4 at about 64 BPM with a flexible light swing. Instrumental only, no vocals. Intimate felted piano trio: the piano states a simple nocturnal motif over a minor-colored Dorian center, using spacious added ninths, suspended dominants, and occasional chromatic passing chords. Begin nearly solo, then bring in warm upright bass and soft brushed drums after the first phrase. Let the trio trade restrained fragments while piano voicings gradually widen through a quiet middle passage, never becoming dramatic. Return to the opening motif, thin the texture back toward piano, and finish with a softly incomplete suspended cadence. Tactile acoustic playing, dim room ambience, spacious phrasing, warm low register, restrained dynamics, gentle repetition. Avoid vocals, abrupt drops, flashy virtuosity, harsh brightness, heavy cymbals, and cinematic bombast."
+      },
+      "renderedLyriaPrompt": "Late-night noir jazz for relaxation. Instrumental only, no vocals.\n\nInstrumental only, no vocals. Late-night noir jazz for relaxation: restrained dynamics, spacious phrasing, tactile acoustic playing, and jazz harmony with tasteful extensions, suspensions, and gentle chromatic tension. Every piece must have a clear self-contained arc, quiet entrance, gradual development, and softened ending. Vary foreground instrument, ensemble size, room intimacy, groove density, and harmonic rhythm, but avoid abrupt drops, flashy virtuosity, harsh brightness, or cinematic bombast.\n\nAim for approximately 150 seconds, with a self-contained beginning, development and ending.\n\nLate-night noir jazz waltz for relaxation, 150 seconds, slow 3/4 at about 64 BPM with a flexible light swing. Instrumental only, no vocals. Intimate felted piano trio: the piano states a simple nocturnal motif over a minor-colored Dorian center, using spacious added ninths, suspended dominants, and occasional chromatic passing chords. Begin nearly solo, then bring in warm upright bass and soft brushed drums after the first phrase. Let the trio trade restrained fragments while piano voicings gradually widen through a quiet middle passage, never becoming dramatic. Return to the opening motif, thin the texture back toward piano, and finish with a softly incomplete suspended cadence. Tactile acoustic playing, dim room ambience, spacious phrasing, warm low register, restrained dynamics, gentle repetition. Avoid vocals, abrupt drops, flashy virtuosity, harsh brightness, heavy cymbals, and cinematic bombast.\n"
+    },
+    {
+      "number": 2,
+      "targetSeconds": 120,
+      "spec": {
+        "schemaVersion": "1.0",
+        "title": "Blue Smoke Ledger",
+        "intent": "A self-contained late-night noir jazz study for relaxation, built from sparse muted-trumpet phrases, dark piano punctuation, and spacious bass-led pauses.",
+        "genres": [
+          "late-night noir jazz",
+          "instrumental jazz",
+          "slow swing"
+        ],
+        "moods": [
+          "smoky and introspective",
+          "restrained tension",
+          "quiet dissolution"
+        ],
+        "tempo": {
+          "bpm": 58,
+          "feel": "Unhurried 4/4 swing, slightly behind the beat, with long rests and minimal cymbal activity."
+        },
+        "tonality": {
+          "tonic": "C minor",
+          "mode": "minor blues with altered dominant color"
+        },
+        "meter": "4/4",
+        "instrumentation": [
+          {
+            "name": "muted trumpet",
+            "role": "Carries the sparse descending theme and gradually fragments into breath-like closing phrases.",
+            "timbre": "Soft Harmon-muted, dusky, intimate, restrained vibrato."
+          },
+          {
+            "name": "hollow-body piano",
+            "role": "Answers the trumpet with dark intervallic punctuation and oblique harmonic color.",
+            "timbre": "Warm, woody, lightly damped, spacious voicings."
+          },
+          {
+            "name": "upright bass",
+            "role": "Anchors pauses with low, patient notes and understated connective motion.",
+            "timbre": "Round, resonant pizzicato with occasional sustained tones."
+          },
+          {
+            "name": "soft brushes",
+            "role": "Provides a barely-there pulse and gentle phrase transitions.",
+            "timbre": "Dry brush swirls, minimal cymbal shimmer, low dynamic ceiling."
+          }
+        ],
+        "structure": [
+          {
+            "section": "Intro",
+            "durationSeconds": 20,
+            "direction": "Sparse piano chords and isolated low bass notes establish minor-sixth and minor-ninth colors; leave generous silence."
+          },
+          {
+            "section": "Theme",
+            "durationSeconds": 35,
+            "direction": "Muted trumpet enters with descending, widely spaced phrases. Piano answers briefly while bass anchors each pause."
+          },
+          {
+            "section": "Development",
+            "durationSeconds": 40,
+            "direction": "Increase call-and-response density without increasing volume. Use altered dominants, oblique resolutions, and subtle chromatic passing tones."
+          },
+          {
+            "section": "Dissolution",
+            "durationSeconds": 25,
+            "direction": "Thin the exchanges gradually. End with a low muted-trumpet breath, one resonant bass note, and a softened unresolved piano color."
+          }
+        ],
+        "vocals": {
+          "enabled": false,
+          "language": null,
+          "style": null,
+          "lyricalTheme": null
+        },
+        "production": "Intimate small-room recording with warm analog softness, close but natural perspective, dark upper register, gentle stereo separation, audible breathing room, and restrained dynamics. Preserve silence between phrases; no abrupt ending.",
+        "avoid": [
+          "vocals",
+          "fixed twelve-bar blues repetition",
+          "bright brass tone",
+          "busy cymbals",
+          "fast swing",
+          "flashy solos",
+          "dramatic crescendos",
+          "cinematic bombast",
+          "abrupt drops"
+        ],
+        "assumptions": [
+          "C minor is used as a dark harmonic center.",
+          "Target tempo is set near 58 BPM to preserve spacious phrasing.",
+          "Section timing totals approximately 120 seconds."
+        ],
+        "lyriaPrompt": "Late-night noir jazz for relaxation, instrumental only, no vocals. About 58 BPM in unhurried 4/4 swing, slightly behind the beat, with long rests and minimal cymbal activity. A muted trumpet carries a sparse descending theme in a dark minor-blues language; hollow-body piano answers with woody, intervallic punctuation and spacious minor-ninth, major-sixth, suspended, and altered-dominant colors; upright bass anchors the pauses with patient low notes; soft brushes provide a barely audible pulse. [Intro] Begin with isolated piano colors and low bass notes. [Theme] Introduce the muted trumpet in widely spaced phrases, answered by short piano figures. [Development] Gradually make the call-and-response denser without getting louder, using gentle chromatic tension and oblique resolutions rather than a fixed twelve-bar pattern. [Outro] Dissolve into a low trumpet breath, one resonant bass note, and a softened unresolved piano color. Warm intimate small-room sound, tactile acoustic playing, dark upper register, restrained dynamics, clear silence between phrases, no abrupt ending. Avoid bright brass, busy cymbals, fast swing, flashy solos, dramatic crescendos, cinematic bombast, or vocals."
+      },
+      "renderedLyriaPrompt": "Late-night noir jazz for relaxation. Instrumental only, no vocals.\n\nInstrumental only, no vocals. Late-night noir jazz for relaxation: restrained dynamics, spacious phrasing, tactile acoustic playing, and jazz harmony with tasteful extensions, suspensions, and gentle chromatic tension. Every piece must have a clear self-contained arc, quiet entrance, gradual development, and softened ending. Vary foreground instrument, ensemble size, room intimacy, groove density, and harmonic rhythm, but avoid abrupt drops, flashy virtuosity, harsh brightness, or cinematic bombast.\n\nAim for approximately 120 seconds, with a self-contained beginning, development and ending.\n\nLate-night noir jazz for relaxation, instrumental only, no vocals. About 58 BPM in unhurried 4/4 swing, slightly behind the beat, with long rests and minimal cymbal activity. A muted trumpet carries a sparse descending theme in a dark minor-blues language; hollow-body piano answers with woody, intervallic punctuation and spacious minor-ninth, major-sixth, suspended, and altered-dominant colors; upright bass anchors the pauses with patient low notes; soft brushes provide a barely audible pulse. [Intro] Begin with isolated piano colors and low bass notes. [Theme] Introduce the muted trumpet in widely spaced phrases, answered by short piano figures. [Development] Gradually make the call-and-response denser without getting louder, using gentle chromatic tension and oblique resolutions rather than a fixed twelve-bar pattern. [Outro] Dissolve into a low trumpet breath, one resonant bass note, and a softened unresolved piano color. Warm intimate small-room sound, tactile acoustic playing, dark upper register, restrained dynamics, clear silence between phrases, no abrupt ending. Avoid bright brass, busy cymbals, fast swing, flashy solos, dramatic crescendos, cinematic bombast, or vocals.\n"
+    },
+    {
+      "number": 3,
+      "targetSeconds": 135,
+      "spec": {
+        "schemaVersion": "1.0",
+        "title": "Rain on the Fire Escape",
+        "intent": "A self-contained late-night noir jazz meditation built around a repeating electric-piano ostinato, with vibraphone reflections and restrained upright bass movement.",
+        "genres": [
+          "late-night noir jazz",
+          "ambient jazz",
+          "instrumental jazz"
+        ],
+        "moods": [
+          "nocturnal",
+          "meditative",
+          "shadowed",
+          "quietly reflective",
+          "softly dissolving"
+        ],
+        "tempo": {
+          "bpm": 54,
+          "feel": "Slow, even 6/8 with a gentle lilt, continuous soft subdivision, and restrained dynamics."
+        },
+        "tonality": {
+          "tonic": "D",
+          "mode": "Dorian with bitonal upper structures"
+        },
+        "meter": "6/8",
+        "instrumentation": [
+          {
+            "name": "warm electric piano",
+            "role": "Establishes and sustains the repeating nocturnal ostinato; gradually becomes more sparse.",
+            "timbre": "Soft, rounded, slightly smoky, with a restrained electric warmth."
+          },
+          {
+            "name": "vibraphone",
+            "role": "Paints quiet reflections through widely spaced replies and overlapping tones.",
+            "timbre": "Delicate, glassy, muted resonance with gentle pedal sustain."
+          },
+          {
+            "name": "upright bass",
+            "role": "Provides a stable minor-centered foundation and subtle low-register counterlines.",
+            "timbre": "Warm, woody, understated pizzicato with occasional sustained notes."
+          },
+          {
+            "name": "brushes",
+            "role": "Maintains a nearly continuous, featherlight 6/8 subdivision beneath the harmony.",
+            "timbre": "Soft circular swirls, minimal cymbal brightness, intimate room sound."
+          }
+        ],
+        "structure": [
+          {
+            "section": "Intro",
+            "durationSeconds": 24,
+            "direction": "Electric piano alone introduces the repeating ostinato in a shadowed minor register, spacious and softly articulated."
+          },
+          {
+            "section": "Development",
+            "durationSeconds": 42,
+            "direction": "Upright bass enters beneath the ostinato; vibraphone answers with widely spaced tones and open fourths, keeping the texture restrained."
+          },
+          {
+            "section": "Climax",
+            "durationSeconds": 39,
+            "direction": "Brushes join with a gentle 6/8 lilt. Vibraphone tones overlap into a quiet halo while bitonal upper colors create mild, unresolved tension without increasing volume."
+          },
+          {
+            "section": "Outro",
+            "durationSeconds": 30,
+            "direction": "Remove brushes, then vibraphone and bass notes one by one. Let the electric-piano ostinato thin, slow, and fade on an incomplete added-sixth sonority."
+          }
+        ],
+        "vocals": {
+          "enabled": false,
+          "language": null,
+          "style": null,
+          "lyricalTheme": null
+        },
+        "production": "Intimate, warm acoustic room perspective with soft stereo width, rounded transients, clear separation between the electric-piano ostinato and vibraphone halo, gentle low-register presence, and a quiet natural decay. Keep dynamics restrained and the ending deliberately softened.",
+        "avoid": [
+          "vocals",
+          "abrupt drops",
+          "flashy virtuosity",
+          "harsh brightness",
+          "cinematic bombast",
+          "heavy backbeat",
+          "dense percussion"
+        ],
+        "assumptions": [
+          "D Dorian is used as a practical minor-centered tonal anchor.",
+          "A 54 BPM pulse supports the requested slow 6/8 relaxation.",
+          "The 135-second arc is divided into four gradual sections."
+        ],
+        "lyriaPrompt": "Late-night noir jazz meditation for relaxation, 135 seconds, slow even 6/8 at about 54 BPM with a gentle lilt and restrained dynamics. Instrumental only, no vocals. Warm electric piano establishes a repeating nocturnal ostinato over a stable D-minor/Dorian center. Add understated upright bass, then delicate vibraphone replies with widely spaced, overlapping bell tones. Use bitonal upper structures, open fourths, added-sixth chords, and partial resolutions for quiet noir tension. Introduce featherlight brushes and let the middle thicken through resonance rather than volume. Gradually remove brushes, vibraphone, and bass until the electric-piano ostinato becomes sparse and fades into an incomplete soft ending. Intimate warm room, tactile acoustic playing, gentle stereo depth, clear separation, no abrupt drops, flashy virtuosity, harsh brightness, heavy backbeat, or cinematic bombast."
+      },
+      "renderedLyriaPrompt": "Late-night noir jazz for relaxation. Instrumental only, no vocals.\n\nInstrumental only, no vocals. Late-night noir jazz for relaxation: restrained dynamics, spacious phrasing, tactile acoustic playing, and jazz harmony with tasteful extensions, suspensions, and gentle chromatic tension. Every piece must have a clear self-contained arc, quiet entrance, gradual development, and softened ending. Vary foreground instrument, ensemble size, room intimacy, groove density, and harmonic rhythm, but avoid abrupt drops, flashy virtuosity, harsh brightness, or cinematic bombast.\n\nAim for approximately 135 seconds, with a self-contained beginning, development and ending.\n\nLate-night noir jazz meditation for relaxation, 135 seconds, slow even 6/8 at about 54 BPM with a gentle lilt and restrained dynamics. Instrumental only, no vocals. Warm electric piano establishes a repeating nocturnal ostinato over a stable D-minor/Dorian center. Add understated upright bass, then delicate vibraphone replies with widely spaced, overlapping bell tones. Use bitonal upper structures, open fourths, added-sixth chords, and partial resolutions for quiet noir tension. Introduce featherlight brushes and let the middle thicken through resonance rather than volume. Gradually remove brushes, vibraphone, and bass until the electric-piano ostinato becomes sparse and fades into an incomplete soft ending. Intimate warm room, tactile acoustic playing, gentle stereo depth, clear separation, no abrupt drops, flashy virtuosity, harsh brightness, heavy backbeat, or cinematic bombast.\n"
+    },
+    {
+      "number": 4,
+      "targetSeconds": 90,
+      "spec": {
+        "schemaVersion": "1.0",
+        "title": "The Empty Booth",
+        "intent": "A 90-second solo piano noir jazz study for late-night relaxation, shaped by silence, fragile commentary, and unresolved color.",
+        "genres": [
+          "late-night noir jazz",
+          "solo piano jazz",
+          "ambient jazz"
+        ],
+        "moods": [
+          "solitary",
+          "unhurried",
+          "shadowed",
+          "quietly suspended"
+        ],
+        "tempo": {
+          "bpm": null,
+          "feel": "Free rubato with an implied slow swing; spacious, non-metrical phrasing."
+        },
+        "tonality": {
+          "tonic": null,
+          "mode": "Minor-major ambiguity with unresolved dominant colors"
+        },
+        "meter": "Free time",
+        "instrumentation": [
+          {
+            "name": "upright piano",
+            "role": "Sole voice, alternating low-register walking suggestions with fragile treble commentary.",
+            "timbre": "Warm, slightly muted acoustic tone with soft attacks, audible resonance, and restrained dynamics."
+          }
+        ],
+        "structure": [
+          {
+            "section": "Intro",
+            "durationSeconds": 18,
+            "direction": "Isolated low intervals emerge from silence, with generous decay and no fixed pulse."
+          },
+          {
+            "section": "Development",
+            "durationSeconds": 42,
+            "direction": "A recurring two-part gesture gradually takes shape: sparse low movement answered by delicate treble fragments. Let planed fourths, minor-major sonorities, and suspended dominant colors unfold with very slow harmonic rhythm."
+          },
+          {
+            "section": "Release",
+            "durationSeconds": 18,
+            "direction": "Move briefly into a more consonant, softly illuminated register without fully resolving the tension."
+          },
+          {
+            "section": "Outro",
+            "durationSeconds": 12,
+            "direction": "Thin the texture and leave the final phrase suspended, allowing the last piano resonance to fade naturally."
+          }
+        ],
+        "vocals": {
+          "enabled": false,
+          "language": null,
+          "style": null,
+          "lyricalTheme": null
+        },
+        "production": "Intimate upright piano recorded in a quiet, dim room; close but natural perspective, warm low mids, gentle room resonance, wide pauses, and a restrained dynamic ceiling. Preserve silence and decay as part of the arrangement.",
+        "avoid": [
+          "vocals",
+          "drums or percussion",
+          "fixed metronomic pulse",
+          "flashy virtuosity",
+          "bright lyrical resolution",
+          "abrupt ending",
+          "cinematic bombast"
+        ],
+        "assumptions": [
+          "The piano remains entirely solo to preserve the candidate's stated role.",
+          "Free time is treated as the meter because silence and rubato define the phrasing."
+        ],
+        "lyriaPrompt": "Late-night noir jazz for relaxation, 90 seconds, solo upright piano, instrumental only, no vocals. Free rubato with an implied slow swing and no fixed metronomic pulse. Begin with isolated low intervals emerging from silence, then gradually form a recurring two-part gesture: a low walking suggestion answered by fragile treble commentary. Use sparse minor-major sonorities, planed fourths, suspended dominants, and very slow harmonic rhythm, keeping the harmony unresolved. Briefly reach a warmer, more consonant register, then thin the texture into a suspended final phrase. Warm, slightly muted acoustic piano in an intimate dim room, with natural resonance, spacious decay, restrained dynamics, and silence as part of the phrasing. No drums, percussion, bright resolution, flashy virtuosity, abrupt ending, or cinematic bombast."
+      },
+      "renderedLyriaPrompt": "Late-night noir jazz for relaxation. Instrumental only, no vocals.\n\nInstrumental only, no vocals. Late-night noir jazz for relaxation: restrained dynamics, spacious phrasing, tactile acoustic playing, and jazz harmony with tasteful extensions, suspensions, and gentle chromatic tension. Every piece must have a clear self-contained arc, quiet entrance, gradual development, and softened ending. Vary foreground instrument, ensemble size, room intimacy, groove density, and harmonic rhythm, but avoid abrupt drops, flashy virtuosity, harsh brightness, or cinematic bombast.\n\nAim for approximately 90 seconds, with a self-contained beginning, development and ending.\n\nLate-night noir jazz for relaxation, 90 seconds, solo upright piano, instrumental only, no vocals. Free rubato with an implied slow swing and no fixed metronomic pulse. Begin with isolated low intervals emerging from silence, then gradually form a recurring two-part gesture: a low walking suggestion answered by fragile treble commentary. Use sparse minor-major sonorities, planed fourths, suspended dominants, and very slow harmonic rhythm, keeping the harmony unresolved. Briefly reach a warmer, more consonant register, then thin the texture into a suspended final phrase. Warm, slightly muted acoustic piano in an intimate dim room, with natural resonance, spacious decay, restrained dynamics, and silence as part of the phrasing. No drums, percussion, bright resolution, flashy virtuosity, abrupt ending, or cinematic bombast.\n"
+    },
+    {
+      "number": 5,
+      "targetSeconds": 165,
+      "spec": {
+        "schemaVersion": "1.0",
+        "title": "Streetlamp Half-Time",
+        "intent": "A relaxed late-night noir jazz study led by upright bass and brushed half-time motion, developing through rhythmic conversation and a brief electric-piano harmonic shift.",
+        "genres": [
+          "late-night noir jazz",
+          "modal jazz",
+          "half-time swing"
+        ],
+        "moods": [
+          "unhurried",
+          "shadowed",
+          "intimate",
+          "quietly hypnotic"
+        ],
+        "tempo": {
+          "bpm": 58,
+          "feel": "Laid-back, behind-the-beat half-time swing with bass phrases crossing the bar line and gentle mallet accents."
+        },
+        "tonality": {
+          "tonic": "D",
+          "mode": "Dorian with dark chromatic color"
+        },
+        "meter": "4/4",
+        "instrumentation": [
+          {
+            "name": "upright bass",
+            "role": "Leads the repeating pocket and develops a denser rhythmic conversation with the brushes.",
+            "timbre": "Warm, woody, rounded, softly fingered."
+          },
+          {
+            "name": "brush kit with soft mallets",
+            "role": "Answers and interlocks with the bass while marking understated phrase turns.",
+            "timbre": "Featherlight brushes with muted mallet taps and restrained dynamics."
+          },
+          {
+            "name": "electric piano",
+            "role": "Briefly transforms the harmony with spacious replies and dark connective voicings.",
+            "timbre": "Warm, softly saturated, low-contrast, spacious."
+          },
+          {
+            "name": "tenor saxophone",
+            "role": "Provides brief breathy color and sparse punctuation rather than a long evolving melody.",
+            "timbre": "Dusky, intimate, restrained, with no virtuosic display."
+          }
+        ],
+        "structure": [
+          {
+            "section": "Intro",
+            "durationSeconds": 30,
+            "direction": "Upright bass establishes a sparse Dorian vamp; brushes enter gradually with soft mallet accents and leave generous space."
+          },
+          {
+            "section": "Bass-Brush Dialogue",
+            "durationSeconds": 50,
+            "direction": "Develop a denser but quiet rhythmic conversation: bass phrases cross the bar line while brushes answer, echo, and subtly vary the half-time pocket."
+          },
+          {
+            "section": "Harmonic Turn",
+            "durationSeconds": 45,
+            "direction": "Electric piano enters briefly with dark spacious voicings, passing ii chords, and restrained tritone substitutions, transforming the vamp without creating a goal-driven cadence. Add only occasional breathy tenor-sax punctuation."
+          },
+          {
+            "section": "Recession",
+            "durationSeconds": 25,
+            "direction": "Withdraw electric piano and thin the brush conversation, leaving bass-led fragments and sparse saxophone color."
+          },
+          {
+            "section": "Outro",
+            "durationSeconds": 15,
+            "direction": "Return to the subdued vamp with bass and faint brushes, ending on a quiet incomplete harmony."
+          }
+        ],
+        "vocals": {
+          "enabled": false,
+          "language": null,
+          "style": null,
+          "lyricalTheme": null
+        },
+        "production": "Tactile acoustic ensemble sound in an intimate dim room, with warm low-mid presence, soft transients, modest stereo width, short dark reverb, restrained dynamics, and clear space between phrases.",
+        "avoid": [
+          "vocals",
+          "long evolving tenor-sax melody",
+          "static pedal-point development",
+          "flashy solos",
+          "bright or aggressive saxophone",
+          "busy cymbals",
+          "strong backbeat",
+          "dramatic crescendos",
+          "cinematic bombast",
+          "abrupt drops",
+          "fully resolved cadence"
+        ],
+        "assumptions": [
+          "D Dorian remains the tonal center.",
+          "Tenor saxophone is reduced to brief textural punctuation.",
+          "The bass-brush exchange becomes the main developmental focus."
+        ],
+        "lyriaPrompt": "Late-night noir modal jazz for relaxation, approximately 165 seconds, around 58 BPM in 4/4 with a laid-back behind-the-beat half-time swing. Instrumental only, no vocals. Begin with warm upright bass establishing a sparse Dorian vamp, joined gradually by featherlight brushes and occasional soft mallet taps. Make the bass and brushes the main voices: develop a denser but still quiet rhythmic conversation, with bass phrases crossing the bar line and brushes answering through subtle variations in texture and accent. Briefly introduce warm electric piano to transform the harmony with spacious dark voicings, passing ii chords, restrained tritone substitutions, suspensions, and gentle chromatic color; keep the motion cyclical and unresolved. Use tenor saxophone only for brief breathy punctuation, not a long evolving melody or solo. Then remove electric piano, thin the brushes, and return to bass-led fragments before a quiet incomplete vamp ending. Tactile acoustic room sound, restrained dynamics, warm low-mid presence, modest stereo width, soft dark reverb, spacious phrasing, no abrupt ending. Avoid vocals, static pedal-harmony development, flashy solos, bright aggression, busy cymbals, strong backbeat, dramatic crescendos, cinematic bombast, and full cadence."
+      },
+      "renderedLyriaPrompt": "Late-night noir jazz for relaxation. Instrumental only, no vocals.\n\nInstrumental only, no vocals. Late-night noir jazz for relaxation: restrained dynamics, spacious phrasing, tactile acoustic playing, and jazz harmony with tasteful extensions, suspensions, and gentle chromatic tension. Every piece must have a clear self-contained arc, quiet entrance, gradual development, and softened ending. Vary foreground instrument, ensemble size, room intimacy, groove density, and harmonic rhythm, but avoid abrupt drops, flashy virtuosity, harsh brightness, or cinematic bombast.\n\nAim for approximately 165 seconds, with a self-contained beginning, development and ending.\n\nLate-night noir modal jazz for relaxation, approximately 165 seconds, around 58 BPM in 4/4 with a laid-back behind-the-beat half-time swing. Instrumental only, no vocals. Begin with warm upright bass establishing a sparse Dorian vamp, joined gradually by featherlight brushes and occasional soft mallet taps. Make the bass and brushes the main voices: develop a denser but still quiet rhythmic conversation, with bass phrases crossing the bar line and brushes answering through subtle variations in texture and accent. Briefly introduce warm electric piano to transform the harmony with spacious dark voicings, passing ii chords, restrained tritone substitutions, suspensions, and gentle chromatic color; keep the motion cyclical and unresolved. Use tenor saxophone only for brief breathy punctuation, not a long evolving melody or solo. Then remove electric piano, thin the brushes, and return to bass-led fragments before a quiet incomplete vamp ending. Tactile acoustic room sound, restrained dynamics, warm low-mid presence, modest stereo width, soft dark reverb, spacious phrasing, no abrupt ending. Avoid vocals, static pedal-harmony development, flashy solos, bright aggression, busy cymbals, strong backbeat, dramatic crescendos, cinematic bombast, and full cadence.\n"
+    },
+    {
+      "number": 6,
+      "targetSeconds": 105,
+      "spec": {
+        "schemaVersion": "1.0",
+        "title": "Nocturne for Closed Curtains",
+        "intent": "A quiet nocturnal jazz chamber study in which piano and bass clarinet pass a breath-like motif above sustained cello shadows, gradually contracting into a whispered ending.",
+        "genres": [
+          "late-night noir jazz",
+          "jazz chamber music",
+          "ambient jazz"
+        ],
+        "moods": [
+          "veiled",
+          "intimate",
+          "unhurried",
+          "quietly unresolved"
+        ],
+        "tempo": {
+          "bpm": 56,
+          "feel": "Slow pulse-based 4/4 with barely audible frame-drum emphasis and generous rubato at phrase endings."
+        },
+        "tonality": {
+          "tonic": null,
+          "mode": "modal minor"
+        },
+        "meter": "4/4",
+        "instrumentation": [
+          {
+            "name": "piano",
+            "role": "Introduces the main motif and provides sparse modal harmony.",
+            "timbre": "Soft, close, lightly felted attack with spacious voicings."
+          },
+          {
+            "name": "bass clarinet",
+            "role": "Echoes and reshapes the piano melody in a lower, breath-like register.",
+            "timbre": "Warm, woody, intimate, with restrained legato phrasing."
+          },
+          {
+            "name": "cello",
+            "role": "Sustains shadow tones and gradually deepens the harmonic atmosphere.",
+            "timbre": "Muted arco, dark and smooth, with long gentle releases."
+          },
+          {
+            "name": "soft frame drum",
+            "role": "Provides a barely audible pulse and subtle phrase punctuation.",
+            "timbre": "Muted fingertip touches, sparse and organic."
+          }
+        ],
+        "structure": [
+          {
+            "section": "Intro",
+            "durationSeconds": 20,
+            "direction": "Nearly free piano introduces isolated fragments of the motif over silence; keep the room intimate and the dynamics very low."
+          },
+          {
+            "section": "Development",
+            "durationSeconds": 45,
+            "direction": "Bass clarinet answers the piano in imitation. Add sustained cello pedal tones, parallel sixths, and delayed modal resolutions; frame drum enters only as a faint pulse."
+          },
+          {
+            "section": "Contraction",
+            "durationSeconds": 25,
+            "direction": "Let piano and bass clarinet overlap more closely while cello lengthens the shadow tones. Increase density slightly without increasing volume, then thin the texture."
+          },
+          {
+            "section": "Outro",
+            "durationSeconds": 15,
+            "direction": "Reduce piano and bass clarinet to a shared unison whisper, with cello fading beneath them and the final harmony remaining gently unresolved."
+          }
+        ],
+        "vocals": {
+          "enabled": false,
+          "language": null,
+          "style": null,
+          "lyricalTheme": null
+        },
+        "production": "Tactile acoustic chamber recording in a small, dim room; close piano and bass clarinet, cello slightly behind them, soft natural reverberation, restrained dynamics, clear silence between phrases, and a warm low-register stereo image.",
+        "avoid": [
+          "vocals",
+          "bright or aggressive brass",
+          "fast swing",
+          "virtuosic soloing",
+          "heavy percussion",
+          "abrupt transitions",
+          "cinematic bombast",
+          "strong final cadence"
+        ],
+        "assumptions": [
+          "Targeted 56 BPM to support the slow pulse and 105-second arc.",
+          "Used an unspecified tonic to preserve the veiled modal character."
+        ],
+        "lyriaPrompt": "Late-night noir jazz chamber piece for relaxation, approximately 105 seconds, slow 56 BPM pulse in 4/4 with generous rubato at phrase endings. Modal minor harmony with pedal tones, parallel sixths, suspended color, and delayed resolutions; keep the tonal center veiled. [Intro] Soft intimate piano presents a breath-like motif in sparse, spacious voicings. [Development] Warm bass clarinet echoes and reshapes the motif in a lower register while muted arco cello sustains dark shadow tones; add a barely audible soft frame-drum pulse. [Contraction] Let piano and bass clarinet overlap in closer imitation, increasing density without increasing volume, then gradually remove layers. [Outro] Contract to a fragile shared unison whisper with fading cello and a gently unresolved final harmony. Tactile acoustic chamber recording, small dim room, close foreground detail, warm low-register stereo image, natural reverberation, restrained dynamics, and meaningful silence between phrases. Instrumental only, no vocals. Avoid bright aggression, virtuoso playing, heavy percussion, abrupt transitions, loud climaxes, and emphatic cadence."
+      },
+      "renderedLyriaPrompt": "Late-night noir jazz for relaxation. Instrumental only, no vocals.\n\nInstrumental only, no vocals. Late-night noir jazz for relaxation: restrained dynamics, spacious phrasing, tactile acoustic playing, and jazz harmony with tasteful extensions, suspensions, and gentle chromatic tension. Every piece must have a clear self-contained arc, quiet entrance, gradual development, and softened ending. Vary foreground instrument, ensemble size, room intimacy, groove density, and harmonic rhythm, but avoid abrupt drops, flashy virtuosity, harsh brightness, or cinematic bombast.\n\nAim for approximately 105 seconds, with a self-contained beginning, development and ending.\n\nLate-night noir jazz chamber piece for relaxation, approximately 105 seconds, slow 56 BPM pulse in 4/4 with generous rubato at phrase endings. Modal minor harmony with pedal tones, parallel sixths, suspended color, and delayed resolutions; keep the tonal center veiled. [Intro] Soft intimate piano presents a breath-like motif in sparse, spacious voicings. [Development] Warm bass clarinet echoes and reshapes the motif in a lower register while muted arco cello sustains dark shadow tones; add a barely audible soft frame-drum pulse. [Contraction] Let piano and bass clarinet overlap in closer imitation, increasing density without increasing volume, then gradually remove layers. [Outro] Contract to a fragile shared unison whisper with fading cello and a gently unresolved final harmony. Tactile acoustic chamber recording, small dim room, close foreground detail, warm low-register stereo image, natural reverberation, restrained dynamics, and meaningful silence between phrases. Instrumental only, no vocals. Avoid bright aggression, virtuoso playing, heavy percussion, abrupt transitions, loud climaxes, and emphatic cadence.\n"
+    },
+    {
+      "number": 7,
+      "targetSeconds": 150,
+      "spec": {
+        "schemaVersion": "1.0",
+        "title": "Last Train, Softly",
+        "intent": "A self-contained late-night noir jazz quartet for relaxation, maintaining gentle forward motion through understated swing and short motif exchanges.",
+        "genres": [
+          "late-night noir jazz",
+          "acoustic quartet jazz",
+          "relaxed swing"
+        ],
+        "moods": [
+          "nocturnal",
+          "tender",
+          "restrained",
+          "quietly wistful",
+          "softly unresolved"
+        ],
+        "tempo": {
+          "bpm": 82,
+          "feel": "Gentle medium-slow swing with discreet walking bass, softened ride texture, and spacious phrasing."
+        },
+        "tonality": {
+          "tonic": null,
+          "mode": "Lyrical major-minor interchange with chromatic mediant color"
+        },
+        "meter": "4/4",
+        "instrumentation": [
+          {
+            "name": "Hollow-body guitar",
+            "role": "Introduces and restates the four-note motif with quiet chordal support.",
+            "timbre": "Warm, woody, lightly amplified, clean fingerstyle articulation."
+          },
+          {
+            "name": "Alto saxophone",
+            "role": "Reshapes the guitar motif in longer answering phrases; no extended solo.",
+            "timbre": "Breathy, mellow, intimate, with restrained vibrato."
+          },
+          {
+            "name": "Upright bass",
+            "role": "Provides a discreet walking foundation and briefly comes forward in the middle.",
+            "timbre": "Round, woody, soft attack, lightly resonant."
+          },
+          {
+            "name": "Brush kit",
+            "role": "Maintains understated swing and supports transitions.",
+            "timbre": "Feathered snare brushes, softened ride, minimal cymbal brightness."
+          }
+        ],
+        "structure": [
+          {
+            "section": "Intro",
+            "durationSeconds": 20,
+            "direction": "Hollow-body guitar alone presents a simple four-note cell in spacious voicings; bass and faint brushes enter gradually."
+          },
+          {
+            "section": "Theme",
+            "durationSeconds": 35,
+            "direction": "The quartet settles into gentle medium-slow swing. Guitar states the motif while bass walks discreetly and brushes remain soft."
+          },
+          {
+            "section": "Exchange",
+            "durationSeconds": 40,
+            "direction": "Alto saxophone reshapes the motif in longer phrases; guitar answers with compact figures. Use lyrical major-minor interchange, secondary dominants, and brief chromatic mediant turns."
+          },
+          {
+            "section": "Bass Interlude",
+            "durationSeconds": 25,
+            "direction": "Thin the texture so upright bass briefly takes the foreground, with sparse guitar punctuations and nearly weightless brushes."
+          },
+          {
+            "section": "Final Statement",
+            "durationSeconds": 30,
+            "direction": "Saxophone and guitar reunite for a smaller, more spacious return of the motif, brightening briefly without becoming cheerful."
+          }
+        ],
+        "vocals": {
+          "enabled": false,
+          "language": null,
+          "style": null,
+          "lyricalTheme": null
+        },
+        "production": "Tactile acoustic quartet recording in an intimate, dimly lit room; warm close-miked guitar and bass, mellow centered saxophone, softly rounded brushes, restrained dynamics, moderate stereo width, gentle room ambience, and a deliberately softened unresolved ending.",
+        "avoid": [
+          "vocals",
+          "extended virtuosic solos",
+          "harsh brightness",
+          "heavy backbeat",
+          "abrupt drops",
+          "cinematic bombast",
+          "cheerful or triumphant resolution"
+        ],
+        "assumptions": [
+          "Target BPM set near 82 to realize the requested medium-slow swing.",
+          "The supplied 150-second arc is divided into five flexible sections."
+        ],
+        "lyriaPrompt": "Late-night noir jazz quartet for relaxation, 150 seconds, gentle medium-slow 4/4 swing around 82 BPM. Instrumental only, no vocals. Use warm hollow-body guitar, mellow breathy alto saxophone, round upright bass, and featherlight brush kit with softened ride. Begin quietly with guitar introducing a simple four-note motif; add discreet walking bass and brushed swing. Let alto saxophone reshape the motif in longer phrases while guitar answers with short figures rather than extended solos. Use lyrical major-minor interchange, secondary dominants, and occasional chromatic mediant turns that brighten briefly without becoming cheerful. Give upright bass a short foreground interlude, then return to a smaller guitar-and-sax statement. Keep spacious phrasing, restrained dynamics, tactile acoustic playing, intimate room ambience, and a softly unresolved ending. Avoid harsh brightness, heavy backbeat, flashy virtuosity, abrupt drops, cinematic bombast, and triumphant resolution."
+      },
+      "renderedLyriaPrompt": "Late-night noir jazz for relaxation. Instrumental only, no vocals.\n\nInstrumental only, no vocals. Late-night noir jazz for relaxation: restrained dynamics, spacious phrasing, tactile acoustic playing, and jazz harmony with tasteful extensions, suspensions, and gentle chromatic tension. Every piece must have a clear self-contained arc, quiet entrance, gradual development, and softened ending. Vary foreground instrument, ensemble size, room intimacy, groove density, and harmonic rhythm, but avoid abrupt drops, flashy virtuosity, harsh brightness, or cinematic bombast.\n\nAim for approximately 150 seconds, with a self-contained beginning, development and ending.\n\nLate-night noir jazz quartet for relaxation, 150 seconds, gentle medium-slow 4/4 swing around 82 BPM. Instrumental only, no vocals. Use warm hollow-body guitar, mellow breathy alto saxophone, round upright bass, and featherlight brush kit with softened ride. Begin quietly with guitar introducing a simple four-note motif; add discreet walking bass and brushed swing. Let alto saxophone reshape the motif in longer phrases while guitar answers with short figures rather than extended solos. Use lyrical major-minor interchange, secondary dominants, and occasional chromatic mediant turns that brighten briefly without becoming cheerful. Give upright bass a short foreground interlude, then return to a smaller guitar-and-sax statement. Keep spacious phrasing, restrained dynamics, tactile acoustic playing, intimate room ambience, and a softly unresolved ending. Avoid harsh brightness, heavy backbeat, flashy virtuosity, abrupt drops, cinematic bombast, and triumphant resolution.\n"
+    },
+    {
+      "number": 8,
+      "targetSeconds": 120,
+      "spec": {
+        "schemaVersion": "1.0",
+        "title": "Ashes in the Blue Hour",
+        "intent": "A self-contained late-night noir jazz meditation whose quiet weight comes from low-register baritone counterlines, sparse felt-piano harmony, and a slow blues pulse.",
+        "genres": [
+          "late-night noir jazz",
+          "slow minor blues",
+          "cool jazz"
+        ],
+        "moods": [
+          "hushed",
+          "smoky",
+          "weightless yet dark",
+          "quietly unresolved"
+        ],
+        "tempo": {
+          "bpm": 52,
+          "feel": "Slow 12/8 blues pulse with brushed triplets, spacious phrasing, and broad breathing pauses."
+        },
+        "tonality": {
+          "tonic": null,
+          "mode": "minor blues with flat-five coloration, suspended dominants, and long pedal tones"
+        },
+        "meter": "12/8",
+        "instrumentation": [
+          {
+            "name": "felt piano",
+            "role": "Sparse harmonic punctuation and opening atmosphere",
+            "timbre": "Muted, soft-edged, widely spaced voicings with restrained pedal resonance"
+          },
+          {
+            "name": "baritone saxophone",
+            "role": "Low sustained counterlines and dark melodic shadow",
+            "timbre": "Distant, breathy, warm, and subdued rather than forceful"
+          },
+          {
+            "name": "upright bass",
+            "role": "Quiet pedal anchor and occasional low connective movement",
+            "timbre": "Round, woody, softly bowed or lightly plucked"
+          },
+          {
+            "name": "brush kit",
+            "role": "Subtle 12/8 pulse and gentle triplet motion",
+            "timbre": "Whispered brushes with minimal cymbal brightness"
+          }
+        ],
+        "structure": [
+          {
+            "section": "Intro",
+            "durationSeconds": 24,
+            "direction": "Felt piano offers sparse minor-blues chords in open space; distant baritone saxophone enters with long, low tones."
+          },
+          {
+            "section": "Development",
+            "durationSeconds": 36,
+            "direction": "Upright bass joins as a quiet pedal anchor while brushes establish soft triplets; baritone and piano overlap in restrained counterpoint."
+          },
+          {
+            "section": "Climax",
+            "durationSeconds": 36,
+            "direction": "Low-register lines become slightly denser and more interwoven, using flat-five tension and suspended dominants without increasing volume or becoming dramatic."
+          },
+          {
+            "section": "Outro",
+            "durationSeconds": 24,
+            "direction": "Brushes and bass recede first; baritone leaves a final breath-like phrase over a sparse felt-piano chord, ending hushed and unresolved."
+          }
+        ],
+        "vocals": {
+          "enabled": false,
+          "language": null,
+          "style": null,
+          "lyricalTheme": null
+        },
+        "production": "Intimate acoustic quartet recording in a dim, softly reverberant room. Keep dynamics restrained, with close felt-piano detail, warm low-end separation, distant baritone depth, gentle stereo width, and a softened final decay.",
+        "avoid": [
+          "vocals",
+          "bright pop production",
+          "fast swing",
+          "flashy solos",
+          "harsh cymbals",
+          "abrupt drops",
+          "cinematic bombast",
+          "strong final cadence"
+        ],
+        "assumptions": [
+          "Target tempo set near 52 BPM to support the slow 12/8 pulse.",
+          "No fixed tonic chosen; the harmony remains deliberately veiled and pedal-oriented."
+        ],
+        "lyriaPrompt": "Late-night noir jazz meditation for relaxation, approximately 120 seconds. Instrumental only, no vocals. Slow 12/8 minor blues pulse around 52 BPM, with brushed triplets, broad breathing spaces, and restrained dynamics. Begin with sparse felt-piano chords and a distant, breathy baritone saxophone playing low sustained counterlines. Add warm upright bass as a quiet pedal anchor, then whispering brushes. Develop overlapping low-register baritone and piano lines using flat-five color, suspended dominants, and long pedal tones; increase density subtly without getting louder or dramatic. [Intro] spacious piano and distant baritone. [Development] bass and brushes enter, forming a hushed blues undercurrent. [Climax] gently interwoven low-register lines. [Outro] remove brushes and bass, leaving a final breath-like baritone phrase over a sparse unresolved piano chord. Intimate acoustic room, soft reverberation, warm low end, tactile felt-piano detail, and a deliberately softened ending. Avoid bright production, fast swing, flashy solos, harsh cymbals, abrupt drops, vocals, and cinematic bombast."
+      },
+      "renderedLyriaPrompt": "Late-night noir jazz for relaxation. Instrumental only, no vocals.\n\nInstrumental only, no vocals. Late-night noir jazz for relaxation: restrained dynamics, spacious phrasing, tactile acoustic playing, and jazz harmony with tasteful extensions, suspensions, and gentle chromatic tension. Every piece must have a clear self-contained arc, quiet entrance, gradual development, and softened ending. Vary foreground instrument, ensemble size, room intimacy, groove density, and harmonic rhythm, but avoid abrupt drops, flashy virtuosity, harsh brightness, or cinematic bombast.\n\nAim for approximately 120 seconds, with a self-contained beginning, development and ending.\n\nLate-night noir jazz meditation for relaxation, approximately 120 seconds. Instrumental only, no vocals. Slow 12/8 minor blues pulse around 52 BPM, with brushed triplets, broad breathing spaces, and restrained dynamics. Begin with sparse felt-piano chords and a distant, breathy baritone saxophone playing low sustained counterlines. Add warm upright bass as a quiet pedal anchor, then whispering brushes. Develop overlapping low-register baritone and piano lines using flat-five color, suspended dominants, and long pedal tones; increase density subtly without getting louder or dramatic. [Intro] spacious piano and distant baritone. [Development] bass and brushes enter, forming a hushed blues undercurrent. [Climax] gently interwoven low-register lines. [Outro] remove brushes and bass, leaving a final breath-like baritone phrase over a sparse unresolved piano chord. Intimate acoustic room, soft reverberation, warm low end, tactile felt-piano detail, and a deliberately softened ending. Avoid bright production, fast swing, flashy solos, harsh cymbals, abrupt drops, vocals, and cinematic bombast.\n"
+    },
+    {
+      "number": 9,
+      "targetSeconds": 135,
+      "spec": {
+        "schemaVersion": "1.0",
+        "title": "Neon Herbarium",
+        "intent": "A self-contained late-night noir jazz meditation built around a delicate vibraphone melody, understated ensemble replies, and a softened fade into unresolved calm.",
+        "genres": [
+          "late-night noir jazz",
+          "ambient jazz",
+          "cool jazz"
+        ],
+        "moods": [
+          "hushed",
+          "mysterious",
+          "weightless",
+          "gently contemplative"
+        ],
+        "tempo": {
+          "bpm": 72,
+          "feel": "Relaxed straight eighths with soft syncopation, no pronounced backbeat, and restrained dynamics."
+        },
+        "tonality": {
+          "tonic": null,
+          "mode": "Ambiguous minor-centered jazz harmony"
+        },
+        "meter": "4/4",
+        "instrumentation": [
+          {
+            "name": "Vibraphone",
+            "role": "Carries the delicate repeating melody and remains the primary foreground voice.",
+            "timbre": "Softly struck, warm, lightly damped, with a subtle nocturnal halo."
+          },
+          {
+            "name": "Flugelhorn",
+            "role": "Adds long, understated tones and reshapes fragments of the vibraphone melody.",
+            "timbre": "Muted-warm, breathy, rounded, and intimate."
+          },
+          {
+            "name": "Piano",
+            "role": "Provides sparse quartal color and quiet counter-rhythms beneath the lead voices.",
+            "timbre": "Dark, spacious, gently voiced, with restrained attack."
+          },
+          {
+            "name": "Upright bass",
+            "role": "Defines shifting harmonic roots and supports the floating pulse.",
+            "timbre": "Warm, woody, sustained, and unhurried."
+          },
+          {
+            "name": "Brushes",
+            "role": "Supply a nearly weightless rhythmic bed without a strong backbeat.",
+            "timbre": "Soft circular swishes, low density, tactile acoustic presence."
+          }
+        ],
+        "structure": [
+          {
+            "section": "Intro",
+            "durationSeconds": 20,
+            "direction": "Vibraphone alone presents a delicate repeating figure over open space; establish the nocturnal atmosphere quietly."
+          },
+          {
+            "section": "Development",
+            "durationSeconds": 35,
+            "direction": "Flugelhorn enters with long tones and understated replies. Upright bass introduces shifting roots while the vibraphone motif remains clear."
+          },
+          {
+            "section": "Middle Passage",
+            "durationSeconds": 40,
+            "direction": "Piano adds sparse quartal voicings and gentle counter-rhythms. Occasional minor-second friction resolves into transparent sixths; keep the energy calm and spacious."
+          },
+          {
+            "section": "Dissolution",
+            "durationSeconds": 25,
+            "direction": "Remove piano and then flugelhorn in reverse order. Let the vibraphone figure become more isolated while bass and brushes recede."
+          },
+          {
+            "section": "Outro",
+            "durationSeconds": 15,
+            "direction": "The vibraphone slows and fades over a final open, unresolved color; end softly without a firm cadence."
+          }
+        ],
+        "vocals": {
+          "enabled": false,
+          "language": null,
+          "style": null,
+          "lyricalTheme": null
+        },
+        "production": "Intimate acoustic room with moderate warmth, clear separation, soft stereo width, gentle sustain, and a restrained late-night dynamic ceiling. Preserve tactile instrument detail while keeping the background spacious and dim.",
+        "avoid": [
+          "vocals",
+          "pronounced backbeat",
+          "harsh brightness",
+          "flashy virtuosity",
+          "abrupt drops",
+          "cinematic bombast",
+          "strong final cadence"
+        ],
+        "assumptions": [
+          "4/4 meter and approximately 72 BPM suit the relaxed straight-eighth pulse.",
+          "The tonal center remains intentionally ambiguous rather than fixed to one key."
+        ],
+        "lyriaPrompt": "Late-night noir jazz meditation for approximately 135 seconds, relaxed around 72 BPM in 4/4 with a straight-eighth pulse, soft syncopation, and no pronounced backbeat. Instrumental only, no vocals. Begin with a softly struck vibraphone presenting a delicate repeating melody in spacious silence. Add warm upright bass on shifting roots, then breathy flugelhorn sustained tones and understated replies. Introduce dark piano quartal voicings and gentle counter-rhythms in the middle, with occasional minor-second friction resolving into transparent sixths. Keep the dynamics restrained, the phrasing spacious, and the acoustic room intimate. Remove layers in reverse order, leaving the vibraphone figure increasingly isolated as it slows and fades over an unresolved open color. Avoid harsh brightness, flashy virtuosity, abrupt drops, pronounced backbeat, and cinematic bombast."
+      },
+      "renderedLyriaPrompt": "Late-night noir jazz for relaxation. Instrumental only, no vocals.\n\nInstrumental only, no vocals. Late-night noir jazz for relaxation: restrained dynamics, spacious phrasing, tactile acoustic playing, and jazz harmony with tasteful extensions, suspensions, and gentle chromatic tension. Every piece must have a clear self-contained arc, quiet entrance, gradual development, and softened ending. Vary foreground instrument, ensemble size, room intimacy, groove density, and harmonic rhythm, but avoid abrupt drops, flashy virtuosity, harsh brightness, or cinematic bombast.\n\nAim for approximately 135 seconds, with a self-contained beginning, development and ending.\n\nLate-night noir jazz meditation for approximately 135 seconds, relaxed around 72 BPM in 4/4 with a straight-eighth pulse, soft syncopation, and no pronounced backbeat. Instrumental only, no vocals. Begin with a softly struck vibraphone presenting a delicate repeating melody in spacious silence. Add warm upright bass on shifting roots, then breathy flugelhorn sustained tones and understated replies. Introduce dark piano quartal voicings and gentle counter-rhythms in the middle, with occasional minor-second friction resolving into transparent sixths. Keep the dynamics restrained, the phrasing spacious, and the acoustic room intimate. Remove layers in reverse order, leaving the vibraphone figure increasingly isolated as it slows and fades over an unresolved open color. Avoid harsh brightness, flashy virtuosity, abrupt drops, pronounced backbeat, and cinematic bombast.\n"
+    },
+    {
+      "number": 10,
+      "targetSeconds": 105,
+      "spec": {
+        "schemaVersion": "1.0",
+        "title": "Velvet Corridor",
+        "intent": "A self-contained late-night noir jazz miniature for relaxation, built around a featherlight bossa-inflected pulse, interlocking nylon-string guitar and piano, and restrained muted-trumpet punctuation.",
+        "genres": [
+          "late-night noir jazz",
+          "bossa-inflected jazz",
+          "instrumental lounge jazz"
+        ],
+        "moods": [
+          "quietly nocturnal",
+          "velvety",
+          "relaxed",
+          "subtly unresolved"
+        ],
+        "tempo": {
+          "bpm": 66,
+          "feel": "Slow, flexible bossa-inflected pulse with understated syncopation and no dance emphasis."
+        },
+        "tonality": {
+          "tonic": "D",
+          "mode": "minor with major-seventh and suspended color"
+        },
+        "meter": "4/4",
+        "instrumentation": [
+          {
+            "name": "Nylon-string guitar",
+            "role": "Establishes the soft syncopated pulse and repeating chordal pattern.",
+            "timbre": "Warm, intimate, lightly fingerpicked."
+          },
+          {
+            "name": "Piano",
+            "role": "Interlocks with the guitar and fills the upper harmonic space.",
+            "timbre": "Soft acoustic attack, spacious voicings, restrained sustain."
+          },
+          {
+            "name": "Muted trumpet",
+            "role": "Adds short nocturnal comments and clipped melodic punctuation.",
+            "timbre": "Close, breathy cup-muted tone; sparse phrasing."
+          },
+          {
+            "name": "Upright bass",
+            "role": "Provides a gentle low-register foundation and supports deceptive harmonic turns.",
+            "timbre": "Round, woody, lightly damped pizzicato."
+          },
+          {
+            "name": "Brush kit",
+            "role": "Maintains a featherlight pulse and subtle transitions.",
+            "timbre": "Soft brushes, minimal cymbal wash, relaxed dynamics."
+          }
+        ],
+        "structure": [
+          {
+            "section": "Intro",
+            "durationSeconds": 16,
+            "direction": "Nylon-string guitar alone establishes the flexible bossa pulse with minor-key ii–V colors."
+          },
+          {
+            "section": "Theme",
+            "durationSeconds": 28,
+            "direction": "Piano enters with interlocking upper voicings; upright bass and very soft brushes join without increasing intensity."
+          },
+          {
+            "section": "Conversation",
+            "durationSeconds": 32,
+            "direction": "Muted trumpet introduces clipped, nocturnal motifs while guitar and piano answer in short phrases; use lush major-seventh side steps and deceptive cadences."
+          },
+          {
+            "section": "Receding Coda",
+            "durationSeconds": 29,
+            "direction": "Trumpet withdraws, leaving guitar and bass to soften the pattern; end on an unresolved, spacious color rather than a firm cadence."
+          }
+        ],
+        "vocals": {
+          "enabled": false,
+          "language": null,
+          "style": null,
+          "lyricalTheme": null
+        },
+        "production": "Intimate acoustic room, warm and close-miked, with gentle stereo separation and soft plate-like ambience. Preserve dynamic restraint, spacious phrasing, tactile string detail, and a dark but non-aggressive low register.",
+        "avoid": [
+          "vocals",
+          "abrupt drops",
+          "flashy solos",
+          "bright pop production",
+          "heavy percussion",
+          "cinematic bombast",
+          "emphatic final cadence"
+        ],
+        "assumptions": [
+          "D minor is used as a practical tonal center for the specified minor-key harmony.",
+          "A slow 66 BPM pulse supports the 105-second arc without sounding static."
+        ],
+        "lyriaPrompt": "Late-night noir jazz for relaxation, 105 seconds, slow flexible bossa-inflected 4/4 pulse around 66 BPM, instrumental only, no vocals. Intimate nylon-string guitar establishes a featherlight syncopated chord pattern; soft piano interlocks in the upper register, upright bass gives a warm restrained foundation, and brushed drums remain barely present. After a quiet introduction, muted trumpet enters with sparse clipped nocturnal motifs and short conversational exchanges with guitar and piano. Use minor-key ii–V colors, lush major-seventh side steps, suspended tones, and deceptive cadences that avoid emphatic arrival. Gradually thin the conversation back to guitar and bass, ending softly on an unresolved spacious harmony. Warm close acoustic room, gentle ambience, restrained dynamics, no flashy solos, no abrupt drops, no bright pop sheen, no heavy percussion, no cinematic bombast."
+      },
+      "renderedLyriaPrompt": "Late-night noir jazz for relaxation. Instrumental only, no vocals.\n\nInstrumental only, no vocals. Late-night noir jazz for relaxation: restrained dynamics, spacious phrasing, tactile acoustic playing, and jazz harmony with tasteful extensions, suspensions, and gentle chromatic tension. Every piece must have a clear self-contained arc, quiet entrance, gradual development, and softened ending. Vary foreground instrument, ensemble size, room intimacy, groove density, and harmonic rhythm, but avoid abrupt drops, flashy virtuosity, harsh brightness, or cinematic bombast.\n\nAim for approximately 105 seconds, with a self-contained beginning, development and ending.\n\nLate-night noir jazz for relaxation, 105 seconds, slow flexible bossa-inflected 4/4 pulse around 66 BPM, instrumental only, no vocals. Intimate nylon-string guitar establishes a featherlight syncopated chord pattern; soft piano interlocks in the upper register, upright bass gives a warm restrained foundation, and brushed drums remain barely present. After a quiet introduction, muted trumpet enters with sparse clipped nocturnal motifs and short conversational exchanges with guitar and piano. Use minor-key ii–V colors, lush major-seventh side steps, suspended tones, and deceptive cadences that avoid emphatic arrival. Gradually thin the conversation back to guitar and bass, ending softly on an unresolved spacious harmony. Warm close acoustic room, gentle ambience, restrained dynamics, no flashy solos, no abrupt drops, no bright pop sheen, no heavy percussion, no cinematic bombast.\n"
+    },
+    {
+      "number": 11,
+      "targetSeconds": 180,
+      "spec": {
+        "schemaVersion": "1.0",
+        "title": "A Door Left Ajar",
+        "intent": "A 180-second late-night noir jazz meditation in which tenor saxophone and piano exchange evolving phrases across contrasting upper-harmony phases, with the unresolved pedal reserved for the opening and coda.",
+        "genres": [
+          "late-night noir jazz",
+          "modal jazz",
+          "relaxation jazz"
+        ],
+        "moods": [
+          "still and nocturnal",
+          "shadowed and contemplative",
+          "gently suspended"
+        ],
+        "tempo": {
+          "bpm": 58,
+          "feel": "Sparse, slow behind-the-beat swing in 4/4, with brushes entering only at phrase turns."
+        },
+        "tonality": {
+          "tonic": null,
+          "mode": "Modal minor with shifting upper harmony and pedal-point ambiguity"
+        },
+        "meter": "4/4",
+        "instrumentation": [
+          {
+            "name": "tenor saxophone",
+            "role": "Foreground melodic voice using spacious call-and-response phrases with piano, gradually ornamenting and fragmenting its material.",
+            "timbre": "Warm, breathy, restrained, softly vibrated, never forceful."
+          },
+          {
+            "name": "piano",
+            "role": "Introduces contrasting upper-harmony phases and answers the saxophone with spacious voicings and short motifs.",
+            "timbre": "Muted, intimate, softly resonant, colored by suspended tones, upper triads, and restrained blues inflections."
+          },
+          {
+            "name": "upright bass",
+            "role": "Establishes a calm two-note pedal in the opening, then supports the evolving harmony before returning to the pedal in the coda.",
+            "timbre": "Deep, woody, rounded, gently pizzicato with occasional sustained resonance."
+          },
+          {
+            "name": "brush kit",
+            "role": "Marks phrase turns and lightly supports the slow swing without a strong backbeat.",
+            "timbre": "Dry, featherlight brush swirls with minimal cymbal brightness."
+          }
+        ],
+        "structure": [
+          {
+            "section": "Intro",
+            "durationSeconds": 25,
+            "direction": "Upright bass establishes the two-note pedal alone; piano adds isolated voicings. Keep the room quiet and spacious."
+          },
+          {
+            "section": "Theme",
+            "durationSeconds": 45,
+            "direction": "Tenor saxophone enters with a long-breathed phrase. Piano answers rather than merely accompanying; brushes appear only at phrase turns."
+          },
+          {
+            "section": "Harmonic Dialogue",
+            "durationSeconds": 55,
+            "direction": "Release the fixed pedal and let piano move through contrasting upper-harmony phases: suspended dominants, modal minor colors, upper triads, and restrained blues inflections. Saxophone responds in call-and-response, with gentle ornamentation and no flashy soloing."
+          },
+          {
+            "section": "Fragmentation",
+            "durationSeconds": 35,
+            "direction": "Shorten the exchanges, increase silence, and thin the brushes. Let saxophone fragments and piano replies pass through softer, more ambiguous harmonic colors."
+          },
+          {
+            "section": "Coda",
+            "durationSeconds": 20,
+            "direction": "Return the upright bass to the two-note pedal. Reduce the dialogue to a final saxophone breath, sparse piano voicing, and softly unresolved decay."
+          }
+        ],
+        "vocals": {
+          "enabled": false,
+          "language": null,
+          "style": null,
+          "lyricalTheme": null
+        },
+        "production": "Intimate tactile acoustic quartet recording in a dark, warm room. Keep the tenor saxophone forward but gentle, piano clearly articulate yet spacious, bass rounded and low, and brushes subdued. Use natural reverb, restrained dynamics, soft transient detail, and a quiet stereo image with no dramatic climax.",
+        "avoid": [
+          "vocals",
+          "abrupt drops",
+          "flashy virtuosic solos",
+          "bright or aggressive cymbals",
+          "cinematic bombast",
+          "strong backbeat",
+          "definitive cadential resolution"
+        ],
+        "assumptions": [
+          "Set the tempo near 58 BPM for the specified slow swing.",
+          "Use shifting modal upper harmony without imposing a fixed tonic.",
+          "Reserve the two-note pedal strictly for the opening and coda."
+        ],
+        "lyriaPrompt": "Late-night noir jazz meditation for relaxation, approximately 180 seconds, instrumental only, no vocals. Slow 4/4 swing around 58 BPM, sparse and slightly behind the beat, with tactile acoustic playing, restrained dynamics, spacious phrasing, and a dark warm room. [Intro] Begin with deep upright bass repeating a calm two-note pedal while intimate piano adds isolated suspended voicings. [Theme] Bring in a warm, breathy tenor saxophone; have saxophone and piano exchange long, spacious call-and-response phrases, with featherlight brushes entering only at phrase turns. [Harmonic Dialogue] Release the pedal and let piano introduce contrasting upper-harmony phases—modal minor colors, suspended dominants, upper triads, and restrained blues inflections—while the tenor saxophone responds with subtle ornamentation, never a flashy solo. [Fragmentation] Shorten the exchanges, increase silence, and thin the brushes as saxophone phrases break into gentle echoes. [Coda] Return the upright bass to the two-note pedal, reduce to a sparse piano voicing and fading tenor breath, and end softly unresolved. Avoid vocals, strong backbeat, bright cymbals, abrupt drops, cinematic bombast, and definitive cadence."
+      },
+      "renderedLyriaPrompt": "Late-night noir jazz for relaxation. Instrumental only, no vocals.\n\nInstrumental only, no vocals. Late-night noir jazz for relaxation: restrained dynamics, spacious phrasing, tactile acoustic playing, and jazz harmony with tasteful extensions, suspensions, and gentle chromatic tension. Every piece must have a clear self-contained arc, quiet entrance, gradual development, and softened ending. Vary foreground instrument, ensemble size, room intimacy, groove density, and harmonic rhythm, but avoid abrupt drops, flashy virtuosity, harsh brightness, or cinematic bombast.\n\nAim for approximately 180 seconds, with a self-contained beginning, development and ending.\n\nLate-night noir jazz meditation for relaxation, approximately 180 seconds, instrumental only, no vocals. Slow 4/4 swing around 58 BPM, sparse and slightly behind the beat, with tactile acoustic playing, restrained dynamics, spacious phrasing, and a dark warm room. [Intro] Begin with deep upright bass repeating a calm two-note pedal while intimate piano adds isolated suspended voicings. [Theme] Bring in a warm, breathy tenor saxophone; have saxophone and piano exchange long, spacious call-and-response phrases, with featherlight brushes entering only at phrase turns. [Harmonic Dialogue] Release the pedal and let piano introduce contrasting upper-harmony phases—modal minor colors, suspended dominants, upper triads, and restrained blues inflections—while the tenor saxophone responds with subtle ornamentation, never a flashy solo. [Fragmentation] Shorten the exchanges, increase silence, and thin the brushes as saxophone phrases break into gentle echoes. [Coda] Return the upright bass to the two-note pedal, reduce to a sparse piano voicing and fading tenor breath, and end softly unresolved. Avoid vocals, strong backbeat, bright cymbals, abrupt drops, cinematic bombast, and definitive cadence.\n"
+    },
+    {
+      "number": 12,
+      "targetSeconds": 120,
+      "spec": {
+        "schemaVersion": "1.0",
+        "title": "Underpass Lullaby",
+        "intent": "A quiet late-night noir jazz meditation in gently lilted 5/4, moving from low bass repetition toward a fragile flute melody before dissolving into air and harmonics.",
+        "genres": [
+          "late-night noir jazz",
+          "ambient jazz",
+          "chamber jazz"
+        ],
+        "moods": [
+          "hushed",
+          "nocturnal",
+          "slightly uneasy",
+          "tender",
+          "softly unresolved"
+        ],
+        "tempo": {
+          "bpm": 54,
+          "feel": "Slow, gentle 5/4 grouped 2+3; lilting rather than mathematical, with spacious phrasing and soft brush motion."
+        },
+        "tonality": {
+          "tonic": "D",
+          "mode": "Dorian minor with chromatic bass approaches"
+        },
+        "meter": "5/4, felt as 2+3",
+        "instrumentation": [
+          {
+            "name": "upright bass",
+            "role": "Establishes and sustains the low repeating lullaby figure; later exposes quiet harmonics.",
+            "timbre": "Warm, woody, restrained pizzicato with occasional bowed or natural harmonics."
+          },
+          {
+            "name": "warm electric piano",
+            "role": "Adds sparse nocturnal harmony and subtle color around the bass figure.",
+            "timbre": "Soft, rounded attack; spacious minor-ninth voicings and open fifths."
+          },
+          {
+            "name": "flute",
+            "role": "Carries the fragile foreground melody in short, breath-shaped phrases.",
+            "timbre": "Airy, delicate, intimate, with restrained vibrato and occasional lower-register shadows."
+          },
+          {
+            "name": "soft brushes",
+            "role": "Provides barely audible pulse and phrase transitions without a strong backbeat.",
+            "timbre": "Featherlight circular brushes, sparse swells, and muted texture."
+          }
+        ],
+        "structure": [
+          {
+            "section": "Intro",
+            "durationSeconds": 20,
+            "direction": "Solo upright bass establishes the 5/4 figure, grouped 2+3, with silence between phrases and no fixed dramatic buildup."
+          },
+          {
+            "section": "Theme",
+            "durationSeconds": 25,
+            "direction": "Electric piano enters with sparse revolving minor-ninth colors and chromatic bass approaches; keep the register low and the dynamics restrained."
+          },
+          {
+            "section": "Development",
+            "durationSeconds": 35,
+            "direction": "Flute introduces short, fragile phrases. Let the ensemble alternate between bass-led repetition and open spaces, gradually widening the flute register without becoming busy."
+          },
+          {
+            "section": "Reprise",
+            "durationSeconds": 20,
+            "direction": "Flute and electric piano gently echo the central motif; occasional open fifths create brief release while preserving ambiguity."
+          },
+          {
+            "section": "Outro",
+            "durationSeconds": 20,
+            "direction": "Remove brushes and electric piano, leaving bass fragments and quiet harmonics surrounded by air; end softened and unresolved, never abruptly."
+          }
+        ],
+        "vocals": {
+          "enabled": false,
+          "language": null,
+          "style": null,
+          "lyricalTheme": null
+        },
+        "production": "Intimate acoustic chamber-jazz room with a dark, warm stereo image. Keep dynamics low and tactile, with close upright bass, softly diffused electric piano, airy flute, and brushes recessed in a gentle room reverb. Preserve silence between phrases and avoid excessive brightness or density.",
+        "avoid": [
+          "vocals",
+          "strong backbeat",
+          "fast swing",
+          "rigid or mechanical 5/4",
+          "flashy solos",
+          "harsh brightness",
+          "abrupt drops",
+          "cinematic bombast",
+          "fully resolved cadence"
+        ],
+        "assumptions": [
+          "D Dorian is used as a flexible tonal center rather than a fixed key.",
+          "The target duration is organized as five softly connected sections totaling about 120 seconds."
+        ],
+        "lyriaPrompt": "Late-night noir jazz meditation for relaxation, instrumental only, no vocals. About 120 seconds at a slow 54 BPM in gently lilting 5/4 grouped 2+3, never rigid or puzzle-like. Warm upright bass establishes a low repeating lullaby figure with chromatic approaches; sparse warm electric piano adds revolving minor-ninth voicings, suspended color, and occasional open fifths. An airy flute enters with fragile, breath-shaped phrases, while very soft brushes mark only occasional transitions. Begin nearly alone with bass and silence, gradually add electric piano, then let flute widen the motif through a quiet middle passage. End by removing layers until only bass fragments, faint harmonics, and air remain, softly unresolved. Intimate dark room sound, tactile acoustic playing, spacious phrasing, restrained dynamics, gentle repetition, and no abrupt ending, harsh brightness, flashy virtuosity, strong backbeat, or cinematic bombast."
+      },
+      "renderedLyriaPrompt": "Late-night noir jazz for relaxation. Instrumental only, no vocals.\n\nInstrumental only, no vocals. Late-night noir jazz for relaxation: restrained dynamics, spacious phrasing, tactile acoustic playing, and jazz harmony with tasteful extensions, suspensions, and gentle chromatic tension. Every piece must have a clear self-contained arc, quiet entrance, gradual development, and softened ending. Vary foreground instrument, ensemble size, room intimacy, groove density, and harmonic rhythm, but avoid abrupt drops, flashy virtuosity, harsh brightness, or cinematic bombast.\n\nAim for approximately 120 seconds, with a self-contained beginning, development and ending.\n\nLate-night noir jazz meditation for relaxation, instrumental only, no vocals. About 120 seconds at a slow 54 BPM in gently lilting 5/4 grouped 2+3, never rigid or puzzle-like. Warm upright bass establishes a low repeating lullaby figure with chromatic approaches; sparse warm electric piano adds revolving minor-ninth voicings, suspended color, and occasional open fifths. An airy flute enters with fragile, breath-shaped phrases, while very soft brushes mark only occasional transitions. Begin nearly alone with bass and silence, gradually add electric piano, then let flute widen the motif through a quiet middle passage. End by removing layers until only bass fragments, faint harmonics, and air remain, softly unresolved. Intimate dark room sound, tactile acoustic playing, spacious phrasing, restrained dynamics, gentle repetition, and no abrupt ending, harsh brightness, flashy virtuosity, strong backbeat, or cinematic bombast.\n"
+    },
+    {
+      "number": 13,
+      "targetSeconds": 150,
+      "spec": {
+        "schemaVersion": "1.0",
+        "title": "Afterimage in Brass",
+        "intent": "A self-contained late-night noir jazz study for relaxation, built from spacious piano and muted trombone phrases over a nearly motionless rhythm foundation.",
+        "genres": [
+          "late-night noir jazz",
+          "cool jazz",
+          "ambient jazz"
+        ],
+        "moods": [
+          "shadowed",
+          "unhurried",
+          "intimate",
+          "quietly unresolved"
+        ],
+        "tempo": {
+          "bpm": 48,
+          "feel": "Very slow 4/4 with spacious, behind-the-beat swing and occasional held bars that suspend forward motion."
+        },
+        "tonality": {
+          "tonic": null,
+          "mode": "minor-centered, chromatically ambiguous"
+        },
+        "meter": "4/4",
+        "instrumentation": [
+          {
+            "name": "piano",
+            "role": "States the harmonic frame and trades broad phrases with the trombone.",
+            "timbre": "Soft, resonant, spacious voicings with restrained attack."
+          },
+          {
+            "name": "muted trombone",
+            "role": "Carries a wide descending melody and answers the piano.",
+            "timbre": "Veiled, breathy, rounded brass tone with gentle falls and sustained notes."
+          },
+          {
+            "name": "upright bass",
+            "role": "Provides stable roots and a nearly motionless low-register foundation.",
+            "timbre": "Warm, woody pizzicato with occasional sustained resonance."
+          },
+          {
+            "name": "brushes",
+            "role": "Maintains a barely moving pulse and marks phrase transitions.",
+            "timbre": "Soft circular swishes, sparse cymbal shimmer, no strong backbeat."
+          }
+        ],
+        "structure": [
+          {
+            "section": "Intro",
+            "durationSeconds": 25,
+            "direction": "Piano alone presents sparse minor, dominant-sus, and ambiguous major sonorities with chromatic descending inner voices."
+          },
+          {
+            "section": "Theme",
+            "durationSeconds": 35,
+            "direction": "Muted trombone enters with a broad descending line; bass and brushes join quietly beneath the piano."
+          },
+          {
+            "section": "Dialogue",
+            "durationSeconds": 50,
+            "direction": "Piano and trombone trade spacious phrases, gradually increasing motivic density without increasing volume; keep roots stable while inner voices descend chromatically."
+          },
+          {
+            "section": "Coda",
+            "durationSeconds": 25,
+            "direction": "Phrases shorten and soften as piano and trombone converge on an open interval over a restrained bass resonance."
+          },
+          {
+            "section": "Outro",
+            "durationSeconds": 15,
+            "direction": "Let the final open sonority decay naturally, softened and unresolved rather than cadential."
+          }
+        ],
+        "vocals": {
+          "enabled": false,
+          "language": null,
+          "style": null,
+          "lyricalTheme": null
+        },
+        "production": "Intimate acoustic room, warm low-register presence, soft dynamics, moderate stereo width, gentle natural reverberation, clear separation between piano and muted trombone, no dramatic buildup.",
+        "avoid": [
+          "vocals",
+          "bright brass tone",
+          "flashy solos",
+          "strong backbeat",
+          "abrupt ending",
+          "cinematic bombast",
+          "loud dynamics"
+        ],
+        "assumptions": [
+          "Target tempo set near 48 BPM to support the specified very slow swing.",
+          "The tonic remains deliberately unspecified to preserve harmonic ambiguity."
+        ],
+        "lyriaPrompt": "Late-night noir jazz for relaxation, 150 seconds, very slow 4/4 at about 48 BPM with spacious behind-the-beat swing and occasional held bars. Instrumental only, no vocals. Intimate acoustic quartet: soft resonant piano presents the harmonic frame, muted trombone answers with broad breathy descending phrases, upright bass holds stable roots, and sparse brushes create a nearly motionless pulse. Use minor-centered harmony with chromatic descending inner voices, dominant-sus chords, and ambiguous major sonorities; sustain tension without harshness. [Intro] Piano alone, spacious and shadowed. [Theme] Add bass, brushes, and muted trombone. [Dialogue] Trade broad phrases and gradually increase density without getting louder. [Coda] Converge on a quiet open interval. [Outro] Let it decay into a softened unresolved ending. Warm, restrained, tactile acoustic production with gentle room reverb; avoid bright brass, flashy virtuosity, strong backbeat, abrupt transitions, vocals, and cinematic bombast."
+      },
+      "renderedLyriaPrompt": "Late-night noir jazz for relaxation. Instrumental only, no vocals.\n\nInstrumental only, no vocals. Late-night noir jazz for relaxation: restrained dynamics, spacious phrasing, tactile acoustic playing, and jazz harmony with tasteful extensions, suspensions, and gentle chromatic tension. Every piece must have a clear self-contained arc, quiet entrance, gradual development, and softened ending. Vary foreground instrument, ensemble size, room intimacy, groove density, and harmonic rhythm, but avoid abrupt drops, flashy virtuosity, harsh brightness, or cinematic bombast.\n\nAim for approximately 150 seconds, with a self-contained beginning, development and ending.\n\nLate-night noir jazz for relaxation, 150 seconds, very slow 4/4 at about 48 BPM with spacious behind-the-beat swing and occasional held bars. Instrumental only, no vocals. Intimate acoustic quartet: soft resonant piano presents the harmonic frame, muted trombone answers with broad breathy descending phrases, upright bass holds stable roots, and sparse brushes create a nearly motionless pulse. Use minor-centered harmony with chromatic descending inner voices, dominant-sus chords, and ambiguous major sonorities; sustain tension without harshness. [Intro] Piano alone, spacious and shadowed. [Theme] Add bass, brushes, and muted trombone. [Dialogue] Trade broad phrases and gradually increase density without getting louder. [Coda] Converge on a quiet open interval. [Outro] Let it decay into a softened unresolved ending. Warm, restrained, tactile acoustic production with gentle room reverb; avoid bright brass, flashy virtuosity, strong backbeat, abrupt transitions, vocals, and cinematic bombast.\n"
+    },
+    {
+      "number": 14,
+      "targetSeconds": 180,
+      "spec": {
+        "schemaVersion": "1.0",
+        "title": "Dawn Without Arrival",
+        "intent": "A restrained late-night jazz quintet gradually shifts from shadowed minor toward softened, unresolved brightness, offering relaxation through spacious phrasing and gentle repetition.",
+        "genres": [
+          "late-night noir jazz",
+          "ambient jazz",
+          "cool jazz"
+        ],
+        "moods": [
+          "nocturnal and introspective",
+          "quietly hopeful",
+          "softly unresolved"
+        ],
+        "tempo": {
+          "bpm": 58,
+          "feel": "Slow, floating swing with spacious phrasing; increasingly sparse near the ending."
+        },
+        "tonality": {
+          "tonic": "D",
+          "mode": "minor with relative-major inflections and common-tone ambiguity"
+        },
+        "meter": "4/4",
+        "instrumentation": [
+          {
+            "name": "Piano",
+            "role": "States and develops the simple central motif; provides spacious harmonic voicings.",
+            "timbre": "Warm, intimate acoustic tone with restrained attack and occasional upper-register resonance."
+          },
+          {
+            "name": "Upright bass",
+            "role": "Creates a barely moving low-register foundation and supports the harmonic transformation.",
+            "timbre": "Soft, rounded pizzicato with occasional sustained notes."
+          },
+          {
+            "name": "Brush kit",
+            "role": "Maintains a subtle floating pulse without a pronounced backbeat.",
+            "timbre": "Whispered brushes, featherlight cymbal shimmer, low dynamic ceiling."
+          },
+          {
+            "name": "Flugelhorn",
+            "role": "Lengthens and gently transforms the piano motif into the emotional foreground.",
+            "timbre": "Muted-warm, breathy, lyrical, never forceful."
+          },
+          {
+            "name": "Vibraphone",
+            "role": "Adds a late luminous halo around the returning motif and final harmony.",
+            "timbre": "Sparse, softly damped notes with delicate sustained shimmer."
+          }
+        ],
+        "structure": [
+          {
+            "section": "Intro",
+            "durationSeconds": 25,
+            "direction": "Solo piano presents a simple, shadowed motif in minor-ninth and suspended colors, with generous silence."
+          },
+          {
+            "section": "Development",
+            "durationSeconds": 55,
+            "direction": "Upright bass and whispered brushes enter with a barely moving floating swing; piano broadens its voicings while preserving the motif."
+          },
+          {
+            "section": "Expansion",
+            "durationSeconds": 55,
+            "direction": "Flugelhorn enters in long, breath-like phrases, gradually introducing relative-major inflections without resolving the underlying ambiguity."
+          },
+          {
+            "section": "Halo",
+            "durationSeconds": 30,
+            "direction": "Vibraphone adds sparse, glowing tones around the flugelhorn and piano; density increases gently but never becomes dramatic."
+          },
+          {
+            "section": "Outro",
+            "durationSeconds": 15,
+            "direction": "Layers recede in reverse order, leaving piano, bass, and a final shared common tone that fades without a full cadence."
+          }
+        ],
+        "vocals": {
+          "enabled": false,
+          "language": null,
+          "style": null,
+          "lyricalTheme": null
+        },
+        "production": "Intimate acoustic room with warm, soft-edged recording, close piano and bass perspective, restrained stereo width, gentle natural reverb, clear separation, and preserved dynamic nuance. Avoid abrupt transitions; let entrances and exits feel breathed and deliberate.",
+        "avoid": [
+          "vocals",
+          "abrupt drops",
+          "flashy virtuosity",
+          "harsh brightness",
+          "pronounced backbeat",
+          "cinematic bombast",
+          "fully resolved cadence"
+        ],
+        "assumptions": [
+          "D minor is used as a flexible tonal center for the shadowed opening.",
+          "A slow 58 BPM pulse supports the requested floating swing and relaxation."
+        ],
+        "lyriaPrompt": "Late-night noir jazz quintet for relaxation, approximately 3 minutes, slow floating swing at 58 BPM in 4/4. Instrumental only, no vocals. Begin with intimate piano stating a simple motif in shadowed minor-ninth and suspended harmony, leaving generous silence. Gradually add soft upright bass and whispering brushes with a barely moving pulse. Let breathy flugelhorn lengthen and gently transform the motif, introducing subtle relative-major inflections while preserving unresolved common-tone ambiguity. Near the later section, add sparse, softly shimmering vibraphone as a luminous halo. Keep dynamics restrained, phrasing spacious, and the acoustic room warm and intimate. Recede by removing vibraphone, flugelhorn, brushes, and bass in turn, ending on a quiet shared common tone without a full cadence. Avoid abrupt drops, flashy virtuosity, harsh brightness, pronounced backbeat, cinematic bombast, and vocals."
+      },
+      "renderedLyriaPrompt": "Late-night noir jazz for relaxation. Instrumental only, no vocals.\n\nInstrumental only, no vocals. Late-night noir jazz for relaxation: restrained dynamics, spacious phrasing, tactile acoustic playing, and jazz harmony with tasteful extensions, suspensions, and gentle chromatic tension. Every piece must have a clear self-contained arc, quiet entrance, gradual development, and softened ending. Vary foreground instrument, ensemble size, room intimacy, groove density, and harmonic rhythm, but avoid abrupt drops, flashy virtuosity, harsh brightness, or cinematic bombast.\n\nAim for approximately 180 seconds, with a self-contained beginning, development and ending.\n\nLate-night noir jazz quintet for relaxation, approximately 3 minutes, slow floating swing at 58 BPM in 4/4. Instrumental only, no vocals. Begin with intimate piano stating a simple motif in shadowed minor-ninth and suspended harmony, leaving generous silence. Gradually add soft upright bass and whispering brushes with a barely moving pulse. Let breathy flugelhorn lengthen and gently transform the motif, introducing subtle relative-major inflections while preserving unresolved common-tone ambiguity. Near the later section, add sparse, softly shimmering vibraphone as a luminous halo. Keep dynamics restrained, phrasing spacious, and the acoustic room warm and intimate. Recede by removing vibraphone, flugelhorn, brushes, and bass in turn, ending on a quiet shared common tone without a full cadence. Avoid abrupt drops, flashy virtuosity, harsh brightness, pronounced backbeat, cinematic bombast, and vocals.\n"
+    }
+  ]
+}

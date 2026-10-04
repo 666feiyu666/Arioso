@@ -1,0 +1,98 @@
+{
+  "inputSha256": "b14baa0c6876e3cb7bd7f053e08c433befb9d143e710e71636f5d7e293dd951c",
+  "spec": {
+    "schemaVersion": "1.0",
+    "title": "Velvet Corridor",
+    "intent": "A self-contained late-night noir jazz miniature for relaxation, built around a featherlight bossa-inflected pulse, interlocking nylon-string guitar and piano, and restrained muted-trumpet punctuation.",
+    "genres": [
+      "late-night noir jazz",
+      "bossa-inflected jazz",
+      "instrumental lounge jazz"
+    ],
+    "moods": [
+      "quietly nocturnal",
+      "velvety",
+      "relaxed",
+      "subtly unresolved"
+    ],
+    "tempo": {
+      "bpm": 66,
+      "feel": "Slow, flexible bossa-inflected pulse with understated syncopation and no dance emphasis."
+    },
+    "tonality": {
+      "tonic": "D",
+      "mode": "minor with major-seventh and suspended color"
+    },
+    "meter": "4/4",
+    "instrumentation": [
+      {
+        "name": "Nylon-string guitar",
+        "role": "Establishes the soft syncopated pulse and repeating chordal pattern.",
+        "timbre": "Warm, intimate, lightly fingerpicked."
+      },
+      {
+        "name": "Piano",
+        "role": "Interlocks with the guitar and fills the upper harmonic space.",
+        "timbre": "Soft acoustic attack, spacious voicings, restrained sustain."
+      },
+      {
+        "name": "Muted trumpet",
+        "role": "Adds short nocturnal comments and clipped melodic punctuation.",
+        "timbre": "Close, breathy cup-muted tone; sparse phrasing."
+      },
+      {
+        "name": "Upright bass",
+        "role": "Provides a gentle low-register foundation and supports deceptive harmonic turns.",
+        "timbre": "Round, woody, lightly damped pizzicato."
+      },
+      {
+        "name": "Brush kit",
+        "role": "Maintains a featherlight pulse and subtle transitions.",
+        "timbre": "Soft brushes, minimal cymbal wash, relaxed dynamics."
+      }
+    ],
+    "structure": [
+      {
+        "section": "Intro",
+        "durationSeconds": 16,
+        "direction": "Nylon-string guitar alone establishes the flexible bossa pulse with minor-key ii–V colors."
+      },
+      {
+        "section": "Theme",
+        "durationSeconds": 28,
+        "direction": "Piano enters with interlocking upper voicings; upright bass and very soft brushes join without increasing intensity."
+      },
+      {
+        "section": "Conversation",
+        "durationSeconds": 32,
+        "direction": "Muted trumpet introduces clipped, nocturnal motifs while guitar and piano answer in short phrases; use lush major-seventh side steps and deceptive cadences."
+      },
+      {
+        "section": "Receding Coda",
+        "durationSeconds": 29,
+        "direction": "Trumpet withdraws, leaving guitar and bass to soften the pattern; end on an unresolved, spacious color rather than a firm cadence."
+      }
+    ],
+    "vocals": {
+      "enabled": false,
+      "language": null,
+      "style": null,
+      "lyricalTheme": null
+    },
+    "production": "Intimate acoustic room, warm and close-miked, with gentle stereo separation and soft plate-like ambience. Preserve dynamic restraint, spacious phrasing, tactile string detail, and a dark but non-aggressive low register.",
+    "avoid": [
+      "vocals",
+      "abrupt drops",
+      "flashy solos",
+      "bright pop production",
+      "heavy percussion",
+      "cinematic bombast",
+      "emphatic final cadence"
+    ],
+    "assumptions": [
+      "D minor is used as a practical tonal center for the specified minor-key harmony.",
+      "A slow 66 BPM pulse supports the 105-second arc without sounding static."
+    ],
+    "lyriaPrompt": "Late-night noir jazz for relaxation, 105 seconds, slow flexible bossa-inflected 4/4 pulse around 66 BPM, instrumental only, no vocals. Intimate nylon-string guitar establishes a featherlight syncopated chord pattern; soft piano interlocks in the upper register, upright bass gives a warm restrained foundation, and brushed drums remain barely present. After a quiet introduction, muted trumpet enters with sparse clipped nocturnal motifs and short conversational exchanges with guitar and piano. Use minor-key ii–V colors, lush major-seventh side steps, suspended tones, and deceptive cadences that avoid emphatic arrival. Gradually thin the conversation back to guitar and bass, ending softly on an unresolved spacious harmony. Warm close acoustic room, gentle ambience, restrained dynamics, no flashy solos, no abrupt drops, no bright pop sheen, no heavy percussion, no cinematic bombast."
+  }
+}

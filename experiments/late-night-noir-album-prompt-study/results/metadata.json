@@ -1,0 +1,9 @@
+{
+  "startedAt": "2026-10-04T07:28:25.149Z",
+  "composerModel": "gpt-5.6-luna",
+  "promptTargetModel": "lyria-3.5",
+  "status": "candidate",
+  "maxConcurrency": 3,
+  "maxRepairPasses": 1,
+  "apiWorkflow": "Existing Arioso runComposerAgent and composeMusic; no audio generation calls"
+}

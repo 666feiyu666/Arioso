@@ -1,0 +1,93 @@
+{
+  "inputSha256": "d55c9a0707c5947cf3c3739e7576d604c3365735cea5ea6b52c460c08c13153d",
+  "spec": {
+    "schemaVersion": "1.0",
+    "title": "Windowlight Waltz",
+    "intent": "A self-contained late-night noir jazz waltz for relaxation, led by a simple felted-piano motif and softened by spacious trio interplay.",
+    "genres": [
+      "late-night noir jazz",
+      "jazz waltz",
+      "ambient jazz"
+    ],
+    "moods": [
+      "nocturnal",
+      "unhurried",
+      "intimate",
+      "gently unresolved"
+    ],
+    "tempo": {
+      "bpm": 64,
+      "feel": "Slow, lightly swung 3/4 with flexible brush circles and understated bass anticipation."
+    },
+    "tonality": {
+      "tonic": "D",
+      "mode": "Dorian minor"
+    },
+    "meter": "3/4",
+    "instrumentation": [
+      {
+        "name": "felted piano",
+        "role": "States the nocturnal motif, supplies spacious extended voicings, and returns as the final foreground voice.",
+        "timbre": "Soft, close, lightly muted attack with warm low mids and delicate treble resonance."
+      },
+      {
+        "name": "upright bass",
+        "role": "Provides a floating three-beat cushion, understated anticipation, and brief answering fragments.",
+        "timbre": "Warm woody pizzicato, restrained sustain, intimate low-register presence."
+      },
+      {
+        "name": "brush kit",
+        "role": "Shapes a quiet circular pulse and subtly broadens the middle section.",
+        "timbre": "Dry, soft brushes with minimal cymbal wash and gentle tactile motion."
+      }
+    ],
+    "structure": [
+      {
+        "section": "Intro",
+        "durationSeconds": 24,
+        "direction": "Nearly solo felted piano introduces a simple nocturnal motif with sparse D-minor color, added ninths, and suspended tones."
+      },
+      {
+        "section": "Main Waltz",
+        "durationSeconds": 42,
+        "direction": "Upright bass and soft brushes enter after the opening phrase, establishing a flexible swung 3/4 cushion beneath the piano."
+      },
+      {
+        "section": "Development",
+        "durationSeconds": 48,
+        "direction": "The trio trades small fragments; piano voicings widen, chromatic passing chords add restrained noir tension, and dynamics remain subdued."
+      },
+      {
+        "section": "Return",
+        "durationSeconds": 24,
+        "direction": "The original piano motif returns with thinner bass and lighter brushes, allowing space between phrases."
+      },
+      {
+        "section": "Outro",
+        "durationSeconds": 12,
+        "direction": "Layers recede to piano, ending on a quiet incomplete cadence with suspended unresolved color."
+      }
+    ],
+    "vocals": {
+      "enabled": false,
+      "language": null,
+      "style": null,
+      "lyricalTheme": null
+    },
+    "production": "Intimate acoustic trio recording in a dim, softly reverberant room; close felt-piano detail, warm centered bass, restrained stereo brush movement, low dynamic ceiling, spacious phrasing, and a gently softened ending.",
+    "avoid": [
+      "vocals",
+      "abrupt drops",
+      "flashy virtuosity",
+      "harsh brightness",
+      "cinematic bombast",
+      "heavy cymbals",
+      "busy drum fills"
+    ],
+    "assumptions": [
+      "D Dorian provides a minor-colored but relaxed harmonic center.",
+      "64 BPM supports the requested floating, lightly swung waltz feel."
+    ],
+    "lyriaPrompt": "Late-night noir jazz waltz for relaxation, 150 seconds, slow 3/4 at about 64 BPM with a flexible light swing. Instrumental only, no vocals. Intimate felted piano trio: the piano states a simple nocturnal motif over a minor-colored Dorian center, using spacious added ninths, suspended dominants, and occasional chromatic passing chords. Begin nearly solo, then bring in warm upright bass and soft brushed drums after the first phrase. Let the trio trade restrained fragments while piano voicings gradually widen through a quiet middle passage, never becoming dramatic. Return to the opening motif, thin the texture back toward piano, and finish with a softly incomplete suspended cadence. Tactile acoustic playing, dim room ambience, spacious phrasing, warm low register, restrained dynamics, gentle repetition. Avoid vocals, abrupt drops, flashy virtuosity, harsh brightness, heavy cymbals, and cinematic bombast."
+  }
+}

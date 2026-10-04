@@ -21,4 +21,13 @@ describe("composer skill", () => {
     expect(orchestral).toContain("entrance and exit explicitly");
     expect(orchestral).not.toContain("[TODO:");
   });
+
+  it("loads album authoring and selective review guidance only in album mode", async () => {
+    const single = await loadComposerSkill();
+    const album = await loadComposerSkill("album");
+    expect(single).not.toContain("Review actual candidate prompts together");
+    expect(album).toContain("Review actual candidate prompts together");
+    expect(album).toContain("at most one selective repair pass");
+    expect(album).toContain("Instrumentation, acoustic space, dynamics and production are authorial choices");
+  });
 });

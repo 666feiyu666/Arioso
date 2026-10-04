@@ -1,0 +1,101 @@
+{
+  "inputSha256": "f55ceedb8806d3e8aa9d0e32c00942e53f8aa425fef0bfcefef85b2df1f01aa0",
+  "spec": {
+    "schemaVersion": "1.0",
+    "title": "Underpass Lullaby",
+    "intent": "A quiet late-night noir jazz meditation in gently lilted 5/4, moving from low bass repetition toward a fragile flute melody before dissolving into air and harmonics.",
+    "genres": [
+      "late-night noir jazz",
+      "ambient jazz",
+      "chamber jazz"
+    ],
+    "moods": [
+      "hushed",
+      "nocturnal",
+      "slightly uneasy",
+      "tender",
+      "softly unresolved"
+    ],
+    "tempo": {
+      "bpm": 54,
+      "feel": "Slow, gentle 5/4 grouped 2+3; lilting rather than mathematical, with spacious phrasing and soft brush motion."
+    },
+    "tonality": {
+      "tonic": "D",
+      "mode": "Dorian minor with chromatic bass approaches"
+    },
+    "meter": "5/4, felt as 2+3",
+    "instrumentation": [
+      {
+        "name": "upright bass",
+        "role": "Establishes and sustains the low repeating lullaby figure; later exposes quiet harmonics.",
+        "timbre": "Warm, woody, restrained pizzicato with occasional bowed or natural harmonics."
+      },
+      {
+        "name": "warm electric piano",
+        "role": "Adds sparse nocturnal harmony and subtle color around the bass figure.",
+        "timbre": "Soft, rounded attack; spacious minor-ninth voicings and open fifths."
+      },
+      {
+        "name": "flute",
+        "role": "Carries the fragile foreground melody in short, breath-shaped phrases.",
+        "timbre": "Airy, delicate, intimate, with restrained vibrato and occasional lower-register shadows."
+      },
+      {
+        "name": "soft brushes",
+        "role": "Provides barely audible pulse and phrase transitions without a strong backbeat.",
+        "timbre": "Featherlight circular brushes, sparse swells, and muted texture."
+      }
+    ],
+    "structure": [
+      {
+        "section": "Intro",
+        "durationSeconds": 20,
+        "direction": "Solo upright bass establishes the 5/4 figure, grouped 2+3, with silence between phrases and no fixed dramatic buildup."
+      },
+      {
+        "section": "Theme",
+        "durationSeconds": 25,
+        "direction": "Electric piano enters with sparse revolving minor-ninth colors and chromatic bass approaches; keep the register low and the dynamics restrained."
+      },
+      {
+        "section": "Development",
+        "durationSeconds": 35,
+        "direction": "Flute introduces short, fragile phrases. Let the ensemble alternate between bass-led repetition and open spaces, gradually widening the flute register without becoming busy."
+      },
+      {
+        "section": "Reprise",
+        "durationSeconds": 20,
+        "direction": "Flute and electric piano gently echo the central motif; occasional open fifths create brief release while preserving ambiguity."
+      },
+      {
+        "section": "Outro",
+        "durationSeconds": 20,
+        "direction": "Remove brushes and electric piano, leaving bass fragments and quiet harmonics surrounded by air; end softened and unresolved, never abruptly."
+      }
+    ],
+    "vocals": {
+      "enabled": false,
+      "language": null,
+      "style": null,
+      "lyricalTheme": null
+    },
+    "production": "Intimate acoustic chamber-jazz room with a dark, warm stereo image. Keep dynamics low and tactile, with close upright bass, softly diffused electric piano, airy flute, and brushes recessed in a gentle room reverb. Preserve silence between phrases and avoid excessive brightness or density.",
+    "avoid": [
+      "vocals",
+      "strong backbeat",
+      "fast swing",
+      "rigid or mechanical 5/4",
+      "flashy solos",
+      "harsh brightness",
+      "abrupt drops",
+      "cinematic bombast",
+      "fully resolved cadence"
+    ],
+    "assumptions": [
+      "D Dorian is used as a flexible tonal center rather than a fixed key.",
+      "The target duration is organized as five softly connected sections totaling about 120 seconds."
+    ],
+    "lyriaPrompt": "Late-night noir jazz meditation for relaxation, instrumental only, no vocals. About 120 seconds at a slow 54 BPM in gently lilting 5/4 grouped 2+3, never rigid or puzzle-like. Warm upright bass establishes a low repeating lullaby figure with chromatic approaches; sparse warm electric piano adds revolving minor-ninth voicings, suspended color, and occasional open fifths. An airy flute enters with fragile, breath-shaped phrases, while very soft brushes mark only occasional transitions. Begin nearly alone with bass and silence, gradually add electric piano, then let flute widen the motif through a quiet middle passage. End by removing layers until only bass fragments, faint harmonics, and air remain, softly unresolved. Intimate dark room sound, tactile acoustic playing, spacious phrasing, restrained dynamics, gentle repetition, and no abrupt ending, harsh brightness, flashy virtuosity, strong backbeat, or cinematic bombast."
+  }
+}

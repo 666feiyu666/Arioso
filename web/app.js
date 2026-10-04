@@ -11,7 +11,25 @@ const translations = {
     multiMovement: "多乐章", orchestralTitle: "管弦乐作曲",
     orchestralDescription: "由 Agent 规划统一主题与完整乐章，再依次生成一部连贯的管弦乐作品。",
     enterOrchestralStudio: "进入管弦乐创作台 →", sameThemeTracks: "同一主题 · 多曲目",
-    albumTitle: "专辑作曲", albumDescription: "围绕同一音乐身份规划多首独立曲目，保持主题、音色与制作风格的一致性。",
+    albumTitle: "专辑与播放列表", albumDescription: "一次生成整批候选曲，试听并选择收录，组成可以连续播放的专辑。",
+    enterAlbums: "打开专辑 →", yourAlbums: "你的专辑。", newAlbum: "＋ 新建专辑",
+    albumShelfCopy: "打开一张专辑，听听候选曲，再选出你想收录的声音。", emptyAlbums: "还没有专辑。从一个音乐主题开始吧。",
+    albumBadge: "专辑 · 纯器乐", albumHeroEyebrow: "COMPOSE AN ALBUM",
+    albumHeroTitle: "给一组声音，<br />一个共同的世界。",
+    albumHeroCopy: "描述专辑的主题与用途。专辑作者会构思整批候选曲，回看和修改方案，然后统一生成。",
+    albumGenerationHelp: "纯器乐 · 每首约 1–3 分钟。整批构思、回看并生成，之后由你选择收录。",
+    albumExamplesTitle: "从一个专辑主题开始", candidateCount: "候选曲数", albumTargetDuration: "目标总时长",
+    albumIdea: "专辑构想", backAlbums: "← 返回专辑", albumCandidates: "候选试听", albumIncluded: "已收录列表",
+    albumTrackCount: "{count} 首候选曲", albumIncludedCount: "已收录 {count} 首", albumAudioDuration: "已生成音频 {duration}",
+    albumPlaylistDuration: "播放列表 {duration}", playPlaylist: "播放列表", playCandidates: "试听候选曲",
+    albumSelectionHint: "试听后选择收录。已收录列表按你的顺序连续播放。",
+    noIncludedTracks: "还没有收录曲目。到候选试听中选出想放进专辑的曲目。",
+    albumPreparing: "正在构思并审阅候选曲方案。", albumGenerating: "正在生成候选曲，已完成 {completed}/{total} 首。",
+    albumCandidateReady: "{count} 首可以试听", albumCandidate: "暂留", albumInclude: "收录", albumExclude: "排除",
+    albumAdmissionIncluded: "已收录", albumAdmissionCandidate: "候选", albumAdmissionExcluded: "已排除",
+    previousTrack: "上一首", nextTrack: "下一首", moveTrackUp: "上移曲目", moveTrackDown: "下移曲目",
+    albumUpdateFailed: "无法保存专辑选择。", albumRetryTrack: "重新生成", albumPrompt: "查看音乐方案",
+    albumTargetTime: "目标 {duration}", albumAutoplayBlocked: "点击唱片即可开始播放。", albumNoAudio: "音频生成后即可试听。",
     viewAlbumDevelopment: "查看开发进度 →", inDevelopment: "正在开发中",
     albumDevelopmentTitle: "让一组作品，拥有同一种声音。",
     albumDevelopmentCopy: "专辑作曲将复用管弦乐工作流中的共享音乐契约与多曲目任务模型。在 03 成熟后开放。",
@@ -92,7 +110,25 @@ const translations = {
     multiMovement: "Multi-movement", orchestralTitle: "Orchestral composition",
     orchestralDescription: "Let an agent plan a shared identity and complete movements, then generate a coherent orchestral work in sequence.",
     enterOrchestralStudio: "Enter orchestral studio →", sameThemeTracks: "One identity · Multiple tracks",
-    albumTitle: "Album composition", albumDescription: "Plan independent tracks around one musical identity with consistent themes, timbre, and production.",
+    albumTitle: "Albums & playlists", albumDescription: "Generate a collection of candidates, choose the tracks to include, and listen as a continuous album.",
+    enterAlbums: "Open albums →", yourAlbums: "Your albums.", newAlbum: "+ New album",
+    albumShelfCopy: "Open an album, listen to its candidates, and choose the sounds to include.", emptyAlbums: "No albums yet. Start with a musical theme.",
+    albumBadge: "Album · Instrumental", albumHeroEyebrow: "COMPOSE AN ALBUM",
+    albumHeroTitle: "Give a collection of sounds<br />a shared world.",
+    albumHeroCopy: "Describe the album's theme and purpose. The album author plans, reviews, and revises a full set of candidates before generating them.",
+    albumGenerationHelp: "Instrumental · approximately 1–3 minutes per track. Plan, review, and generate the whole set, then choose what to include.",
+    albumExamplesTitle: "Start with an album theme", candidateCount: "Candidate tracks", albumTargetDuration: "Target duration",
+    albumIdea: "Album idea", backAlbums: "← Back to albums", albumCandidates: "Candidate listening", albumIncluded: "Included playlist",
+    albumTrackCount: "{count} candidates", albumIncludedCount: "{count} included", albumAudioDuration: "Generated audio {duration}",
+    albumPlaylistDuration: "Playlist {duration}", playPlaylist: "Play playlist", playCandidates: "Listen to candidates",
+    albumSelectionHint: "Listen and choose what to include. The included playlist plays continuously in your chosen order.",
+    noIncludedTracks: "No tracks included yet. Choose tracks from Candidate listening to build your album.",
+    albumPreparing: "Planning and reviewing the candidate tracks.", albumGenerating: "Generating candidates. {completed}/{total} tracks ready.",
+    albumCandidateReady: "{count} ready to listen", albumCandidate: "Keep candidate", albumInclude: "Include", albumExclude: "Exclude",
+    albumAdmissionIncluded: "Included", albumAdmissionCandidate: "Candidate", albumAdmissionExcluded: "Excluded",
+    previousTrack: "Previous track", nextTrack: "Next track", moveTrackUp: "Move track up", moveTrackDown: "Move track down",
+    albumUpdateFailed: "Album selection could not be saved.", albumRetryTrack: "Generate again", albumPrompt: "View music plan",
+    albumTargetTime: "Target {duration}", albumAutoplayBlocked: "Click the record to start playback.", albumNoAudio: "Listen once the audio is ready.",
     viewAlbumDevelopment: "View development status →", inDevelopment: "In development",
     albumDevelopmentTitle: "Give a collection of pieces one recognizable voice.",
     albumDevelopmentCopy: "Album composition will reuse the shared musical contract and multi-track task model proven by the orchestral workflow. It will open after workflow 03 matures.",
@@ -277,11 +313,36 @@ const orchestralExamples = [
   },
 ];
 
+const albumExamples = [
+  {
+    title: "Late Night Noir", description: "深夜 noir jazz，留白、温暖与一点悬疑，适合放松。",
+    prompt: "Late night noir jazz for relaxation. An instrumental album with a thoughtful balance of cohesion and variety. Quiet, intimate, spacious, and gently mysterious. Each independent candidate can last approximately 1–3 minutes.",
+    tags: ["Noir Jazz", "深夜", "纯器乐"], vocalMode: "instrumental",
+    en: { title: "Late Night Noir", description: "Late-night noir jazz with warmth, space, and a touch of mystery for relaxation.", tags: ["Noir Jazz", "Late night", "Instrumental"] },
+  },
+  {
+    title: "雨窗旁", description: "安静的爵士与雨天氛围，陪伴阅读和独处。",
+    prompt: "An instrumental album for reading beside a rain-streaked window. Intimate jazz, unhurried melodies, and room to breathe. Let the album author decide how instruments, rhythm, and harmony vary while maintaining a calm shared world.",
+    tags: ["Jazz", "阅读", "纯器乐"], vocalMode: "instrumental",
+    en: { title: "By the Rainy Window", description: "Quiet jazz and rainy-day atmosphere for reading and solitude.", tags: ["Jazz", "Reading", "Instrumental"] },
+  },
+  {
+    title: "海岸微光", description: "朦胧的器乐声音，从黄昏走向宁静的夜晚。",
+    prompt: "An instrumental album inspired by a coastline at dusk, moving gently toward a quiet night. Soft ambient textures and delicate acoustic detail, suitable for unwinding. Give each independent track a distinct musical idea within the album's world.",
+    tags: ["Ambient", "黄昏", "纯器乐"], vocalMode: "instrumental",
+    en: { title: "Coastal Glow", description: "Instrumental textures drifting from dusk into a peaceful night.", tags: ["Ambient", "Dusk", "Instrumental"] },
+  },
+];
+
 const state = {
   tasks: [],
   selectedTaskId: null,
   playingTaskId: null,
   playingMovementId: null,
+  playingAlbumTrackId: null,
+  albumPlaybackScope: "candidate",
+  albumPlaybackTrackOrder: [],
+  albumViewScope: "candidate",
   playbackStatus: "ready",
   playbackRequest: 0,
   corpusMode: "none",
@@ -300,7 +361,8 @@ const state = {
 };
 const elements = {
   entryView: document.querySelector("#entry-view"),
-  developmentView: document.querySelector("#development-view"),
+  albumView: document.querySelector("#album-view"),
+  albumGrid: document.querySelector("#album-grid"),
   entryMessage: document.querySelector("#entry-message"),
   homeView: document.querySelector("#home-view"),
   taskView: document.querySelector("#task-view"),
@@ -318,6 +380,13 @@ const elements = {
   message: document.querySelector("#form-message"),
   mode: document.querySelector("#mode-select"),
   lyriaModel: document.querySelector("#lyria-model-select"),
+  modeSetting: document.querySelector("#generation-mode-setting"),
+  lyriaSetting: document.querySelector("#lyria-model-setting"),
+  albumCountSetting: document.querySelector("#album-count-setting"),
+  albumCount: document.querySelector("#album-count-select"),
+  albumDurationSetting: document.querySelector("#album-duration-setting"),
+  albumDuration: document.querySelector("#album-duration-select"),
+  albumGenerationHelp: document.querySelector("#album-generation-help"),
   corpusMode: document.querySelector("#corpus-mode-select"),
   jazzCorpusSetting: document.querySelector("#jazz-corpus-setting"),
   jazzCorpusHelp: document.querySelector("#jazz-corpus-help"),
@@ -331,6 +400,9 @@ const elements = {
   playerTitle: document.querySelector("#player-title"),
   playerMeta: document.querySelector("#player-meta"),
   playerToggle: document.querySelector("#player-toggle"),
+  playlistControls: document.querySelector("#playlist-controls"),
+  playerPrevious: document.querySelector("#player-previous"),
+  playerNext: document.querySelector("#player-next"),
   playerStatus: document.querySelector("#player-status"),
   settingsDialog: document.querySelector("#settings-dialog"),
   settingsForm: document.querySelector("#settings-form"),
@@ -368,6 +440,7 @@ function workflowTypeForTask(task) {
     return task.workflowType;
   }
   if (task.compositionMode === "orchestral") return "03-orchestral";
+  if (task.compositionMode === "album") return "04-album";
   if (normalizeCorpusMode(task.corpusMode) === "jazz" || task.retrievalQuery) return "02-jazz";
   return "01-general";
 }
@@ -385,24 +458,30 @@ function renderComposerContext() {
   const isJazz = state.workflowType === "02-jazz";
   const usesJazzCorpus = state.corpusMode === "jazz";
   const isOrchestral = state.compositionMode === "orchestral";
+  const isAlbum = state.compositionMode === "album";
   elements.heroEyebrow.textContent = t(
-    isOrchestral ? "orchestralHeroEyebrow" : isJazz ? "jazzHeroEyebrow" : "heroEyebrow",
+    isAlbum ? "albumHeroEyebrow" : isOrchestral ? "orchestralHeroEyebrow" : isJazz ? "jazzHeroEyebrow" : "heroEyebrow",
   );
   elements.heroTitle.innerHTML = t(
-    isOrchestral ? "orchestralHeroTitle" : isJazz ? "jazzHeroTitle" : "heroTitle",
+    isAlbum ? "albumHeroTitle" : isOrchestral ? "orchestralHeroTitle" : isJazz ? "jazzHeroTitle" : "heroTitle",
   );
   elements.heroCopy.textContent = t(
-    isOrchestral ? "orchestralHeroCopy"
+    isAlbum ? "albumHeroCopy" : isOrchestral ? "orchestralHeroCopy"
       : isJazz ? (usesJazzCorpus ? "jazzHeroCopy" : "jazzNoCorpusHeroCopy") : "heroCopy",
   );
   elements.creationModeBadge.textContent = t(
-    isOrchestral ? "orchestralBadge"
+    isAlbum ? "albumBadge" : isOrchestral ? "orchestralBadge"
       : isJazz ? (usesJazzCorpus ? "jazzCorpusBadge" : "jazzNoCorpusBadge") : "noCorpusBadge",
   );
   document.querySelector("#examples-title").textContent = t(
-    isOrchestral ? "orchestralTitle" : isJazz ? "jazzExamplesTitle" : "generalExamplesTitle",
+    isAlbum ? "albumExamplesTitle" : isOrchestral ? "orchestralTitle" : isJazz ? "jazzExamplesTitle" : "generalExamplesTitle",
   );
-  elements.vocalSetting.hidden = isOrchestral;
+  elements.vocalSetting.hidden = isOrchestral || isAlbum;
+  elements.modeSetting.hidden = isAlbum;
+  elements.lyriaSetting.hidden = isAlbum;
+  elements.albumCountSetting.hidden = !isAlbum;
+  elements.albumDurationSetting.hidden = !isAlbum;
+  elements.albumGenerationHelp.hidden = !isAlbum;
   elements.jazzCorpusSetting.hidden = !isJazz;
   elements.corpusMode.value = state.corpusMode;
   elements.corpusMode.disabled = !state.supportsJazzCorpusToggle;
@@ -445,6 +524,7 @@ function applyTranslations() {
   renderComposerContext();
   renderExamples();
   renderTaskList();
+  renderAlbums();
   const selected = state.tasks.find((task) => task.id === state.selectedTaskId);
   if (selected) renderTaskDetail(selected);
   if (state.playingTaskId) {
@@ -457,6 +537,7 @@ function applyTranslations() {
       elements.playerMeta.textContent = `${playing.lyriaModel} · ${t("finishedTrack")}`;
     }
   }
+  syncPlayerMetadata();
   renderCredentialStatus();
 }
 
@@ -470,7 +551,7 @@ function selectVocalMode(mode) {
 }
 
 function escapeHtml(value = "") {
-  return value.replace(/[&<>'"]/g, (character) => ({
+  return String(value).replace(/[&<>'"]/g, (character) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;",
   })[character]);
 }
@@ -487,6 +568,7 @@ function formatTime(value) {
 function taskIsPlaying(id) {
   return state.playingTaskId === id
     && !state.playingMovementId
+    && !state.playingAlbumTrackId
     && !elements.audio.paused
     && !elements.audio.ended
     && !elements.audio.error;
@@ -547,7 +629,7 @@ function syncPlaybackControls() {
   document.querySelectorAll("[data-play-task]").forEach((button) => {
     const task = state.tasks.find((item) => item.id === button.dataset.playTask);
     const playing = taskIsPlaying(button.dataset.playTask);
-    const selected = state.playingTaskId === button.dataset.playTask && !state.playingMovementId;
+    const selected = state.playingTaskId === button.dataset.playTask && !state.playingMovementId && !state.playingAlbumTrackId;
     const title = task?.title || task?.description || t("thisMusic");
 
     if (button.classList.contains("record-control")) {
@@ -578,9 +660,30 @@ function syncPlaybackControls() {
             : t("playMusic");
     }
   });
+  document.querySelectorAll("[data-play-album-track]").forEach((button) => {
+    const selected = state.playingTaskId === button.dataset.parentTask && state.playingAlbumTrackId === button.dataset.playAlbumTrack;
+    const playing = selected && !elements.audio.paused && !elements.audio.ended && !elements.audio.error;
+    const track = state.tasks.find((task) => task.id === button.dataset.parentTask)?.albumTracks?.find((item) => item.id === button.dataset.playAlbumTrack);
+    button.textContent = playing ? "Ⅱ" : "▶";
+    button.setAttribute("aria-label", t(playing ? "pauseNamed" : "playNamed", { title: track?.title || t("thisMusic") }));
+    button.setAttribute("aria-pressed", String(playing));
+  });
+  document.querySelectorAll("[data-album-row]").forEach((row) => {
+    const selected = row.dataset.parentTask === state.playingTaskId && row.dataset.albumRow === state.playingAlbumTrackId;
+    row.classList.toggle("current", selected);
+    if (selected) row.setAttribute("aria-current", "true");
+    else row.removeAttribute("aria-current");
+  });
+  const albumQueue = currentAlbumQueue();
+  const albumIndex = albumQueue.findIndex((track) => track.id === state.playingAlbumTrackId);
+  elements.playlistControls.hidden = !state.playingAlbumTrackId;
+  elements.playerPrevious.disabled = albumIndex <= 0;
+  const previousIndex = state.albumPlaybackTrackOrder.indexOf(state.playingAlbumTrackId);
+  const remaining = previousIndex >= 0 && state.albumPlaybackTrackOrder.slice(previousIndex + 1).some((id) => albumQueue.some((track) => track.id === id));
+  elements.playerNext.disabled = albumIndex >= 0 ? albumIndex >= albumQueue.length - 1 : !remaining;
   document.querySelectorAll("[data-audio-task]").forEach((panel) => {
     const selected = panel.dataset.audioTask === state.playingTaskId
-      && (panel.dataset.audioMovement || null) === state.playingMovementId;
+      && (panel.dataset.audioMovement || null) === state.playingMovementId && !state.playingAlbumTrackId;
     panel.querySelector("[data-playback-status]").textContent = playbackStatusLabel(playbackStatus(selected));
   });
   if (state.playingTaskId) {
@@ -598,7 +701,7 @@ async function playTask(id) {
 
   try {
     elements.message.textContent = "";
-    if (state.playingTaskId === id && !state.playingMovementId && !elements.audio.error && state.playbackStatus !== "error") {
+    if (state.playingTaskId === id && !state.playingMovementId && !state.playingAlbumTrackId && !elements.audio.error && state.playbackStatus !== "error") {
       if (elements.audio.paused) {
         if (elements.audio.ended) elements.audio.currentTime = 0;
         await elements.audio.play();
@@ -610,6 +713,7 @@ async function playTask(id) {
 
     state.playingTaskId = id;
     state.playingMovementId = null;
+    state.playingAlbumTrackId = null;
     state.playbackStatus = "loading";
     elements.playerTitle.textContent = task.title || task.description;
     elements.playerMeta.textContent = `${task.lyriaModel} · ${t("finishedTrack")}`;
@@ -645,6 +749,7 @@ async function playMovement(taskId, movementId) {
 
     state.playingTaskId = taskId;
     state.playingMovementId = movementId;
+    state.playingAlbumTrackId = null;
     state.playbackStatus = "loading";
     elements.playerTitle.textContent = `${movement.order}. ${movement.title}`;
     elements.playerMeta.textContent = `${task.lyriaModel} · ${task.title || task.description}`;
@@ -662,8 +767,203 @@ async function playMovement(taskId, movementId) {
   }
 }
 
+function albumTracks(task, scope = "candidate", playableOnly = false) {
+  const tracks = [...(task?.albumTracks || [])];
+  const ordered = scope === "included"
+    ? (task?.albumPlaylist || []).map((id) => tracks.find((track) => track.id === id && track.admission === "included")).filter(Boolean)
+    : tracks.sort((a, b) => a.order - b.order);
+  return playableOnly ? ordered.filter((track) => track.audioFile && track.admission !== "excluded") : ordered;
+}
+
+function durationLabel(seconds) {
+  if (!Number.isFinite(seconds) || seconds <= 0) return "—";
+  const rounded = Math.round(seconds);
+  return `${Math.floor(rounded / 60)}:${String(rounded % 60).padStart(2, "0")}`;
+}
+
+function currentAlbumQueue() {
+  return albumTracks(state.tasks.find((task) => task.id === state.playingTaskId), state.albumPlaybackScope, true);
+}
+
+function syncPlayerMetadata() {
+  const task = state.tasks.find((item) => item.id === state.playingTaskId);
+  const track = task?.albumTracks?.find((item) => item.id === state.playingAlbumTrackId);
+  if (!track) return;
+  elements.playerTitle.textContent = track.title;
+  elements.playerMeta.textContent = `${task.albumPlan?.albumTitle || task.title || task.description} · ${t(state.albumPlaybackScope === "included" ? "albumIncluded" : "albumCandidates")}`;
+}
+
+async function playAlbumTrack(taskId, trackId, scope = "candidate", start = false) {
+  const task = state.tasks.find((item) => item.id === taskId);
+  const track = task?.albumTracks?.find((item) => item.id === trackId);
+  if (!track?.audioFile) return;
+  const request = ++state.playbackRequest;
+  try {
+    elements.message.textContent = "";
+    state.albumPlaybackScope = scope;
+    if (!start && state.playingTaskId === taskId && state.playingAlbumTrackId === trackId && !elements.audio.error && state.playbackStatus !== "error") {
+      if (elements.audio.paused) {
+        if (elements.audio.ended) elements.audio.currentTime = 0;
+        await elements.audio.play();
+      } else elements.audio.pause();
+      return;
+    }
+    state.playingTaskId = taskId;
+    state.playingMovementId = null;
+    state.playingAlbumTrackId = trackId;
+    state.albumPlaybackTrackOrder = currentAlbumQueue().map((item) => item.id);
+    state.playbackStatus = "loading";
+    syncPlayerMetadata();
+    elements.globalPlayer.hidden = false;
+    elements.audio.src = `/api/tasks/${encodeURIComponent(taskId)}/album/tracks/${encodeURIComponent(trackId)}/audio`;
+    elements.audio.load();
+    syncPlaybackControls();
+    await elements.audio.play();
+  } catch (error) {
+    if (request !== state.playbackRequest || error?.name === "AbortError") return;
+    state.playbackStatus = error?.name === "NotAllowedError" ? "paused" : "error";
+    elements.message.textContent = t(error?.name === "NotAllowedError" ? "albumAutoplayBlocked" : "audioPlaybackFailed");
+  } finally {
+    syncPlaybackControls();
+  }
+}
+
+function startAlbum(taskId, scope = state.albumViewScope) {
+  const task = state.tasks.find((item) => item.id === taskId);
+  const first = albumTracks(task, scope, true)[0];
+  if (first) return playAlbumTrack(taskId, first.id, scope, true);
+}
+
+function stepAlbumTrack(direction) {
+  const queue = currentAlbumQueue();
+  const index = queue.findIndex((track) => track.id === state.playingAlbumTrackId);
+  const previousIndex = state.albumPlaybackTrackOrder.indexOf(state.playingAlbumTrackId);
+  const following = direction > 0
+    ? state.albumPlaybackTrackOrder.slice(previousIndex + 1)
+    : state.albumPlaybackTrackOrder.slice(0, previousIndex).reverse();
+  const next = index >= 0 ? queue[index + direction]
+    : previousIndex >= 0 ? following.map((id) => queue.find((track) => track.id === id)).find(Boolean) : null;
+  if (next) return playAlbumTrack(state.playingTaskId, next.id, state.albumPlaybackScope, true);
+}
+
+function openAlbum(id) {
+  const task = state.tasks.find((item) => item.id === id);
+  state.albumViewScope = albumTracks(task, "included", true).length ? "included" : "candidate";
+  selectTask(id);
+  return startAlbum(id, state.albumViewScope);
+}
+
+function renderAlbums() {
+  const albums = state.tasks.filter((task) => workflowTypeForTask(task) === "04-album");
+  elements.albumGrid.innerHTML = albums.length ? albums.map((task) => {
+    const ready = albumTracks(task, "candidate", true).length;
+    const included = albumTracks(task, "included").length;
+    const seconds = (task.albumTracks || []).reduce((total, track) => total + (track.audioFile ? track.durationSeconds || 0 : 0), 0);
+    return `<button class="album-card" type="button" data-open-album="${escapeHtml(task.id)}">
+      <span class="album-art" aria-hidden="true"><span class="album-art-line"></span><span class="record-disc"><span class="record-label"></span></span><span class="album-art-caption">ARIOSO / ${escapeHtml(String(task.albumTracks?.length || task.albumCandidateCount || 14).padStart(2, "0"))} TRACKS</span></span>
+      <span class="album-card-copy"><span class="eyebrow">${escapeHtml(t("albumCandidateReady", { count: ready }))}</span><strong>${escapeHtml(task.albumPlan?.albumTitle || task.title || task.description)}</strong><span>${escapeHtml(t("albumIncludedCount", { count: included }))} · ${escapeHtml(durationLabel(seconds))}</span><span class="album-card-state">${escapeHtml(statusLabel(task.status))}</span></span>
+    </button>`;
+  }).join("") : `<p class="album-empty">${escapeHtml(t("emptyAlbums"))}</p>`;
+  elements.albumGrid.querySelectorAll("[data-open-album]").forEach((button) => button.addEventListener("click", () => openAlbum(button.dataset.openAlbum)));
+}
+
+async function updateAlbum(taskId, route, method, payload) {
+  const response = await fetch(`/api/tasks/${encodeURIComponent(taskId)}/album/${route}`, {
+    method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
+  });
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.error || t("albumUpdateFailed"));
+  const index = state.tasks.findIndex((task) => task.id === result.id);
+  if (index >= 0) state.tasks[index] = result;
+  renderAlbums();
+  renderTaskList();
+  if (state.selectedTaskId === result.id) renderAlbumDetail(result);
+  syncPlayerMetadata();
+  return result;
+}
+
+async function changeAdmission(taskId, trackId, admission, button) {
+  button.disabled = true;
+  try {
+    await updateAlbum(taskId, `tracks/${encodeURIComponent(trackId)}`, "PATCH", { admission });
+  } catch (error) {
+    document.querySelector("#album-action-message").textContent = error instanceof Error ? error.message : t("albumUpdateFailed");
+    button.disabled = false;
+  }
+}
+
+async function moveAlbumTrack(taskId, trackId, direction, button) {
+  button.disabled = true;
+  const task = state.tasks.find((item) => item.id === taskId);
+  const ids = albumTracks(task, "included").map((track) => track.id);
+  const index = ids.indexOf(trackId);
+  const next = index + direction;
+  if (index < 0 || next < 0 || next >= ids.length) return;
+  [ids[index], ids[next]] = [ids[next], ids[index]];
+  try {
+    await updateAlbum(taskId, "playlist", "PUT", { trackIds: ids });
+  } catch (error) {
+    document.querySelector("#album-action-message").textContent = error instanceof Error ? error.message : t("albumUpdateFailed");
+    button.disabled = false;
+  }
+}
+
+async function retryAlbumTrack(taskId, trackId, button) {
+  button.disabled = true;
+  try {
+    await updateAlbum(taskId, `tracks/${encodeURIComponent(trackId)}/retry`, "POST", {});
+  } catch (error) {
+    document.querySelector("#album-action-message").textContent = error instanceof Error ? error.message : t("restoreFailed");
+    button.disabled = false;
+  }
+}
+
+function renderAlbumDetail(task) {
+  const scope = state.albumViewScope;
+  const tracks = albumTracks(task, scope);
+  const all = task.albumTracks || [];
+  const ready = all.filter((track) => track.audioFile).length;
+  const included = albumTracks(task, "included");
+  const candidateDuration = all.reduce((total, track) => total + (track.audioFile ? track.durationSeconds || 0 : 0), 0);
+  const playlistDuration = included.reduce((total, track) => total + (track.audioFile ? track.durationSeconds || 0 : 0), 0);
+  const playable = albumTracks(task, scope, true);
+  const running = ["queued", "composing", "generating"].includes(task.status);
+  document.querySelector("#back-home").textContent = t("backAlbums");
+  elements.taskDetail.innerHTML = `<header class="album-detail-header">
+    <div class="album-detail-art" aria-hidden="true"><span class="record-disc"><span class="record-label"></span></span><span>ARIOSO / ALBUM</span></div>
+    <div class="album-detail-copy"><p class="eyebrow accent">04 · ${escapeHtml(t("albumTitle"))}</p><h2>${escapeHtml(task.albumPlan?.albumTitle || task.title || task.description)}</h2><div class="album-summary"><span>${escapeHtml(t("albumTrackCount", { count: all.length || task.albumCandidateCount || 14 }))}</span><span>${escapeHtml(t("albumIncludedCount", { count: included.length }))}</span><span>${escapeHtml(t("albumAudioDuration", { duration: durationLabel(candidateDuration) }))}</span></div></div>
+    <span class="status-pill ${statusClass(task.status)}">${escapeHtml(statusLabel(task.status))}</span>
+  </header>
+  <details class="album-idea"><summary>${escapeHtml(t("albumIdea"))}</summary><p class="album-mind">${escapeHtml(task.albumPlan?.albumMind || task.description)}</p></details>
+  ${running ? `<p class="album-progress" role="status">${escapeHtml(t(task.status === "generating" ? "albumGenerating" : "albumPreparing", { completed: ready, total: all.length || task.albumCandidateCount || 14 }))}</p>` : ""}
+  ${task.status === "failed" ? `<div class="error-box"><div><strong>${t("taskInterrupted")}</strong><p>${escapeHtml(task.error || t("taskFailedFallback"))}</p></div><button class="retry-button" type="button" data-retry-task="${escapeHtml(task.id)}">${t("continueTask")}</button></div>` : ""}
+  <section class="album-playlist"><div class="album-playlist-toolbar"><div class="album-tabs" role="group" aria-label="${escapeHtml(t("albumTitle"))}"><button type="button" data-album-scope="candidate" aria-pressed="${scope === "candidate"}">${t("albumCandidates")} <small>${all.length}</small></button><button type="button" data-album-scope="included" aria-pressed="${scope === "included"}">${t("albumIncluded")} <small>${included.length}</small></button></div>
+    <div class="album-play-action"><span>${escapeHtml(t("albumPlaylistDuration", { duration: durationLabel(scope === "included" ? playlistDuration : playable.reduce((sum, track) => sum + (track.durationSeconds || 0), 0)) }))}</span><button class="primary-button" type="button" id="start-album-playlist" ${!playable.length ? "disabled" : ""}>▶ ${t(scope === "included" ? "playPlaylist" : "playCandidates")}</button></div></div>
+    <p class="album-selection-hint">${t("albumSelectionHint")}</p><p class="album-action-message" id="album-action-message" role="status"></p>
+    <div class="album-track-list">${tracks.length ? tracks.map((track, index) => {
+      const admission = track.admission || "candidate";
+      return `<article class="album-track-row ${admission === "excluded" ? "excluded" : ""}" data-album-row="${escapeHtml(track.id)}" data-parent-task="${escapeHtml(task.id)}">
+        <span class="album-track-number">${String(index + 1).padStart(2, "0")}</span><button class="album-track-play" type="button" data-parent-task="${escapeHtml(task.id)}" data-play-album-track="${escapeHtml(track.id)}" aria-label="${escapeHtml(t("playNamed", { title: track.title }))}" ${!track.audioFile ? "disabled" : ""}>▶</button>
+        <div class="album-track-copy"><h3>${escapeHtml(track.title)}</h3><p><span class="admission-label ${admission}">${t({ included: "albumAdmissionIncluded", candidate: "albumAdmissionCandidate", excluded: "albumAdmissionExcluded" }[admission])}</span>${!track.audioFile ? ` · ${escapeHtml(statusLabel(track.status))}` : ""}</p>${track.musicSpec ? `<details><summary>${t("albumPrompt")}</summary><div class="prompt-output">${escapeHtml(track.musicSpec.lyriaPrompt)}</div></details>` : ""}</div>
+        <span class="album-track-duration">${escapeHtml(durationLabel(track.durationSeconds))}${!track.durationSeconds ? `<small>${escapeHtml(t("albumTargetTime", { duration: durationLabel(track.targetDurationSeconds) }))}</small>` : ""}</span>
+        <div class="admission-actions" role="group" aria-label="${escapeHtml(track.title)}">${[["included", "albumInclude"], ["candidate", "albumCandidate"], ["excluded", "albumExclude"]].map(([value, label]) => `<button type="button" data-admission="${value}" data-album-track="${escapeHtml(track.id)}" aria-pressed="${admission === value}" ${value === "included" && !track.audioFile ? "disabled" : ""}>${t(label)}</button>`).join("")}</div>
+        ${scope === "included" ? `<div class="album-track-order"><button type="button" data-move-track="${escapeHtml(track.id)}" data-direction="-1" aria-label="${escapeHtml(t("moveTrackUp"))}" ${index === 0 ? "disabled" : ""}>↑</button><button type="button" data-move-track="${escapeHtml(track.id)}" data-direction="1" aria-label="${escapeHtml(t("moveTrackDown"))}" ${index === tracks.length - 1 ? "disabled" : ""}>↓</button></div>` : ""}
+        ${track.status === "failed" ? `<button class="retry-button album-track-retry" type="button" data-retry-album-track="${escapeHtml(track.id)}">${t("albumRetryTrack")}</button>` : ""}
+      </article>`;
+    }).join("") : `<p class="album-empty">${t(scope === "included" ? "noIncludedTracks" : "albumPreparing")}</p>`}</div>
+  </section>`;
+  elements.taskDetail.querySelectorAll("[data-album-scope]").forEach((button) => button.addEventListener("click", () => { state.albumViewScope = button.dataset.albumScope; renderAlbumDetail(task); }));
+  elements.taskDetail.querySelector("#start-album-playlist").addEventListener("click", () => startAlbum(task.id, scope));
+  elements.taskDetail.querySelectorAll("[data-play-album-track]").forEach((button) => button.addEventListener("click", () => playAlbumTrack(task.id, button.dataset.playAlbumTrack, scope)));
+  elements.taskDetail.querySelectorAll("[data-admission]").forEach((button) => button.addEventListener("click", () => changeAdmission(task.id, button.dataset.albumTrack, button.dataset.admission, button)));
+  elements.taskDetail.querySelectorAll("[data-move-track]").forEach((button) => button.addEventListener("click", () => moveAlbumTrack(task.id, button.dataset.moveTrack, Number(button.dataset.direction), button)));
+  elements.taskDetail.querySelectorAll("[data-retry-album-track]").forEach((button) => button.addEventListener("click", () => retryAlbumTrack(task.id, button.dataset.retryAlbumTrack, button)));
+  elements.taskDetail.querySelectorAll("[data-retry-task]").forEach((button) => button.addEventListener("click", () => retryTask(task.id, button)));
+  syncPlaybackControls();
+}
+
 function renderExamples() {
-  const activeExamples = state.compositionMode === "orchestral"
+  const activeExamples = state.compositionMode === "album" ? albumExamples : state.compositionMode === "orchestral"
     ? orchestralExamples
     : state.workflowType === "02-jazz" ? jazzExamples : generalExamples;
   document.querySelector("#example-grid").innerHTML = activeExamples.map((source, index) => {
@@ -718,7 +1018,7 @@ function renderTaskList() {
         </div>
       `;
     }).join("");
-    const emptyLabel = workflowType === "04-album" ? t("albumComingSoon") : t("noTasksInWorkflow");
+    const emptyLabel = t("noTasksInWorkflow");
     return `
       <details class="task-group" data-task-group="${workflowType}" ${state.expandedTaskGroup === workflowType ? "open" : ""}>
         <summary>
@@ -748,7 +1048,11 @@ function renderTaskList() {
     });
   });
   elements.taskList.querySelectorAll("[data-task-id]").forEach((button) => {
-    button.addEventListener("click", () => selectTask(button.dataset.taskId));
+    button.addEventListener("click", () => {
+      const task = state.tasks.find((item) => item.id === button.dataset.taskId);
+      if (task?.compositionMode === "album") openAlbum(task.id);
+      else selectTask(button.dataset.taskId);
+    });
   });
   elements.taskList.querySelectorAll("[data-play-task]").forEach((button) => {
     button.addEventListener("click", () => playTask(button.dataset.playTask));
@@ -862,6 +1166,10 @@ function renderOrchestralTaskDetail(task) {
 }
 
 function renderTaskDetail(task) {
+  if (task.compositionMode === "album") {
+    renderAlbumDetail(task);
+    return;
+  }
   if (task.compositionMode === "orchestral") {
     renderOrchestralTaskDetail(task);
     return;
@@ -939,7 +1247,7 @@ function renderTaskDetail(task) {
 function showEntry() {
   state.selectedTaskId = null;
   elements.entryView.hidden = false;
-  elements.developmentView.hidden = true;
+  elements.albumView.hidden = true;
   elements.homeView.hidden = true;
   elements.taskView.hidden = true;
   elements.composerDock.hidden = !state.playingTaskId;
@@ -955,33 +1263,38 @@ function showComposer(
 ) {
   state.selectedTaskId = null;
   state.corpusMode = normalizeCorpusMode(corpusMode);
-  state.compositionMode = compositionMode === "orchestral" ? "orchestral" : "single";
+  state.compositionMode = ["orchestral", "album"].includes(compositionMode) ? compositionMode : "single";
   state.workflowType = workflowType;
   state.expandedTaskGroup = workflowType;
   elements.entryView.hidden = true;
-  elements.developmentView.hidden = true;
+  elements.albumView.hidden = true;
   elements.homeView.hidden = false;
   elements.taskView.hidden = true;
   elements.composerDock.hidden = false;
   elements.form.hidden = false;
   renderComposerContext();
   renderExamples();
-  if (state.compositionMode === "orchestral") {
+  if (["orchestral", "album"].includes(state.compositionMode)) {
     elements.lyriaModel.value = "lyria-3.5";
     selectVocalMode("instrumental");
   }
+  if (state.compositionMode === "album") elements.mode.value = "generate";
   renderTaskList();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-function showDevelopment() {
+function showAlbums() {
   state.selectedTaskId = null;
+  state.workflowType = "04-album";
+  state.compositionMode = "album";
+  state.expandedTaskGroup = "04-album";
   elements.entryView.hidden = true;
-  elements.developmentView.hidden = false;
+  elements.albumView.hidden = false;
   elements.homeView.hidden = true;
   elements.taskView.hidden = true;
   elements.composerDock.hidden = !state.playingTaskId;
   elements.form.hidden = true;
+  renderAlbums();
   renderTaskList();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -993,15 +1306,17 @@ function selectTask(id) {
   state.workflowType = workflowTypeForTask(task);
   state.expandedTaskGroup = state.workflowType;
   state.corpusMode = normalizeCorpusMode(task.corpusMode);
-  state.compositionMode = task.compositionMode === "orchestral" ? "orchestral" : "single";
+  state.compositionMode = ["orchestral", "album"].includes(task.compositionMode) ? task.compositionMode : "single";
   state.orchestralReferenceId = task.orchestralReference?.id ?? "";
   renderComposerContext();
   elements.entryView.hidden = true;
-  elements.developmentView.hidden = true;
+  elements.albumView.hidden = true;
   elements.homeView.hidden = true;
   elements.taskView.hidden = false;
   elements.composerDock.hidden = false;
-  elements.form.hidden = false;
+  elements.form.hidden = task.compositionMode === "album";
+  elements.composerDock.hidden = elements.form.hidden && !state.playingTaskId;
+  document.querySelector("#back-home").textContent = t(task.compositionMode === "album" ? "backAlbums" : "backHome");
   renderTaskList();
   renderTaskDetail(task);
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1014,6 +1329,7 @@ async function refreshTasks() {
     const previousSelected = state.tasks.find((task) => task.id === state.selectedTaskId);
     state.tasks = await response.json();
     renderTaskList();
+    renderAlbums();
     if (state.selectedTaskId) {
       const selected = state.tasks.find((task) => task.id === state.selectedTaskId);
       if (selected && selected.updatedAt !== previousSelected?.updatedAt) {
@@ -1031,6 +1347,7 @@ async function refreshTasks() {
         elements.playerMeta.textContent = `${playing.lyriaModel} · ${t("finishedTrack")}`;
       }
     }
+    syncPlayerMetadata();
   } catch {
     // A temporary polling failure should not replace the current interface.
   }
@@ -1087,12 +1404,16 @@ async function submitTask(event) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         description: elements.input.value,
-        mode: elements.mode.value,
-        lyriaModel: elements.lyriaModel.value,
-        vocalMode: selectedVocalMode(),
+        mode: state.compositionMode === "album" ? "generate" : elements.mode.value,
+        lyriaModel: state.compositionMode === "album" ? "lyria-3.5" : elements.lyriaModel.value,
+        vocalMode: state.compositionMode === "album" ? "instrumental" : selectedVocalMode(),
         corpusMode: state.corpusMode,
         compositionMode: state.compositionMode,
         workflowType: state.workflowType,
+        ...(state.compositionMode === "album" ? {
+          candidateCount: Number(elements.albumCount.value),
+          targetTotalMinutes: Number(elements.albumDuration.value),
+        } : {}),
         ...(state.compositionMode === "orchestral" && state.orchestralReferenceId
           ? { orchestralReferenceId: state.orchestralReferenceId } : {}),
       }),
@@ -1263,7 +1584,8 @@ elements.orchestralReference.addEventListener("change", () => {
 });
 elements.settingsForm.addEventListener("submit", saveSettings);
 elements.playerToggle.addEventListener("click", () => {
-  if (state.playingMovementId) playMovement(state.playingTaskId, state.playingMovementId);
+  if (state.playingAlbumTrackId) playAlbumTrack(state.playingTaskId, state.playingAlbumTrackId, state.albumPlaybackScope);
+  else if (state.playingMovementId) playMovement(state.playingTaskId, state.playingMovementId);
   else if (state.playingTaskId) playTask(state.playingTaskId);
 });
 for (const [event, status] of Object.entries({ loadstart: "loading", play: "loading", waiting: "loading", playing: "playing", pause: "paused", ended: "ended", emptied: "ready" })) {
@@ -1272,6 +1594,11 @@ for (const [event, status] of Object.entries({ loadstart: "loading", play: "load
     syncPlaybackControls();
   });
 }
+elements.playerPrevious.addEventListener("click", () => stepAlbumTrack(-1));
+elements.playerNext.addEventListener("click", () => stepAlbumTrack(1));
+elements.audio.addEventListener("ended", () => {
+  if (state.playingAlbumTrackId) stepAlbumTrack(1);
+});
 elements.audio.addEventListener("error", () => {
   state.playbackStatus = "error";
   elements.message.textContent = t("audioLoadFailed");
@@ -1279,16 +1606,21 @@ elements.audio.addEventListener("error", () => {
 });
 document.querySelector("#new-task").addEventListener("click", showEntry);
 document.querySelector("#back-entry").addEventListener("click", showEntry);
-document.querySelector("#back-development").addEventListener("click", showEntry);
+document.querySelector("#back-albums-entry").addEventListener("click", showEntry);
+document.querySelector("#create-album").addEventListener("click", () => {
+  showComposer("none", "album", "04-album");
+  elements.input.focus();
+});
 document.querySelector("#back-home").addEventListener("click", () => {
-  showComposer(state.corpusMode, state.compositionMode, state.workflowType);
+  if (state.compositionMode === "album") showAlbums();
+  else showComposer(state.corpusMode, state.compositionMode, state.workflowType);
 });
 document.querySelectorAll("[data-workflow-type]").forEach((button) => {
   button.addEventListener("click", () => {
     const workflowType = button.dataset.workflowType;
     elements.entryMessage.textContent = "";
     if (workflowType === "04-album") {
-      showDevelopment();
+      showAlbums();
       return;
     }
     if (!state.supportedWorkflows.has(workflowType)) {

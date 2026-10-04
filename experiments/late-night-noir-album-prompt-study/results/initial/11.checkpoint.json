@@ -1,0 +1,98 @@
+{
+  "inputSha256": "cfc097b91c59d36d6ccb9c8a01461be22f7fc82c0224f21e0ac4a0f7ee610c9e",
+  "spec": {
+    "schemaVersion": "1.0",
+    "title": "A Door Left Ajar",
+    "intent": "A slow, late-night noir jazz meditation built around a sustained tenor saxophone melody over an unresolved pedal bass, with piano gradually changing the harmonic light and brushes marking only phrase turns.",
+    "genres": [
+      "late-night noir jazz",
+      "modal jazz",
+      "relaxation jazz"
+    ],
+    "moods": [
+      "still and nocturnal",
+      "shadowed and contemplative",
+      "gently suspended"
+    ],
+    "tempo": {
+      "bpm": 58,
+      "feel": "Sparse, slow behind-the-beat swing with a calm two-note bass figure and occasional rubato at phrase endings."
+    },
+    "tonality": {
+      "tonic": null,
+      "mode": "Modal minor with pedal-point ambiguity"
+    },
+    "meter": "4/4",
+    "instrumentation": [
+      {
+        "name": "tenor saxophone",
+        "role": "Foreground voice carrying one long, evolving melody that gradually fragments.",
+        "timbre": "Warm, breathy, restrained, with soft vibrato and no forceful peaks."
+      },
+      {
+        "name": "upright bass",
+        "role": "Repeating a calm two-note pedal foundation and sustaining the unresolved center.",
+        "timbre": "Deep, woody, rounded, lightly bowed or gently pizzicato."
+      },
+      {
+        "name": "piano",
+        "role": "Changes the surrounding harmonic light with spacious upper triads, suspended voicings, and subtle blues color.",
+        "timbre": "Muted, intimate, softly resonant, with generous space between chords."
+      },
+      {
+        "name": "brush kit",
+        "role": "Enters sparingly at phrase turns and supports the slow swing without establishing a strong backbeat.",
+        "timbre": "Dry, featherlight brush swirls with minimal cymbal brightness."
+      }
+    ],
+    "structure": [
+      {
+        "section": "Intro",
+        "durationSeconds": 25,
+        "direction": "Upright bass establishes the repeating two-note pedal alone; piano adds isolated, spacious voicings."
+      },
+      {
+        "section": "Theme",
+        "durationSeconds": 50,
+        "direction": "Tenor saxophone enters with a long-breathed melody over the pedal, while brushes appear only at phrase turns."
+      },
+      {
+        "section": "Development",
+        "durationSeconds": 55,
+        "direction": "Piano shifts the upper harmony through suspended dominants, upper triads, and restrained blues inflections; saxophone ornaments and gently varies the melody without becoming louder."
+      },
+      {
+        "section": "Fragmentation",
+        "durationSeconds": 30,
+        "direction": "The saxophone melody breaks into shorter echoes and rests as the piano thins and the bass pedal remains steady."
+      },
+      {
+        "section": "Outro",
+        "durationSeconds": 20,
+        "direction": "Remove the brushes and let the saxophone recede; leave the bass pedal and one ambiguous piano voicing unresolved, ending softly."
+      }
+    ],
+    "vocals": {
+      "enabled": false,
+      "language": null,
+      "style": null,
+      "lyricalTheme": null
+    },
+    "production": "Intimate acoustic quartet recording with a dark, warm room perspective, restrained dynamics, spacious stereo placement, soft transient detail, and gentle natural reverb. Keep the tenor saxophone forward but never loud; let silence and low-register sustain carry the noir atmosphere.",
+    "avoid": [
+      "vocals",
+      "abrupt drops",
+      "flashy virtuosic solos",
+      "bright or aggressive cymbals",
+      "cinematic bombast",
+      "strong backbeat",
+      "definitive cadential resolution"
+    ],
+    "assumptions": [
+      "Set the tempo near 58 BPM to support the specified slow swing.",
+      "Used an intentionally ambiguous tonic rather than forcing a fixed key.",
+      "Allocated the 180 seconds across five developmental sections."
+    ],
+    "lyriaPrompt": "Late-night noir jazz meditation for relaxation, 180 seconds, instrumental only, no vocals. Slow 4/4 swing around 58 BPM, sparse and behind the beat, with a calm repeating two-note upright-bass pedal. Begin with upright bass and spacious intimate piano voicings; introduce a warm, breathy tenor saxophone carrying one long, evolving melody. Let the piano gradually change the harmonic light through shifting upper triads, suspended dominants, modal minor colors, and occasional restrained blues inflections. Brushes should enter only at phrase turns, with no strong backbeat. Develop through subtle melodic ornamentation and denser harmonic conversation without increasing volume, then fragment the saxophone melody into shorter echoes while the pedal remains unresolved. End by thinning to bass, one ambiguous piano voicing, and a fading saxophone breath. Tactile acoustic quartet sound, dark warm room, soft natural reverb, spacious phrasing, restrained dynamics, no flashy solos, no bright cymbals, no abrupt ending, no definitive cadence."
+  }
+}
