@@ -27,6 +27,7 @@ describe("web capabilities API", () => {
         apiVersion: 5,
         workflows: ["01-general", "02-jazz", "03-orchestral", "04-album"],
         albumPlaylist: true,
+        albumExport: true,
         albumCandidates: { minimum: 12, maximum: 15, default: 14 },
         jazzCorpusToggle: true,
         orchestralAssembly: true,

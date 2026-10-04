@@ -1,4 +1,4 @@
-import { createServer } from "node:http";
+import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import path from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
@@ -11,9 +11,18 @@ import { loadConfig, type AriosoConfig } from "../config/env.js";
 import { SettingsStore, SUPPORTED_LANGUAGES, type ApiProvider, type InterfaceLanguage } from "../config/settings.js";
 import { LyriaClient } from "../lyria/lyria-client.js";
 import { listOrchestralKnowledgeCards } from "../retrieval/orchestral-cards.js";
-import { TaskStore, parseTaskInput, type AlbumAdmission, type MusicTask } from "./task-store.js";
+import { TaskStore, parseTaskInput, type AlbumAdmission, type AlbumAudioExport, type MusicTask } from "./task-store.js";
 import { HttpError, readJsonBody, sendAudio, sendJson, serveStatic } from "./http.js";
 import { isRecord } from "../utils/validation.js";
+
+async function sendAlbumExport(request: IncomingMessage, response: ServerResponse, exported: AlbumAudioExport): Promise<void> {
+  const encodedName = encodeURIComponent(exported.fileName)
+    .replace(/['()*]/g, (character) => "%" + character.charCodeAt(0).toString(16).toUpperCase());
+  response.setHeader("Content-Disposition", "attachment; filename=\"album.mp3\"; filename*=UTF-8''" + encodedName);
+  response.setHeader("X-Album-Track-Count", exported.trackCount);
+  response.setHeader("X-Album-Duration-Seconds", exported.durationSeconds);
+  await sendAudio(request, response, exported.outputPath);
+}
 
 const REQUEST_RETRY_DELAYS_MS = [750, 1_500];
 
@@ -414,6 +423,8 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
       const albumTrackMatch = /^\/api\/tasks\/([^/]+)\/album\/tracks\/([^/]+)$/.exec(url.pathname);
       const albumTrackAudioMatch = /^\/api\/tasks\/([^/]+)\/album\/tracks\/([^/]+)\/audio$/.exec(url.pathname);
       const albumTrackRetryMatch = /^\/api\/tasks\/([^/]+)\/album\/tracks\/([^/]+)\/retry$/.exec(url.pathname);
+      const albumExportAudioMatch = /^\/api\/tasks\/([^/]+)\/album\/exports\/([a-f0-9]{64})\/(audio|timestamps)$/.exec(url.pathname);
+      const albumExportMatch = /^\/api\/tasks\/([^/]+)\/album\/export$/.exec(url.pathname);
       const albumPlaylistMatch = /^\/api\/tasks\/([^/]+)\/album\/playlist$/.exec(url.pathname);
       const retryMatch = /^\/api\/tasks\/([^/]+)\/retry$/.exec(url.pathname);
       const credentialMatch = /^\/api\/settings\/credentials\/(openai|gemini)$/.exec(url.pathname);
@@ -422,6 +433,7 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
           apiVersion: 5,
           workflows: ["01-general", "02-jazz", "03-orchestral", "04-album"],
           albumPlaylist: true,
+          albumExport: true,
           albumCandidates: { minimum: 12, maximum: 15, default: 14 },
           jazzCorpusToggle: true,
           orchestralAssembly: true,
@@ -552,6 +564,53 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
           throw new HttpError(400, "Unsupported album admission.");
         }
         sendJson(response, 200, await store.setAlbumAdmission(task.id, track.id, value.admission as AlbumAdmission));
+        return;
+      }
+
+      if ((request.method === "GET" || request.method === "HEAD") && albumExportAudioMatch?.[1] && albumExportAudioMatch[2]) {
+        const task = store.get(albumExportAudioMatch[1]);
+        const exported = task && task.compositionMode === "album"
+          ? await store.albumAudioExport(task, albumExportAudioMatch[2]) : undefined;
+        if (!exported) throw new HttpError(404, "Album export is not available.");
+        if (albumExportAudioMatch[3] === "timestamps") {
+          const fileName = exported.fileName.replace(/\.mp3$/i, " - Timestamps.txt");
+          const encodedName = encodeURIComponent(fileName)
+            .replace(/['()*]/g, (character) => "%" + character.charCodeAt(0).toString(16).toUpperCase());
+          response.writeHead(200, {
+            "Content-Type": "text/plain; charset=utf-8",
+            "Content-Disposition": "attachment; filename=\"timestamps.txt\"; filename*=UTF-8''" + encodedName,
+            "Content-Length": Buffer.byteLength(exported.timestampsText),
+            "Cache-Control": "private, no-cache",
+          });
+          response.end(request.method === "HEAD" ? undefined : exported.timestampsText);
+          return;
+        }
+        await sendAlbumExport(request, response, exported);
+        return;
+      }
+
+      if (request.method === "POST" && albumExportMatch?.[1]) {
+        const task = store.get(albumExportMatch[1]);
+        if (!task || task.compositionMode !== "album") throw new HttpError(404, "Album task not found.");
+        const value = await readJsonBody(request);
+        if (!isRecord(value) || (value.scope !== undefined
+          && value.scope !== "included" && value.scope !== "candidate")) {
+          throw new HttpError(400, "Unsupported album export scope.");
+        }
+        if (value.format !== undefined && value.format !== "mp3" && value.format !== "manifest") {
+          throw new HttpError(400, "Unsupported album export format.");
+        }
+        const exported = await store.exportAlbumAudio(task, value.scope ?? "included");
+        if (value.format === "manifest") {
+          const { exportId, fileName, trackCount, durationSeconds, chapters, timestampsText } = exported;
+          sendJson(response, 200, {
+            exportId, fileName, trackCount, durationSeconds, chapters, timestampsText,
+            audioUrl: "/api/tasks/" + encodeURIComponent(task.id) + "/album/exports/" + exportId + "/audio",
+            timestampsUrl: "/api/tasks/" + encodeURIComponent(task.id) + "/album/exports/" + exportId + "/timestamps",
+          });
+          return;
+        }
+        await sendAlbumExport(request, response, exported);
         return;
       }
 

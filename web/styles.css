@@ -347,8 +347,14 @@ button:focus-visible, textarea:focus-visible, select:focus-visible, input:focus-
 .album-tabs button { padding: 10px 15px; border: 0; border-radius: 999px; color: var(--muted); background: transparent; font-size: 12px; }
 .album-tabs button[aria-pressed="true"] { color: var(--ink); background: var(--paper); box-shadow: 0 2px 8px rgba(51,42,31,.08); }
 .album-tabs small { margin-left: 6px; opacity: .7; font-size: 10px; }
-.album-play-action { display: flex; align-items: center; gap: 14px; }
+.album-play-action { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; }
 .album-play-action > span { color: var(--muted); font-size: 10px; }
+.album-export-timestamps { margin: 18px 0; padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: #f7f5ef; }
+.album-timestamps-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.album-timestamps-toolbar > div { flex: 1; min-width: 180px; }
+.album-timestamps-toolbar strong { display: block; font-size: 12px; }
+.album-timestamps-toolbar small { display: block; margin-top: 5px; color: var(--muted); font-size: 10px; overflow-wrap: anywhere; }
+.album-export-timestamps pre { margin: 16px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; line-height: 1.8; }
 .album-selection-hint { margin: 16px 0 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
 .album-action-message { min-height: 12px; margin: 7px 0; color: #8a342f; font-size: 11px; }
 .album-track-list { display: grid; gap: 5px; }

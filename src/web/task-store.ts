@@ -1,7 +1,8 @@
+import { createHash } from "node:crypto";
 import { copyFile, mkdir, readFile, readdir, rename, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import { stitchAudioFiles } from "../audio/stitch.js";
+import { measureAudioDuration, stitchAudioFiles } from "../audio/stitch.js";
 import type { AriosoConfig } from "../config/env.js";
 import { isOrchestralCardId, loadOrchestralKnowledgeCard, type OrchestralKnowledgeCard } from "../retrieval/orchestral-cards.js";
 import { MusicSpecSchema, type MusicSpec } from "../schema/music-spec.js";
@@ -202,10 +203,8 @@ function safeAudioName(value: string | undefined, fallback: string): string {
     .replace(/[<>:"/\\|?*\u0000-\u001f]/g, " ")
     .replace(/\s+/g, " ")
     .replace(/[. ]+$/g, "")
-    .trim()
-    .slice(0, 96)
-    .replace(/[. ]+$/g, "");
-  const name = normalized || fallback;
+    .trim();
+  const name = Array.from(normalized).slice(0, 96).join("").replace(/[. ]+$/g, "") || fallback;
   return `${isSafeFileName(name) ? name : `_${name}`}.mp3`;
 }
 
@@ -349,10 +348,29 @@ function validatePreparedAlbum(plan: AlbumPlan, tracks: PreparedAlbumTrack[]): v
   }
 }
 
+export interface AlbumAudioExport {
+  exportId: string;
+  outputPath: string;
+  chapters: Array<{ title: string; startSeconds: number; time: string }>;
+  timestampsText: string;
+  fileName: string;
+  trackCount: number;
+  durationSeconds: number;
+}
+
+function albumTimestamp(seconds: number): string {
+  const total = Math.max(0, Math.floor(seconds));
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor(total / 60);
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return (hours ? pad(hours) + ":" + pad(minutes % 60) : pad(minutes)) + ":" + pad(total % 60);
+}
+
 export class TaskStore {
   readonly #directory: string;
   readonly #tasks = new Map<string, MusicTask>();
   readonly #taskDirectories = new Map<string, string>();
+  readonly #albumExports = new Map<string, Promise<AlbumAudioExport>>();
 
   constructor(directory: string) {
     this.#directory = directory;
@@ -556,6 +574,96 @@ export class TaskStore {
   albumTrackAudioPath(task: MusicTask, track: AlbumTrackTask): string | undefined {
     return isSafeFileName(track.audioFile)
       ? path.join(this.taskDirectory(task), "tracks", track.audioFile) : undefined;
+  }
+
+  async exportAlbumAudio(
+    task: MusicTask,
+    scope: "included" | "candidate" = "included",
+  ): Promise<AlbumAudioExport> {
+    if (task.compositionMode !== "album") throw new Error("Album task not found.");
+    const all = task.albumTracks ?? [];
+    const selected = scope === "included"
+      ? (task.albumPlaylist ?? []).map((id) => all.find((track) => track.id === id))
+      : [...all].filter((track) => track.admission !== "excluded").sort((a, b) => a.order - b.order);
+    if (!selected.length) throw new Error("The selected album list is empty.");
+    const tracks = selected.map((track) => {
+      if (!track || (scope === "included" && track.admission !== "included")
+        || track.status !== "completed" || !track.audioFile) {
+        throw new Error("Every selected track must have completed audio before export.");
+      }
+      return track;
+    });
+    if (scope === "included" && tracks.length !== all.filter((track) => track.admission === "included").length) {
+      throw new Error("The album playlist must contain every included track exactly once.");
+    }
+    if (new Set(tracks.map((track) => track.id)).size !== tracks.length) {
+      throw new Error("The album list must not contain duplicate tracks.");
+    }
+    const inputFiles = tracks.map((track) => {
+      const audioPath = this.albumTrackAudioPath(task, track);
+      if (!audioPath || path.extname(audioPath).toLowerCase() !== ".mp3") {
+        throw new Error("Every selected track must have a safe MP3 audio file.");
+      }
+      return audioPath;
+    });
+    const sources = await Promise.all(inputFiles.map(async (file) => {
+      let info;
+      try {
+        info = await stat(file);
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+          throw new Error("A selected track's audio file is missing.");
+        }
+        throw error;
+      }
+      if (!info.isFile()) throw new Error("A selected track's audio file is not available.");
+      return { file, size: info.size, modified: info.mtimeMs, changed: info.ctimeMs };
+    }));
+    const title = task.albumPlan?.albumTitle || task.title || task.id;
+    const fileName = safeAudioName(scope === "candidate" ? title + " - Candidates" : title, task.id);
+    const signature = createHash("sha256")
+      .update(JSON.stringify(["album-mp3-v1", task.id, scope, fileName, sources]))
+      .digest("hex");
+    const cached = this.#albumExports.get(signature);
+    if (cached) return cached;
+    const exporting = (async (): Promise<AlbumAudioExport> => {
+      const outputPath = path.join(this.taskDirectory(task), "exports", signature + ".mp3");
+      let durationSeconds: number;
+      let segmentDurationsSeconds: number[];
+      if (inputFiles.length === 1) {
+        const audio = await readFile(inputFiles[0]!);
+        durationSeconds = measureAudioDuration(audio);
+        segmentDurationsSeconds = [durationSeconds];
+        await mkdir(path.dirname(outputPath), { recursive: true });
+        await writeFile(outputPath, audio);
+      } else {
+        const assembled = await stitchAudioFiles(outputPath, inputFiles);
+        durationSeconds = assembled.durationSeconds;
+        segmentDurationsSeconds = assembled.segmentDurationsSeconds;
+      }
+      let elapsed = 0;
+      const chapters = tracks.map((track, index) => {
+        const chapter = { title: track.title.replace(/[\r\n]+/g, " ").trim(), startSeconds: elapsed, time: albumTimestamp(elapsed) };
+        elapsed += segmentDurationsSeconds[index]!;
+        return chapter;
+      });
+      const timestampsText = chapters.map((chapter) => chapter.time + " " + chapter.title).join("\n") + "\n";
+      return { exportId: signature, outputPath, fileName, trackCount: tracks.length, durationSeconds, chapters, timestampsText };
+    })();
+    // Share pending writes so concurrent downloads cannot observe a partial export.
+    this.#albumExports.set(signature, exporting);
+    try {
+      return await exporting;
+    } catch (error) {
+      this.#albumExports.delete(signature);
+      throw error;
+    }
+  }
+
+  async albumAudioExport(task: MusicTask, exportId: string): Promise<AlbumAudioExport | undefined> {
+    const exported = await this.#albumExports.get(exportId);
+    return exported && path.dirname(exported.outputPath) === path.join(this.taskDirectory(task), "exports")
+      ? exported : undefined;
   }
 
   async writeAlbumTrackAudio(
