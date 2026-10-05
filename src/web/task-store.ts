@@ -6,7 +6,16 @@ import { measureAudioDuration, stitchAudioFiles } from "../audio/stitch.js";
 import type { AriosoConfig } from "../config/env.js";
 import { isOrchestralCardId, loadOrchestralKnowledgeCard, type OrchestralKnowledgeCard } from "../retrieval/orchestral-cards.js";
 import { MusicSpecSchema, type MusicSpec } from "../schema/music-spec.js";
-import { AlbumPlanSchema, type AlbumPlan, type AlbumReview } from "../schema/album-plan.js";
+import {
+  ALBUM_MAX_CANDIDATES,
+  ALBUM_MAX_TOTAL_MINUTES,
+  ALBUM_MIN_CANDIDATES,
+  ALBUM_MIN_TOTAL_MINUTES,
+  AlbumPlanSchema,
+  isAlbumTargetFeasible,
+  type AlbumPlan,
+  type AlbumReview,
+} from "../schema/album-plan.js";
 import type { OrchestralMovementPlan, OrchestralWorkPlan } from "../schema/orchestral-plan.js";
 import { writeTextFileAtomic } from "../utils/files.js";
 import { isRecord } from "../utils/validation.js";
@@ -916,12 +925,16 @@ export function parseTaskInput(value: unknown): CreateTaskInput {
     throw new Error("Background Music Producer requires album generation mode.");
   }
   if (compositionMode === "album") {
-    if (!Number.isInteger(candidateCount) || Number(candidateCount) < 12 || Number(candidateCount) > 15) {
-      throw new Error("Album candidate count must be an integer from 12 to 15.");
+    if (!Number.isInteger(candidateCount)
+      || Number(candidateCount) < ALBUM_MIN_CANDIDATES || Number(candidateCount) > ALBUM_MAX_CANDIDATES) {
+      throw new Error(`Album candidate count must be an integer from ${ALBUM_MIN_CANDIDATES} to ${ALBUM_MAX_CANDIDATES}.`);
     }
     if (typeof targetTotalMinutes !== "number" || !Number.isFinite(targetTotalMinutes)
-      || targetTotalMinutes < 30 || targetTotalMinutes > 40) {
-      throw new Error("Album target duration must be between 30 and 40 minutes.");
+      || targetTotalMinutes < ALBUM_MIN_TOTAL_MINUTES || targetTotalMinutes > ALBUM_MAX_TOTAL_MINUTES) {
+      throw new Error(`Album target duration must be between ${ALBUM_MIN_TOTAL_MINUTES} and ${ALBUM_MAX_TOTAL_MINUTES} minutes.`);
+    }
+    if (!isAlbumTargetFeasible(Number(candidateCount), targetTotalMinutes)) {
+      throw new Error("Album candidate count cannot reach the requested duration with 1–3 minute tracks.");
     }
     if (candidate.lyriaModel === "lyria-3-clip-preview") {
       throw new Error("Album generation requires lyria-3.5.");

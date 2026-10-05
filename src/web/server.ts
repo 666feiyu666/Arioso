@@ -443,7 +443,7 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
           albumPlaylist: true,
           albumExport: true,
           backgroundMusicProducer: { denoiser: "denoising-historical-recordings", outputChannels: 1, listeningReview: "required" },
-          albumCandidates: { minimum: 12, maximum: 15, default: 14 },
+          albumCandidates: { minimum: 12, maximum: 28, default: 14 },
           jazzCorpusToggle: true,
           orchestralAssembly: true,
           orchestralPromptFormat: "orchestral-v1",

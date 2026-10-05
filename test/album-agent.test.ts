@@ -29,6 +29,25 @@ describe("album composition agents", () => {
     expect(mocks.skill).toHaveBeenCalledWith("album");
   });
 
+  it("accepts a 65-minute plan with 26 varied candidates", async () => {
+    const fixture = albumPlanFixture();
+    mocks.run.mockResolvedValue({
+      ...fixture,
+      tracks: Array.from({ length: 26 }, (_, index) => ({
+        ...fixture.tracks[index % fixture.tracks.length]!,
+        number: index + 1,
+        title: `Morning ${index + 1}`,
+        targetSeconds: [120, 150, 180][index % 3]!,
+      })),
+    });
+    const plan = await planAlbum("uplifting morning focus jazz", {
+      candidateCount: 26,
+      targetTotalMinutes: 65,
+    });
+    expect(plan.tracks).toHaveLength(26);
+    expect(plan.tracks.reduce((sum, track) => sum + track.targetSeconds, 0)).toBe(3_870);
+  });
+
   it("composes through the existing Composer with instrumental and no-corpus settings", async () => {
     const plan = albumPlanFixture();
     const spec = await composeAlbumTrack(plan, 1, { model: "configured-model", genre: "jazz" });
@@ -68,7 +87,8 @@ describe("album composition agents", () => {
   });
 
   it("rejects unsupported requests and incomplete reviews before unrelated work", async () => {
-    await expect(planAlbum("noir", { candidateCount: 11 })).rejects.toThrow("12–15");
+    await expect(planAlbum("noir", { candidateCount: 11 })).rejects.toThrow("12–28");
+    await expect(planAlbum("noir", { candidateCount: 14, targetTotalMinutes: 65 })).rejects.toThrow("cannot reach");
     await expect(planAlbum("noir", { vocalMode: "vocals" })).rejects.toThrow("instrumental");
     await expect(reviewAlbumCandidates(albumPlanFixture(), [albumSpecFixture()])).rejects.toThrow("every candidate");
     expect(mocks.run).not.toHaveBeenCalled();

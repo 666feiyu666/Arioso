@@ -486,6 +486,17 @@ function workflowLabel(workflowType) {
   }[workflowType]);
 }
 
+function syncAlbumCandidateOptions() {
+  const longAlbum = Number(elements.albumDuration.value) >= 60;
+  const counts = longAlbum ? [24, 25, 26, 27, 28] : [12, 13, 14, 15];
+  const previous = Number(elements.albumCount.value);
+  const selected = counts.includes(previous) ? previous : longAlbum ? 26 : 14;
+  elements.albumCount.innerHTML = counts
+    .map((count) => `<option value="${count}">${count}</option>`)
+    .join("");
+  elements.albumCount.value = String(selected);
+}
+
 function renderComposerContext() {
   const isJazz = state.workflowType === "02-jazz";
   const usesJazzCorpus = state.corpusMode === "jazz";
@@ -513,6 +524,7 @@ function renderComposerContext() {
   elements.lyriaSetting.hidden = isAlbum;
   elements.albumCountSetting.hidden = !isAlbum;
   elements.albumDurationSetting.hidden = !isAlbum;
+  if (isAlbum) syncAlbumCandidateOptions();
   elements.albumProductionSetting.hidden = !isAlbum;
   elements.albumProductionHelp.hidden = !isAlbum || elements.albumProduction.value !== "producer";
   elements.albumGenerationHelp.hidden = !isAlbum;
@@ -1776,5 +1788,6 @@ refreshTasks();
 elements.albumProduction.addEventListener("change", () => {
   elements.albumProductionHelp.hidden = state.compositionMode !== "album" || elements.albumProduction.value !== "producer";
 });
+elements.albumDuration.addEventListener("change", syncAlbumCandidateOptions);
 
 setInterval(refreshTasks, 1500);

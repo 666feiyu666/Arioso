@@ -1,7 +1,20 @@
 import { z } from "zod";
 
+export const ALBUM_MIN_CANDIDATES = 12;
+export const ALBUM_MAX_CANDIDATES = 28;
+export const ALBUM_MIN_TOTAL_MINUTES = 30;
+export const ALBUM_MAX_TOTAL_MINUTES = 70;
+export const ALBUM_TARGET_TOLERANCE_MINUTES = 5;
+
+export function isAlbumTargetFeasible(candidateCount: number, targetTotalMinutes: number): boolean {
+  const minimumDurationMinutes = candidateCount;
+  const maximumDurationMinutes = candidateCount * 3;
+  return targetTotalMinutes >= minimumDurationMinutes - ALBUM_TARGET_TOLERANCE_MINUTES
+    && targetTotalMinutes <= maximumDurationMinutes + ALBUM_TARGET_TOLERANCE_MINUTES;
+}
+
 export const AlbumTrackOutlineSchema = z.object({
-  number: z.number().int().min(1).max(15),
+  number: z.number().int().min(1).max(ALBUM_MAX_CANDIDATES),
   title: z.string().min(1),
   musicalRole: z.string().min(1).describe("What the musicians do and how this candidate serves the album idea."),
   instruments: z.array(z.string().min(1)).min(1),
@@ -16,7 +29,7 @@ export const AlbumPlanDraftSchema = z.object({
   albumMind: z.string().min(1).describe("The author's concise creative idea for the complete listening experience."),
   cohesionStrategy: z.string().min(1).describe("Author-selected consistency, variation and grouping, with their musical purpose."),
   sharedSoundContract: z.string().min(1).describe("Only audible directions that apply to every candidate. Put distribution and variation rules in cohesionStrategy."),
-  tracks: z.array(AlbumTrackOutlineSchema).min(12).max(15),
+  tracks: z.array(AlbumTrackOutlineSchema).min(ALBUM_MIN_CANDIDATES).max(ALBUM_MAX_CANDIDATES),
 });
 
 export const AlbumPlanSchema = AlbumPlanDraftSchema.extend({
@@ -27,8 +40,8 @@ export const AlbumPlanSchema = AlbumPlanDraftSchema.extend({
     context.addIssue({ code: "custom", path: ["tracks"], message: "Album candidates must be numbered consecutively from one." });
   }
   const total = plan.tracks.reduce((sum, track) => sum + track.targetSeconds, 0);
-  if (total < 1800 || total > 2400) {
-    context.addIssue({ code: "custom", path: ["tracks"], message: "Album duration targets must total approximately 30–40 minutes." });
+  if (total < ALBUM_MIN_TOTAL_MINUTES * 60 || total > ALBUM_MAX_TOTAL_MINUTES * 60) {
+    context.addIssue({ code: "custom", path: ["tracks"], message: "Album duration targets must total approximately 30–70 minutes." });
   }
   if (new Set(plan.tracks.map((track) => track.targetSeconds)).size < 3) {
     context.addIssue({ code: "custom", path: ["tracks"], message: "Use at least three different candidate durations rather than a fixed track length." });
@@ -39,17 +52,17 @@ export const AlbumReviewSchema = z.object({
   verdict: z.enum(["ready", "needs-work"]),
   albumFindings: z.array(z.string()),
   similarities: z.array(z.object({
-    first: z.number().int().min(1).max(15),
-    second: z.number().int().min(1).max(15),
+    first: z.number().int().min(1).max(ALBUM_MAX_CANDIDATES),
+    second: z.number().int().min(1).max(ALBUM_MAX_CANDIDATES),
     evidence: z.string().min(1),
     judgment: z.string().min(1),
   })),
   candidates: z.array(z.object({
-    number: z.number().int().min(1).max(15),
+    number: z.number().int().min(1).max(ALBUM_MAX_CANDIDATES),
     verdict: z.enum(["ready", "needs-work"]),
     evidence: z.array(z.string().min(1)).min(1),
     revisionBrief: z.string().nullable(),
-  })).min(12).max(15),
+  })).min(ALBUM_MIN_CANDIDATES).max(ALBUM_MAX_CANDIDATES),
 });
 
 export type AlbumTrackOutline = z.infer<typeof AlbumTrackOutlineSchema>;

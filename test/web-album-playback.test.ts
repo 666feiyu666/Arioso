@@ -201,4 +201,16 @@ describe("album listening interface", () => {
     await api.submitTask({ preventDefault() {} });
     expect(requests.find((item) => item.url === "/api/tasks" && item.method === "POST")?.body).toMatchObject({ compositionMode: "album", workflowType: "04-album", candidateCount: 14, targetTotalMinutes: 35, mode: "generate", lyriaModel: "lyria-3.5", vocalMode: "instrumental" });
   });
+
+  it("uses an expanded candidate batch for a 65-minute album", async () => {
+    const { api, requests } = await interfaceHarness();
+    api.showComposer("none", "album", "04-album");
+    api.elements.albumDuration.value = "65";
+    await api.elements.albumDuration.emit("change");
+    expect(api.elements.albumCount.value).toBe("26");
+    api.elements.input.value = "Uplifting morning focus jazz";
+    await api.submitTask({ preventDefault() {} });
+    expect(requests.find((item) => item.url === "/api/tasks" && item.method === "POST")?.body)
+      .toMatchObject({ candidateCount: 26, targetTotalMinutes: 65 });
+  });
 });

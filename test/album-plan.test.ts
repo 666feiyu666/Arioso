@@ -18,8 +18,20 @@ describe("album candidate plan and prompt rendering", () => {
     const plan = albumPlanFixture();
     expect(() => AlbumPlanSchema.parse({ ...plan, tracks: plan.tracks.map((track) => ({ ...track, number: 1 })) })).toThrow("numbered consecutively");
     expect(() => AlbumPlanSchema.parse({ ...plan, tracks: plan.tracks.map((track) => ({ ...track, targetSeconds: 150 })) })).toThrow("different candidate durations");
-    expect(() => AlbumPlanSchema.parse({ ...plan, tracks: plan.tracks.map((track) => ({ ...track, targetSeconds: 60 + track.number })) })).toThrow("30–40 minutes");
+    expect(() => AlbumPlanSchema.parse({ ...plan, tracks: plan.tracks.map((track) => ({ ...track, targetSeconds: 60 + track.number })) })).toThrow("30–70 minutes");
     expect(() => AlbumPlanSchema.parse({ ...plan, tracks: plan.tracks.slice(0, 11) })).toThrow();
+  });
+
+  it("accepts a varied 65-minute candidate batch", () => {
+    const plan = albumPlanFixture();
+    const tracks = Array.from({ length: 26 }, (_, index) => ({
+      ...plan.tracks[index % plan.tracks.length]!,
+      number: index + 1,
+      title: `Morning ${index + 1}`,
+      targetSeconds: [120, 150, 180][index % 3]!,
+    }));
+    expect(AlbumPlanSchema.parse({ ...plan, tracks }).tracks).toHaveLength(26);
+    expect(tracks.reduce((sum, track) => sum + track.targetSeconds, 0)).toBe(3_870);
   });
 
   it("renders common audible directions and concrete fields without legacy batch instructions", () => {

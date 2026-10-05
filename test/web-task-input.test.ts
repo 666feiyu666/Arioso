@@ -90,9 +90,24 @@ describe("web task input", () => {
         lyriaModel: "lyria-3.5", candidateCount: 14, targetTotalMinutes: 35 });
   });
 
-  it.each([11, 16, 13.5, "14"])("rejects invalid album candidate counts: %s", (candidateCount) => {
+  it("accepts a 65-minute album with an expanded candidate batch", () => {
+    expect(parseTaskInput({
+      description: "morning focus jazz",
+      workflowType: "04-album",
+      candidateCount: 26,
+      targetTotalMinutes: 65,
+    })).toMatchObject({ candidateCount: 26, targetTotalMinutes: 65 });
+  });
+
+  it.each([11, 29, 13.5, "14"])("rejects invalid album candidate counts: %s", (candidateCount) => {
     expect(() => parseTaskInput({ description: "a concept album", workflowType: "04-album", candidateCount }))
-      .toThrow("Album candidate count must be an integer from 12 to 15.");
+      .toThrow("Album candidate count must be an integer from 12 to 28.");
+  });
+
+  it("rejects a long target that the selected candidate count cannot reach", () => {
+    expect(() => parseTaskInput({
+      description: "a concept album", workflowType: "04-album", candidateCount: 14, targetTotalMinutes: 65,
+    })).toThrow("cannot reach the requested duration");
   });
 
   it("rejects the clip generation model for albums", () => {
