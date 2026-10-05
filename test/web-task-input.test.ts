@@ -104,10 +104,10 @@ describe("web task input", () => {
       .toThrow("Album candidate count must be an integer from 12 to 28.");
   });
 
-  it("rejects a long target that the selected candidate count cannot reach", () => {
-    expect(() => parseTaskInput({
+  it("treats the target duration as advisory instead of coupling it to candidate count", () => {
+    expect(parseTaskInput({
       description: "a concept album", workflowType: "04-album", candidateCount: 14, targetTotalMinutes: 65,
-    })).toThrow("cannot reach the requested duration");
+    })).toMatchObject({ candidateCount: 14, targetTotalMinutes: 65 });
   });
 
   it("rejects the clip generation model for albums", () => {

@@ -88,7 +88,6 @@ describe("album composition agents", () => {
 
   it("rejects unsupported requests and incomplete reviews before unrelated work", async () => {
     await expect(planAlbum("noir", { candidateCount: 11 })).rejects.toThrow("12–28");
-    await expect(planAlbum("noir", { candidateCount: 14, targetTotalMinutes: 65 })).rejects.toThrow("cannot reach");
     await expect(planAlbum("noir", { vocalMode: "vocals" })).rejects.toThrow("instrumental");
     await expect(reviewAlbumCandidates(albumPlanFixture(), [albumSpecFixture()])).rejects.toThrow("every candidate");
     expect(mocks.run).not.toHaveBeenCalled();

@@ -5,11 +5,9 @@ import {
   ALBUM_MAX_TOTAL_MINUTES,
   ALBUM_MIN_CANDIDATES,
   ALBUM_MIN_TOTAL_MINUTES,
-  ALBUM_TARGET_TOLERANCE_MINUTES,
   AlbumPlanDraftSchema,
   AlbumPlanSchema,
   AlbumReviewSchema,
-  isAlbumTargetFeasible,
   validateAlbumReview,
   type AlbumPlan,
   type AlbumReview,
@@ -27,7 +25,7 @@ You are Arioso's album author and planner. Develop one complete batch of indepen
 - Give every candidate a specific musical role, instrument interaction, groove, harmonic behavior and development realizing that album idea. Differences must have musical purpose; changing titles, keys or numerical BPM alone does not resolve duplication. Intentional recurrence can serve cohesion.
 - Put only audible directions applicable to EVERY piece in sharedSoundContract. Keep it concise. Distribution, variation and sequencing instructions belong in cohesionStrategy. Never put commands such as "vary foreground instruments across tracks" in sharedSoundContract; realize those choices in individual outlines.
 - Produce the requested candidate count, numbered consecutively from 1. These are the first candidate batch, not an automatically admitted album.
-- Every candidate is 60–180 seconds. Use at least three different durations. Aim within five minutes of the supplied batch total, which can range from 30–70 minutes; never assign the whole batch duration to one track or give every piece a fixed duration.
+- Every candidate is 60–180 seconds. Use at least three different durations. Treat the supplied batch duration as a soft planning goal, never as a validity condition; candidate count is authoritative. Never assign the whole batch duration to one track or give every piece a fixed duration.
 - Each piece has its own beginning, development and ending, independent of neighboring tracks. Scale its amount of material to its duration.
 - Use accurate instrument names and playing techniques. "Hollow-body piano" is not an established piano type. Do not manufacture extra instruments or invented terminology for diversity.
 - Keep every candidate purely instrumental. Preserve the requested musical idiom; do not force jazz when it was not requested.
@@ -78,13 +76,6 @@ export async function planAlbum(description: string, options: AlbumAgentOptions 
     || targetTotalMinutes < ALBUM_MIN_TOTAL_MINUTES || targetTotalMinutes > ALBUM_MAX_TOTAL_MINUTES) {
     throw new Error(`The album batch duration target must be ${ALBUM_MIN_TOTAL_MINUTES}–${ALBUM_MAX_TOTAL_MINUTES} minutes.`);
   }
-  if (!isAlbumTargetFeasible(candidateCount, targetTotalMinutes)) {
-    throw new Error("The album candidate count cannot reach the requested duration with 1–3 minute tracks.");
-  }
-  const feasibleTotalMinutes = Math.min(
-    Math.max(targetTotalMinutes, candidateCount),
-    candidateCount * 3,
-  );
   const skill = await loadComposerSkill("album");
   const agent = new Agent({
     name: "Arioso Album Author",
@@ -96,17 +87,11 @@ export async function planAlbum(description: string, options: AlbumAgentOptions 
     description: input,
     candidateCount,
     targetTotalMinutes,
-    // Candidate count can limit the reachable total while tracks remain independently variable.
-    feasibleTotalMinutes,
     durationRangeSeconds: [60, 180],
     vocalMode: "instrumental",
   }), "The album author returned no structured plan.", options.apiKey);
   const plan = AlbumPlanSchema.parse(output);
   if (plan.tracks.length !== candidateCount) throw new Error("The album author returned a different candidate count.");
-  const plannedTotalMinutes = plan.tracks.reduce((sum, track) => sum + track.targetSeconds, 0) / 60;
-  if (Math.abs(plannedTotalMinutes - feasibleTotalMinutes) > ALBUM_TARGET_TOLERANCE_MINUTES) {
-    throw new Error(`The album author missed the feasible ${feasibleTotalMinutes}-minute target by more than ${ALBUM_TARGET_TOLERANCE_MINUTES} minutes.`);
-  }
   return { ...plan, tracks: [...plan.tracks].sort((first, second) => first.number - second.number) };
 }
 

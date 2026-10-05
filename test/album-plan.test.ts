@@ -14,12 +14,19 @@ describe("album candidate plan and prompt rendering", () => {
     expect(plan.tracks[0]?.instruments).not.toEqual(plan.tracks[1]?.instruments);
   });
 
-  it("rejects duplicate numbering, a fixed length and an undersized batch", () => {
+  it("rejects duplicate numbering, a fixed length and an undersized candidate batch", () => {
     const plan = albumPlanFixture();
     expect(() => AlbumPlanSchema.parse({ ...plan, tracks: plan.tracks.map((track) => ({ ...track, number: 1 })) })).toThrow("numbered consecutively");
     expect(() => AlbumPlanSchema.parse({ ...plan, tracks: plan.tracks.map((track) => ({ ...track, targetSeconds: 150 })) })).toThrow("different candidate durations");
-    expect(() => AlbumPlanSchema.parse({ ...plan, tracks: plan.tracks.map((track) => ({ ...track, targetSeconds: 60 + track.number })) })).toThrow("30–70 minutes");
     expect(() => AlbumPlanSchema.parse({ ...plan, tracks: plan.tracks.slice(0, 11) })).toThrow();
+  });
+
+  it("treats the album total duration as advisory", () => {
+    const plan = albumPlanFixture();
+    expect(() => AlbumPlanSchema.parse({
+      ...plan,
+      tracks: plan.tracks.map((track) => ({ ...track, targetSeconds: 60 + track.number })),
+    })).not.toThrow();
   });
 
   it("accepts a varied 65-minute candidate batch", () => {

@@ -12,7 +12,6 @@ import {
   ALBUM_MIN_CANDIDATES,
   ALBUM_MIN_TOTAL_MINUTES,
   AlbumPlanSchema,
-  isAlbumTargetFeasible,
   type AlbumPlan,
   type AlbumReview,
 } from "../schema/album-plan.js";
@@ -932,9 +931,6 @@ export function parseTaskInput(value: unknown): CreateTaskInput {
     if (typeof targetTotalMinutes !== "number" || !Number.isFinite(targetTotalMinutes)
       || targetTotalMinutes < ALBUM_MIN_TOTAL_MINUTES || targetTotalMinutes > ALBUM_MAX_TOTAL_MINUTES) {
       throw new Error(`Album target duration must be between ${ALBUM_MIN_TOTAL_MINUTES} and ${ALBUM_MAX_TOTAL_MINUTES} minutes.`);
-    }
-    if (!isAlbumTargetFeasible(Number(candidateCount), targetTotalMinutes)) {
-      throw new Error("Album candidate count cannot reach the requested duration with 1–3 minute tracks.");
     }
     if (candidate.lyriaModel === "lyria-3-clip-preview") {
       throw new Error("Album generation requires lyria-3.5.");
