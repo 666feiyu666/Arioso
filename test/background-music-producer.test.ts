@@ -50,23 +50,24 @@ async function setup() {
 async function fakeAlbumOutput(args: string[], progress?: (line: string) => Promise<void>): Promise<void> {
   const input = args[1]!;
   const output = args[args.indexOf("--output-dir") + 1]!;
-  const files = (await readdir(input)).sort();
+  const sources = JSON.parse(await readFile(input, "utf8")) as Array<{ file: string; hash: string }>;
   await mkdir(output, { recursive: true });
   const master = Buffer.from("joined-wav");
   const tracks = [];
-  for (const [index, file] of files.entries()) {
+  for (const [index, source] of sources.entries()) {
     const cleaned = Buffer.from(`cleaned-${index}`);
     const directory = path.join(output, "tracks", String(index + 1).padStart(2, "0"));
     await mkdir(directory, { recursive: true });
     await writeFile(path.join(directory, "audio-denoised.wav"), cleaned);
-    tracks.push({ position: index + 1, track_number: index + 1, source_sha256: hash(await readFile(path.join(input, file))), sha256: hash(cleaned), duration_seconds: 1 });
+    tracks.push({ position: index + 1, track_number: index + 1, title: `Track ${index + 1}`, start_seconds: index,
+      source_sha256: hash(await readFile(source.file)), sha256: hash(cleaned), duration_seconds: 1 });
   }
   await writeFile(path.join(output, "album-denoised.wav"), master);
   await writeFile(path.join(output, "video.mp4"), "video");
-  await writeFile(path.join(output, "tracklist.txt"), "00:00:00.000 Track 1");
+  await writeFile(path.join(output, "tracklist.txt"), tracks.map((track) => `00:${String(track.start_seconds).padStart(2, "0")} ${track.title}`).join("\n\n") + "\n");
   await writeFile(path.join(output, "manifest.json"), JSON.stringify({
     denoiser: "denoising-historical-recordings", source_unchanged: true, tracks,
-    audio: { sha256: hash(master), pcm: { sample_rate: 44100, channels: 1, bits_per_sample: 24, duration_seconds: files.length } },
+    audio: { sha256: hash(master), pcm: { sample_rate: 44100, channels: 1, bits_per_sample: 24, duration_seconds: sources.length } },
   }));
   await progress?.("Album exports complete");
 }
@@ -94,6 +95,11 @@ describe("Background Music Producer lifecycle", () => {
     expect(completed.albumTracks!.every((track) => track.admission === "candidate")).toBe(true);
     expect(await readFile(productionArtifactPath(store, completed, "audio")!, "utf8")).toBe("joined-wav");
     expect(await readFile(store.albumTrackAudioPath(completed, completed.albumTracks![0]!)!, "utf8")).toBe("original-mp3");
+    const productionDirectory = path.join(store.taskDirectory(completed), "production");
+    expect(await readdir(productionDirectory)).toEqual([completed.albumProduction!.runId]);
+    expect(await readdir(path.join(productionDirectory, completed.albumProduction!.runId!))).not.toContain("result");
+    expect(await readFile(productionArtifactPath(store, completed, "tracklist")!, "utf8"))
+      .toMatch(/^00:00 Track 1\n\n00:01 Track 2/u);
     // Re-entering a completed workflow must not call models or process again.
     await runBackgroundMusicProducer(store, completed, config, compose, command);
     expect(command).toHaveBeenCalledTimes(2);

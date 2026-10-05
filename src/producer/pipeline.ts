@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
-import { createReadStream } from "node:fs";
-import { copyFile, mkdir, readFile, stat, writeFile } from "node:fs/promises";
+import { createReadStream, existsSync } from "node:fs";
+import { mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { createInterface } from "node:readline";
 import { fileURLToPath } from "node:url";
@@ -54,10 +54,23 @@ async function checksum(file: string): Promise<string> {
   return hash.digest("hex");
 }
 
+function tracklistTimestamp(seconds: number): string {
+  const totalSeconds = Math.floor(seconds);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const remainder = totalSeconds % 60;
+  return hours > 0
+    ? [hours, minutes, remainder].map((value) => String(value).padStart(2, "0")).join(":")
+    : [minutes, remainder].map((value) => String(value).padStart(2, "0")).join(":");
+}
+
 export function productionArtifactPath(store: TaskStore, task: MusicTask, artifact: ProductionArtifact): string | undefined {
   const production = task.albumProduction;
   if (production?.status !== "completed" || !isProductionRunId(production.runId)) return undefined;
-  return path.join(store.taskDirectory(task), "production", production.runId, "result", PRODUCTION_ARTIFACTS[artifact]);
+  const directory = path.join(store.taskDirectory(task), "production", production.runId);
+  const current = path.join(directory, PRODUCTION_ARTIFACTS[artifact]);
+  // Keep completed runs from the previous result/ layout readable.
+  return existsSync(current) ? current : path.join(directory, "result", PRODUCTION_ARTIFACTS[artifact]);
 }
 
 export async function verifyProductionResult(
@@ -73,16 +86,20 @@ export async function verifyProductionResult(
     throw new Error("Unexpected album master format or duration.");
   }
   let duration = 0;
+  const tracklist: string[] = [];
   for (let index = 0; index < sources.length; index++) {
     const source = sources[index]!;
     const track: unknown = value.tracks[index];
     const cleaned = path.join(output, "tracks", String(index + 1).padStart(2, "0"), "audio-denoised.wav");
     if (!isRecord(track) || track.position !== index + 1 || track.track_number !== index + 1
+      || typeof track.title !== "string" || !track.title.trim() || /[\r\n]/u.test(track.title)
+      || typeof track.start_seconds !== "number" || Math.abs(track.start_seconds - duration) >= 0.002
       || track.source_sha256 !== source.hash || typeof track.duration_seconds !== "number"
       || !Number.isFinite(track.duration_seconds) || track.duration_seconds <= 0
       || track.sha256 !== await checksum(cleaned) || source.hash !== await checksum(source.file)) {
       throw new Error(`Production verification failed for track ${index + 1}.`);
     }
+    tracklist.push(`${tracklistTimestamp(track.start_seconds)} ${track.title}`);
     duration += track.duration_seconds;
   }
   if (Math.abs(duration - pcm.duration_seconds) >= 0.002
@@ -91,6 +108,9 @@ export async function verifyProductionResult(
   }
   for (const name of Object.values(PRODUCTION_ARTIFACTS)) {
     if ((await stat(path.join(output, name))).size === 0) throw new Error(`Empty production artifact: ${name}`);
+  }
+  if (await readFile(path.join(output, "tracklist.txt"), "utf8") !== `${tracklist.join("\n\n")}\n`) {
+    throw new Error("Production tracklist does not use the expected chapter format.");
   }
   return pcm.duration_seconds;
 }
@@ -105,30 +125,30 @@ export async function produceAlbum(
     throw new Error("Every production candidate must have completed audio.");
   }
   const runId = randomUUID();
-  const directory = path.join(store.taskDirectory(task), "production", runId);
-  const input = path.join(directory, "inputs");
-  await mkdir(input, { recursive: true });
+  const productionDirectory = path.join(store.taskDirectory(task), "production");
+  const output = path.join(productionDirectory, runId);
+  const input = path.join(productionDirectory, `.${runId}.sources.json`);
+  const cover = path.join(productionDirectory, `.${runId}.background.ppm`);
+  await mkdir(productionDirectory, { recursive: true });
   const sources: Array<{ file: string; hash: string }> = [];
-  for (const [index, track] of tracks.entries()) {
+  for (const track of tracks) {
     const file = store.albumTrackAudioPath(task, track);
     if (!file || path.extname(file).toLowerCase() !== ".mp3") throw new Error("Production requires safe MP3 sources.");
     const hash = await checksum(file);
-    const title = track.title.replace(/[<>:"/\\|?*\u0000-\u001f]/gu, " ").trim().slice(0, 80) || "Track";
-    const staged = path.join(input, `${String(index + 1).padStart(2, "0")} - ${title}.mp3`);
-    await copyFile(file, staged);
-    if (hash !== await checksum(staged)) throw new Error("Source changed while staging audio.");
     sources.push({ file, hash });
   }
-  // A plain PPM background satisfies the existing album pipeline's cover input.
-  const cover = path.join(directory, "background.ppm");
-  await writeFile(cover, "P3\n2 2\n255\n24 27 32 24 27 32\n24 27 32 24 27 32\n", { flag: "wx" });
-  await writeFile(path.join(directory, "sources.json"), JSON.stringify(tracks.map((track, index) => ({
-    trackId: track.id, title: track.title, ...sources[index],
-  })), null, 2), { flag: "wx" });
-  await store.update(task.id, { albumProduction: { ...task.albumProduction!, runId, trackIds: tracks.map((track) => track.id) } });
-  const output = path.join(directory, "result");
-  await command(["album", input, "--title", task.title || "Background Music Album", "--cover", cover,
-    "--workers", "2", "--output-dir", output], onProgress);
-  const durationSeconds = await verifyProductionResult(output, sources);
-  return { runId, trackIds: tracks.map((track) => track.id), durationSeconds };
+  try {
+    // A plain PPM background satisfies the existing album pipeline's cover input.
+    await writeFile(cover, "P3\n2 2\n255\n24 27 32 24 27 32\n24 27 32 24 27 32\n", { flag: "wx" });
+    await writeFile(input, JSON.stringify(tracks.map((track, index) => ({
+      trackId: track.id, title: track.title, ...sources[index],
+    })), null, 2), { flag: "wx" });
+    await store.update(task.id, { albumProduction: { ...task.albumProduction!, runId, trackIds: tracks.map((track) => track.id) } });
+    await command(["album", input, "--title", task.title || "Background Music Album", "--cover", cover,
+      "--workers", "2", "--output-dir", output], onProgress);
+    const durationSeconds = await verifyProductionResult(output, sources);
+    return { runId, trackIds: tracks.map((track) => track.id), durationSeconds };
+  } finally {
+    await Promise.all([rm(input, { force: true }), rm(cover, { force: true })]);
+  }
 }
