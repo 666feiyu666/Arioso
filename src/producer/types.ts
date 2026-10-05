@@ -8,6 +8,14 @@ export interface AlbumProduction {
   runId?: string;
   trackIds?: string[];
   durationSeconds?: number;
+  videoCreated?: boolean;
+  progress?: {
+    step: "checking" | "denoising" | "exporting" | "assembling" | "video";
+    completedTracks: number;
+    totalTracks: number;
+    currentTrackNumber?: number;
+    currentTrackTitle?: string;
+  };
 }
 
 export const PRODUCTION_ARTIFACTS = {

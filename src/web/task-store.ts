@@ -207,11 +207,22 @@ function isTaskRecord(value: unknown): value is MusicTask {
     && value.albumPlaylist.every((id: unknown) => isSafeFileName(id)));
   const albumPlanValid = value.albumPlan === undefined || AlbumPlanSchema.safeParse(value.albumPlan).success;
   const production = value.albumProduction;
+  const productionProgress = isRecord(production) ? production.progress : undefined;
+  const productionProgressValid = productionProgress === undefined || (isRecord(productionProgress)
+    && ["checking", "denoising", "exporting", "assembling", "video"].includes(String(productionProgress.step))
+    && Number.isInteger(productionProgress.completedTracks) && Number(productionProgress.completedTracks) >= 0
+    && Number.isInteger(productionProgress.totalTracks) && Number(productionProgress.totalTracks) > 0
+    && Number(productionProgress.completedTracks) <= Number(productionProgress.totalTracks)
+    && (productionProgress.currentTrackNumber === undefined
+      || (Number.isInteger(productionProgress.currentTrackNumber) && Number(productionProgress.currentTrackNumber) > 0))
+    && (productionProgress.currentTrackTitle === undefined || typeof productionProgress.currentTrackTitle === "string"));
   const productionValid = production === undefined || (isRecord(production)
     && production.role === "background_music_producer"
     && ["pending", "checking", "composing", "processing", "completed", "failed"].includes(String(production.status))
     && ["runtime", "composition", "postproduction", "delivery"].includes(String(production.stage))
-    && (production.runId === undefined || isProductionRunId(production.runId)));
+    && (production.runId === undefined || isProductionRunId(production.runId))
+    && (production.videoCreated === undefined || typeof production.videoCreated === "boolean")
+    && productionProgressValid);
   return movementsValid && tracksValid && playlistValid && albumPlanValid && productionValid;
 }
 

@@ -38,12 +38,13 @@ afterEach(async () => {
   }
 });
 
-async function setup() {
+async function setup(options: { cover?: boolean } = {}) {
   const root = await mkdtemp(path.join(tmpdir(), "arioso-producer-"));
   roots.push(root);
   const store = new TaskStore(path.join(root, "outputs", "tasks"));
   await store.initialize();
   const task = await store.create(parseTaskInput({ description: "Background music for reading", workflowType: "04-album", produceAlbum: true }), config);
+  if (options.cover !== false) await writeFile(path.join(store.taskDirectory(task), "cover.png"), "cover");
   return { store, task, root, compose: () => runAlbumTask(store, store.get(task.id)!, config) };
 }
 
@@ -63,10 +64,12 @@ async function fakeAlbumOutput(args: string[], progress?: (line: string) => Prom
       source_sha256: hash(await readFile(source.file)), sha256: hash(cleaned), duration_seconds: 1 });
   }
   await writeFile(path.join(output, "album-denoised.wav"), master);
-  await writeFile(path.join(output, "video.mp4"), "video");
+  const videoCreated = args.includes("--cover");
+  if (videoCreated) await writeFile(path.join(output, "video.mp4"), "video");
   await writeFile(path.join(output, "tracklist.txt"), tracks.map((track) => `00:${String(track.start_seconds).padStart(2, "0")} ${track.title}`).join("\n\n") + "\n");
   await writeFile(path.join(output, "manifest.json"), JSON.stringify({
     denoiser: "denoising-historical-recordings", source_unchanged: true, tracks,
+    mp4: videoCreated ? { output: path.join(output, "video.mp4") } : null,
     audio: { sha256: hash(master), pcm: { sample_rate: 44100, channels: 1, bits_per_sample: 24, duration_seconds: sources.length } },
   }));
   await progress?.("Album exports complete");
@@ -91,7 +94,9 @@ describe("Background Music Producer lifecycle", () => {
     expect(mocks.generate).toHaveBeenCalledTimes(14);
     expect(completed).toMatchObject({ status: "completed", albumPlaylist: [], albumProduction: {
       role: "background_music_producer", status: "completed", stage: "delivery", listeningReview: "pending", durationSeconds: 14,
+      videoCreated: true,
     } });
+    expect(command.mock.calls[1]?.[0]).toContain("--cover");
     expect(completed.albumTracks!.every((track) => track.admission === "candidate")).toBe(true);
     expect(await readFile(productionArtifactPath(store, completed, "audio")!, "utf8")).toBe("joined-wav");
     expect(await readFile(store.albumTrackAudioPath(completed, completed.albumTracks![0]!)!, "utf8")).toBe("original-mp3");
@@ -104,6 +109,48 @@ describe("Background Music Producer lifecycle", () => {
     await runBackgroundMusicProducer(store, completed, config, compose, command);
     expect(command).toHaveBeenCalledTimes(2);
     expect(mocks.generate).toHaveBeenCalledTimes(14);
+  });
+
+  it("completes denoising without creating an MP4 when cover.png is absent", async () => {
+    const { store, task, compose } = await setup({ cover: false });
+    const command = fakeCommand();
+    await runBackgroundMusicProducer(store, task, config, compose, command);
+    const completed = store.get(task.id)!;
+    expect(command.mock.calls[1]?.[0]).not.toContain("--cover");
+    expect(completed).toMatchObject({ status: "completed", albumProduction: {
+      status: "completed", videoCreated: false,
+      message: "Denoised audio exports verified. MP4 skipped because cover.png was not provided.",
+    } });
+    expect(productionArtifactPath(store, completed, "audio")).toBeDefined();
+    expect(productionArtifactPath(store, completed, "video")).toBeUndefined();
+  });
+
+  it("persists structured per-track denoising progress for the interface", async () => {
+    const { store, task, compose, root } = await setup();
+    const observed: unknown[] = [];
+    const command: PipelineCommand = async (args, progress) => {
+      if (args[0] !== "album") return;
+      for (const line of ["Checking 14 track checkpoint(s)", "[03/14] Decoding Green Notebook",
+        "[07/14 complete] Track 07: Small Clear Steps", "Applying one album gain to every track: 0.000000 dB",
+        "Concatenating PCM tracks in the requested order without added gaps", "Creating 1080p H.264 / AAC MP4..."]) {
+        await progress?.(line);
+        observed.push(structuredClone(store.get(task.id)?.albumProduction?.progress));
+      }
+      await fakeAlbumOutput(args);
+    };
+    await runBackgroundMusicProducer(store, task, config, compose, command);
+    expect(observed).toEqual([
+      { step: "checking", completedTracks: 0, totalTracks: 14 },
+      { step: "denoising", completedTracks: 0, totalTracks: 14, currentTrackNumber: 3, currentTrackTitle: "Green Notebook" },
+      { step: "denoising", completedTracks: 7, totalTracks: 14, currentTrackNumber: 7, currentTrackTitle: "Small Clear Steps" },
+      { step: "exporting", completedTracks: 14, totalTracks: 14 },
+      { step: "assembling", completedTracks: 14, totalTracks: 14 },
+      { step: "video", completedTracks: 14, totalTracks: 14 },
+    ]);
+    const restarted = new TaskStore(path.join(root, "outputs", "tasks"));
+    await restarted.initialize();
+    expect(restarted.get(task.id)?.albumProduction?.progress)
+      .toEqual({ step: "video", completedTracks: 14, totalTracks: 14 });
   });
 
   it("fails runtime preflight before any model call", async () => {
@@ -130,7 +177,12 @@ describe("Background Music Producer lifecycle", () => {
   it("retries failed processing with existing audio after a server restart", async () => {
     const { store, task, compose, root } = await setup();
     const command = fakeCommand();
-    command.mockImplementationOnce(async () => {}).mockImplementationOnce(async () => { throw new Error("Denoising interrupted"); });
+    command.mockImplementationOnce(async () => {}).mockImplementationOnce(async (args) => {
+      const output = args[args.indexOf("--output-dir") + 1]!;
+      await mkdir(output, { recursive: true });
+      await writeFile(path.join(output, "run-state.json"), "{}");
+      throw new Error("Denoising interrupted");
+    });
     await expect(runBackgroundMusicProducer(store, task, config, compose, command)).rejects.toThrow("Denoising interrupted");
     const firstRun = store.get(task.id)!.albumProduction!.runId;
     expect(store.get(task.id)).toMatchObject({ status: "failed", albumProduction: { stage: "postproduction" } });
@@ -140,9 +192,25 @@ describe("Background Music Producer lifecycle", () => {
     await runBackgroundMusicProducer(resumedStore, resumed, config,
       () => runAlbumTask(resumedStore, resumedStore.get(task.id)!, config), command);
     expect(resumedStore.get(task.id)?.status).toBe("completed");
-    expect(resumedStore.get(task.id)?.albumProduction?.runId).not.toBe(firstRun);
+    expect(resumedStore.get(task.id)?.albumProduction?.runId).toBe(firstRun);
+    expect(command.mock.calls[3]?.[0]).toContain("--resume");
     expect(mocks.generate).toHaveBeenCalledTimes(14);
     expect(mocks.plan).toHaveBeenCalledOnce();
+  });
+
+  it("starts a new production run when a generated source changed after failure", async () => {
+    const { store, task, compose } = await setup();
+    const command = fakeCommand();
+    command.mockImplementationOnce(async () => {}).mockImplementationOnce(async () => {
+      throw new Error("Denoising interrupted");
+    });
+    await expect(runBackgroundMusicProducer(store, task, config, compose, command)).rejects.toThrow("Denoising interrupted");
+    const failed = store.get(task.id)!;
+    const firstRun = failed.albumProduction!.runId;
+    await writeFile(store.albumTrackAudioPath(failed, failed.albumTracks![0]!)!, "changed-source");
+    await runBackgroundMusicProducer(store, store.get(task.id)!, config, compose, command);
+    expect(store.get(task.id)?.albumProduction?.runId).not.toBe(firstRun);
+    expect(command.mock.calls[3]?.[0]).not.toContain("--resume");
   });
 
   it("marks interrupted production failed while preserving completed candidates", async () => {

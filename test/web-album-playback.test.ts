@@ -138,6 +138,26 @@ describe("album listening interface", () => {
     expect(api.elements.form.hidden).toBe(true);
   });
 
+  it("shows the production video download only when an MP4 was created", async () => {
+    const audioOnly = { ...album(), albumProduction: { status: "completed", stage: "delivery", videoCreated: false } };
+    const { api } = await interfaceHarness(audioOnly);
+    api.renderAlbumDetail(audioOnly);
+    expect(api.elements.taskDetail.innerHTML).toContain("/production/audio");
+    expect(api.elements.taskDetail.innerHTML).not.toContain("/production/video");
+    const withVideo = { ...audioOnly, albumProduction: { ...audioOnly.albumProduction, videoCreated: true } };
+    api.renderAlbumDetail(withVideo);
+    expect(api.elements.taskDetail.innerHTML).toContain("/production/video");
+  });
+
+  it("shows the current denoising track and completed count", async () => {
+    const initial = { ...album(), status: "processing", albumProduction: { status: "processing", stage: "postproduction",
+      progress: { step: "denoising", completedTracks: 7, totalTracks: 14,
+        currentTrackNumber: 8, currentTrackTitle: "Morning Grid" } } };
+    const { api } = await interfaceHarness(initial);
+    api.renderAlbumDetail(initial);
+    expect(api.elements.taskDetail.innerHTML).toContain("正在降噪，已完成 7/14 首 · 08 Morning Grid");
+  });
+
   it("plays only included audio in the explicit playlist order and stops at the end", async () => {
     const initial = album();
     initial.albumTracks[0]!.admission = "included";

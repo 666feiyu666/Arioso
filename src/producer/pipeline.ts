@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
 import { createReadStream, existsSync } from "node:fs";
-import { mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { lstat, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { createInterface } from "node:readline";
 import { fileURLToPath } from "node:url";
@@ -70,15 +70,18 @@ export function productionArtifactPath(store: TaskStore, task: MusicTask, artifa
   const directory = path.join(store.taskDirectory(task), "production", production.runId);
   const current = path.join(directory, PRODUCTION_ARTIFACTS[artifact]);
   // Keep completed runs from the previous result/ layout readable.
-  return existsSync(current) ? current : path.join(directory, "result", PRODUCTION_ARTIFACTS[artifact]);
+  if (existsSync(current)) return current;
+  const legacy = path.join(directory, "result", PRODUCTION_ARTIFACTS[artifact]);
+  return existsSync(legacy) ? legacy : undefined;
 }
 
 export async function verifyProductionResult(
-  output: string, sources: Array<{ file: string; hash: string }>,
+  output: string, sources: Array<{ file: string; hash: string }>, videoExpected: boolean,
 ): Promise<number> {
   const value: unknown = JSON.parse(await readFile(path.join(output, "manifest.json"), "utf8"));
   if (!isRecord(value) || value.denoiser !== "denoising-historical-recordings"
     || value.source_unchanged !== true || !Array.isArray(value.tracks) || value.tracks.length !== sources.length
+    || (videoExpected ? !isRecord(value.mp4) : value.mp4 !== null)
     || !isRecord(value.audio) || !isRecord(value.audio.pcm)) throw new Error("Incomplete production manifest.");
   const pcm = value.audio.pcm;
   if (pcm.channels !== 1 || pcm.sample_rate !== 44100 || pcm.bits_per_sample !== 24
@@ -106,10 +109,13 @@ export async function verifyProductionResult(
     || value.audio.sha256 !== await checksum(path.join(output, "album-denoised.wav"))) {
     throw new Error("Album master checksum or duration verification failed.");
   }
-  for (const name of Object.values(PRODUCTION_ARTIFACTS)) {
+  const requiredArtifacts = [PRODUCTION_ARTIFACTS.audio, PRODUCTION_ARTIFACTS.tracklist,
+    PRODUCTION_ARTIFACTS.manifest, ...(videoExpected ? [PRODUCTION_ARTIFACTS.video] : [])];
+  for (const name of requiredArtifacts) {
     if ((await stat(path.join(output, name))).size === 0) throw new Error(`Empty production artifact: ${name}`);
   }
-  if (await readFile(path.join(output, "tracklist.txt"), "utf8") !== `${tracklist.join("\n\n")}\n`) {
+  const actualTracklist = (await readFile(path.join(output, "tracklist.txt"), "utf8")).replace(/\r\n/gu, "\n");
+  if (actualTracklist !== `${tracklist.join("\n\n")}\n`) {
     throw new Error("Production tracklist does not use the expected chapter format.");
   }
   return pcm.duration_seconds;
@@ -118,17 +124,15 @@ export async function verifyProductionResult(
 export async function produceAlbum(
   store: TaskStore, task: MusicTask, command: PipelineCommand,
   onProgress: (line: string) => Promise<void>,
-): Promise<{ runId: string; trackIds: string[]; durationSeconds: number }> {
+): Promise<{ runId: string; trackIds: string[]; durationSeconds: number; videoCreated: boolean }> {
   const tracks = [...(task.albumTracks ?? [])].filter((track) => track.admission !== "excluded")
     .sort((a, b) => a.order - b.order);
   if (!tracks.length || tracks.some((track) => track.status !== "completed" || !track.audioFile)) {
     throw new Error("Every production candidate must have completed audio.");
   }
-  const runId = randomUUID();
   const productionDirectory = path.join(store.taskDirectory(task), "production");
-  const output = path.join(productionDirectory, runId);
-  const input = path.join(productionDirectory, `.${runId}.sources.json`);
-  const cover = path.join(productionDirectory, `.${runId}.background.ppm`);
+  const cover = path.join(store.taskDirectory(task), "cover.png");
+  const videoCreated = existsSync(cover);
   await mkdir(productionDirectory, { recursive: true });
   const sources: Array<{ file: string; hash: string }> = [];
   for (const track of tracks) {
@@ -137,18 +141,37 @@ export async function produceAlbum(
     const hash = await checksum(file);
     sources.push({ file, hash });
   }
-  try {
-    // A plain PPM background satisfies the existing album pipeline's cover input.
-    await writeFile(cover, "P3\n2 2\n255\n24 27 32 24 27 32\n24 27 32 24 27 32\n", { flag: "wx" });
-    await writeFile(input, JSON.stringify(tracks.map((track, index) => ({
-      trackId: track.id, title: track.title, ...sources[index],
-    })), null, 2), { flag: "wx" });
-    await store.update(task.id, { albumProduction: { ...task.albumProduction!, runId, trackIds: tracks.map((track) => track.id) } });
-    await command(["album", input, "--title", task.title || "Background Music Album", "--cover", cover,
-      "--workers", "2", "--output-dir", output], onProgress);
-    const durationSeconds = await verifyProductionResult(output, sources);
-    return { runId, trackIds: tracks.map((track) => track.id), durationSeconds };
-  } finally {
-    await Promise.all([rm(input, { force: true }), rm(cover, { force: true })]);
+  const trackIds = tracks.map((track) => track.id);
+  const sourceManifest = JSON.stringify(tracks.map((track, index) => ({
+    trackId: track.id, title: track.title, ...sources[index],
+  })), null, 2);
+  let runId: string = randomUUID();
+  let resume = false;
+  const previous = task.albumProduction;
+  if (isProductionRunId(previous?.runId)
+    && JSON.stringify(previous.trackIds) === JSON.stringify(trackIds)) {
+    const previousInput = path.join(productionDirectory, `.${previous.runId}.sources.json`);
+    try {
+      if (await readFile(previousInput, "utf8") === sourceManifest) {
+        runId = previous.runId;
+        const previousOutput = path.join(productionDirectory, runId);
+        const details = await lstat(previousOutput).catch(() => undefined);
+        resume = details?.isDirectory() === true && !details.isSymbolicLink()
+          && existsSync(path.join(previousOutput, "run-state.json"));
+        if (!resume && details) runId = randomUUID();
+      }
+    } catch {
+      // Runs created before resumable checkpoints safely start a new production run.
+    }
   }
+  const output = path.join(productionDirectory, runId);
+  const input = path.join(productionDirectory, `.${runId}.sources.json`);
+  if (!existsSync(input)) await writeFile(input, sourceManifest, { flag: "wx" });
+  await store.update(task.id, { albumProduction: { ...task.albumProduction!, runId, trackIds } });
+  await command(["album", input, "--title", task.title || "Background Music Album",
+    ...(videoCreated ? ["--cover", cover] : []), "--workers", "2", "--output-dir", output,
+    ...(resume ? ["--resume"] : [])], onProgress);
+  const durationSeconds = await verifyProductionResult(output, sources, videoCreated);
+  await rm(input, { force: true });
+  return { runId, trackIds, durationSeconds, videoCreated };
 }

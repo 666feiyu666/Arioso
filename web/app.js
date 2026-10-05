@@ -2,11 +2,16 @@ const translations = {
   "zh-CN": {
     albumProductionMode: "制作流程", albumGenerationOnly: "生成候选曲",
     backgroundMusicProducer: "Background Music Producer · 生成并降噪",
-    albumProductionHelp: "制作人流程会保留原始音频，将未排除的候选曲降噪并导出单声道 WAV 与 MP4。完成后仍需试听确认。",
+    albumProductionHelp: "制作人流程会保留原始音频并导出单声道 WAV；任务目录存在 cover.png 时还会生成 MP4。完成后仍需试听确认。",
     productionTitle: "Background Music Producer", productionReview: "单声道降噪版本 · 请与原始候选曲对比试听后再决定收录。",
     productionAudio: "下载降噪专辑 WAV", productionVideo: "下载专辑 MP4", productionTracklist: "下载曲目时间戳", productionManifest: "下载处理记录",
     processing: "正在降噪与制作专辑", productionWorking: "正在检查环境并准备专辑制作。",
     productionChecking: "正在检查音频处理环境。",
+    productionCheckpointing: "正在检查 {total} 首曲目的降噪断点。",
+    productionDenoising: "正在降噪，已完成 {completed}/{total} 首",
+    productionExporting: "全部 {total} 首降噪完成，正在导出单曲 WAV",
+    productionAssembling: "全部 {total} 首降噪完成，正在合成专辑 WAV。",
+    productionCreatingVideo: "专辑 WAV 已完成，正在合成 MP4。",
     pageTitle: "Arioso · AI 音乐工坊",
     newTask: "新建任务", tasks: "任务", musicTasks: "音乐任务", settings: "设置",
     entryEyebrow: "CHOOSE A WORKFLOW", entryTitle: "选择音乐的<br />创作方式。",
@@ -114,11 +119,16 @@ const translations = {
   en: {
     albumProductionMode: "Production workflow", albumGenerationOnly: "Generate candidates",
     backgroundMusicProducer: "Background Music Producer · generate and denoise",
-    albumProductionHelp: "Preserve originals, denoise non-excluded candidates, and export a mono WAV album and MP4. Listening review is still required.",
+    albumProductionHelp: "Preserve originals and export a denoised mono WAV album; also create an MP4 when cover.png exists in the task directory. Listening review is still required.",
     productionTitle: "Background Music Producer", productionReview: "Mono denoised version · compare with the original candidates before selecting tracks.",
     productionAudio: "Download denoised album WAV", productionVideo: "Download album MP4", productionTracklist: "Download timestamps", productionManifest: "Download processing record",
     processing: "Denoising and producing album", productionWorking: "Checking the runtime and preparing album production.",
     productionChecking: "Checking the audio processing runtime.",
+    productionCheckpointing: "Checking denoising checkpoints for {total} tracks.",
+    productionDenoising: "Denoising tracks · {completed}/{total} complete",
+    productionExporting: "All {total} tracks are denoised · exporting track WAV files",
+    productionAssembling: "All {total} tracks are denoised · assembling the album WAV.",
+    productionCreatingVideo: "Album WAV complete · creating the MP4.",
     pageTitle: "Arioso · AI Music Studio",
     newTask: "New task", tasks: "Tasks", musicTasks: "Music tasks", settings: "Settings",
     entryEyebrow: "CHOOSE A WORKFLOW", entryTitle: "Choose how to<br />create your music.",
@@ -1005,12 +1015,28 @@ async function exportAlbum(taskId, scope, button) {
   }
 }
 
+function productionStatusText(production) {
+  if (production.status === "completed") return t("completed");
+  if (production.status === "failed") return t("taskInterrupted");
+  if (production.stage === "runtime") return t("productionChecking");
+  if (production.stage === "composition") return t("albumPreparing");
+  const progress = production.progress;
+  if (!progress) return production.message || t("processing");
+  const key = { checking: "productionCheckpointing", denoising: "productionDenoising",
+    exporting: "productionExporting", assembling: "productionAssembling",
+    video: "productionCreatingVideo" }[progress.step];
+  const summary = t(key || "processing", { completed: progress.completedTracks, total: progress.totalTracks });
+  return progress.currentTrackTitle
+    ? `${summary} · ${String(progress.currentTrackNumber).padStart(2, "0")} ${progress.currentTrackTitle}`
+    : summary;
+}
+
 function renderAlbumDetail(task) {
   const production = task.albumProduction;
   const productionBase = `/api/tasks/${encodeURIComponent(task.id)}/production/`;
   const productionPanel = production ? `<section class="album-idea"><h3>${t("productionTitle")}</h3>
-    <p role="status">${t(production.status === "completed" ? "completed" : production.status === "failed" ? "taskInterrupted" : production.stage === "runtime" ? "productionChecking" : production.stage === "composition" ? "albumPreparing" : "processing")}</p>
-    ${production.status === "completed" ? `<p>${t("productionReview")}</p><audio controls preload="none" src="${productionBase}audio"></audio><p>${[["audio", "productionAudio"], ["video", "productionVideo"], ["tracklist", "productionTracklist"], ["manifest", "productionManifest"]].map(([artifact, label]) => `<a class="secondary-button" href="${productionBase}${artifact}" download>${t(label)}</a>`).join(" ")}</p>` : ""}</section>` : "";
+    <p role="status">${escapeHtml(productionStatusText(production))}</p>
+    ${production.status === "completed" ? `<p>${t("productionReview")}</p><audio controls preload="none" src="${productionBase}audio"></audio><p>${[["audio", "productionAudio"], ...(production.videoCreated === false ? [] : [["video", "productionVideo"]]), ["tracklist", "productionTracklist"], ["manifest", "productionManifest"]].map(([artifact, label]) => `<a class="secondary-button" href="${productionBase}${artifact}" download>${t(label)}</a>`).join(" ")}</p>` : ""}</section>` : "";
   const scope = state.albumViewScope;
   const tracks = albumTracks(task, scope);
   const all = task.albumTracks || [];
