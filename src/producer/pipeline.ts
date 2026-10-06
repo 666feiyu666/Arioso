@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
 import { createReadStream, existsSync } from "node:fs";
-import { lstat, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { lstat, mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { createInterface } from "node:readline";
 import { fileURLToPath } from "node:url";
@@ -142,12 +142,35 @@ export async function produceAlbum(
     sources.push({ file, hash });
   }
   const trackIds = tracks.map((track) => track.id);
+  const previous = task.albumProduction;
+  const productionRuns = (await readdir(productionDirectory, { withFileTypes: true }))
+    .filter((entry) => entry.isDirectory() && isProductionRunId(entry.name))
+    .map((entry) => entry.name);
+  const recoveryOrder = [
+    ...(isProductionRunId(previous?.runId) ? [previous.runId] : []),
+    ...productionRuns.filter((runId) => runId !== previous?.runId),
+  ];
+  for (const runId of recoveryOrder) {
+    const existingOutput = path.join(productionDirectory, runId);
+    if (!existsSync(path.join(existingOutput, PRODUCTION_ARTIFACTS.manifest))
+      || !existsSync(path.join(existingOutput, PRODUCTION_ARTIFACTS.audio))
+      || (videoCreated && !existsSync(path.join(existingOutput, PRODUCTION_ARTIFACTS.video)))) continue;
+    try {
+      const durationSeconds = await verifyProductionResult(existingOutput, sources, videoCreated);
+      await store.update(task.id, { albumProduction: { ...task.albumProduction!, runId, trackIds } });
+      if (isProductionRunId(previous?.runId)) {
+        await rm(path.join(productionDirectory, `.${previous.runId}.sources.json`), { force: true });
+      }
+      return { runId, trackIds, durationSeconds, videoCreated };
+    } catch {
+      // Ignore stale or mismatched exports and continue with checkpoint recovery or a new run.
+    }
+  }
   const sourceManifest = JSON.stringify(tracks.map((track, index) => ({
     trackId: track.id, title: track.title, ...sources[index],
   })), null, 2);
   let runId: string = randomUUID();
   let resume = false;
-  const previous = task.albumProduction;
   if (isProductionRunId(previous?.runId)
     && JSON.stringify(previous.trackIds) === JSON.stringify(trackIds)) {
     const previousInput = path.join(productionDirectory, `.${previous.runId}.sources.json`);

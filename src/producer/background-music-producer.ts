@@ -36,7 +36,8 @@ function pipelineProgress(line: string, task: MusicTask): AlbumProduction["progr
   if (line.startsWith("Concatenating PCM tracks") || line.startsWith("Reusing verified concatenated")) {
     return { step: "assembling", completedTracks: total, totalTracks: total };
   }
-  if (line.startsWith("Creating 1080p") || line.startsWith("Reusing verified MP4")) {
+  if (line.startsWith("Creating 1080p") || line.startsWith("Reusing verified MP4")
+    || line.startsWith("Recovered and reused existing verified MP4")) {
     return { step: "video", completedTracks: total, totalTracks: total };
   }
   return previous;
@@ -72,9 +73,12 @@ export async function runBackgroundMusicProducer(
       const parsed = pipelineProgress(message, latest);
       await progress(parsed ? { message, progress: parsed } : { message });
     });
-    await progress({ ...result, status: "completed", stage: "delivery", message: result.videoCreated
-      ? "Audio and video exports verified. Listening review is pending."
-      : "Denoised audio exports verified. MP4 skipped because cover.png was not provided." });
+    await progress({ ...result, status: "completed", stage: "delivery",
+      progress: { step: result.videoCreated ? "video" : "assembling",
+        completedTracks: result.trackIds.length, totalTracks: result.trackIds.length },
+      message: result.videoCreated
+        ? "Audio and video exports verified. Listening review is pending."
+        : "Denoised audio exports verified. MP4 skipped because cover.png was not provided." });
     await store.update(task.id, { status: "completed", error: undefined });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

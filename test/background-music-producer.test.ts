@@ -198,6 +198,30 @@ describe("Background Music Producer lifecycle", () => {
     expect(mocks.plan).toHaveBeenCalledOnce();
   });
 
+  it("recovers a completed MP4 export without starting another production run", async () => {
+    const { store, task, compose } = await setup();
+    const command = fakeCommand();
+    await runBackgroundMusicProducer(store, task, config, compose, command);
+    const completed = store.get(task.id)!;
+    const completedRun = completed.albumProduction!.runId!;
+    await store.update(task.id, { status: "failed", error: "stale failure", albumProduction: {
+      ...completed.albumProduction!, status: "failed", stage: "postproduction",
+      runId: "11111111-1111-4111-8111-111111111111", error: "stale failure",
+      progress: { step: "denoising", completedTracks: 0, totalTracks: 14,
+        currentTrackNumber: 1, currentTrackTitle: "Track 1" },
+    } });
+
+    await runBackgroundMusicProducer(store, store.get(task.id)!, config,
+      () => runAlbumTask(store, store.get(task.id)!, config), command);
+
+    expect(command.mock.calls.map(([args]) => args[0])).toEqual(["doctor", "album", "doctor"]);
+    expect(store.get(task.id)).toMatchObject({ status: "completed", albumProduction: {
+      status: "completed", stage: "delivery", runId: completedRun,
+      progress: { step: "video", completedTracks: 14, totalTracks: 14 },
+    } });
+    expect(await readdir(path.join(store.taskDirectory(task), "production"))).toEqual([completedRun]);
+  });
+
   it("starts a new production run when a generated source changed after failure", async () => {
     const { store, task, compose } = await setup();
     const command = fakeCommand();
