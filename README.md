@@ -18,6 +18,10 @@ and a command-line interface:
 
 ![Arioso browser interface](Assets/arioso-web-interface.png)
 
+## Workflow
+
+![Arioso current workflow](Assets/arioso-current-workflow.png)
+
 ## Example output
 
 Listen to [Afternoon Study](https://www.bilibili.com/video/BV1p5pc6AEX2/), a

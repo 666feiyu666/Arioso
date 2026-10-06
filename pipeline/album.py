@@ -163,10 +163,14 @@ def raw_track_valid(record: dict) -> bool:
 def denoise_track(track: dict, runtime: dict, job: Path, total: int) -> dict:
     number = track['track_number']
     directory = job / 'tracks' / f'{number:02d}'
-    directory.mkdir(parents=True)
+    # A cancelled run can leave the per-track directory behind before it has a
+    # usable denoise checkpoint.  The directory is workspace, not the
+    # checkpoint, so resuming must be allowed to reuse it.
+    directory.mkdir(parents=True, exist_ok=True)
     decoded = directory / 'input-float.wav'
     raw = directory / 'denoised-float.wav'
-    for stale in (decoded, raw):
+    transport = directory / 'historical' / 'historical-transport.json'
+    for stale in (decoded, raw, transport):
         if stale.exists() or stale.is_symlink():
             stale.unlink()
     ffmpeg = runtime['ffmpeg']

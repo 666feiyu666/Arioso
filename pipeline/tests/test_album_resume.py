@@ -13,6 +13,51 @@ import album  # noqa: E402
 
 
 class AlbumResumeTest(unittest.TestCase):
+    def test_denoise_reuses_partial_track_directory(self) -> None:
+        with tempfile.TemporaryDirectory(prefix='arioso-album-partial-') as temporary:
+            root = Path(temporary)
+            source = root / '01 Track.mp3'
+            source.write_bytes(b'source')
+            job = root / 'production'
+            directory = job / 'tracks' / '01'
+            historical = directory / 'historical'
+            historical.mkdir(parents=True)
+            (directory / 'input-float.wav').write_bytes(b'partial-input')
+            (directory / 'denoised-float.wav').write_bytes(b'partial-output')
+            (historical / 'historical-transport.json').write_text('{}', encoding='utf-8')
+            track = {'track_number': 1, 'title': 'Track', 'source': source,
+                     'source_sha256': album.source_hash(source)}
+            runtime = {'ffmpeg': 'ffmpeg', 'historical_python': 'python',
+                       'historical_repository': 'repository'}
+
+            def fake_execute(arguments: list[str], _log: Path, **_kwargs: object) -> str:
+                if '--output' in arguments:
+                    raw = Path(arguments[arguments.index('--output') + 1])
+                    transport = Path(arguments[arguments.index('--log-dir') + 1]) / 'historical-transport.json'
+                    self.assertFalse(raw.exists())
+                    self.assertFalse(transport.exists())
+                    raw.write_bytes(b'fresh-output')
+                    transport.write_text(json.dumps({'outputs': {
+                        'input-float_denoised.wav': {
+                            'sample_rate': 44100, 'channels': 1, 'subtype': 'FLOAT',
+                            'frames': 100,
+                        },
+                    }}), encoding='utf-8')
+                else:
+                    Path(arguments[-1]).write_bytes(b'fresh-input')
+                return ''
+
+            with patch.object(album, 'execute', side_effect=fake_execute), \
+                    patch.object(album, 'measure_audio', return_value={
+                        'duration_seconds': 100 / 44100, 'true_peak_dbfs': -2.0,
+                        'integrated_lufs': -20.0,
+                    }):
+                record = album.denoise_track(track, runtime, job, 1)
+
+            self.assertEqual(record['frames'], 100)
+            self.assertEqual(record['raw'].read_bytes(), b'fresh-output')
+            self.assertFalse((directory / 'input-float.wav').exists())
+
     def test_resume_reuses_verified_tracks_and_repairs_only_corrupt_track(self) -> None:
         with tempfile.TemporaryDirectory(prefix='arioso-album-resume-') as temporary:
             root = Path(temporary)
