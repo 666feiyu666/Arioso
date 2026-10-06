@@ -1,59 +1,81 @@
 # Arioso
 
-Arioso is a workspace for **agentic music composition**.There's another way which asks agent to compose and write midi directly. But based on my knowledge so far, it could do the latter very well, but still not good enough for the former. And that's why I turn to the music-generation model.
+Arioso is a local workspace for agent-directed music composition. It turns a
+musical idea into a structured plan, uses optional corpus knowledge to refine
+that plan, and can send the resulting prompt to Google Lyria for audio
+generation.
 
-The idea is simple: before a music-generation model creates sound, an agent first decides what the music should become.
+Arioso now supports four workflows through a bilingual browser interface
+and a command-line interface:
 
-```text
-human idea
-    ↓
-agent-composer
-    ↓
-music prompt
-    ↓
-Lyria
+- general composition from a free-form brief;
+- Jazz composition with local corpus retrieval;
+- coherent multi-movement orchestral works; and
+- multi-track albums with candidate review, playlist ordering, playback, and
+  MP3 export.
+
+## Requirements
+
+- Windows or macOS;
+- Node.js 22 or newer;
+- pnpm 11.19.0, as declared in `package.json`;
+- an OpenAI API key for composition; and
+- a Gemini API key with Lyria access for audio generation.
+
+The core web and CLI workflows support Windows and macOS. The optional
+historical-denoising production workflow currently supports Windows only.
+macOS users can still compose and generate album candidates, manage playlists,
+and export their selected tracks without denoising.
+
+## Quick start
+
+```shell
+git clone https://github.com/666feiyu666/Arioso.git
+cd Arioso
+corepack enable
+pnpm install --frozen-lockfile
+pnpm web
 ```
 
-I am interested in two kinds of agent-composer.
+Open <http://127.0.0.1:4173> and configure the required API keys in Settings.
 
-## Without a corpus
+If Corepack is unavailable, install pnpm 11.19.0 separately before running
+`pnpm install`.
 
-The first composer works directly from the user's idea.
+## Command line
 
-An agent interprets the request and turns it into a more structured musical intention: genre, instrumentation, rhythm, harmony, form, dynamics, and production.
+For CLI use, copy `.env.example` to `.env` and replace the placeholders:
 
-In this setting, the composer mainly relies on the musical knowledge already contained in the language model.
-
-This gives Arioso a baseline:
-
-> How well can an agent compose from its internal knowledge alone?
-
-## With a corpus
-
-The second direction introduces **information retrieval**.
-
-```text
-human idea
-    ↓
-retrieval
-    ↓
-musical references
-    ↓
-agent-composer
-    ↓
-music prompt
+```powershell
+# Windows PowerShell
+Copy-Item .env.example .env
 ```
 
-Instead of relying only on internal model knowledge, the composer can retrieve relevant musical context before making decisions.
+```shell
+# macOS
+cp .env.example .env
+```
 
-I think of this corpus as a small form of **external musical memory**.
+Then run one of the supported commands:
 
-## why-not-jazz
+```shell
+pnpm dev compose "A quiet nocturne for piano and muted trumpet."
+pnpm dev generate "A quiet nocturne for piano and muted trumpet."
+pnpm dev produce-album "A calm instrumental album for late-night reading."
+pnpm dev stitch "album.mp3" "part-1.mp3" "part-2.mp3"
+```
 
-Because I like jazz.
+`produce-album` includes the Windows-only denoising production stage. Use the
+browser's standard album workflow on macOS.
 
-For the first corpus-based experiment, I use material collected from two Wikipedia sources: **List of jazz genres** and **List of jazz standards**.
+## Verification
 
-One provides a map of jazz styles; the other provides a repertoire of compositions that have become shared references in jazz.
+```shell
+pnpm typecheck
+pnpm test
+pnpm build
+```
 
-When Arioso receives a jazz-related request, the system retrieves relevant knowledge from the corpus and provides it to the agent as context for composition.
+See [`docs/development.md`](docs/development.md) for development commands and
+[`pipeline/USAGE.md`](pipeline/USAGE.md) for the optional Windows production
+pipeline.

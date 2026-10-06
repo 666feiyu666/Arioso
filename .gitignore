@@ -1,8 +1,38 @@
+# Secrets and local instructions
 .env
+.env.*
+!.env.example
 AGENTS.md
-node_modules/*
-dist/*
-outputs/*
-scripts/*
-docs/*
-pipeline/*
+
+# Node.js
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+npm-debug.log*
+pnpm-debug.log*
+
+# Runtime output and generated media
+outputs/
+*.mp3
+*.wav
+*.mp4
+*.log
+
+# Local audio-pipeline dependencies and evidence
+pipeline/runtime/
+pipeline/evidence/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini

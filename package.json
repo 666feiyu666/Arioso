@@ -1,8 +1,8 @@
 {
   "name": "arioso",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
-  "description": "A structured music prompt composer for Google Lyria.",
+  "description": "An agentic music composition workspace for Google Lyria.",
   "type": "module",
   "packageManager": "pnpm@11.19.0",
   "bin": {
