@@ -14,6 +14,15 @@ and a command-line interface:
 - multi-track albums with candidate review, playlist ordering, playback, and
   MP3 export.
 
+## Interface
+
+![Arioso browser interface](Assets/arioso-web-interface.png)
+
+## Example output
+
+Listen to [Afternoon Study](https://www.bilibili.com/video/BV1p5pc6AEX2/), a
+complete piece generated with Arioso.
+
 ## Requirements
 
 - Windows or macOS;
