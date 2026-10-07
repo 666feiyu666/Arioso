@@ -8,6 +8,7 @@ What needs to add:
 - Long/Short term Memory?(suitable for user requirement)
 - image generation
 - RAG refinement
+- multi-thread
 - ...
 
 
