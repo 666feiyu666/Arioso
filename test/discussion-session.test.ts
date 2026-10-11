@@ -3,7 +3,8 @@ import path from "node:path";
 
 import { describe, expect, it, vi } from "vitest";
 
-import type { DiscussionAgent, DiscussionAgentMessage } from "../src/discussion/types.js";
+import type { DiscussionAgent, DiscussionAgentMessage, DiscussionAgentOptions } from "../src/discussion/types.js";
+import { discussionScopeInstructions } from "../src/discussion/langchain-discussion.js";
 import { withWebServer } from "./helpers/web-server.js";
 
 const { composeMock } = vi.hoisted(() => ({ composeMock: vi.fn() }));
@@ -22,20 +23,25 @@ function musicSpec(title = "Approved direction") {
 
 class StubDiscussionAgent implements DiscussionAgent {
   calls: DiscussionAgentMessage[][] = [];
-  async respond(messages: DiscussionAgentMessage[]): Promise<string> {
+  options: DiscussionAgentOptions[] = [];
+  async respond(messages: DiscussionAgentMessage[], options: DiscussionAgentOptions): Promise<string> {
     this.calls.push(messages);
+    this.options.push(options);
     return "适合温暖、安静、略带怀旧感的下班后音乐。";
   }
-  async propose(messages: DiscussionAgentMessage[]): Promise<string> {
+  async propose(messages: DiscussionAgentMessage[], options: DiscussionAgentOptions): Promise<string> {
     this.calls.push(messages);
+    this.options.push(options);
     return "创作温暖安静的下班后放松音乐，以柔和钢琴和自然空间感为核心。";
   }
 }
 
-async function createSession(baseUrl: string) {
+async function createSession(baseUrl: string, input: Record<string, unknown> = {
+  mode: "compose", workflowType: "01-general", vocalMode: "instrumental",
+}) {
   const response = await fetch(`${baseUrl}/api/discussions`, {
     method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ mode: "compose", workflowType: "01-general", vocalMode: "instrumental" }),
+    body: JSON.stringify(input),
   });
   expect(response.status).toBe(201);
   return response.json() as Promise<{ id: string }>;
@@ -54,8 +60,33 @@ describe("creative discussion sessions", () => {
       const updated = await response.json() as { messages: Array<{ role: string; content: string }> };
       expect(updated.messages.map((message: { role: string }) => message.role)).toEqual(["user", "assistant"]);
       expect(updated.messages[1]!.content).toContain("温暖");
+      expect(agent.options[0]).toMatchObject({ compositionMode: "single", workflowType: "01-general" });
       expect(await fetch(`${baseUrl}/api/tasks`).then((result) => result.json())).toEqual([]);
     }, { environment: { OPENAI_API_KEY: "test-local-only" }, discussionAgent: agent });
+  });
+
+  it("preserves themed album scope for the discussion and final proposal", async () => {
+    const agent = new StubDiscussionAgent();
+    await withWebServer(async ({ baseUrl }) => {
+      const session = await createSession(baseUrl, {
+        mode: "generate", workflowType: "04-album", vocalMode: "instrumental", compositionMode: "album",
+        candidateCount: 14, targetTotalMinutes: 35, lyriaModel: "lyria-3.5",
+      });
+      await fetch(`${baseUrl}/api/discussions/${session.id}/messages`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: "做一张夜晚凯尔特酒馆主题专辑。" }),
+      });
+      const proposal = await fetch(`${baseUrl}/api/discussions/${session.id}/proposal`, { method: "POST" });
+      expect(proposal.status).toBe(200);
+      expect(agent.options).toHaveLength(2);
+      expect(agent.options).toEqual(expect.arrayContaining([
+        expect.objectContaining({ compositionMode: "album", workflowType: "04-album", candidateCount: 14, targetTotalMinutes: 35 }),
+      ]));
+    }, { environment: { OPENAI_API_KEY: "test-local-only" }, discussionAgent: agent });
+    expect(discussionScopeInstructions({
+      apiKey: "test", model: "test", language: "zh-CN", compositionMode: "album", workflowType: "04-album",
+      candidateCount: 14, targetTotalMinutes: 35,
+    })).toContain("not a single track");
   });
 
   it("sends locally stored images into the same multimodal discussion", async () => {

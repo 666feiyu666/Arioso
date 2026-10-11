@@ -557,7 +557,8 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
 
       if (request.method === "POST" && discussionMessagesMatch?.[1]) {
         const sessionId = discussionMessagesMatch[1];
-        if (!discussionStore.get(sessionId)) throw new HttpError(404, "Discussion session not found.");
+        const session = discussionStore.get(sessionId);
+        if (!session) throw new HttpError(404, "Discussion session not found.");
         const value = await readJsonBody(request);
         if (!isRecord(value)
           || (value.content !== undefined && typeof value.content !== "string")
@@ -575,6 +576,10 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
           apiKey: config.openAiApiKey,
           model: config.openAiModel,
           language: await settings.language(),
+          compositionMode: session.taskOptions.compositionMode,
+          workflowType: session.taskOptions.workflowType,
+          candidateCount: session.taskOptions.candidateCount,
+          targetTotalMinutes: session.taskOptions.targetTotalMinutes,
         });
         sendJson(response, 200, await discussionView(
           await discussionStore.addMessage(sessionId, "assistant", reply),
@@ -584,13 +589,18 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
 
       if (request.method === "POST" && discussionProposalMatch?.[1]) {
         const sessionId = discussionProposalMatch[1];
-        if (!discussionStore.get(sessionId)) throw new HttpError(404, "Discussion session not found.");
+        const session = discussionStore.get(sessionId);
+        if (!session) throw new HttpError(404, "Discussion session not found.");
         const runtime = await settings.runtimeEnvironment();
         const config = loadConfig(false, runtime);
         const proposal = await discussionAgent.propose(await discussionStore.agentMessages(sessionId), {
           apiKey: config.openAiApiKey,
           model: config.openAiModel,
           language: await settings.language(),
+          compositionMode: session.taskOptions.compositionMode,
+          workflowType: session.taskOptions.workflowType,
+          candidateCount: session.taskOptions.candidateCount,
+          targetTotalMinutes: session.taskOptions.targetTotalMinutes,
         });
         sendJson(response, 200, await discussionView(await discussionStore.setProposal(sessionId, proposal)));
         return;

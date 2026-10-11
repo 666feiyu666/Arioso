@@ -81,6 +81,9 @@ const translations = {
     directionReady: "这个方向合适吗？", directionReadyHint: "你可以继续补充，或把当前共识整理成最终提示词。",
     useDirection: "使用当前方向", proposalEditHint: "可编辑；以下内容将直接交给 Composer Agent",
     continueDiscussion: "继续讨论", approvePrompt: "开始作曲", discussing: "讨论中",
+    sessionScopeSingle: "单曲", sessionScopeOrchestral: "多乐章作品",
+    sessionScopeAlbum: "主题专辑 · {count} 首候选 · 约 {minutes} 分钟",
+    sessionScopeAlbumFallback: "主题专辑 · 一组同方向的音乐",
     proposalReady: "提示词已生成", discussionSending: "正在整理想法…", proposalGenerating: "正在生成提示词…",
     imageSelected: "参考图片：{name}", imageUploadFailed: "参考图片上传失败。",
     sessionExecution: "创作执行", sessionWaiting: "任务已提交，正在等待 Agent 开始。",
@@ -210,6 +213,9 @@ const translations = {
     directionReady: "Does this direction feel right?", directionReadyHint: "Keep discussing, or turn the current agreement into the final prompt.",
     useDirection: "Use this direction", proposalEditHint: "Editable; this exact text will be sent to the Composer Agent",
     continueDiscussion: "Continue discussion", approvePrompt: "Start composing", discussing: "Discussing",
+    sessionScopeSingle: "Single piece", sessionScopeOrchestral: "Multi-movement work",
+    sessionScopeAlbum: "Themed album · {count} candidates · about {minutes} min",
+    sessionScopeAlbumFallback: "Themed album · a coherent collection",
     proposalReady: "Prompt ready", discussionSending: "Developing the idea…", proposalGenerating: "Generating prompt…",
     imageSelected: "Reference image: {name}", imageUploadFailed: "Unable to upload the reference image.",
     sessionExecution: "Creation run", sessionWaiting: "The request is queued and waiting for the agent.",
@@ -449,6 +455,7 @@ const elements = {
   discussionPanel: document.querySelector("#discussion-panel"),
   discussionMessages: document.querySelector("#discussion-messages"),
   discussionStatus: document.querySelector("#discussion-status"),
+  discussionScope: document.querySelector("#discussion-scope"),
   discussionNext: document.querySelector("#discussion-next"),
   discussionImage: document.querySelector("#discussion-image"),
   attachImage: document.querySelector("#attach-image"),
@@ -1759,6 +1766,7 @@ function renderDiscussion() {
     return `<article class="discussion-message ${message.role}">${images}<p>${escapeHtml(message.content)}</p></article>`;
   }).join("") || "";
   const task = latestSessionTask(session);
+  elements.discussionScope.textContent = discussionScopeLabel(session?.taskOptions);
   elements.discussionStatus.textContent = session
     ? task ? statusLabel(task.status) : t(session.status === "proposal-ready" ? "proposalReady" : "discussing") : "";
   const proposal = session?.proposal || "";
@@ -1775,6 +1783,17 @@ function renderDiscussion() {
   if (session?.messages?.length) {
     elements.discussionMessages.scrollTop = elements.discussionMessages.scrollHeight;
   }
+}
+
+function discussionScopeLabel(taskOptions = {}) {
+  if (taskOptions.compositionMode === "album") {
+    const count = Number(taskOptions.candidateCount);
+    const minutes = Number(taskOptions.targetTotalMinutes);
+    return Number.isFinite(count) && count > 0 && Number.isFinite(minutes) && minutes > 0
+      ? t("sessionScopeAlbum", { count, minutes })
+      : t("sessionScopeAlbumFallback");
+  }
+  return taskOptions.compositionMode === "orchestral" ? t("sessionScopeOrchestral") : t("sessionScopeSingle");
 }
 
 function clearSelectedDiscussionImage() {

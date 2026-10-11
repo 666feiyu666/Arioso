@@ -30,6 +30,25 @@ You are Arioso Prompt Director. Convert the complete discussion into one concise
 - Reply in the language used by the user unless the user requested another language.
 `.trim();
 
+export function discussionScopeInstructions(options: DiscussionAgentOptions): string {
+  if (options.compositionMode === "album") {
+    const count = options.candidateCount ? `${options.candidateCount} candidate pieces` : "a set of candidate pieces";
+    const duration = options.targetTotalMinutes ? ` and an approximate total duration of ${options.targetTotalMinutes} minutes` : "";
+    return `
+Creative scope: this is a cohesive themed album, not a single track. It should establish one shared sound world while allowing functional variation across ${count}${duration}.
+- In discussion, frame recommendations as an album-level direction: shared identity, contrasting uses or energy levels, and how pieces belong together.
+- In the final proposal, begin by explicitly requesting an original themed album or collection. Never phrase the result as one song, one track, or a standalone piece.
+- Do not write a complete track list unless the user explicitly asks for one.
+`.trim();
+  }
+  if (options.compositionMode === "orchestral") {
+    return `
+Creative scope: this is one multi-movement orchestral work, not a standalone song. Discuss its shared thematic material, dramatic arc, and movement-to-movement contrast.
+`.trim();
+  }
+  return "Creative scope: this is one standalone music piece.";
+}
+
 function userMessage(message: DiscussionAgentMessage): HumanMessage {
   if (!message.images.length) return new HumanMessage(message.content || "Please discuss this image as a music reference.");
   return new HumanMessage({
@@ -72,7 +91,7 @@ function model(options: DiscussionAgentOptions): ChatOpenAI {
 export class LangChainDiscussionAgent implements DiscussionAgent {
   async respond(messages: DiscussionAgentMessage[], options: DiscussionAgentOptions): Promise<string> {
     const result = await model(options).invoke([
-      new SystemMessage(DISCUSSION_INSTRUCTIONS),
+      new SystemMessage(`${DISCUSSION_INSTRUCTIONS}\n\n${discussionScopeInstructions(options)}`),
       ...conversation(messages),
     ]);
     const text = responseText(result.content);
@@ -82,7 +101,7 @@ export class LangChainDiscussionAgent implements DiscussionAgent {
 
   async propose(messages: DiscussionAgentMessage[], options: DiscussionAgentOptions): Promise<string> {
     const result = await model(options).invoke([
-      new SystemMessage(PROPOSAL_INSTRUCTIONS),
+      new SystemMessage(`${PROPOSAL_INSTRUCTIONS}\n\n${discussionScopeInstructions(options)}`),
       ...conversation(messages),
       new HumanMessage("Create the final concise prompt from this discussion now."),
     ]);

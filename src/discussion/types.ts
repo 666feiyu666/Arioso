@@ -53,6 +53,10 @@ export interface DiscussionAgentOptions {
   apiKey: string;
   model: string;
   language: "zh-CN" | "en";
+  compositionMode: DiscussionTaskOptions["compositionMode"];
+  workflowType: DiscussionTaskOptions["workflowType"];
+  candidateCount?: number | undefined;
+  targetTotalMinutes?: number | undefined;
 }
 
 export interface DiscussionAgent {
