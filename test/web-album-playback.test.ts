@@ -123,7 +123,7 @@ async function interfaceHarness(initial = album()) {
     return { ok: true, json: async () => structuredClone(result) };
   };
   const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
-  const run = new AsyncFunction("document", "window", "ResizeObserver", "fetch", "setInterval", `${source}\nreturn {state, elements, openAlbum, startAlbum, playAlbumTrack, playTask, stepAlbumTrack, changeAdmission, showComposer, submitTask, sendDiscussionMessage, generateDiscussionProposal, renderAlbumDetail};`);
+  const run = new AsyncFunction("document", "window", "ResizeObserver", "fetch", "setInterval", `${source}\nreturn {state, elements, openAlbum, startAlbum, playAlbumTrack, playTask, stepAlbumTrack, changeAdmission, showComposer, submitTask, sendDiscussionMessage, generateDiscussionProposal, renderAlbumDetail, expandedTaskDetailKeys, restoreTaskDetailKeys};`);
   const api = await run(document, { scrollTo() {} }, class { observe() {} }, fetch, () => 0);
   await Promise.resolve();
   await Promise.resolve();
@@ -133,8 +133,14 @@ async function interfaceHarness(initial = album()) {
 
 describe("album listening interface", () => {
   it("shows a clear next step and submits the edited discussion prompt", async () => {
-    const { api, requests } = await interfaceHarness();
-    api.showComposer("none", "single", "01-general");
+    const initial = album();
+    initial.status = "generating";
+    Object.assign(initial.albumTracks[0]!, { musicSpec: { lyriaPrompt: "Warm brushed-jazz opening" } });
+    initial.albumTracks[2]!.status = "generating";
+    initial.albumTracks[2]!.audioFile = undefined;
+    initial.albumTracks[2]!.durationSeconds = undefined;
+    const { api, requests } = await interfaceHarness(initial);
+    api.showComposer("none", "album", "04-album");
     api.elements.input.value = "适合下班后阅读的安静背景音乐";
     await api.sendDiscussionMessage({ preventDefault() {} });
     expect(api.elements.discussionNext.hidden).toBe(false);
@@ -148,7 +154,11 @@ describe("album listening interface", () => {
 
     expect(requests.find((item) => item.url.endsWith("/submit"))?.body)
       .toEqual({ prompt: "用户编辑后的最终提示词" });
-    expect(api.elements.discussionTask.innerHTML).toContain("Late Night Noir");
+    expect(api.elements.discussionPanel.hidden).toBe(false);
+    expect(api.elements.taskView.hidden).toBe(false);
+    expect(api.elements.taskDetail.innerHTML).toContain("Late Night Noir");
+    expect(api.elements.taskDetail.innerHTML).toContain("正在生成候选曲，已完成 2/3 首");
+    expect(api.elements.taskDetail.innerHTML).toContain("Warm brushed-jazz opening");
 
     api.state.discussionSession = null;
     await api.elements.taskList.emit("click", {
@@ -156,6 +166,20 @@ describe("album listening interface", () => {
     });
     expect(api.state.discussionSession.id).toBe("discussion-1");
     expect(api.elements.entryView.hidden).toBe(true);
+  });
+
+  it("preserves expanded music plans while the original detail view refreshes", async () => {
+    const { api } = await interfaceHarness();
+    const before = { querySelectorAll: () => [{ dataset: { taskDetail: "album:one" }, open: true }] };
+    const keys = api.expandedTaskDetailKeys(before);
+    const afterDetails = [
+      { dataset: { taskDetail: "album:one" }, open: false },
+      { dataset: { taskDetail: "album:two" }, open: false },
+    ];
+
+    api.restoreTaskDetailKeys(keys, { querySelectorAll: () => afterDetails });
+    expect(afterDetails[0]!.open).toBe(true);
+    expect(afterDetails[1]!.open).toBe(false);
   });
 
   it("blocks producer creation against an older server", async () => {

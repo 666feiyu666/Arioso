@@ -157,23 +157,6 @@
 
         <section id="task-view" class="view task-view" hidden>
           <button class="back-button" id="back-home" type="button" data-i18n="backHome">← 返回创作台</button>
-          <div id="task-detail"></div>
-        </section>
-
-        <div class="composer-dock" id="composer-dock" hidden>
-          <div class="global-player" id="global-player" hidden>
-            <button class="record-control record-control-small" id="player-toggle" type="button" aria-label="播放音乐" data-i18n-aria-label="playMusic">
-              <span class="record-disc" aria-hidden="true"><span class="record-label"></span></span>
-              <span class="playback-icon" aria-hidden="true">▶</span>
-            </button>
-            <div class="player-now">
-              <span id="player-status" role="status" data-i18n="readyToPlay">待播放</span>
-              <strong id="player-title" data-i18n="noMusicSelected">未选择音乐</strong>
-              <small id="player-meta"></small>
-            </div>
-            <div class="playlist-controls" id="playlist-controls" hidden><button id="player-previous" type="button" data-i18n-aria-label="previousTrack" aria-label="上一首">⏮</button><button id="player-next" type="button" data-i18n-aria-label="nextTrack" aria-label="下一首">⏭</button></div>
-            <audio id="audio-player" controls preload="metadata"></audio>
-          </div>
           <section class="discussion-panel" id="discussion-panel" aria-label="创作讨论" data-i18n-aria-label="creativeDiscussion" hidden>
             <div class="discussion-heading">
               <div><span class="eyebrow" data-i18n="promptDirector">PROMPT DIRECTOR</span><strong data-i18n="creativeDiscussion">创作讨论</strong><span class="discussion-scope" id="discussion-scope"></span></div>
@@ -200,8 +183,24 @@
                 <button class="primary-button" id="approve-prompt" type="button"><span data-i18n="approvePrompt">开始作曲</span><span aria-hidden="true">→</span></button>
               </div>
             </div>
-            <div class="discussion-task" id="discussion-task" aria-live="polite"></div>
           </section>
+          <div id="task-detail"></div>
+        </section>
+
+        <div class="composer-dock" id="composer-dock" hidden>
+          <div class="global-player" id="global-player" hidden>
+            <button class="record-control record-control-small" id="player-toggle" type="button" aria-label="播放音乐" data-i18n-aria-label="playMusic">
+              <span class="record-disc" aria-hidden="true"><span class="record-label"></span></span>
+              <span class="playback-icon" aria-hidden="true">▶</span>
+            </button>
+            <div class="player-now">
+              <span id="player-status" role="status" data-i18n="readyToPlay">待播放</span>
+              <strong id="player-title" data-i18n="noMusicSelected">未选择音乐</strong>
+              <small id="player-meta"></small>
+            </div>
+            <div class="playlist-controls" id="playlist-controls" hidden><button id="player-previous" type="button" data-i18n-aria-label="previousTrack" aria-label="上一首">⏮</button><button id="player-next" type="button" data-i18n-aria-label="nextTrack" aria-label="下一首">⏭</button></div>
+            <audio id="audio-player" controls preload="metadata"></audio>
+          </div>
           <form id="composer-form" class="composer-form">
             <div class="composer-main">
               <button class="attach-image-button" id="attach-image" type="button" aria-label="添加参考图片" data-i18n-aria-label="attachImage">＋</button>

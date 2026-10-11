@@ -464,7 +464,6 @@ const elements = {
   proposalCard: document.querySelector("#prompt-proposal-card"),
   proposalText: document.querySelector("#prompt-proposal-text"),
   proposalActions: document.querySelector("#proposal-actions"),
-  discussionTask: document.querySelector("#discussion-task"),
   continueDiscussion: document.querySelector("#continue-discussion"),
   approvePrompt: document.querySelector("#approve-prompt"),
   mode: document.querySelector("#mode-select"),
@@ -1106,7 +1105,7 @@ function renderAlbumDetail(task) {
     <div class="album-detail-copy"><p class="eyebrow accent">04 · ${escapeHtml(t("albumTitle"))}</p><h2>${escapeHtml(task.albumPlan?.albumTitle || task.title || task.description)}</h2><div class="album-summary"><span>${escapeHtml(t("albumTrackCount", { count: all.length || task.albumCandidateCount || 14 }))}</span><span>${escapeHtml(t("albumIncludedCount", { count: included.length }))}</span><span>${escapeHtml(t("albumAudioDuration", { duration: durationLabel(candidateDuration) }))}</span></div></div>
     <span class="status-pill ${statusClass(task.status)}">${escapeHtml(statusLabel(task.status))}</span>
   </header>
-  <details class="album-idea"><summary>${escapeHtml(t("albumIdea"))}</summary><p class="album-mind">${escapeHtml(task.albumPlan?.albumMind || task.description)}</p></details>
+  <details class="album-idea" data-task-detail="album-idea"><summary>${escapeHtml(t("albumIdea"))}</summary><p class="album-mind">${escapeHtml(task.albumPlan?.albumMind || task.description)}</p></details>
   ${productionPanel}
   ${running ? `<p class="album-progress" role="status">${escapeHtml(t(task.status === "generating" ? "albumGenerating" : "albumPreparing", { completed: ready, total: all.length || task.albumCandidateCount || 14 }))}</p>` : ""}
   ${task.status === "failed" ? `<div class="error-box"><div><strong>${t("taskInterrupted")}</strong><p>${escapeHtml(task.error || t("taskFailedFallback"))}</p></div><button class="retry-button" type="button" data-retry-task="${escapeHtml(task.id)}">${t("continueTask")}</button></div>` : ""}
@@ -1118,7 +1117,7 @@ function renderAlbumDetail(task) {
       const admission = track.admission || "candidate";
       return `<article class="album-track-row ${admission === "excluded" ? "excluded" : ""}" data-album-row="${escapeHtml(track.id)}" data-parent-task="${escapeHtml(task.id)}">
         <span class="album-track-number">${String(index + 1).padStart(2, "0")}</span><button class="album-track-play" type="button" data-parent-task="${escapeHtml(task.id)}" data-play-album-track="${escapeHtml(track.id)}" aria-label="${escapeHtml(t("playNamed", { title: track.title }))}" ${!track.audioFile ? "disabled" : ""}>▶</button>
-        <div class="album-track-copy"><h3>${escapeHtml(track.title)}</h3><p><span class="admission-label ${admission}">${t({ included: "albumAdmissionIncluded", candidate: "albumAdmissionCandidate", excluded: "albumAdmissionExcluded" }[admission])}</span>${!track.audioFile ? ` · ${escapeHtml(statusLabel(track.status))}` : ""}</p>${track.musicSpec ? `<details><summary>${t("albumPrompt")}</summary><div class="prompt-output">${escapeHtml(track.musicSpec.lyriaPrompt)}</div></details>` : ""}</div>
+        <div class="album-track-copy"><h3>${escapeHtml(track.title)}</h3><p><span class="admission-label ${admission}">${t({ included: "albumAdmissionIncluded", candidate: "albumAdmissionCandidate", excluded: "albumAdmissionExcluded" }[admission])}</span>${!track.audioFile ? ` · ${escapeHtml(statusLabel(track.status))}` : ""}</p>${track.musicSpec ? `<details data-task-detail="album:${escapeHtml(track.id)}"><summary>${t("albumPrompt")}</summary><div class="prompt-output">${escapeHtml(track.musicSpec.lyriaPrompt)}</div></details>` : ""}</div>
         <span class="album-track-duration">${escapeHtml(durationLabel(track.durationSeconds))}${!track.durationSeconds ? `<small>${escapeHtml(t("albumTargetTime", { duration: durationLabel(track.targetDurationSeconds) }))}</small>` : ""}</span>
         <div class="admission-actions" role="group" aria-label="${escapeHtml(track.title)}">${[["included", "albumInclude"], ["candidate", "albumCandidate"], ["excluded", "albumExclude"]].map(([value, label]) => `<button type="button" data-admission="${value}" data-album-track="${escapeHtml(track.id)}" aria-pressed="${admission === value}" ${value === "included" && !track.audioFile ? "disabled" : ""}>${t(label)}</button>`).join("")}</div>
         ${scope === "included" ? `<div class="album-track-order"><button type="button" data-move-track="${escapeHtml(track.id)}" data-direction="-1" aria-label="${escapeHtml(t("moveTrackUp"))}" ${index === 0 ? "disabled" : ""}>↑</button><button type="button" data-move-track="${escapeHtml(track.id)}" data-direction="1" aria-label="${escapeHtml(t("moveTrackDown"))}" ${index === tracks.length - 1 ? "disabled" : ""}>↓</button></div>` : ""}
@@ -1284,7 +1283,7 @@ function renderOrchestralTaskDetail(task) {
     <div class="panel orchestral-reference">
       <h3>${t("knowledgeCard")}</h3>
       <p>${escapeHtml(task.orchestralReference?.title || t("noKnowledgeCard"))}</p>
-      ${task.orchestralReference ? `<details><summary>${t("knowledgeCardSnapshot")}</summary><div class="prompt-output">${escapeHtml(task.orchestralReference.content)}</div></details>` : ""}
+      ${task.orchestralReference ? `<details data-task-detail="orchestral-reference"><summary>${t("knowledgeCardSnapshot")}</summary><div class="prompt-output">${escapeHtml(task.orchestralReference.content)}</div></details>` : ""}
     </div>
   `;
   const activeMovement = movements.find((movement) =>
@@ -1317,7 +1316,7 @@ function renderOrchestralTaskDetail(task) {
           <div class="spec-row"><span>${t("entranceContract")}</span><strong>${escapeHtml(movementPlan.entranceContract)}</strong></div>
           <div class="spec-row"><span>${t("exitContract")}</span><strong>${escapeHtml(movementPlan.exitContract)}</strong></div>
         </div>
-        <details>
+        <details data-task-detail="movement:${escapeHtml(movement.id)}">
           <summary>${t("movementPrompt")}</summary>
           <div class="prompt-output">${escapeHtml(movementPlan.lyriaPrompt)}</div>
         </details>
@@ -1381,13 +1380,28 @@ function renderOrchestralTaskDetail(task) {
   syncPlaybackControls();
 }
 
+function expandedTaskDetailKeys(container = elements.taskDetail) {
+  return new Set([...container.querySelectorAll("[data-task-detail][open]")]
+    .map((detail) => detail.dataset.taskDetail)
+    .filter(Boolean));
+}
+
+function restoreTaskDetailKeys(keys, container = elements.taskDetail) {
+  container.querySelectorAll("[data-task-detail]").forEach((detail) => {
+    detail.open = keys.has(detail.dataset.taskDetail);
+  });
+}
+
 function renderTaskDetail(task) {
+  const expandedDetails = expandedTaskDetailKeys();
   if (task.compositionMode === "album") {
     renderAlbumDetail(task);
+    restoreTaskDetailKeys(expandedDetails);
     return;
   }
   if (task.compositionMode === "orchestral") {
     renderOrchestralTaskDetail(task);
+    restoreTaskDetailKeys(expandedDetails);
     return;
   }
   const running = ["queued", "composing", "generating"].includes(task.status);
@@ -1457,13 +1471,13 @@ function renderTaskDetail(task) {
   elements.taskDetail.querySelectorAll("[data-retry-task]").forEach((button) => {
     button.addEventListener("click", () => retryTask(button.dataset.retryTask, button));
   });
+  restoreTaskDetailKeys(expandedDetails);
   syncPlaybackControls();
 }
 
 function showEntry() {
   state.selectedTaskId = null;
   state.discussionSession = null;
-  elements.composerDock.classList.toggle("session-workspace", false);
   elements.entryView.hidden = false;
   elements.albumView.hidden = true;
   elements.homeView.hidden = true;
@@ -1510,7 +1524,6 @@ function showComposer(
 function showAlbums() {
   state.selectedTaskId = null;
   state.discussionSession = null;
-  elements.composerDock.classList.toggle("session-workspace", false);
   state.workflowType = "04-album";
   state.compositionMode = "album";
   state.expandedTaskGroup = "04-album";
@@ -1529,7 +1542,6 @@ function selectTask(id) {
   state.selectedTaskId = id;
   state.discussionSession = null;
   elements.discussionPanel.hidden = true;
-  elements.composerDock.classList.toggle("session-workspace", false);
   const task = state.tasks.find((item) => item.id === id);
   if (!task) return;
   state.workflowType = workflowTypeForTask(task);
@@ -1669,71 +1681,10 @@ function upsertDiscussionSession(session) {
   state.discussionSessions.sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
 }
 
-function sessionProgressCopy(task) {
-  if (task.status === "queued") return t("sessionWaiting");
-  if (task.status === "composing") return t("sessionComposing");
-  if (task.status === "generating") return t("sessionGenerating");
-  if (task.status === "assembling") return t("sessionAssembling");
-  if (task.status === "processing") return t("sessionProcessing");
-  if (task.status === "failed") return t("sessionFailed");
-  return t(task.mode === "compose" ? "sessionComposeCompleted" : "sessionCompleted");
-}
-
-function renderSessionTask(task) {
-  if (!task) return "";
-  const running = ["queued", "composing", "generating", "assembling", "processing"].includes(task.status);
-  const prompt = task.musicSpec?.lyriaPrompt;
-  const singleAudio = task.audioFile ? `
-    <button class="session-audio-button" type="button" data-session-play-task="${escapeHtml(task.id)}">
-      <span aria-hidden="true">▶</span><span>${escapeHtml(task.title || task.description)}</span>
-    </button>` : "";
-  const movements = (task.movements || []).map((movement) => `
-    <div class="session-result-row">
-      <span>${String(movement.order).padStart(2, "0")} · ${escapeHtml(movement.title)}</span>
-      <strong>${escapeHtml(statusLabel(movement.status))}</strong>
-      ${movement.audioFile ? `<button type="button" data-session-play-movement="${escapeHtml(movement.id)}" data-parent-task="${escapeHtml(task.id)}">▶</button>` : ""}
-    </div>`).join("");
-  const albumTracks = (task.albumTracks || []).map((track) => `
-    <div class="session-result-row">
-      <span>${String(track.order).padStart(2, "0")} · ${escapeHtml(track.title)}</span>
-      <strong>${escapeHtml(statusLabel(track.status))}</strong>
-      ${track.audioFile ? `<button type="button" data-session-play-album-track="${escapeHtml(track.id)}" data-parent-task="${escapeHtml(task.id)}">▶</button>` : ""}
-    </div>`).join("");
-  return `
-    <section class="session-task-card ${statusClass(task.status)}">
-      <header>
-        <div><span class="eyebrow">${t("sessionExecution")}</span><h3>${escapeHtml(task.title || task.description)}</h3></div>
-        <span class="status-pill ${statusClass(task.status)}">${escapeHtml(statusLabel(task.status))}</span>
-      </header>
-      <p>${escapeHtml(sessionProgressCopy(task))}</p>
-      ${running ? '<div class="progress-line"></div>' : ""}
-      ${task.status === "failed" ? `<div class="session-task-error"><span>${escapeHtml(task.error || t("taskFailedFallback"))}</span><button class="secondary-button" type="button" data-session-retry-task="${escapeHtml(task.id)}">${t("continueTask")}</button></div>` : ""}
-      ${singleAudio}
-      ${movements ? `<div class="session-result-list">${movements}</div>` : ""}
-      ${albumTracks ? `<div class="session-result-list">${albumTracks}</div>` : ""}
-      ${prompt ? `<details><summary>${t("sessionPromptDetails")}</summary><div class="prompt-output">${escapeHtml(prompt)}</div></details>` : ""}
-    </section>`;
-}
-
-function bindSessionTaskActions(task) {
-  if (!task) return;
-  elements.discussionTask.querySelectorAll("[data-session-play-task]").forEach((button) => {
-    button.addEventListener("click", () => playTask(button.dataset.sessionPlayTask));
-  });
-  elements.discussionTask.querySelectorAll("[data-session-play-movement]").forEach((button) => {
-    button.addEventListener("click", () => playMovement(button.dataset.parentTask, button.dataset.sessionPlayMovement));
-  });
-  elements.discussionTask.querySelectorAll("[data-session-play-album-track]").forEach((button) => {
-    button.addEventListener("click", () => playAlbumTrack(button.dataset.parentTask, button.dataset.sessionPlayAlbumTrack, "candidate"));
-  });
-  elements.discussionTask.querySelectorAll("[data-session-retry-task]").forEach((button) => {
-    button.addEventListener("click", () => retryTask(button.dataset.sessionRetryTask, button));
-  });
-}
-
 function enterDiscussionWorkspace(session) {
   state.discussionSession = session;
-  state.selectedTaskId = null;
+  const task = latestSessionTask(session);
+  state.selectedTaskId = task?.id ?? null;
   const options = session.taskOptions || {};
   state.corpusMode = normalizeCorpusMode(options.corpusMode);
   state.compositionMode = ["orchestral", "album"].includes(options.compositionMode) ? options.compositionMode : "single";
@@ -1745,16 +1696,17 @@ function enterDiscussionWorkspace(session) {
   elements.entryView.hidden = true;
   elements.albumView.hidden = true;
   elements.homeView.hidden = true;
-  elements.taskView.hidden = true;
+  elements.taskView.hidden = false;
   elements.composerDock.hidden = false;
-  elements.composerDock.classList.toggle("session-workspace", true);
+  document.querySelector("#back-home").textContent = t(state.compositionMode === "album" ? "backAlbums" : "backHome");
   renderComposerContext();
   renderDiscussion();
+  if (task) renderTaskDetail(task);
+  else elements.taskDetail.innerHTML = "";
 }
 
 function renderDiscussion() {
   const session = state.discussionSession;
-  elements.composerDock.classList.toggle("session-workspace", Boolean(session));
   elements.discussionPanel.hidden = !state.supportsDiscussionSessions || !session;
   elements.discussionMessages.innerHTML = session?.messages?.map((message) => {
     const images = message.attachmentIds?.map((attachmentId) => {
@@ -1777,8 +1729,6 @@ function renderDiscussion() {
     || !session?.messages?.some((message) => message.role === "assistant") || Boolean(proposal);
   if (proposal && elements.proposalText.value !== proposal) elements.proposalText.value = proposal;
   elements.generateProposal.disabled = !session?.messages?.some((message) => message.role === "user") || state.submitting;
-  elements.discussionTask.innerHTML = renderSessionTask(task);
-  bindSessionTaskActions(task);
   if (session) elements.form.hidden = session.status === "submitted";
   if (session?.messages?.length) {
     elements.discussionMessages.scrollTop = elements.discussionMessages.scrollHeight;
@@ -2118,7 +2068,7 @@ new ResizeObserver(() => {
   const height = elements.composerDock.getBoundingClientRect().height;
   document.documentElement.style.setProperty(
     "--dock-space",
-    elements.composerDock.classList.contains("session-workspace") ? "40px" : `${Math.max(230, height + 50)}px`,
+    `${Math.max(230, height + 50)}px`,
   );
 }).observe(elements.composerDock);
 elements.corpusMode.addEventListener("change", () => {
