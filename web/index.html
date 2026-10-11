@@ -195,11 +195,12 @@
                 <span data-i18n="proposalEditHint">可编辑；以下内容将直接交给 Composer Agent</span>
               </div>
               <textarea id="prompt-proposal-text" rows="4" maxlength="8000"></textarea>
-              <div class="proposal-actions">
+              <div class="proposal-actions" id="proposal-actions">
                 <button class="secondary-button" id="continue-discussion" type="button" data-i18n="continueDiscussion">继续讨论</button>
                 <button class="primary-button" id="approve-prompt" type="button"><span data-i18n="approvePrompt">开始作曲</span><span aria-hidden="true">→</span></button>
               </div>
             </div>
+            <div class="discussion-task" id="discussion-task" aria-live="polite"></div>
           </section>
           <form id="composer-form" class="composer-form">
             <div class="composer-main">

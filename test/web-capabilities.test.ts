@@ -8,9 +8,10 @@ describe("web capabilities API", () => {
       const response = await fetch(`${baseUrl}/api/capabilities`);
       expect(response.ok).toBe(true);
       expect(await response.json()).toEqual({
-        apiVersion: 6,
+        apiVersion: 7,
         workflows: ["01-general", "02-jazz", "03-orchestral", "04-album"],
         discussionSessions: true,
+        creativeSessionTimeline: true,
         discussionImages: {
           types: ["image/jpeg", "image/png", "image/webp"],
           maximumBytes: 8 * 1024 * 1024,

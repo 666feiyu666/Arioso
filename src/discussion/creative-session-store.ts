@@ -62,6 +62,10 @@ export class CreativeSessionStore {
     return this.#sessions.get(id);
   }
 
+  list(): CreativeSession[] {
+    return [...this.#sessions.values()].sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
+  }
+
   async create(taskOptions: DiscussionTaskOptions): Promise<CreativeSession> {
     const now = new Date().toISOString();
     const session: CreativeSession = {
@@ -159,8 +163,10 @@ export class CreativeSessionStore {
 
   async markSubmitted(id: string, taskId: string, proposal: string): Promise<CreativeSession> {
     const session = this.require(id);
+    const taskIds = [...new Set([...(session.taskIds ?? []), taskId])];
     const updated: CreativeSession = {
       ...session, status: "submitted", proposal: proposal.trim(), submittedTaskId: taskId,
+      taskIds,
       updatedAt: new Date().toISOString(),
     };
     this.#sessions.set(id, updated);

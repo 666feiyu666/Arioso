@@ -83,6 +83,11 @@ const translations = {
     continueDiscussion: "继续讨论", approvePrompt: "开始作曲", discussing: "讨论中",
     proposalReady: "提示词已生成", discussionSending: "正在整理想法…", proposalGenerating: "正在生成提示词…",
     imageSelected: "参考图片：{name}", imageUploadFailed: "参考图片上传失败。",
+    sessionExecution: "创作执行", sessionWaiting: "任务已提交，正在等待 Agent 开始。",
+    sessionComposing: "Composer Agent 正在形成完整编曲方案。", sessionGenerating: "编曲完成，正在等待音乐生成结果。",
+    sessionAssembling: "各部分已经生成，正在组合完整作品。", sessionProcessing: "正在完成音频后期处理。",
+    sessionCompleted: "音乐已经完成，可以直接试听。", sessionComposeCompleted: "编曲方案已经完成。",
+    sessionFailed: "执行遇到问题，可以从这里继续任务。", sessionPromptDetails: "查看生成提示词",
     vocalAuto: "自动", vocalInstrumental: "纯器乐", vocalEnabled: "人声", preferences: "PREFERENCES",
     close: "关闭", interfaceLanguage: "界面语言", apiConfiguration: "API 配置",
     apiNeverShown: "密钥只保存在本机，界面不会回显完整内容。",
@@ -101,7 +106,7 @@ const translations = {
     movementProgress: "{completed}/{total} 乐章", totalDuration: "作品总时长", movementDuration: "乐章时长",
     durationAdjusted: "时长调整", minutes: "分钟",
     serverRestartRequired: "当前本地服务仍是旧版本，无法安全创建多乐章任务。请重启 Arioso 服务后再试。",
-    queued: "等待开始", composing: "正在整理编曲", generating: "Lyria 正在生成", assembling: "正在组合完整作品", completed: "已完成",
+    submitted: "已提交", queued: "等待开始", composing: "正在整理编曲", generating: "Lyria 正在生成", assembling: "正在组合完整作品", processing: "音频处理中", completed: "已完成",
     failed: "生成失败", pause: "暂停", play: "播放", pausePlayback: "暂停播放", resumePlayback: "继续播放",
     playInPlayer: "在播放器中播放", thisMusic: "这首音乐", finishedTrack: "完整成品",
     playMusic: "播放音乐", playNamed: "播放《{title}》", pauseNamed: "暂停《{title}》",
@@ -207,6 +212,11 @@ const translations = {
     continueDiscussion: "Continue discussion", approvePrompt: "Start composing", discussing: "Discussing",
     proposalReady: "Prompt ready", discussionSending: "Developing the idea…", proposalGenerating: "Generating prompt…",
     imageSelected: "Reference image: {name}", imageUploadFailed: "Unable to upload the reference image.",
+    sessionExecution: "Creation run", sessionWaiting: "The request is queued and waiting for the agent.",
+    sessionComposing: "The Composer Agent is building the complete arrangement.", sessionGenerating: "The arrangement is ready; music generation is in progress.",
+    sessionAssembling: "The generated parts are being assembled into the complete work.", sessionProcessing: "Audio post-production is in progress.",
+    sessionCompleted: "The music is ready to play.", sessionComposeCompleted: "The composition plan is complete.",
+    sessionFailed: "The run needs attention. Continue it from here.", sessionPromptDetails: "View generated prompt",
     vocalAuto: "Auto", vocalInstrumental: "Instrumental", vocalEnabled: "Vocals", preferences: "PREFERENCES",
     close: "Close", interfaceLanguage: "Interface language", apiConfiguration: "API configuration",
     apiNeverShown: "Keys stay on this computer and are never displayed in full.",
@@ -225,7 +235,7 @@ const translations = {
     movementProgress: "{completed}/{total} movements", totalDuration: "Total work duration", movementDuration: "Movement duration",
     durationAdjusted: "Duration adjustment", minutes: "minutes",
     serverRestartRequired: "The local service is still running an older version and cannot safely create multi-movement tasks. Restart Arioso and try again.",
-    queued: "Waiting to start", composing: "Composing", generating: "Lyria is generating", assembling: "Assembling complete work", completed: "Completed",
+    submitted: "Submitted", queued: "Waiting to start", composing: "Composing", generating: "Lyria is generating", assembling: "Assembling complete work", processing: "Processing audio", completed: "Completed",
     failed: "Generation failed", pause: "Pause ", play: "Play ", pausePlayback: "Pause", resumePlayback: "Resume",
     playInPlayer: "Play in player", thisMusic: "this music", finishedTrack: "Finished track",
     playMusic: "Play music", playNamed: "Play {title}", pauseNamed: "Pause {title}",
@@ -406,6 +416,7 @@ const state = {
   supportsJazzCorpusToggle: false,
   supportsBackgroundMusicProducer: false,
   supportsDiscussionSessions: false,
+  supportsCreativeSessionTimeline: false,
   orchestralCards: [],
   orchestralCardsError: false,
   orchestralReferenceId: "",
@@ -413,6 +424,7 @@ const state = {
   language: "zh-CN",
   settings: null,
   discussionSession: null,
+  discussionSessions: [],
   selectedDiscussionImage: null,
 };
 const elements = {
@@ -444,6 +456,8 @@ const elements = {
   generateProposal: document.querySelector("#generate-proposal"),
   proposalCard: document.querySelector("#prompt-proposal-card"),
   proposalText: document.querySelector("#prompt-proposal-text"),
+  proposalActions: document.querySelector("#proposal-actions"),
+  discussionTask: document.querySelector("#discussion-task"),
   continueDiscussion: document.querySelector("#continue-discussion"),
   approvePrompt: document.querySelector("#approve-prompt"),
   mode: document.querySelector("#mode-select"),
@@ -1167,10 +1181,32 @@ function renderExamples() {
 }
 
 function renderTaskList() {
-  elements.taskCount.textContent = String(state.tasks.length);
+  const sessionTaskIds = new Set(state.discussionSessions.flatMap((session) => session.taskIds || []));
+  const legacyTasks = state.tasks.filter((task) => !sessionTaskIds.has(task.id));
+  elements.taskCount.textContent = String(state.discussionSessions.length + legacyTasks.length);
   const workflowTypes = ["01-general", "02-jazz", "03-orchestral", "04-album"];
   elements.taskList.innerHTML = workflowTypes.map((workflowType) => {
-    const tasks = state.tasks.filter((task) => workflowTypeForTask(task) === workflowType);
+    const sessions = state.discussionSessions.filter((session) =>
+      (session.taskOptions?.workflowType || workflowTypeForTask(latestSessionTask(session) || {})) === workflowType,
+    );
+    const tasks = legacyTasks.filter((task) => workflowTypeForTask(task) === workflowType);
+    const sessionItems = sessions.map((session) => {
+      const task = latestSessionTask(session);
+      const firstUserMessage = session.messages?.find((message) => message.role === "user")?.content;
+      const title = task?.title || firstUserMessage || session.proposal || t("creativeDiscussion");
+      const phase = task?.status || session.phase || session.status;
+      return `
+        <div class="task-list-item">
+          <button class="task-button ${session.id === state.discussionSession?.id ? "active" : ""}" type="button" data-session-id="${escapeHtml(session.id)}">
+            <strong>${escapeHtml(title)}</strong>
+            <span class="task-meta">
+              <span class="task-state-dot ${statusClass(phase)}"></span>
+              ${escapeHtml(phase === "proposal-ready" ? t("proposalReady") : phase === "discussing" ? t("discussing") : statusLabel(phase))} · ${formatTime(session.updatedAt)}
+            </span>
+          </button>
+          ${task?.audioFile ? `<button class="task-play" type="button" data-play-task="${escapeHtml(task.id)}"></button>` : ""}
+        </div>`;
+    }).join("");
     const taskItems = tasks.map((task) => {
       const movements = task.movements || [];
       const completedMovements = movements.filter((movement) => movement.status === "completed").length;
@@ -1197,12 +1233,12 @@ function renderTaskList() {
         <summary>
           <strong>${escapeHtml(workflowLabel(workflowType))}</strong>
           <span class="task-group-summary-meta">
-            <span class="task-group-count">${tasks.length}</span>
+          <span class="task-group-count">${sessions.length + tasks.length}</span>
             <span class="task-group-chevron" aria-hidden="true"></span>
           </span>
         </summary>
         <div class="task-group-content">
-          ${taskItems || `<p class="task-group-empty">${escapeHtml(emptyLabel)}</p>`}
+          ${sessionItems}${taskItems}${!sessionItems && !taskItems ? `<p class="task-group-empty">${escapeHtml(emptyLabel)}</p>` : ""}
         </div>
       </details>
     `;
@@ -1419,6 +1455,8 @@ function renderTaskDetail(task) {
 
 function showEntry() {
   state.selectedTaskId = null;
+  state.discussionSession = null;
+  elements.composerDock.classList.toggle("session-workspace", false);
   elements.entryView.hidden = false;
   elements.albumView.hidden = true;
   elements.homeView.hidden = true;
@@ -1464,6 +1502,8 @@ function showComposer(
 
 function showAlbums() {
   state.selectedTaskId = null;
+  state.discussionSession = null;
+  elements.composerDock.classList.toggle("session-workspace", false);
   state.workflowType = "04-album";
   state.compositionMode = "album";
   state.expandedTaskGroup = "04-album";
@@ -1480,6 +1520,9 @@ function showAlbums() {
 
 function selectTask(id) {
   state.selectedTaskId = id;
+  state.discussionSession = null;
+  elements.discussionPanel.hidden = true;
+  elements.composerDock.classList.toggle("session-workspace", false);
   const task = state.tasks.find((item) => item.id === id);
   if (!task) return;
   state.workflowType = workflowTypeForTask(task);
@@ -1501,12 +1544,39 @@ function selectTask(id) {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
+async function openDiscussionSession(id) {
+  try {
+    const response = await fetch(`/api/discussions/${encodeURIComponent(id)}`, { cache: "no-store" });
+    const session = await response.json();
+    if (!response.ok) throw new Error(session.error || t("createFailed"));
+    upsertDiscussionSession(session);
+    enterDiscussionWorkspace(session);
+    renderTaskList();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } catch (error) {
+    elements.message.textContent = error instanceof Error ? error.message : String(error);
+  }
+}
+
 async function refreshTasks() {
   try {
-    const response = await fetch("/api/tasks", { cache: "no-store" });
-    if (!response.ok) return;
+    const [response, sessionsResponse] = await Promise.all([
+      fetch("/api/tasks", { cache: "no-store" }),
+      state.supportsDiscussionSessions
+        ? fetch("/api/discussions", { cache: "no-store" })
+        : Promise.resolve(null),
+    ]);
+    if (!response.ok || (sessionsResponse && !sessionsResponse.ok)) return;
     const previousSelected = state.tasks.find((task) => task.id === state.selectedTaskId);
     state.tasks = await response.json();
+    if (sessionsResponse) state.discussionSessions = await sessionsResponse.json();
+    if (state.discussionSession?.status === "submitted") {
+      const updatedSession = state.discussionSessions.find((session) => session.id === state.discussionSession.id);
+      if (updatedSession) {
+        state.discussionSession = updatedSession;
+        renderDiscussion();
+      }
+    }
     renderTaskList();
     renderAlbums();
     if (state.selectedTaskId) {
@@ -1579,8 +1649,105 @@ function discussionAttachmentUrl(sessionId, attachmentId) {
   return `/api/discussions/${encodeURIComponent(sessionId)}/attachments/${encodeURIComponent(attachmentId)}`;
 }
 
+function latestSessionTask(session) {
+  return session?.tasks?.at(-1)
+    || state.tasks.find((task) => task.sourceDiscussionId === session?.id)
+    || null;
+}
+
+function upsertDiscussionSession(session) {
+  const index = state.discussionSessions.findIndex((candidate) => candidate.id === session.id);
+  if (index >= 0) state.discussionSessions[index] = session;
+  else state.discussionSessions.unshift(session);
+  state.discussionSessions.sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
+}
+
+function sessionProgressCopy(task) {
+  if (task.status === "queued") return t("sessionWaiting");
+  if (task.status === "composing") return t("sessionComposing");
+  if (task.status === "generating") return t("sessionGenerating");
+  if (task.status === "assembling") return t("sessionAssembling");
+  if (task.status === "processing") return t("sessionProcessing");
+  if (task.status === "failed") return t("sessionFailed");
+  return t(task.mode === "compose" ? "sessionComposeCompleted" : "sessionCompleted");
+}
+
+function renderSessionTask(task) {
+  if (!task) return "";
+  const running = ["queued", "composing", "generating", "assembling", "processing"].includes(task.status);
+  const prompt = task.musicSpec?.lyriaPrompt;
+  const singleAudio = task.audioFile ? `
+    <button class="session-audio-button" type="button" data-session-play-task="${escapeHtml(task.id)}">
+      <span aria-hidden="true">▶</span><span>${escapeHtml(task.title || task.description)}</span>
+    </button>` : "";
+  const movements = (task.movements || []).map((movement) => `
+    <div class="session-result-row">
+      <span>${String(movement.order).padStart(2, "0")} · ${escapeHtml(movement.title)}</span>
+      <strong>${escapeHtml(statusLabel(movement.status))}</strong>
+      ${movement.audioFile ? `<button type="button" data-session-play-movement="${escapeHtml(movement.id)}" data-parent-task="${escapeHtml(task.id)}">▶</button>` : ""}
+    </div>`).join("");
+  const albumTracks = (task.albumTracks || []).map((track) => `
+    <div class="session-result-row">
+      <span>${String(track.order).padStart(2, "0")} · ${escapeHtml(track.title)}</span>
+      <strong>${escapeHtml(statusLabel(track.status))}</strong>
+      ${track.audioFile ? `<button type="button" data-session-play-album-track="${escapeHtml(track.id)}" data-parent-task="${escapeHtml(task.id)}">▶</button>` : ""}
+    </div>`).join("");
+  return `
+    <section class="session-task-card ${statusClass(task.status)}">
+      <header>
+        <div><span class="eyebrow">${t("sessionExecution")}</span><h3>${escapeHtml(task.title || task.description)}</h3></div>
+        <span class="status-pill ${statusClass(task.status)}">${escapeHtml(statusLabel(task.status))}</span>
+      </header>
+      <p>${escapeHtml(sessionProgressCopy(task))}</p>
+      ${running ? '<div class="progress-line"></div>' : ""}
+      ${task.status === "failed" ? `<div class="session-task-error"><span>${escapeHtml(task.error || t("taskFailedFallback"))}</span><button class="secondary-button" type="button" data-session-retry-task="${escapeHtml(task.id)}">${t("continueTask")}</button></div>` : ""}
+      ${singleAudio}
+      ${movements ? `<div class="session-result-list">${movements}</div>` : ""}
+      ${albumTracks ? `<div class="session-result-list">${albumTracks}</div>` : ""}
+      ${prompt ? `<details><summary>${t("sessionPromptDetails")}</summary><div class="prompt-output">${escapeHtml(prompt)}</div></details>` : ""}
+    </section>`;
+}
+
+function bindSessionTaskActions(task) {
+  if (!task) return;
+  elements.discussionTask.querySelectorAll("[data-session-play-task]").forEach((button) => {
+    button.addEventListener("click", () => playTask(button.dataset.sessionPlayTask));
+  });
+  elements.discussionTask.querySelectorAll("[data-session-play-movement]").forEach((button) => {
+    button.addEventListener("click", () => playMovement(button.dataset.parentTask, button.dataset.sessionPlayMovement));
+  });
+  elements.discussionTask.querySelectorAll("[data-session-play-album-track]").forEach((button) => {
+    button.addEventListener("click", () => playAlbumTrack(button.dataset.parentTask, button.dataset.sessionPlayAlbumTrack, "candidate"));
+  });
+  elements.discussionTask.querySelectorAll("[data-session-retry-task]").forEach((button) => {
+    button.addEventListener("click", () => retryTask(button.dataset.sessionRetryTask, button));
+  });
+}
+
+function enterDiscussionWorkspace(session) {
+  state.discussionSession = session;
+  state.selectedTaskId = null;
+  const options = session.taskOptions || {};
+  state.corpusMode = normalizeCorpusMode(options.corpusMode);
+  state.compositionMode = ["orchestral", "album"].includes(options.compositionMode) ? options.compositionMode : "single";
+  state.workflowType = options.workflowType || "01-general";
+  state.expandedTaskGroup = state.workflowType;
+  if (options.mode) elements.mode.value = options.mode;
+  if (options.lyriaModel) elements.lyriaModel.value = options.lyriaModel;
+  if (options.vocalMode) selectVocalMode(options.vocalMode);
+  elements.entryView.hidden = true;
+  elements.albumView.hidden = true;
+  elements.homeView.hidden = true;
+  elements.taskView.hidden = true;
+  elements.composerDock.hidden = false;
+  elements.composerDock.classList.toggle("session-workspace", true);
+  renderComposerContext();
+  renderDiscussion();
+}
+
 function renderDiscussion() {
   const session = state.discussionSession;
+  elements.composerDock.classList.toggle("session-workspace", Boolean(session));
   elements.discussionPanel.hidden = !state.supportsDiscussionSessions || !session;
   elements.discussionMessages.innerHTML = session?.messages?.map((message) => {
     const images = message.attachmentIds?.map((attachmentId) => {
@@ -1591,13 +1758,20 @@ function renderDiscussion() {
     }).join("") || "";
     return `<article class="discussion-message ${message.role}">${images}<p>${escapeHtml(message.content)}</p></article>`;
   }).join("") || "";
+  const task = latestSessionTask(session);
   elements.discussionStatus.textContent = session
-    ? t(session.status === "proposal-ready" ? "proposalReady" : "discussing") : "";
+    ? task ? statusLabel(task.status) : t(session.status === "proposal-ready" ? "proposalReady" : "discussing") : "";
   const proposal = session?.proposal || "";
   elements.proposalCard.hidden = !proposal;
-  elements.discussionNext.hidden = !session?.messages?.some((message) => message.role === "assistant") || Boolean(proposal);
+  elements.proposalActions.hidden = session?.status === "submitted";
+  elements.proposalText.readOnly = session?.status === "submitted";
+  elements.discussionNext.hidden = session?.status === "submitted"
+    || !session?.messages?.some((message) => message.role === "assistant") || Boolean(proposal);
   if (proposal && elements.proposalText.value !== proposal) elements.proposalText.value = proposal;
   elements.generateProposal.disabled = !session?.messages?.some((message) => message.role === "user") || state.submitting;
+  elements.discussionTask.innerHTML = renderSessionTask(task);
+  bindSessionTaskActions(task);
+  if (session) elements.form.hidden = session.status === "submitted";
   if (session?.messages?.length) {
     elements.discussionMessages.scrollTop = elements.discussionMessages.scrollHeight;
   }
@@ -1619,8 +1793,9 @@ async function ensureDiscussionSession() {
   });
   const session = await response.json();
   if (!response.ok) throw new Error(session.error || t("createFailed"));
-  state.discussionSession = session;
-  renderDiscussion();
+  upsertDiscussionSession(session);
+  enterDiscussionWorkspace(session);
+  renderTaskList();
   return session;
 }
 
@@ -1634,6 +1809,7 @@ async function uploadDiscussionImage(session) {
   const updated = await response.json();
   if (!response.ok) throw new Error(updated.error || t("imageUploadFailed"));
   state.discussionSession = updated;
+  upsertDiscussionSession(updated);
   const attachment = updated.attachments.at(-1);
   return attachment ? [attachment.id] : [];
 }
@@ -1655,6 +1831,7 @@ async function sendDiscussionMessage(event) {
     const updated = await response.json();
     if (!response.ok) throw new Error(updated.error || t("createFailed"));
     state.discussionSession = updated;
+    upsertDiscussionSession(updated);
     elements.input.value = "";
     clearSelectedDiscussionImage();
     elements.message.textContent = "";
@@ -1679,6 +1856,7 @@ async function generateDiscussionProposal() {
     const updated = await response.json();
     if (!response.ok) throw new Error(updated.error || t("createFailed"));
     state.discussionSession = updated;
+    upsertDiscussionSession(updated);
     elements.message.textContent = "";
     renderDiscussion();
   } catch (error) {
@@ -1729,10 +1907,16 @@ async function submitTask(event, approvedPrompt) {
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || t("createFailed"));
     const task = discussionSubmission ? result.task : result;
-    if (discussionSubmission) state.discussionSession = result.session;
+    if (discussionSubmission) {
+      state.discussionSession = result.session;
+      upsertDiscussionSession(result.session);
+    }
     elements.input.value = "";
     state.tasks.unshift(task);
-    selectTask(task.id);
+    if (discussionSubmission) {
+      enterDiscussionWorkspace(result.session);
+      renderTaskList();
+    } else selectTask(task.id);
   } catch (error) {
     elements.message.textContent = error instanceof Error ? error.message : String(error);
   } finally {
@@ -1780,6 +1964,7 @@ async function loadCapabilities() {
     state.supportsJazzCorpusToggle = result.jazzCorpusToggle === true;
     state.supportsBackgroundMusicProducer = result.backgroundMusicProducer?.denoiser === "denoising-historical-recordings";
     state.supportsDiscussionSessions = result.discussionSessions === true;
+    state.supportsCreativeSessionTimeline = result.creativeSessionTimeline === true;
     state.supportsOrchestralCards = result.orchestralKnowledgeCards === true;
     if (state.supportsOrchestralCards) {
       try {
@@ -1884,6 +2069,10 @@ async function clearCredential(provider, button) {
 }
 
 elements.form.addEventListener("submit", sendDiscussionMessage);
+elements.taskList.addEventListener("click", async (event) => {
+  const button = event.target.closest?.("[data-session-id]");
+  if (button) await openDiscussionSession(button.dataset.sessionId);
+});
 elements.attachImage.addEventListener("click", () => elements.discussionImage.click());
 elements.discussionImage.addEventListener("change", () => {
   const file = elements.discussionImage.files?.[0];
@@ -1908,7 +2097,10 @@ elements.approvePrompt.addEventListener("click", async () => {
 });
 new ResizeObserver(() => {
   const height = elements.composerDock.getBoundingClientRect().height;
-  document.documentElement.style.setProperty("--dock-space", `${Math.max(230, height + 50)}px`);
+  document.documentElement.style.setProperty(
+    "--dock-space",
+    elements.composerDock.classList.contains("session-workspace") ? "40px" : `${Math.max(230, height + 50)}px`,
+  );
 }).observe(elements.composerDock);
 elements.corpusMode.addEventListener("change", () => {
   state.corpusMode = normalizeCorpusMode(elements.corpusMode.value);

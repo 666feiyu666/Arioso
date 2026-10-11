@@ -11,18 +11,18 @@ class Element {
   dataset: Record<string, string> = {};
   attributes = new Map<string, string>();
   children = new Map<string, Element>();
-  listeners = new Map<string, Array<() => unknown>>();
+  listeners = new Map<string, Array<(event?: unknown) => unknown>>();
   classList = { contains: () => false, toggle: () => {} };
   setAttribute(key: string, value: string) { this.attributes.set(key, value); }
   getAttribute(key: string) { return this.attributes.get(key) || null; }
   removeAttribute(key: string) { this.attributes.delete(key); }
-  addEventListener(event: string, handler: () => unknown) {
+  addEventListener(event: string, handler: (event?: unknown) => unknown) {
     const handlers = this.listeners.get(event) || [];
     handlers.push(handler);
     this.listeners.set(event, handlers);
   }
-  async emit(event: string) {
-    await Promise.all((this.listeners.get(event) || []).map((handler) => handler()));
+  async emit(event: string, payload?: unknown) {
+    await Promise.all((this.listeners.get(event) || []).map((handler) => handler(payload)));
     await Promise.resolve();
   }
   querySelector(selector: string): Element {
@@ -81,7 +81,8 @@ async function interfaceHarness(initial = album()) {
   let discussion: {
     id: string; status: string; taskOptions: Record<string, unknown>;
     messages: Array<Record<string, unknown>>; attachments: Array<Record<string, unknown>>;
-    proposal?: string; createdAt: string; updatedAt: string;
+    proposal?: string; taskIds?: string[]; tasks?: Array<Record<string, unknown>>;
+    createdAt: string; updatedAt: string;
   } = {
     id: "discussion-1", status: "discussing", taskOptions: {}, messages: [] as Array<Record<string, unknown>>,
     attachments: [], createdAt: "2026-10-11T00:00:00Z", updatedAt: "2026-10-11T00:00:00Z",
@@ -95,7 +96,9 @@ async function interfaceHarness(initial = album()) {
     else if (url === "/api/settings") result = { language: "zh-CN", credentials: { openai: { configured: false }, gemini: { configured: false } } };
     else if (url === "/api/tasks" && method === "GET") result = [stored];
     else if (url === "/api/tasks" && method === "POST") result = stored;
+    else if (url === "/api/discussions" && method === "GET") result = [];
     else if (url === "/api/discussions" && method === "POST") result = discussion;
+    else if (url.startsWith("/api/discussions/") && method === "GET") result = discussion;
     else if (url.endsWith("/messages") && method === "POST") {
       discussion = { ...discussion, messages: [
         { id: "user-1", role: "user", content: body.content, attachmentIds: [], createdAt: discussion.updatedAt },
@@ -106,7 +109,7 @@ async function interfaceHarness(initial = album()) {
       discussion = { ...discussion, status: "proposal-ready", proposal: "温暖安静、适合长时间阅读的纯器乐背景音乐。" };
       result = discussion;
     } else if (url.endsWith("/submit") && method === "POST") {
-      discussion = { ...discussion, status: "submitted", proposal: body.prompt };
+      discussion = { ...discussion, status: "submitted", proposal: body.prompt, taskIds: [stored.id], tasks: [stored] };
       result = { session: discussion, task: stored };
     }
     else if (method === "PATCH") {
@@ -145,6 +148,14 @@ describe("album listening interface", () => {
 
     expect(requests.find((item) => item.url.endsWith("/submit"))?.body)
       .toEqual({ prompt: "用户编辑后的最终提示词" });
+    expect(api.elements.discussionTask.innerHTML).toContain("Late Night Noir");
+
+    api.state.discussionSession = null;
+    await api.elements.taskList.emit("click", {
+      target: { closest: () => ({ dataset: { sessionId: "discussion-1" } }) },
+    });
+    expect(api.state.discussionSession.id).toBe("discussion-1");
+    expect(api.elements.entryView.hidden).toBe(true);
   });
 
   it("blocks producer creation against an older server", async () => {

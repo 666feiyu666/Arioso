@@ -11,8 +11,10 @@ import { loadConfig, type AriosoConfig } from "../config/env.js";
 import { SettingsStore, SUPPORTED_LANGUAGES, type ApiProvider, type InterfaceLanguage } from "../config/settings.js";
 import { CreativeSessionStore } from "../discussion/creative-session-store.js";
 import { LangChainDiscussionAgent } from "../discussion/langchain-discussion.js";
+import { resolveCreativeSessionPhase } from "../discussion/session-graph.js";
 import {
   MAX_DISCUSSION_IMAGE_BYTES,
+  type CreativeSession,
   type DiscussionAgent,
   type DiscussionTaskOptions,
 } from "../discussion/types.js";
@@ -438,6 +440,20 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
   await discussionStore.initialize();
   const activeTaskIds = new Set<string>();
   const activeDiscussionSubmissions = new Set<string>();
+  const discussionView = async (session: CreativeSession) => {
+    const taskIds = session.taskIds ?? (session.submittedTaskId ? [session.submittedTaskId] : []);
+    const tasks = taskIds.flatMap((id) => {
+      const task = store.get(id);
+      return task ? [task] : [];
+    });
+    const latestTask = tasks.at(-1);
+    return {
+      ...session,
+      taskIds,
+      phase: await resolveCreativeSessionPhase(session.status, latestTask?.status),
+      tasks,
+    };
+  };
   const startTask = (task: MusicTask, config: AriosoConfig, albumTrackId?: string): void => {
     activeTaskIds.add(task.id);
     void runTask(store, task, config, albumTrackId)
@@ -472,9 +488,10 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
       const discussionAttachmentMatch = /^\/api\/discussions\/([^/]+)\/attachments\/([^/]+)$/.exec(url.pathname);
       if (request.method === "GET" && url.pathname === "/api/capabilities") {
         sendJson(response, 200, {
-          apiVersion: 6,
+          apiVersion: 7,
           workflows: ["01-general", "02-jazz", "03-orchestral", "04-album"],
           discussionSessions: true,
+          creativeSessionTimeline: true,
           discussionImages: { types: ["image/jpeg", "image/png", "image/webp"], maximumBytes: MAX_DISCUSSION_IMAGE_BYTES },
           albumPlaylist: true,
           albumExport: true,
@@ -500,14 +517,19 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
 
       if (request.method === "POST" && url.pathname === "/api/discussions") {
         const taskOptions = discussionTaskOptions(await readJsonBody(request));
-        sendJson(response, 201, await discussionStore.create(taskOptions));
+        sendJson(response, 201, await discussionView(await discussionStore.create(taskOptions)));
+        return;
+      }
+
+      if (request.method === "GET" && url.pathname === "/api/discussions") {
+        sendJson(response, 200, await Promise.all(discussionStore.list().map(discussionView)));
         return;
       }
 
       if (request.method === "GET" && discussionMatch?.[1]) {
         const session = discussionStore.get(discussionMatch[1]);
         if (!session) throw new HttpError(404, "Discussion session not found.");
-        sendJson(response, 200, session);
+        sendJson(response, 200, await discussionView(session));
         return;
       }
 
@@ -519,7 +541,7 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
         const session = await discussionStore.addAttachment(sessionId, {
           originalName: decodedFileName(url.searchParams.get("name")), mimeType, data,
         });
-        sendJson(response, 201, session);
+        sendJson(response, 201, await discussionView(session));
         return;
       }
 
@@ -554,7 +576,9 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
           model: config.openAiModel,
           language: await settings.language(),
         });
-        sendJson(response, 200, await discussionStore.addMessage(sessionId, "assistant", reply));
+        sendJson(response, 200, await discussionView(
+          await discussionStore.addMessage(sessionId, "assistant", reply),
+        ));
         return;
       }
 
@@ -568,7 +592,7 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
           model: config.openAiModel,
           language: await settings.language(),
         });
-        sendJson(response, 200, await discussionStore.setProposal(sessionId, proposal));
+        sendJson(response, 200, await discussionView(await discussionStore.setProposal(sessionId, proposal)));
         return;
       }
 
@@ -596,7 +620,9 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
           const task = await store.create(input, config);
           await discussionStore.markSubmitted(sessionId, task.id, prompt);
           startTask(task, config);
-          sendJson(response, 202, { session: discussionStore.get(sessionId), task });
+          sendJson(response, 202, {
+            session: await discussionView(discussionStore.get(sessionId)!), task,
+          });
         } finally {
           activeDiscussionSubmissions.delete(sessionId);
         }

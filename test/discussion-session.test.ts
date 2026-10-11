@@ -118,6 +118,18 @@ describe("creative discussion sessions", () => {
           .then((response) => response.json()) as { status: string };
         expect(task.status).toBe("completed");
       });
+      const restored = await fetch(`${baseUrl}/api/discussions/${session.id}`)
+        .then((response) => response.json()) as {
+          phase: string; taskIds: string[]; tasks: Array<{ id: string; status: string }>;
+        };
+      expect(restored).toMatchObject({
+        phase: "completed",
+        taskIds: [submitted.task.id],
+        tasks: [{ id: submitted.task.id, status: "completed" }],
+      });
+      const sessions = await fetch(`${baseUrl}/api/discussions`)
+        .then((response) => response.json()) as Array<{ id: string }>;
+      expect(sessions.map((item) => item.id)).toContain(session.id);
       expect(composeMock).toHaveBeenCalledWith(approvedPrompt, expect.any(Object));
     }, { environment: { OPENAI_API_KEY: "test-local-only" }, discussionAgent: agent });
   });

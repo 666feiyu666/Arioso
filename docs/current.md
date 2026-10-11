@@ -170,6 +170,14 @@ user may continue the same session, request a concise prompt, edit its visible
 text, and approve it; approval passes that exact text into the existing task
 pipeline and records the source discussion identifier on the task.
 
+The browser presents the discussion and its linked task as one continuous
+creative-session timeline. A LangGraph state graph resolves the visible phase
+from discussion state and the latest task state, covering discussion, prompt
+approval, queueing, composition, generation, assembly, processing, completion,
+and failure. `MusicTask` remains a separate execution record for recovery and
+retry, while the sidebar and workspace use the parent creative session whenever
+one exists. Legacy tasks without a session remain available.
+
 ## Configuration
 
 The runtime reads:
@@ -218,6 +226,7 @@ an isolated file-stitching feature with no stable musical context.
 - settings and credential storage: `src/config/settings.ts`
 - local server and task persistence: `src/web/server.ts`
 - creative discussion sessions: `src/discussion/`
+- creative-session state graph: `src/discussion/session-graph.ts`
 - browser client: `web/`
 - regression behavior: `test/`
 

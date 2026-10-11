@@ -6,6 +6,7 @@ export const MAX_DISCUSSION_ATTACHMENTS = 4;
 
 export type DiscussionImageType = (typeof DISCUSSION_IMAGE_TYPES)[number];
 export type DiscussionTaskOptions = Omit<CreateTaskInput, "description" | "sourceDiscussionId">;
+export type CreativeSessionStatus = "discussing" | "proposal-ready" | "submitted";
 
 export interface DiscussionAttachment {
   id: string;
@@ -26,12 +27,13 @@ export interface DiscussionMessage {
 
 export interface CreativeSession {
   id: string;
-  status: "discussing" | "proposal-ready" | "submitted";
+  status: CreativeSessionStatus;
   taskOptions: DiscussionTaskOptions;
   messages: DiscussionMessage[];
   attachments: DiscussionAttachment[];
   proposal?: string;
   submittedTaskId?: string;
+  taskIds?: string[];
   createdAt: string;
   updatedAt: string;
 }
