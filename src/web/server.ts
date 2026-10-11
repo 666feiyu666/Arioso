@@ -9,10 +9,17 @@ import { composeMusic } from "../composer/composer-agent.js";
 import { composeOrchestralMovement, planOrchestralWork } from "../composer/orchestral-agent.js";
 import { loadConfig, type AriosoConfig } from "../config/env.js";
 import { SettingsStore, SUPPORTED_LANGUAGES, type ApiProvider, type InterfaceLanguage } from "../config/settings.js";
+import { CreativeSessionStore } from "../discussion/creative-session-store.js";
+import { LangChainDiscussionAgent } from "../discussion/langchain-discussion.js";
+import {
+  MAX_DISCUSSION_IMAGE_BYTES,
+  type DiscussionAgent,
+  type DiscussionTaskOptions,
+} from "../discussion/types.js";
 import { LyriaClient } from "../lyria/lyria-client.js";
 import { listOrchestralKnowledgeCards } from "../retrieval/orchestral-cards.js";
 import { TaskStore, parseTaskInput, type AlbumAdmission, type AlbumAudioExport, type MusicTask } from "./task-store.js";
-import { HttpError, readJsonBody, sendAudio, sendJson, serveStatic } from "./http.js";
+import { HttpError, readBinaryBody, readJsonBody, sendAudio, sendFile, sendJson, serveStatic } from "./http.js";
 import { isRecord } from "../utils/validation.js";
 import { runBackgroundMusicProducer } from "../producer/background-music-producer.js";
 import { productionArtifactPath } from "../producer/pipeline.js";
@@ -392,6 +399,23 @@ export interface AriosoServerOptions {
   environment?: NodeJS.ProcessEnv;
   envPath?: string;
   preferencesPath?: string;
+  discussionAgent?: DiscussionAgent;
+}
+
+function discussionTaskOptions(value: unknown): DiscussionTaskOptions {
+  if (!isRecord(value)) throw new Error("A discussion request is required.");
+  const parsed = parseTaskInput({ ...value, description: "Pending creative discussion." });
+  const { description: _description, sourceDiscussionId: _sourceDiscussionId, ...taskOptions } = parsed;
+  return taskOptions;
+}
+
+function decodedFileName(value: string | null): string {
+  if (!value) return "image";
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    throw new HttpError(400, "Invalid image filename.");
+  }
 }
 
 export async function createAriosoServer(options: AriosoServerOptions = {}) {
@@ -408,8 +432,12 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
   const environment = await settings.runtimeEnvironment();
   const outputDirectory = environment.ARIOSO_OUTPUT_DIR ?? "outputs";
   const store = new TaskStore(path.resolve(outputDirectory, "tasks"));
+  const discussionStore = new CreativeSessionStore(path.resolve(outputDirectory, "discussions"));
+  const discussionAgent = options.discussionAgent ?? new LangChainDiscussionAgent();
   await store.initialize();
+  await discussionStore.initialize();
   const activeTaskIds = new Set<string>();
+  const activeDiscussionSubmissions = new Set<string>();
   const startTask = (task: MusicTask, config: AriosoConfig, albumTrackId?: string): void => {
     activeTaskIds.add(task.id);
     void runTask(store, task, config, albumTrackId)
@@ -436,10 +464,18 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
       const productionArtifactMatch = /^\/api\/tasks\/([^/]+)\/production\/(audio|video|tracklist|manifest)$/.exec(url.pathname);
       const retryMatch = /^\/api\/tasks\/([^/]+)\/retry$/.exec(url.pathname);
       const credentialMatch = /^\/api\/settings\/credentials\/(openai|gemini)$/.exec(url.pathname);
+      const discussionMatch = /^\/api\/discussions\/([^/]+)$/.exec(url.pathname);
+      const discussionMessagesMatch = /^\/api\/discussions\/([^/]+)\/messages$/.exec(url.pathname);
+      const discussionProposalMatch = /^\/api\/discussions\/([^/]+)\/proposal$/.exec(url.pathname);
+      const discussionSubmitMatch = /^\/api\/discussions\/([^/]+)\/submit$/.exec(url.pathname);
+      const discussionAttachmentsMatch = /^\/api\/discussions\/([^/]+)\/attachments$/.exec(url.pathname);
+      const discussionAttachmentMatch = /^\/api\/discussions\/([^/]+)\/attachments\/([^/]+)$/.exec(url.pathname);
       if (request.method === "GET" && url.pathname === "/api/capabilities") {
         sendJson(response, 200, {
-          apiVersion: 5,
+          apiVersion: 6,
           workflows: ["01-general", "02-jazz", "03-orchestral", "04-album"],
+          discussionSessions: true,
+          discussionImages: { types: ["image/jpeg", "image/png", "image/webp"], maximumBytes: MAX_DISCUSSION_IMAGE_BYTES },
           albumPlaylist: true,
           albumExport: true,
           backgroundMusicProducer: { denoiser: "denoising-historical-recordings", outputChannels: 1, listeningReview: "required" },
@@ -459,6 +495,111 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
 
       if (request.method === "GET" && url.pathname === "/api/orchestral-cards") {
         sendJson(response, 200, await listOrchestralKnowledgeCards());
+        return;
+      }
+
+      if (request.method === "POST" && url.pathname === "/api/discussions") {
+        const taskOptions = discussionTaskOptions(await readJsonBody(request));
+        sendJson(response, 201, await discussionStore.create(taskOptions));
+        return;
+      }
+
+      if (request.method === "GET" && discussionMatch?.[1]) {
+        const session = discussionStore.get(discussionMatch[1]);
+        if (!session) throw new HttpError(404, "Discussion session not found.");
+        sendJson(response, 200, session);
+        return;
+      }
+
+      if (request.method === "POST" && discussionAttachmentsMatch?.[1]) {
+        const sessionId = discussionAttachmentsMatch[1];
+        if (!discussionStore.get(sessionId)) throw new HttpError(404, "Discussion session not found.");
+        const mimeType = String(request.headers["content-type"] ?? "").split(";", 1)[0]!.trim().toLowerCase();
+        const data = await readBinaryBody(request, MAX_DISCUSSION_IMAGE_BYTES);
+        const session = await discussionStore.addAttachment(sessionId, {
+          originalName: decodedFileName(url.searchParams.get("name")), mimeType, data,
+        });
+        sendJson(response, 201, session);
+        return;
+      }
+
+      if ((request.method === "GET" || request.method === "HEAD")
+        && discussionAttachmentMatch?.[1] && discussionAttachmentMatch[2]) {
+        const attachment = discussionStore.attachmentPath(
+          discussionAttachmentMatch[1], discussionAttachmentMatch[2],
+        );
+        if (!attachment) throw new HttpError(404, "Discussion image is not available.");
+        await sendFile(request, response, attachment.path, attachment.mimeType);
+        return;
+      }
+
+      if (request.method === "POST" && discussionMessagesMatch?.[1]) {
+        const sessionId = discussionMessagesMatch[1];
+        if (!discussionStore.get(sessionId)) throw new HttpError(404, "Discussion session not found.");
+        const value = await readJsonBody(request);
+        if (!isRecord(value)
+          || (value.content !== undefined && typeof value.content !== "string")
+          || (value.attachmentIds !== undefined && (!Array.isArray(value.attachmentIds)
+            || !value.attachmentIds.every((id: unknown) => typeof id === "string")))) {
+          throw new HttpError(400, "A valid discussion message is required.");
+        }
+        await discussionStore.addMessage(
+          sessionId, "user", typeof value.content === "string" ? value.content : "",
+          (value.attachmentIds as string[] | undefined) ?? [],
+        );
+        const runtime = await settings.runtimeEnvironment();
+        const config = loadConfig(false, runtime);
+        const reply = await discussionAgent.respond(await discussionStore.agentMessages(sessionId), {
+          apiKey: config.openAiApiKey,
+          model: config.openAiModel,
+          language: await settings.language(),
+        });
+        sendJson(response, 200, await discussionStore.addMessage(sessionId, "assistant", reply));
+        return;
+      }
+
+      if (request.method === "POST" && discussionProposalMatch?.[1]) {
+        const sessionId = discussionProposalMatch[1];
+        if (!discussionStore.get(sessionId)) throw new HttpError(404, "Discussion session not found.");
+        const runtime = await settings.runtimeEnvironment();
+        const config = loadConfig(false, runtime);
+        const proposal = await discussionAgent.propose(await discussionStore.agentMessages(sessionId), {
+          apiKey: config.openAiApiKey,
+          model: config.openAiModel,
+          language: await settings.language(),
+        });
+        sendJson(response, 200, await discussionStore.setProposal(sessionId, proposal));
+        return;
+      }
+
+      if (request.method === "POST" && discussionSubmitMatch?.[1]) {
+        const sessionId = discussionSubmitMatch[1];
+        const session = discussionStore.get(sessionId);
+        if (!session) throw new HttpError(404, "Discussion session not found.");
+        if (session.status === "submitted" || activeDiscussionSubmissions.has(sessionId)) {
+          throw new HttpError(409, "This discussion has already been submitted.");
+        }
+        const value = await readJsonBody(request);
+        if (!isRecord(value) || typeof value.prompt !== "string" || !value.prompt.trim()) {
+          throw new HttpError(400, "An approved prompt is required.");
+        }
+        const prompt = value.prompt.trim();
+        activeDiscussionSubmissions.add(sessionId);
+        try {
+          await discussionStore.setProposal(sessionId, prompt);
+          const input = parseTaskInput({
+            ...session.taskOptions,
+            description: prompt,
+          });
+          input.sourceDiscussionId = sessionId;
+          const config = loadConfig(input.mode === "generate", await settings.runtimeEnvironment());
+          const task = await store.create(input, config);
+          await discussionStore.markSubmitted(sessionId, task.id, prompt);
+          startTask(task, config);
+          sendJson(response, 202, { session: discussionStore.get(sessionId), task });
+        } finally {
+          activeDiscussionSubmissions.delete(sessionId);
+        }
         return;
       }
 

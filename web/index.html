@@ -174,8 +174,37 @@
             <div class="playlist-controls" id="playlist-controls" hidden><button id="player-previous" type="button" data-i18n-aria-label="previousTrack" aria-label="上一首">⏮</button><button id="player-next" type="button" data-i18n-aria-label="nextTrack" aria-label="下一首">⏭</button></div>
             <audio id="audio-player" controls preload="metadata"></audio>
           </div>
+          <section class="discussion-panel" id="discussion-panel" aria-label="创作讨论" data-i18n-aria-label="creativeDiscussion" hidden>
+            <div class="discussion-heading">
+              <div><span class="eyebrow" data-i18n="promptDirector">PROMPT DIRECTOR</span><strong data-i18n="creativeDiscussion">创作讨论</strong></div>
+              <span class="discussion-status" id="discussion-status"></span>
+            </div>
+            <div class="discussion-messages" id="discussion-messages" aria-live="polite"></div>
+            <div class="discussion-next" id="discussion-next" hidden>
+              <div>
+                <strong data-i18n="directionReady">这个方向合适吗？</strong>
+                <span data-i18n="directionReadyHint">你可以继续补充，或把当前共识整理成最终提示词。</span>
+              </div>
+              <button class="primary-button discussion-next-button" id="generate-proposal" type="button">
+                <span data-i18n="useDirection">使用当前方向</span><span aria-hidden="true">→</span>
+              </button>
+            </div>
+            <div class="prompt-proposal" id="prompt-proposal-card" hidden>
+              <div class="proposal-heading">
+                <label for="prompt-proposal-text" data-i18n="generatedPrompt">作曲提示词</label>
+                <span data-i18n="proposalEditHint">可编辑；以下内容将直接交给 Composer Agent</span>
+              </div>
+              <textarea id="prompt-proposal-text" rows="4" maxlength="8000"></textarea>
+              <div class="proposal-actions">
+                <button class="secondary-button" id="continue-discussion" type="button" data-i18n="continueDiscussion">继续讨论</button>
+                <button class="primary-button" id="approve-prompt" type="button"><span data-i18n="approvePrompt">开始作曲</span><span aria-hidden="true">→</span></button>
+              </div>
+            </div>
+          </section>
           <form id="composer-form" class="composer-form">
             <div class="composer-main">
+              <button class="attach-image-button" id="attach-image" type="button" aria-label="添加参考图片" data-i18n-aria-label="attachImage">＋</button>
+              <input id="discussion-image" type="file" accept="image/jpeg,image/png,image/webp" hidden />
               <textarea
                 id="prompt-input"
                 rows="2"
@@ -186,7 +215,10 @@
                 data-i18n-aria-label="promptLabel"
                 required
               ></textarea>
-              <button id="submit-task" type="submit" aria-label="开始生成" data-i18n-aria-label="startGeneration">↑</button>
+              <button id="submit-task" type="submit" aria-label="发送消息" data-i18n-aria-label="sendMessage">↑</button>
+            </div>
+            <div class="discussion-actions">
+              <span id="selected-image" hidden></span>
             </div>
             <fieldset class="vocal-setting" id="vocal-setting">
               <legend data-i18n="vocalRule">人声规则</legend>

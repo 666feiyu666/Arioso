@@ -144,6 +144,7 @@ export interface MusicTask {
   generatedText?: string | null;
   audioFile?: string;
   error?: string | undefined;
+  sourceDiscussionId?: string;
 }
 
 export interface CreateTaskInput {
@@ -158,6 +159,7 @@ export interface CreateTaskInput {
   candidateCount?: number;
   targetTotalMinutes?: number;
   produceAlbum?: boolean;
+  sourceDiscussionId?: string;
 }
 
 function isSafeFileName(value: unknown): value is string {
@@ -508,6 +510,7 @@ export class TaskStore {
       lyriaModel: input.lyriaModel ?? config.lyriaModel,
       createdAt: now,
       updatedAt: now,
+      ...(input.sourceDiscussionId ? { sourceDiscussionId: input.sourceDiscussionId } : {}),
     };
     this.#tasks.set(task.id, task);
     this.#taskDirectories.set(task.id, this.taskDirectory(task));

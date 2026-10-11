@@ -150,6 +150,47 @@ export async function readJsonBody(request: IncomingMessage): Promise<unknown> {
   }
 }
 
+export async function readBinaryBody(request: IncomingMessage, maximumBytes: number): Promise<Buffer> {
+  const chunks: Buffer[] = [];
+  let size = 0;
+
+  for await (const chunk of request) {
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    size += buffer.length;
+    // Drain oversized requests so the server can return a normal 413 response.
+    if (size <= maximumBytes) chunks.push(buffer);
+  }
+
+  if (size > maximumBytes) throw new HttpError(413, "Request body is too large.");
+  return Buffer.concat(chunks);
+}
+
+export async function sendFile(
+  request: IncomingMessage,
+  response: ServerResponse,
+  filePath: string,
+  contentType: string,
+): Promise<void> {
+  let file;
+  try {
+    file = await stat(filePath);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") throw new HttpError(404, "File is not available.");
+    throw error;
+  }
+  if (!file.isFile()) throw new HttpError(404, "File is not available.");
+  response.writeHead(200, {
+    "Content-Type": contentType,
+    "Content-Length": file.size,
+    "Cache-Control": "private, no-cache",
+  });
+  if (request.method === "HEAD") {
+    response.end();
+    return;
+  }
+  await pipeline(createReadStream(filePath), response);
+}
+
 export async function serveStatic(
   pathname: string,
   response: ServerResponse,

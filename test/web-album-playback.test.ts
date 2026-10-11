@@ -78,15 +78,37 @@ async function interfaceHarness(initial = album()) {
   };
   const requests: Array<{ url: string; method: string; body: unknown }> = [];
   let stored = structuredClone(initial);
+  let discussion: {
+    id: string; status: string; taskOptions: Record<string, unknown>;
+    messages: Array<Record<string, unknown>>; attachments: Array<Record<string, unknown>>;
+    proposal?: string; createdAt: string; updatedAt: string;
+  } = {
+    id: "discussion-1", status: "discussing", taskOptions: {}, messages: [] as Array<Record<string, unknown>>,
+    attachments: [], createdAt: "2026-10-11T00:00:00Z", updatedAt: "2026-10-11T00:00:00Z",
+  };
   const fetch = async (url: string, options: { method?: string; body?: string } = {}) => {
     const method = options.method || "GET";
     const body = options.body ? JSON.parse(options.body) : undefined;
     requests.push({ url, method, body });
     let result: unknown = {};
-    if (url === "/api/capabilities") result = { apiVersion: 5, workflows: ["01-general", "02-jazz", "03-orchestral", "04-album"], backgroundMusicProducer: { denoiser: "denoising-historical-recordings" } };
+    if (url === "/api/capabilities") result = { apiVersion: 6, workflows: ["01-general", "02-jazz", "03-orchestral", "04-album"], discussionSessions: true, backgroundMusicProducer: { denoiser: "denoising-historical-recordings" } };
     else if (url === "/api/settings") result = { language: "zh-CN", credentials: { openai: { configured: false }, gemini: { configured: false } } };
     else if (url === "/api/tasks" && method === "GET") result = [stored];
     else if (url === "/api/tasks" && method === "POST") result = stored;
+    else if (url === "/api/discussions" && method === "POST") result = discussion;
+    else if (url.endsWith("/messages") && method === "POST") {
+      discussion = { ...discussion, messages: [
+        { id: "user-1", role: "user", content: body.content, attachmentIds: [], createdAt: discussion.updatedAt },
+        { id: "assistant-1", role: "assistant", content: "温暖、安静的阅读背景音乐方向。", attachmentIds: [], createdAt: discussion.updatedAt },
+      ] };
+      result = discussion;
+    } else if (url.endsWith("/proposal") && method === "POST") {
+      discussion = { ...discussion, status: "proposal-ready", proposal: "温暖安静、适合长时间阅读的纯器乐背景音乐。" };
+      result = discussion;
+    } else if (url.endsWith("/submit") && method === "POST") {
+      discussion = { ...discussion, status: "submitted", proposal: body.prompt };
+      result = { session: discussion, task: stored };
+    }
     else if (method === "PATCH") {
       const id = url.split("/").at(-1);
       const target = stored.albumTracks.find((item) => item.id === id)!;
@@ -98,7 +120,7 @@ async function interfaceHarness(initial = album()) {
     return { ok: true, json: async () => structuredClone(result) };
   };
   const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
-  const run = new AsyncFunction("document", "window", "ResizeObserver", "fetch", "setInterval", `${source}\nreturn {state, elements, openAlbum, startAlbum, playAlbumTrack, playTask, stepAlbumTrack, changeAdmission, showComposer, submitTask, renderAlbumDetail};`);
+  const run = new AsyncFunction("document", "window", "ResizeObserver", "fetch", "setInterval", `${source}\nreturn {state, elements, openAlbum, startAlbum, playAlbumTrack, playTask, stepAlbumTrack, changeAdmission, showComposer, submitTask, sendDiscussionMessage, generateDiscussionProposal, renderAlbumDetail};`);
   const api = await run(document, { scrollTo() {} }, class { observe() {} }, fetch, () => 0);
   await Promise.resolve();
   await Promise.resolve();
@@ -107,6 +129,24 @@ async function interfaceHarness(initial = album()) {
 }
 
 describe("album listening interface", () => {
+  it("shows a clear next step and submits the edited discussion prompt", async () => {
+    const { api, requests } = await interfaceHarness();
+    api.showComposer("none", "single", "01-general");
+    api.elements.input.value = "适合下班后阅读的安静背景音乐";
+    await api.sendDiscussionMessage({ preventDefault() {} });
+    expect(api.elements.discussionNext.hidden).toBe(false);
+    expect(api.elements.proposalCard.hidden).toBe(true);
+
+    await api.generateDiscussionProposal();
+    expect(api.elements.discussionNext.hidden).toBe(true);
+    expect(api.elements.proposalCard.hidden).toBe(false);
+    api.elements.proposalText.value = "用户编辑后的最终提示词";
+    await api.elements.approvePrompt.emit("click");
+
+    expect(requests.find((item) => item.url.endsWith("/submit"))?.body)
+      .toEqual({ prompt: "用户编辑后的最终提示词" });
+  });
+
   it("blocks producer creation against an older server", async () => {
     const { api, requests } = await interfaceHarness();
     api.showComposer("none", "album", "04-album");

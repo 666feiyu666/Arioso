@@ -23,6 +23,9 @@ describe("workflow entry page", () => {
       ]);
       expect(html).toMatch(/\bid=["']album-view["']/);
       expect(html).toMatch(/\bid=["']playlist-controls["']/);
+      expect(html).toMatch(/\bid=["']discussion-next["']/);
+      expect(html).toMatch(/\bid=["']generate-proposal["']/);
+      expect(html).toMatch(/\bid=["']approve-prompt["']/);
       expect(html).not.toMatch(/\bid=["']development-view["']/);
     });
   });

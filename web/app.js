@@ -75,7 +75,14 @@ const translations = {
     lyriaFull: "Lyria 3.5 · 完整歌曲", examplesTitle: "从一个声音画面开始",
     examplesHint: "选择示例后仍可自由修改", backHome: "← 返回创作台", nowPlaying: "正在播放",
     noMusicSelected: "未选择音乐", promptPlaceholder: "例如：慵懒的午后爵士，刷镲与温暖钢琴轻轻摇摆……",
-    promptLabel: "描述想生成的音乐", startGeneration: "开始生成", vocalRule: "人声规则",
+    promptLabel: "讨论想生成的音乐", startGeneration: "开始生成", vocalRule: "人声规则",
+    creativeDiscussion: "创作讨论", promptDirector: "PROMPT DIRECTOR", sendMessage: "发送消息",
+    attachImage: "添加参考图片", generatePrompt: "生成提示词", generatedPrompt: "作曲提示词",
+    directionReady: "这个方向合适吗？", directionReadyHint: "你可以继续补充，或把当前共识整理成最终提示词。",
+    useDirection: "使用当前方向", proposalEditHint: "可编辑；以下内容将直接交给 Composer Agent",
+    continueDiscussion: "继续讨论", approvePrompt: "开始作曲", discussing: "讨论中",
+    proposalReady: "提示词已生成", discussionSending: "正在整理想法…", proposalGenerating: "正在生成提示词…",
+    imageSelected: "参考图片：{name}", imageUploadFailed: "参考图片上传失败。",
     vocalAuto: "自动", vocalInstrumental: "纯器乐", vocalEnabled: "人声", preferences: "PREFERENCES",
     close: "关闭", interfaceLanguage: "界面语言", apiConfiguration: "API 配置",
     apiNeverShown: "密钥只保存在本机，界面不会回显完整内容。",
@@ -192,7 +199,14 @@ const translations = {
     lyriaFull: "Lyria 3.5 · Full song", examplesTitle: "Start with a sonic scene",
     examplesHint: "Choose an example, then edit it freely", backHome: "← Back to studio", nowPlaying: "NOW PLAYING",
     noMusicSelected: "No music selected", promptPlaceholder: "For example: lazy afternoon jazz with brushes and warm, gently swinging piano…",
-    promptLabel: "Describe the music to create", startGeneration: "Start generation", vocalRule: "Vocal rule",
+    promptLabel: "Discuss the music to create", startGeneration: "Start generation", vocalRule: "Vocal rule",
+    creativeDiscussion: "Creative discussion", promptDirector: "PROMPT DIRECTOR", sendMessage: "Send message",
+    attachImage: "Attach reference image", generatePrompt: "Generate prompt", generatedPrompt: "Composition prompt",
+    directionReady: "Does this direction feel right?", directionReadyHint: "Keep discussing, or turn the current agreement into the final prompt.",
+    useDirection: "Use this direction", proposalEditHint: "Editable; this exact text will be sent to the Composer Agent",
+    continueDiscussion: "Continue discussion", approvePrompt: "Start composing", discussing: "Discussing",
+    proposalReady: "Prompt ready", discussionSending: "Developing the idea…", proposalGenerating: "Generating prompt…",
+    imageSelected: "Reference image: {name}", imageUploadFailed: "Unable to upload the reference image.",
     vocalAuto: "Auto", vocalInstrumental: "Instrumental", vocalEnabled: "Vocals", preferences: "PREFERENCES",
     close: "Close", interfaceLanguage: "Interface language", apiConfiguration: "API configuration",
     apiNeverShown: "Keys stay on this computer and are never displayed in full.",
@@ -391,12 +405,15 @@ const state = {
   supportsOrchestralCards: false,
   supportsJazzCorpusToggle: false,
   supportsBackgroundMusicProducer: false,
+  supportsDiscussionSessions: false,
   orchestralCards: [],
   orchestralCardsError: false,
   orchestralReferenceId: "",
   submitting: false,
   language: "zh-CN",
   settings: null,
+  discussionSession: null,
+  selectedDiscussionImage: null,
 };
 const elements = {
   entryView: document.querySelector("#entry-view"),
@@ -417,6 +434,18 @@ const elements = {
   input: document.querySelector("#prompt-input"),
   submit: document.querySelector("#submit-task"),
   message: document.querySelector("#form-message"),
+  discussionPanel: document.querySelector("#discussion-panel"),
+  discussionMessages: document.querySelector("#discussion-messages"),
+  discussionStatus: document.querySelector("#discussion-status"),
+  discussionNext: document.querySelector("#discussion-next"),
+  discussionImage: document.querySelector("#discussion-image"),
+  attachImage: document.querySelector("#attach-image"),
+  selectedImage: document.querySelector("#selected-image"),
+  generateProposal: document.querySelector("#generate-proposal"),
+  proposalCard: document.querySelector("#prompt-proposal-card"),
+  proposalText: document.querySelector("#prompt-proposal-text"),
+  continueDiscussion: document.querySelector("#continue-discussion"),
+  approvePrompt: document.querySelector("#approve-prompt"),
   mode: document.querySelector("#mode-select"),
   lyriaModel: document.querySelector("#lyria-model-select"),
   modeSetting: document.querySelector("#generation-mode-setting"),
@@ -1405,10 +1434,15 @@ function showComposer(
   compositionMode = "single",
   workflowType = "01-general",
 ) {
+  const workflowChanged = state.workflowType !== workflowType;
   state.selectedTaskId = null;
   state.corpusMode = normalizeCorpusMode(corpusMode);
   state.compositionMode = ["orchestral", "album"].includes(compositionMode) ? compositionMode : "single";
   state.workflowType = workflowType;
+  if (workflowChanged || state.discussionSession?.status === "submitted") {
+    state.discussionSession = null;
+    clearSelectedDiscussionImage();
+  }
   state.expandedTaskGroup = workflowType;
   elements.entryView.hidden = true;
   elements.albumView.hidden = true;
@@ -1417,6 +1451,7 @@ function showComposer(
   elements.composerDock.hidden = false;
   elements.form.hidden = false;
   renderComposerContext();
+  renderDiscussion();
   renderExamples();
   if (["orchestral", "album"].includes(state.compositionMode)) {
     elements.lyriaModel.value = "lyria-3.5";
@@ -1521,7 +1556,140 @@ async function retryTask(id, button) {
   }
 }
 
-async function submitTask(event) {
+function currentTaskRequest(description) {
+  return {
+    description,
+    mode: state.compositionMode === "album" ? "generate" : elements.mode.value,
+    lyriaModel: state.compositionMode === "album" ? "lyria-3.5" : elements.lyriaModel.value,
+    vocalMode: state.compositionMode === "album" ? "instrumental" : selectedVocalMode(),
+    corpusMode: state.corpusMode,
+    compositionMode: state.compositionMode,
+    workflowType: state.workflowType,
+    ...(state.compositionMode === "album" ? {
+      candidateCount: Number(elements.albumCount.value),
+      targetTotalMinutes: Number(elements.albumDuration.value),
+      ...(elements.albumProduction.value === "producer" ? { produceAlbum: true } : {}),
+    } : {}),
+    ...(state.compositionMode === "orchestral" && state.orchestralReferenceId
+      ? { orchestralReferenceId: state.orchestralReferenceId } : {}),
+  };
+}
+
+function discussionAttachmentUrl(sessionId, attachmentId) {
+  return `/api/discussions/${encodeURIComponent(sessionId)}/attachments/${encodeURIComponent(attachmentId)}`;
+}
+
+function renderDiscussion() {
+  const session = state.discussionSession;
+  elements.discussionPanel.hidden = !state.supportsDiscussionSessions || !session;
+  elements.discussionMessages.innerHTML = session?.messages?.map((message) => {
+    const images = message.attachmentIds?.map((attachmentId) => {
+      const attachment = session.attachments?.find((candidate) => candidate.id === attachmentId);
+      return attachment
+        ? `<img src="${discussionAttachmentUrl(session.id, attachment.id)}" alt="${escapeHtml(attachment.originalName)}" />`
+        : "";
+    }).join("") || "";
+    return `<article class="discussion-message ${message.role}">${images}<p>${escapeHtml(message.content)}</p></article>`;
+  }).join("") || "";
+  elements.discussionStatus.textContent = session
+    ? t(session.status === "proposal-ready" ? "proposalReady" : "discussing") : "";
+  const proposal = session?.proposal || "";
+  elements.proposalCard.hidden = !proposal;
+  elements.discussionNext.hidden = !session?.messages?.some((message) => message.role === "assistant") || Boolean(proposal);
+  if (proposal && elements.proposalText.value !== proposal) elements.proposalText.value = proposal;
+  elements.generateProposal.disabled = !session?.messages?.some((message) => message.role === "user") || state.submitting;
+  if (session?.messages?.length) {
+    elements.discussionMessages.scrollTop = elements.discussionMessages.scrollHeight;
+  }
+}
+
+function clearSelectedDiscussionImage() {
+  state.selectedDiscussionImage = null;
+  elements.discussionImage.value = "";
+  elements.selectedImage.hidden = true;
+  elements.selectedImage.textContent = "";
+}
+
+async function ensureDiscussionSession() {
+  if (state.discussionSession && state.discussionSession.status !== "submitted") return state.discussionSession;
+  const request = currentTaskRequest("Pending creative discussion.");
+  const response = await fetch("/api/discussions", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(request),
+  });
+  const session = await response.json();
+  if (!response.ok) throw new Error(session.error || t("createFailed"));
+  state.discussionSession = session;
+  renderDiscussion();
+  return session;
+}
+
+async function uploadDiscussionImage(session) {
+  const file = state.selectedDiscussionImage;
+  if (!file) return [];
+  const response = await fetch(
+    `/api/discussions/${encodeURIComponent(session.id)}/attachments?name=${encodeURIComponent(file.name)}`,
+    { method: "POST", headers: { "Content-Type": file.type }, body: file },
+  );
+  const updated = await response.json();
+  if (!response.ok) throw new Error(updated.error || t("imageUploadFailed"));
+  state.discussionSession = updated;
+  const attachment = updated.attachments.at(-1);
+  return attachment ? [attachment.id] : [];
+}
+
+async function sendDiscussionMessage(event) {
+  event.preventDefault();
+  if (!state.supportsDiscussionSessions) return submitTask(event);
+  if (state.submitting || (!elements.input.value.trim() && !state.selectedDiscussionImage)) return;
+  state.submitting = true;
+  elements.submit.disabled = true;
+  elements.message.textContent = t("discussionSending");
+  try {
+    const session = await ensureDiscussionSession();
+    const attachmentIds = await uploadDiscussionImage(session);
+    const response = await fetch(`/api/discussions/${encodeURIComponent(session.id)}/messages`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: elements.input.value, attachmentIds }),
+    });
+    const updated = await response.json();
+    if (!response.ok) throw new Error(updated.error || t("createFailed"));
+    state.discussionSession = updated;
+    elements.input.value = "";
+    clearSelectedDiscussionImage();
+    elements.message.textContent = "";
+    renderDiscussion();
+  } catch (error) {
+    elements.message.textContent = error instanceof Error ? error.message : String(error);
+  } finally {
+    state.submitting = false;
+    elements.submit.disabled = false;
+    renderDiscussion();
+  }
+}
+
+async function generateDiscussionProposal() {
+  const session = state.discussionSession;
+  if (!session || state.submitting) return;
+  state.submitting = true;
+  elements.generateProposal.disabled = true;
+  elements.message.textContent = t("proposalGenerating");
+  try {
+    const response = await fetch(`/api/discussions/${encodeURIComponent(session.id)}/proposal`, { method: "POST" });
+    const updated = await response.json();
+    if (!response.ok) throw new Error(updated.error || t("createFailed"));
+    state.discussionSession = updated;
+    elements.message.textContent = "";
+    renderDiscussion();
+  } catch (error) {
+    elements.message.textContent = error instanceof Error ? error.message : String(error);
+  } finally {
+    state.submitting = false;
+    renderDiscussion();
+  }
+}
+
+async function submitTask(event, approvedPrompt) {
   event.preventDefault();
   if (state.submitting) return;
   if (!state.supportedWorkflows.has(state.workflowType)) {
@@ -1548,31 +1716,23 @@ async function submitTask(event) {
   elements.message.textContent = "";
 
   try {
-    const response = await fetch("/api/tasks", {
+    const discussionSubmission = approvedPrompt && state.discussionSession;
+    const response = await fetch(discussionSubmission
+      ? `/api/discussions/${encodeURIComponent(state.discussionSession.id)}/submit`
+      : "/api/tasks", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        description: elements.input.value,
-        mode: state.compositionMode === "album" ? "generate" : elements.mode.value,
-        lyriaModel: state.compositionMode === "album" ? "lyria-3.5" : elements.lyriaModel.value,
-        vocalMode: state.compositionMode === "album" ? "instrumental" : selectedVocalMode(),
-        corpusMode: state.corpusMode,
-        compositionMode: state.compositionMode,
-        workflowType: state.workflowType,
-        ...(state.compositionMode === "album" ? {
-          candidateCount: Number(elements.albumCount.value),
-          targetTotalMinutes: Number(elements.albumDuration.value),
-          ...(elements.albumProduction.value === "producer" ? { produceAlbum: true } : {}),
-        } : {}),
-        ...(state.compositionMode === "orchestral" && state.orchestralReferenceId
-          ? { orchestralReferenceId: state.orchestralReferenceId } : {}),
-      }),
+      body: JSON.stringify(discussionSubmission
+        ? { prompt: approvedPrompt }
+        : currentTaskRequest(elements.input.value)),
     });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || t("createFailed"));
+    const task = discussionSubmission ? result.task : result;
+    if (discussionSubmission) state.discussionSession = result.session;
     elements.input.value = "";
-    state.tasks.unshift(result);
-    selectTask(result.id);
+    state.tasks.unshift(task);
+    selectTask(task.id);
   } catch (error) {
     elements.message.textContent = error instanceof Error ? error.message : String(error);
   } finally {
@@ -1619,6 +1779,7 @@ async function loadCapabilities() {
     state.supportedWorkflows = new Set(result.workflows);
     state.supportsJazzCorpusToggle = result.jazzCorpusToggle === true;
     state.supportsBackgroundMusicProducer = result.backgroundMusicProducer?.denoiser === "denoising-historical-recordings";
+    state.supportsDiscussionSessions = result.discussionSessions === true;
     state.supportsOrchestralCards = result.orchestralKnowledgeCards === true;
     if (state.supportsOrchestralCards) {
       try {
@@ -1630,6 +1791,7 @@ async function loadCapabilities() {
       }
     }
     renderComposerContext();
+    renderDiscussion();
   } catch {
     // An older local server has no capabilities endpoint. Keep orchestral creation blocked.
   }
@@ -1721,7 +1883,29 @@ async function clearCredential(provider, button) {
   }
 }
 
-elements.form.addEventListener("submit", submitTask);
+elements.form.addEventListener("submit", sendDiscussionMessage);
+elements.attachImage.addEventListener("click", () => elements.discussionImage.click());
+elements.discussionImage.addEventListener("change", () => {
+  const file = elements.discussionImage.files?.[0];
+  if (!file) return clearSelectedDiscussionImage();
+  if (!["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size > 8 * 1024 * 1024) {
+    clearSelectedDiscussionImage();
+    elements.message.textContent = t("imageUploadFailed");
+    return;
+  }
+  state.selectedDiscussionImage = file;
+  elements.selectedImage.hidden = false;
+  elements.selectedImage.textContent = t("imageSelected", { name: file.name });
+});
+elements.generateProposal.addEventListener("click", generateDiscussionProposal);
+elements.continueDiscussion.addEventListener("click", () => {
+  elements.proposalCard.hidden = true;
+  elements.input.focus();
+});
+elements.approvePrompt.addEventListener("click", async () => {
+  const prompt = elements.proposalText.value.trim();
+  if (prompt) await submitTask({ preventDefault() {} }, prompt);
+});
 new ResizeObserver(() => {
   const height = elements.composerDock.getBoundingClientRect().height;
   document.documentElement.style.setProperty("--dock-space", `${Math.max(230, height + 50)}px`);

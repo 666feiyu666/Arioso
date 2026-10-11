@@ -139,6 +139,9 @@ text when present, audio filename, creation time, and complete `MusicSpec`.
 
 The local web application provides:
 
+- a LangChain-backed creative discussion session before task creation;
+- text and image-grounded discussion in the existing composer interface;
+- an editable concise prompt proposal with explicit approval before handoff;
 - a choice between no-corpus and Jazz-corpus workflows;
 - compose-only and compose-and-generate task modes;
 - Lyria model and vocal-policy controls;
@@ -159,6 +162,13 @@ are marked failed rather than resumed automatically. Retrying reuses an existing
 Credentials may be held for the current server session or, with explicit user
 selection, written to the local `.env`. The settings API returns only masked
 credential summaries and never the complete stored value.
+
+Creative discussions are persisted separately under `outputs/discussions`.
+Uploaded JPEG, PNG, and WebP references are stored as attachment files rather
+than embedded in session JSON. Discussion turns do not create music tasks. The
+user may continue the same session, request a concise prompt, edit its visible
+text, and approve it; approval passes that exact text into the existing task
+pipeline and records the source discussion identifier on the task.
 
 ## Configuration
 
@@ -207,6 +217,7 @@ an isolated file-stitching feature with no stable musical context.
 - Lyria adapter: `src/lyria/lyria-client.ts`
 - settings and credential storage: `src/config/settings.ts`
 - local server and task persistence: `src/web/server.ts`
+- creative discussion sessions: `src/discussion/`
 - browser client: `web/`
 - regression behavior: `test/`
 
