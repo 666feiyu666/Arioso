@@ -20,6 +20,16 @@ quality.
 
 ## Core workflows
 
+### Shaping the direction before composition
+
+Every workflow begins by listening. The user states a rough intention; the agent
+turns it into a clear, production-useful direction, which the user confirms
+before any plan is written. Direction is a distinct, revisable stage, and the
+user remains the decision-maker.
+
+Arioso supports three scopes: a standalone piece, one multi-movement orchestral
+work, and a themed album of related pieces.
+
 ### Composition without a corpus
 
 The baseline composer works from the user's brief and the model's internal
@@ -134,6 +144,9 @@ value; those remain listening decisions.
 Human brief
     |
     v
+Direction discussion (listen -> confirmed direction)
+    |
+    v
 Album and track planner <---------- Optional musical corpus
     |
     v
@@ -178,7 +191,8 @@ when they provide better musical control than an in-project approximation.
 
 ## Architectural invariants
 
-1. Planning precedes audio generation and remains inspectable afterward.
+1. A confirmed creative direction precedes planning, and planning precedes audio
+   generation; both remain inspectable afterward.
 2. The album is the top-level project; tracks, sections, and takes have stable
    identities beneath it.
 3. Generated audio is a realization and evidence item, not the entire project.

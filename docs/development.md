@@ -53,6 +53,20 @@ The server listens on `127.0.0.1:4173` by default. The interface can compose a
 prompt without Lyria or generate audio, so only configure the providers needed
 for the selected operation.
 
+## Produce an album
+
+The optional background-music producer generates and denoises an instrumental
+album:
+
+```powershell
+pnpm dev produce-album "Instrumental background music for quiet nighttime reading"
+pnpm dev produce-album --resume "<failed-task-id>"
+```
+
+It requires the installed audio pipeline. See
+[`background-music-producer.md`](background-music-producer.md) and
+[`pipeline/USAGE.md`](../pipeline/USAGE.md).
+
 ## Verify a change
 
 Run focused tests while iterating, then the complete local verification set for

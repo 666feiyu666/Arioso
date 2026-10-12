@@ -14,6 +14,9 @@ intent and the implemented repository state are deliberately kept separate.
   it differs from the target. Read it before planning an architectural change.
 - [`development.md`](development.md) contains the commands and working practices
   for developing and testing the current implementation.
+- [`background-music-producer.md`](background-music-producer.md) documents the
+  optional album production workflow.
+- [`nextphase-plan.md`](nextphase-plan.md) is a draft of the next goals.
 
 ## Maintenance rule
 
