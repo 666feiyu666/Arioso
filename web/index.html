@@ -302,6 +302,24 @@
       </form>
     </dialog>
 
+    <dialog class="settings-dialog confirm-dialog" id="confirm-dialog">
+      <form method="dialog">
+        <header class="settings-header">
+          <div>
+            <p class="eyebrow" data-i18n="confirmEyebrow">CONFIRM</p>
+            <h2 id="confirm-title"></h2>
+          </div>
+        </header>
+        <p class="confirm-body" id="confirm-body"></p>
+        <footer class="confirm-footer">
+          <button class="secondary-button" id="confirm-cancel" type="submit" value="cancel" data-i18n="cancel">取消</button>
+          <button class="primary-button" id="confirm-accept" type="submit" value="accept"></button>
+        </footer>
+      </form>
+    </dialog>
+
+    <div class="toast-region" id="toast-region" popover="manual" role="region" aria-live="polite" data-i18n-aria-label="notifications"></div>
+
     <script type="module" src="/app.js"></script>
   </body>
 </html>

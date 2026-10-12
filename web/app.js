@@ -130,6 +130,16 @@ const translations = {
     composingProgress: "OpenAI Composer 正在把你的描述整理成一致的音乐规格。",
     taskInterrupted: "任务已中断", taskFailedFallback: "任务未能完成。", continueTask: "继续此任务",
     restoring: "正在恢复…", restoreFailed: "无法恢复任务。", createFailed: "无法创建任务。",
+    confirmEyebrow: "CONFIRM", notifications: "通知",
+    confirmRemoveKeyTitle: "移除已保存的 API Key？",
+    confirmRemoveKeyBody: "移除后无法从界面回退；服务会改用环境变量中的 Key（如果存在）。",
+    removeKeyAction: "移除",
+    confirmRetryTitle: "继续此任务？",
+    confirmRetryBody: "会依据已有信息重新生成，可能再次调用模型并产生费用。",
+    continueAction: "继续生成",
+    confirmRetryTrackTitle: "重新生成这首候选曲？",
+    confirmRetryTrackBody: "将覆盖当前候选曲，并再次调用模型生成。",
+    regenerateAction: "重新生成",
   },
   en: {
     albumProductionMode: "Production workflow", albumGenerationOnly: "Generate candidates",
@@ -262,6 +272,16 @@ const translations = {
     composingProgress: "OpenAI Composer is turning your description into a coherent music specification.",
     taskInterrupted: "Task interrupted", taskFailedFallback: "The task could not be completed.", continueTask: "Continue task",
     restoring: "Restoring…", restoreFailed: "The task could not be restored.", createFailed: "The task could not be created.",
+    confirmEyebrow: "CONFIRM", notifications: "Notifications",
+    confirmRemoveKeyTitle: "Remove the saved API key?",
+    confirmRemoveKeyBody: "This cannot be undone from here. The server will fall back to an environment variable key if one is set.",
+    removeKeyAction: "Remove",
+    confirmRetryTitle: "Continue this task?",
+    confirmRetryBody: "Arioso will regenerate from the existing information, which may call the model again and incur cost.",
+    continueAction: "Continue",
+    confirmRetryTrackTitle: "Regenerate this candidate?",
+    confirmRetryTrackBody: "The current candidate is replaced and the model is called again.",
+    regenerateAction: "Regenerate",
   },
 };
 
@@ -512,6 +532,58 @@ function t(key, values = {}) {
     (result, [name, value]) => result.replaceAll(`{${name}}`, String(value)),
     template,
   );
+}
+
+const toastRegion = document.querySelector("#toast-region");
+const confirmDialog = document.querySelector("#confirm-dialog");
+const confirmTitle = document.querySelector("#confirm-title");
+const confirmBody = document.querySelector("#confirm-body");
+const confirmAccept = document.querySelector("#confirm-accept");
+
+function showToast(message, type = "info") {
+  if (!message || !toastRegion) return;
+  if (typeof toastRegion.showPopover === "function" && !toastRegion.matches(":popover-open")) {
+    try { toastRegion.showPopover(); } catch { /* popover not available in this state */ }
+  }
+  const toast = document.createElement("div");
+  toast.className = `toast toast-${type}`;
+  toast.setAttribute("role", type === "error" ? "alert" : "status");
+  toast.textContent = message;
+  toastRegion.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add("show"));
+  const lifetime = type === "error" ? 6500 : 4000;
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => {
+      toast.remove();
+      if (!toastRegion.childElementCount) {
+        try { toastRegion.hidePopover(); } catch { /* already hidden */ }
+      }
+    }, 320);
+  }, lifetime);
+}
+
+function confirmAction({ title, body = "", confirmLabel, danger = false }) {
+  if (!confirmDialog) return Promise.resolve(true);
+  confirmTitle.textContent = title;
+  confirmBody.textContent = body;
+  confirmBody.hidden = !body;
+  confirmAccept.textContent = confirmLabel || t("save");
+  confirmAccept.classList.toggle("danger", Boolean(danger));
+  confirmDialog.returnValue = "";
+  confirmDialog.showModal();
+  return new Promise((resolve) => {
+    confirmDialog.addEventListener("close", () => {
+      resolve(confirmDialog.returnValue === "accept");
+    }, { once: true });
+  });
+}
+
+function setButtonBusy(button, busy) {
+  if (!button) return;
+  button.classList.toggle("is-loading", Boolean(busy));
+  if (busy) button.setAttribute("aria-busy", "true");
+  else button.removeAttribute("aria-busy");
 }
 
 function statusLabel(status) {
@@ -988,38 +1060,49 @@ async function updateAlbum(taskId, route, method, payload) {
 }
 
 async function changeAdmission(taskId, trackId, admission, button) {
-  button.disabled = true;
+  setButtonBusy(button, true);
   try {
     await updateAlbum(taskId, `tracks/${encodeURIComponent(trackId)}`, "PATCH", { admission });
   } catch (error) {
-    document.querySelector("#album-action-message").textContent = error instanceof Error ? error.message : t("albumUpdateFailed");
-    button.disabled = false;
+    showToast(error instanceof Error ? error.message : t("albumUpdateFailed"), "error");
+  } finally {
+    setButtonBusy(button, false);
   }
 }
 
 async function moveAlbumTrack(taskId, trackId, direction, button) {
-  button.disabled = true;
+  setButtonBusy(button, true);
   const task = state.tasks.find((item) => item.id === taskId);
   const ids = albumTracks(task, "included").map((track) => track.id);
   const index = ids.indexOf(trackId);
   const next = index + direction;
-  if (index < 0 || next < 0 || next >= ids.length) return;
+  if (index < 0 || next < 0 || next >= ids.length) {
+    setButtonBusy(button, false);
+    return;
+  }
   [ids[index], ids[next]] = [ids[next], ids[index]];
   try {
     await updateAlbum(taskId, "playlist", "PUT", { trackIds: ids });
   } catch (error) {
-    document.querySelector("#album-action-message").textContent = error instanceof Error ? error.message : t("albumUpdateFailed");
-    button.disabled = false;
+    showToast(error instanceof Error ? error.message : t("albumUpdateFailed"), "error");
+  } finally {
+    setButtonBusy(button, false);
   }
 }
 
 async function retryAlbumTrack(taskId, trackId, button) {
-  button.disabled = true;
+  const confirmed = await confirmAction({
+    title: t("confirmRetryTrackTitle"), body: t("confirmRetryTrackBody"),
+    confirmLabel: t("regenerateAction"), danger: true,
+  });
+  if (!confirmed) return;
+  setButtonBusy(button, true);
   try {
     await updateAlbum(taskId, `tracks/${encodeURIComponent(trackId)}/retry`, "POST", {});
   } catch (error) {
-    document.querySelector("#album-action-message").textContent = error instanceof Error ? error.message : t("restoreFailed");
-    button.disabled = false;
+    showToast(error instanceof Error ? error.message : t("restoreFailed"), "error");
+  } finally {
+    setButtonBusy(button, false);
   }
 }
 
@@ -1035,9 +1118,7 @@ function downloadAlbumFile(url, fileName) {
 async function exportAlbum(taskId, scope, button) {
   if (state.albumExporting) return;
   state.albumExporting = true;
-  button.disabled = true;
-  button.textContent = t("albumExporting");
-  let message = "";
+  setButtonBusy(button, true);
   try {
     const response = await fetch("/api/tasks/" + encodeURIComponent(taskId) + "/album/export", {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ scope, format: "manifest" }),
@@ -1049,18 +1130,14 @@ async function exportAlbum(taskId, scope, button) {
     const exported = await response.json();
     downloadAlbumFile(exported.audioUrl, exported.fileName);
     state.albumLastExport = { ...exported, taskId, scope };
-    message = t("albumExportStarted", { count: exported.trackCount, duration: durationLabel(exported.durationSeconds) });
+    showToast(t("albumExportStarted", { count: exported.trackCount, duration: durationLabel(exported.durationSeconds) }), "success");
   } catch (error) {
-    message = error instanceof Error ? error.message : t("albumExportFailed");
+    showToast(error instanceof Error ? error.message : t("albumExportFailed"), "error");
   } finally {
     state.albumExporting = false;
     const currentTask = state.tasks.find((item) => item.id === state.selectedTaskId);
-    if (currentTask?.compositionMode === "album") {
-      renderAlbumDetail(currentTask);
-      if (state.selectedTaskId === taskId && state.albumViewScope === scope) {
-        elements.taskDetail.querySelector("#album-action-message").textContent = message;
-      }
-    }
+    if (currentTask?.compositionMode === "album") renderAlbumDetail(currentTask);
+    setButtonBusy(button, false);
   }
 }
 
@@ -1134,16 +1211,11 @@ function renderAlbumDetail(task) {
       downloadAlbumFile(exportRecord.timestampsUrl, exportRecord.fileName.replace(/\.mp3$/i, " - Timestamps.txt"));
     });
     elements.taskDetail.querySelector("#copy-album-timestamps").addEventListener("click", async () => {
-      let message;
       try {
         await navigator.clipboard.writeText(exportRecord.timestampsText);
-        message = t("albumTimestampsCopied");
+        showToast(t("albumTimestampsCopied"), "success");
       } catch {
-        message = t("albumTimestampsCopyFailed");
-      }
-      if (state.selectedTaskId === task.id && state.albumViewScope === scope) {
-        const status = elements.taskDetail.querySelector("#album-action-message");
-        if (status) status.textContent = message;
+        showToast(t("albumTimestampsCopyFailed"), "error");
       }
     });
   }
@@ -1561,6 +1633,8 @@ function selectTask(id) {
   renderTaskList();
   renderTaskDetail(task);
   window.scrollTo({ top: 0, behavior: "smooth" });
+  elements.taskDetail.setAttribute("tabindex", "-1");
+  elements.taskDetail.focus({ preventScroll: true });
 }
 
 async function openDiscussionSession(id) {
@@ -1623,8 +1697,11 @@ async function refreshTasks() {
 
 async function retryTask(id, button) {
   if (button.disabled) return;
-  button.disabled = true;
-  button.textContent = t("restoring");
+  const confirmed = await confirmAction({
+    title: t("confirmRetryTitle"), body: t("confirmRetryBody"), confirmLabel: t("continueAction"),
+  });
+  if (!confirmed) return;
+  setButtonBusy(button, true);
   elements.message.textContent = "";
 
   try {
@@ -1640,8 +1717,8 @@ async function retryTask(id, button) {
     if (state.selectedTaskId === result.id) renderTaskDetail(result);
   } catch (error) {
     elements.message.textContent = error instanceof Error ? error.message : String(error);
-    button.disabled = false;
-    button.textContent = t("continueTask");
+  } finally {
+    setButtonBusy(button, false);
   }
 }
 
@@ -1788,7 +1865,7 @@ async function sendDiscussionMessage(event) {
   if (!state.supportsDiscussionSessions) return submitTask(event);
   if (state.submitting || (!elements.input.value.trim() && !state.selectedDiscussionImage)) return;
   state.submitting = true;
-  elements.submit.disabled = true;
+  setButtonBusy(elements.submit, true);
   elements.message.textContent = t("discussionSending");
   try {
     const session = await ensureDiscussionSession();
@@ -1809,7 +1886,7 @@ async function sendDiscussionMessage(event) {
     elements.message.textContent = error instanceof Error ? error.message : String(error);
   } finally {
     state.submitting = false;
-    elements.submit.disabled = false;
+    setButtonBusy(elements.submit, false);
     renderDiscussion();
   }
 }
@@ -1818,7 +1895,7 @@ async function generateDiscussionProposal() {
   const session = state.discussionSession;
   if (!session || state.submitting) return;
   state.submitting = true;
-  elements.generateProposal.disabled = true;
+  setButtonBusy(elements.generateProposal, true);
   elements.message.textContent = t("proposalGenerating");
   try {
     const response = await fetch(`/api/discussions/${encodeURIComponent(session.id)}/proposal`, { method: "POST" });
@@ -1832,6 +1909,7 @@ async function generateDiscussionProposal() {
     elements.message.textContent = error instanceof Error ? error.message : String(error);
   } finally {
     state.submitting = false;
+    setButtonBusy(elements.generateProposal, false);
     renderDiscussion();
   }
 }
@@ -1859,7 +1937,7 @@ async function submitTask(event, approvedPrompt) {
     return;
   }
   state.submitting = true;
-  elements.submit.disabled = true;
+  setButtonBusy(elements.submit, true);
   elements.message.textContent = "";
 
   try {
@@ -1890,7 +1968,7 @@ async function submitTask(event, approvedPrompt) {
     elements.message.textContent = error instanceof Error ? error.message : String(error);
   } finally {
     state.submitting = false;
-    elements.submit.disabled = false;
+    setButtonBusy(elements.submit, false);
   }
 }
 
@@ -1963,7 +2041,7 @@ async function openSettings() {
 
 async function saveSettings(event) {
   event.preventDefault();
-  elements.saveSettings.disabled = true;
+  setButtonBusy(elements.saveSettings, true);
   setSettingsMessage("");
 
   const credentials = {};
@@ -1991,13 +2069,13 @@ async function saveSettings(event) {
   } catch (error) {
     setSettingsMessage(error instanceof Error ? error.message : t("settingsSaveFailed"));
   } finally {
-    elements.saveSettings.disabled = false;
+    setButtonBusy(elements.saveSettings, false);
   }
 }
 
 async function testConnection(provider, button) {
   const input = provider === "openai" ? elements.openAiKey : elements.geminiKey;
-  button.disabled = true;
+  setButtonBusy(button, true);
   setSettingsMessage(t("testingConnection"));
   try {
     const response = await fetch("/api/settings/test", {
@@ -2011,12 +2089,17 @@ async function testConnection(provider, button) {
   } catch (error) {
     setSettingsMessage(error instanceof Error ? error.message : t("connectionFailed"));
   } finally {
-    button.disabled = false;
+    setButtonBusy(button, false);
   }
 }
 
 async function clearCredential(provider, button) {
-  button.disabled = true;
+  const confirmed = await confirmAction({
+    title: t("confirmRemoveKeyTitle"), body: t("confirmRemoveKeyBody"),
+    confirmLabel: t("removeKeyAction"), danger: true,
+  });
+  if (!confirmed) return;
+  setButtonBusy(button, true);
   setSettingsMessage("");
   try {
     const response = await fetch(`/api/settings/credentials/${provider}`, { method: "DELETE" });
@@ -2026,18 +2109,28 @@ async function clearCredential(provider, button) {
     const input = provider === "openai" ? elements.openAiKey : elements.geminiKey;
     input.value = "";
     renderCredentialStatus();
-    setSettingsMessage(
+    showToast(
       result.credentials[provider].configured ? t("keyFallback") : t("keyCleared"),
-      true,
+      "success",
     );
   } catch (error) {
-    setSettingsMessage(error instanceof Error ? error.message : t("settingsSaveFailed"));
+    showToast(error instanceof Error ? error.message : t("settingsSaveFailed"), "error");
   } finally {
-    button.disabled = false;
+    setButtonBusy(button, false);
   }
 }
 
 elements.form.addEventListener("submit", sendDiscussionMessage);
+elements.input.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter" || event.shiftKey || event.isComposing || event.keyCode === 229) return;
+  event.preventDefault();
+  elements.form.requestSubmit();
+});
+elements.proposalText.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter" || !(event.metaKey || event.ctrlKey) || event.isComposing) return;
+  event.preventDefault();
+  if (!elements.approvePrompt.disabled) elements.approvePrompt.click();
+});
 elements.taskList.addEventListener("click", async (event) => {
   const button = event.target.closest?.("[data-session-id]");
   if (button) await openDiscussionSession(button.dataset.sessionId);
