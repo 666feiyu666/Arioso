@@ -153,7 +153,7 @@ describe("album listening interface", () => {
     await api.elements.approvePrompt.emit("click");
 
     expect(requests.find((item) => item.url.endsWith("/submit"))?.body)
-      .toEqual({ prompt: "用户编辑后的最终提示词" });
+      .toMatchObject({ prompt: "用户编辑后的最终提示词", mode: "generate", lyriaModel: "lyria-3.5" });
     expect(api.elements.discussionPanel.hidden).toBe(false);
     expect(api.elements.taskView.hidden).toBe(false);
     expect(api.elements.taskDetail.innerHTML).toContain("Late Night Noir");

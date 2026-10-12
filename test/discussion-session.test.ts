@@ -15,8 +15,17 @@ import type {
 import { discussionScopeInstructions } from "../src/discussion/langchain-discussion.js";
 import { withWebServer } from "./helpers/web-server.js";
 
-const { composeMock } = vi.hoisted(() => ({ composeMock: vi.fn() }));
+const { composeMock, planAlbumMock } = vi.hoisted(() => ({ composeMock: vi.fn(), planAlbumMock: vi.fn() }));
 vi.mock("../src/composer/composer-agent.js", () => ({ composeMusic: composeMock }));
+vi.mock("../src/composer/album-agent.js", () => ({
+  planAlbum: planAlbumMock,
+  composeAlbumTrack: vi.fn(),
+  reviewAlbumCandidates: vi.fn(),
+  reviseAlbumTrack: vi.fn(),
+}));
+vi.mock("../src/lyria/lyria-client.js", () => ({
+  LyriaClient: class { generate = vi.fn(); },
+}));
 
 function musicSpec(title = "Approved direction") {
   return {
@@ -177,6 +186,57 @@ describe("creative discussion sessions", () => {
       expect(sessions.map((item) => item.id)).toContain(session.id);
       expect(composeMock).toHaveBeenCalledWith(approvedPrompt, expect.any(Object));
     }, { environment: { OPENAI_API_KEY: "test-local-only" }, discussionAgent: agent });
+  });
+
+  it("applies the generation settings chosen after the discussion", async () => {
+    composeMock.mockResolvedValue(musicSpec());
+    const agent = new StubDiscussionAgent();
+    await withWebServer(async ({ baseUrl }) => {
+      const session = await createSession(baseUrl, {
+        mode: "compose", workflowType: "01-general", vocalMode: "auto",
+      });
+      await fetch(`${baseUrl}/api/discussions/${session.id}/messages`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: "适合下班后放松。" }),
+      });
+      const submitted = await fetch(`${baseUrl}/api/discussions/${session.id}/submit`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: "原创温暖夜间器乐", mode: "compose", lyriaModel: "lyria-3.5", vocalMode: "vocals" }),
+      });
+      expect(submitted.status).toBe(202);
+      const result = await submitted.json() as { task: { id: string; mode: string; lyriaModel: string; vocalMode: string } };
+      expect(result.task).toMatchObject({ mode: "compose", lyriaModel: "lyria-3.5", vocalMode: "vocals" });
+      await vi.waitFor(async () => {
+        const task = await fetch(`${baseUrl}/api/tasks/${result.task.id}`)
+          .then((response) => response.json()) as { status: string };
+        expect(task.status).toBe("completed");
+      });
+    }, { environment: { OPENAI_API_KEY: "test-local-only" }, discussionAgent: agent });
+  });
+
+  it("locks generation settings for fixed-scope workflows", async () => {
+    planAlbumMock.mockRejectedValue(new Error("generation is out of scope for this test"));
+    const agent = new StubDiscussionAgent();
+    await withWebServer(async ({ baseUrl }) => {
+      const session = await createSession(baseUrl, {
+        mode: "generate", workflowType: "04-album", compositionMode: "album",
+        vocalMode: "instrumental", candidateCount: 14, targetTotalMinutes: 35, lyriaModel: "lyria-3.5",
+      });
+      await fetch(`${baseUrl}/api/discussions/${session.id}/messages`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: "做一张夜晚主题专辑。" }),
+      });
+      const submitted = await fetch(`${baseUrl}/api/discussions/${session.id}/submit`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: "原创夜晚主题器乐专辑", mode: "compose", lyriaModel: "lyria-3-clip-preview", vocalMode: "vocals" }),
+      });
+      expect(submitted.status).toBe(202);
+      const result = await submitted.json() as { task: { mode: string; lyriaModel: string; vocalMode: string } };
+      expect(result.task).toMatchObject({ mode: "generate", lyriaModel: "lyria-3.5", vocalMode: "instrumental" });
+    }, {
+      environment: { OPENAI_API_KEY: "test-local-only", GEMINI_API_KEY: "test-local-only" },
+      discussionAgent: agent,
+    });
   });
 });
 

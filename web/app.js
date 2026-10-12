@@ -74,7 +74,7 @@ const translations = {
     modeCompose: "仅生成编曲提示", lyriaModel: "Lyria 模型", lyriaClip: "Lyria 3 Clip · 30 秒",
     lyriaFull: "Lyria 3.5 · 完整歌曲", examplesTitle: "从一个声音画面开始",
     examplesHint: "选择示例后仍可自由修改", backHome: "← 返回创作台", nowPlaying: "正在播放",
-    noMusicSelected: "未选择音乐", promptPlaceholder: "例如：慵懒的午后爵士，刷镲与温暖钢琴轻轻摇摆……",
+    noMusicSelected: "未选择音乐", promptPlaceholder: "让 Arioso 听听你的想法",
     promptLabel: "讨论想生成的音乐", startGeneration: "开始生成", vocalRule: "人声规则",
     creativeDiscussion: "创作讨论", promptDirector: "PROMPT DIRECTOR", sendMessage: "发送消息",
     attachImage: "添加参考图片", generatePrompt: "生成提示词", generatedPrompt: "作曲提示词",
@@ -217,7 +217,7 @@ const translations = {
     modeCompose: "Compose prompt only", lyriaModel: "Lyria model", lyriaClip: "Lyria 3 Clip · 30 seconds",
     lyriaFull: "Lyria 3.5 · Full song", examplesTitle: "Start with a sonic scene",
     examplesHint: "Choose an example, then edit it freely", backHome: "← Back to studio", nowPlaying: "NOW PLAYING",
-    noMusicSelected: "No music selected", promptPlaceholder: "For example: lazy afternoon jazz with brushes and warm, gently swinging piano…",
+    noMusicSelected: "No music selected", promptPlaceholder: "Let Arioso hear what's on your mind",
     promptLabel: "Discuss the music to create", startGeneration: "Start generation", vocalRule: "Vocal rule",
     creativeDiscussion: "Creative discussion", promptDirector: "PROMPT DIRECTOR", sendMessage: "Send message",
     attachImage: "Attach reference image", generatePrompt: "Generate prompt", generatedPrompt: "Composition prompt",
@@ -492,6 +492,8 @@ const elements = {
   lyriaModel: document.querySelector("#lyria-model-select"),
   modeSetting: document.querySelector("#generation-mode-setting"),
   lyriaSetting: document.querySelector("#lyria-model-setting"),
+  modelSettings: document.querySelector("#model-settings"),
+  proposalSettings: document.querySelector("#proposal-settings"),
   albumCountSetting: document.querySelector("#album-count-setting"),
   albumCount: document.querySelector("#album-count-select"),
   albumDurationSetting: document.querySelector("#album-duration-setting"),
@@ -652,9 +654,6 @@ function renderComposerContext() {
   document.querySelector("#examples-title").textContent = t(
     isAlbum ? "albumExamplesTitle" : isOrchestral ? "orchestralTitle" : isJazz ? "jazzExamplesTitle" : "generalExamplesTitle",
   );
-  elements.vocalSetting.hidden = isOrchestral || isAlbum;
-  elements.modeSetting.hidden = isAlbum;
-  elements.lyriaSetting.hidden = isAlbum;
   elements.albumCountSetting.hidden = !isAlbum;
   elements.albumDurationSetting.hidden = !isAlbum;
   if (isAlbum) syncAlbumCandidateOptions();
@@ -683,6 +682,7 @@ function renderComposerContext() {
       : state.orchestralCardsError ? "knowledgeCardLoadFailed"
         : !cards.length ? "noKnowledgeCardsAvailable" : "knowledgeCardHelp",
   );
+  elements.modelSettings.hidden = [...elements.modelSettings.children].every((child) => child.hidden);
 }
 
 function applyTranslations() {
@@ -1816,6 +1816,22 @@ function renderDiscussion() {
   if (session?.messages?.length) {
     elements.discussionMessages.scrollTop = elements.discussionMessages.scrollHeight;
   }
+  renderProposalSettings();
+}
+
+function renderProposalSettings() {
+  const session = state.discussionSession;
+  const hasProposal = Boolean(session?.proposal);
+  const locked = state.compositionMode === "album" || state.compositionMode === "orchestral";
+  elements.proposalSettings.hidden = !hasProposal;
+  if (locked) {
+    elements.mode.value = "generate";
+    elements.lyriaModel.value = "lyria-3.5";
+    selectVocalMode("instrumental");
+  }
+  elements.mode.disabled = locked;
+  elements.lyriaModel.disabled = locked;
+  for (const input of elements.vocalModes) input.disabled = locked;
 }
 
 function discussionScopeLabel(taskOptions = {}) {
@@ -1954,7 +1970,12 @@ async function submitTask(event, approvedPrompt) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(discussionSubmission
-        ? { prompt: approvedPrompt }
+        ? {
+            prompt: approvedPrompt,
+            mode: elements.mode.value,
+            lyriaModel: elements.lyriaModel.value,
+            vocalMode: selectedVocalMode(),
+          }
         : currentTaskRequest(elements.input.value)),
     });
     const result = await response.json();

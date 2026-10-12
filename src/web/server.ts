@@ -632,11 +632,21 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
           throw new HttpError(400, "An approved prompt is required.");
         }
         const prompt = value.prompt.trim();
+        const compositionMode = session.taskOptions.compositionMode;
+        const locked = compositionMode === "album" || compositionMode === "orchestral";
+        const overrides = locked
+          ? { mode: "generate", lyriaModel: "lyria-3.5", vocalMode: "instrumental" }
+          : {
+              ...(typeof value.mode === "string" ? { mode: value.mode } : {}),
+              ...(typeof value.lyriaModel === "string" ? { lyriaModel: value.lyriaModel } : {}),
+              ...(typeof value.vocalMode === "string" ? { vocalMode: value.vocalMode } : {}),
+            };
         activeDiscussionSubmissions.add(sessionId);
         try {
           await discussionStore.setProposal(sessionId, prompt);
           const input = parseTaskInput({
             ...session.taskOptions,
+            ...overrides,
             description: prompt,
           });
           input.sourceDiscussionId = sessionId;

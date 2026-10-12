@@ -119,6 +119,7 @@ button:focus-visible, textarea:focus-visible, select:focus-visible, input:focus-
 .model-settings label > span { color: var(--muted); font-size: 11.5px; font-weight: 550; }
 .model-settings select { border: 0; color: var(--ink); background: transparent; font-size: 12.5px; font-weight: 650; }
 .model-settings label[hidden], .reference-help[hidden] { display: none; }
+.model-settings[hidden] { display: none; }
 #orchestral-reference-setting { max-width: 100%; }
 #orchestral-reference-setting > span { flex: 0 0 auto; white-space: nowrap; }
 #orchestral-reference-select { min-width: 0; max-width: 380px; text-overflow: ellipsis; }
@@ -169,12 +170,19 @@ button:focus-visible, textarea:focus-visible, select:focus-visible, input:focus-
 .prompt-proposal { display: grid; gap: 10px; margin-top: 10px; padding: 14px; border: 1px solid rgba(145,79,61,.3); border-radius: 15px; background: #f7efe9; }
 .prompt-proposal[hidden] { display: none; }
 .proposal-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
-.prompt-proposal label { color: var(--accent-dark); font-size: 11.5px; font-weight: 750; letter-spacing: .08em; }
+.proposal-heading label { color: var(--accent-dark); font-size: 11.5px; font-weight: 750; letter-spacing: .08em; }
 .proposal-heading span { color: var(--muted); font-size: 10.5px; }
 .prompt-proposal textarea { width: 100%; resize: vertical; padding: 11px 12px; border: 1px solid var(--line); border-radius: 11px; color: var(--ink); background: #fff; font: inherit; font-size: 13.5px; line-height: 1.65; }
 .proposal-actions { display: flex; justify-content: flex-end; gap: 8px; }
 .proposal-actions .primary-button { display: inline-flex; align-items: center; gap: 12px; }
 .proposal-actions[hidden] { display: none; }
+.proposal-settings { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 2px 0; }
+.proposal-settings[hidden] { display: none; }
+.proposal-settings > label { display: flex; align-items: center; gap: 10px; padding: 6px 8px 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.6); }
+.proposal-settings > label > span { color: var(--muted); font-size: 11.5px; font-weight: 550; }
+.proposal-settings select { border: 0; color: var(--ink); background: transparent; font-size: 12.5px; font-weight: 650; }
+.proposal-settings .vocal-setting { border-top: 0; padding: 0; }
+.proposal-settings .vocal-setting legend { float: none; padding: 0; }
 .global-player { display: grid; grid-template-columns: 48px minmax(100px, .7fr) minmax(180px, 1.3fr); align-items: center; gap: 14px; margin-bottom: 8px; padding: 12px 16px; border: 1px solid rgba(28,27,24,.13); border-radius: 20px; color: #f7f4ed; background: rgba(34,33,31,.96); box-shadow: 0 14px 38px rgba(49,42,32,.16); backdrop-filter: blur(20px); }
 .global-player[hidden] { display: none; }
 .player-now { min-width: 0; display: grid; gap: 3px; }
