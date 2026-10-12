@@ -21,7 +21,10 @@ composition.
 
 ## Interface
 
+### Four Specific Workflow 
 ![Arioso browser interface](Assets/arioso-web-interface.png)
+
+### Mood + Music
 ![Mood + Music support](Assets/arioso-moodmic.png)
 
 ## Workflow
@@ -32,8 +35,9 @@ composition.
 
 Listen to these Arioso outputs:
 
-- [雨泊山影 | When Blue Meets Calm | 学习、阅读、桌游背景音](https://www.bilibili.com/video/BV1jcpR66Ea/?share_source=copy_web&vd_source=db5fe656aa211faf8e79db42720c8bda)
-- [Afternoon Study](https://www.bilibili.com/video/BV1p5pc6AEX2/?share_source=copy_web&vd_source=db5fe656aa211faf8e79db42720c8bda), a complete piece generated with Arioso.
+- [Afternoon Study](https://www.bilibili.com/video/BV1p5pc6AEX2/?share_source=copy_web&vd_source=db5fe656aa211faf8e79db42720c8bda) v0.3.0: Full Playlist Supported
+- [雨泊山影 | When Blue Meets Calm | 学习、阅读、桌游背景音](https://www.bilibili.com/video/BV1jcpR66Ea/?share_source=copy_web&vd_source=db5fe656aa211faf8e79db42720c8bda) v0.6.0: Mood + Music Direction kickoff
+
 
 ## Requirements
 
