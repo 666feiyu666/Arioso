@@ -17,11 +17,17 @@ export interface DiscussionAttachment {
   createdAt: string;
 }
 
+export interface DiscussionMood {
+  label: string;
+  imagery: string;
+}
+
 export interface DiscussionMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
   attachmentIds: string[];
+  mood?: DiscussionMood;
   createdAt: string;
 }
 
@@ -49,6 +55,11 @@ export interface DiscussionAgentMessage {
   images: DiscussionImageInput[];
 }
 
+export interface DiscussionAgentReply {
+  content: string;
+  mood?: DiscussionMood;
+}
+
 export interface DiscussionAgentOptions {
   apiKey: string;
   model: string;
@@ -60,6 +71,6 @@ export interface DiscussionAgentOptions {
 }
 
 export interface DiscussionAgent {
-  respond(messages: DiscussionAgentMessage[], options: DiscussionAgentOptions): Promise<string>;
+  respond(messages: DiscussionAgentMessage[], options: DiscussionAgentOptions): Promise<DiscussionAgentReply>;
   propose(messages: DiscussionAgentMessage[], options: DiscussionAgentOptions): Promise<string>;
 }

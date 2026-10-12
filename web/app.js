@@ -85,6 +85,7 @@ const translations = {
     sessionScopeAlbum: "主题专辑 · {count} 首候选 · 约 {minutes} 分钟",
     sessionScopeAlbumFallback: "主题专辑 · 一组同方向的音乐",
     proposalReady: "提示词已生成", discussionSending: "正在整理想法…", proposalGenerating: "正在生成提示词…",
+    discussionMood: "情绪",
     imageSelected: "参考图片：{name}", imageUploadFailed: "参考图片上传失败。",
     sessionExecution: "创作执行", sessionWaiting: "任务已提交，正在等待 Agent 开始。",
     sessionComposing: "Composer Agent 正在形成完整编曲方案。", sessionGenerating: "编曲完成，正在等待音乐生成结果。",
@@ -227,6 +228,7 @@ const translations = {
     sessionScopeAlbum: "Themed album · {count} candidates · about {minutes} min",
     sessionScopeAlbumFallback: "Themed album · a coherent collection",
     proposalReady: "Prompt ready", discussionSending: "Developing the idea…", proposalGenerating: "Generating prompt…",
+    discussionMood: "Mood",
     imageSelected: "Reference image: {name}", imageUploadFailed: "Unable to upload the reference image.",
     sessionExecution: "Creation run", sessionWaiting: "The request is queued and waiting for the agent.",
     sessionComposing: "The Composer Agent is building the complete arrangement.", sessionGenerating: "The arrangement is ready; music generation is in progress.",
@@ -1792,7 +1794,11 @@ function renderDiscussion() {
         ? `<img src="${discussionAttachmentUrl(session.id, attachment.id)}" alt="${escapeHtml(attachment.originalName)}" />`
         : "";
     }).join("") || "";
-    return `<article class="discussion-message ${message.role}">${images}<p>${escapeHtml(message.content)}</p></article>`;
+    const mood = message.mood;
+    const moodBadge = mood && (mood.label || mood.imagery)
+      ? `<span class="discussion-mood" title="${escapeHtml(mood.imagery || "")}">${escapeHtml(t("discussionMood"))} · ${escapeHtml(mood.label || mood.imagery)}</span>`
+      : "";
+    return `<article class="discussion-message ${message.role}">${images}${moodBadge}<p>${escapeHtml(message.content)}</p></article>`;
   }).join("") || "";
   const task = latestSessionTask(session);
   elements.discussionScope.textContent = discussionScopeLabel(session?.taskOptions);

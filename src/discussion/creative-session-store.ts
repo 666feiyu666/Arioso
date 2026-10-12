@@ -10,6 +10,7 @@ import {
   type CreativeSession,
   type DiscussionAttachment,
   type DiscussionImageType,
+  type DiscussionMood,
   type DiscussionTaskOptions,
 } from "./types.js";
 
@@ -118,6 +119,7 @@ export class CreativeSessionStore {
     role: "user" | "assistant",
     content: string,
     attachmentIds: string[] = [],
+    mood?: DiscussionMood,
   ): Promise<CreativeSession> {
     const session = this.require(id);
     if (session.status === "submitted") throw new Error("This discussion has already been submitted.");
@@ -136,6 +138,7 @@ export class CreativeSessionStore {
       status: "discussing",
       messages: [...session.messages, {
         id: crypto.randomUUID(), role, content: text, attachmentIds: [...new Set(attachmentIds)], createdAt: now,
+        ...(role === "assistant" && mood ? { mood } : {}),
       }],
       updatedAt: now,
     };

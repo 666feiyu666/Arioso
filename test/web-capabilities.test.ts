@@ -8,7 +8,8 @@ describe("web capabilities API", () => {
       const response = await fetch(`${baseUrl}/api/capabilities`);
       expect(response.ok).toBe(true);
       expect(await response.json()).toEqual({
-        apiVersion: 7,
+        apiVersion: 8,
+        version: expect.any(String),
         workflows: ["01-general", "02-jazz", "03-orchestral", "04-album"],
         discussionSessions: true,
         creativeSessionTimeline: true,
@@ -16,6 +17,7 @@ describe("web capabilities API", () => {
           types: ["image/jpeg", "image/png", "image/webp"],
           maximumBytes: 8 * 1024 * 1024,
         },
+        discussionMood: true,
         albumPlaylist: true,
         albumExport: true,
         backgroundMusicProducer: { denoiser: "denoising-historical-recordings", outputChannels: 1, listeningReview: "required" },

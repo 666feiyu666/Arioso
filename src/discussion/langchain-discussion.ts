@@ -1,11 +1,14 @@
 import { AIMessage, HumanMessage, SystemMessage, type BaseMessage } from "@langchain/core/messages";
 import { ChatOpenAI } from "@langchain/openai";
+import { z } from "zod";
 
 import { loadPromptDirectingSkill } from "./prompt-directing-skill.js";
 import type {
   DiscussionAgent,
   DiscussionAgentMessage,
   DiscussionAgentOptions,
+  DiscussionAgentReply,
+  DiscussionMood,
 } from "./types.js";
 
 export function discussionScopeInstructions(options: DiscussionAgentOptions): string {
@@ -58,6 +61,24 @@ function responseText(content: unknown): string {
   return "";
 }
 
+const discussionReplySchema = z.object({
+  content: z.string().describe(
+    "A four-to-six-sentence direction draft in the user's language that carries the user's feeling inside musical imagery instead of naming it separately.",
+  ),
+  mood: z.object({
+    label: z.string().describe("A short label for the feeling the user expressed, in the user's language."),
+    imagery: z.string().describe("The musical image that carries that feeling, in the user's language."),
+  }),
+});
+
+function normalizeMood(value: unknown): DiscussionMood | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const { label, imagery } = value as { label?: unknown; imagery?: unknown };
+  const labelText = typeof label === "string" ? label.trim() : "";
+  const imageryText = typeof imagery === "string" ? imagery.trim() : "";
+  return labelText && imageryText ? { label: labelText, imagery: imageryText } : undefined;
+}
+
 function model(options: DiscussionAgentOptions): ChatOpenAI {
   return new ChatOpenAI({
     apiKey: options.apiKey,
@@ -67,15 +88,30 @@ function model(options: DiscussionAgentOptions): ChatOpenAI {
 }
 
 export class LangChainDiscussionAgent implements DiscussionAgent {
-  async respond(messages: DiscussionAgentMessage[], options: DiscussionAgentOptions): Promise<string> {
+  async respond(messages: DiscussionAgentMessage[], options: DiscussionAgentOptions): Promise<DiscussionAgentReply> {
     const instructions = await loadPromptDirectingSkill("discussion");
-    const result = await model(options).invoke([
+    const conversationMessages = [
       new SystemMessage(`${instructions}\n\n${discussionScopeInstructions(options)}`),
       ...conversation(messages),
-    ]);
-    const text = responseText(result.content);
-    if (!text) throw new Error("The Prompt Director returned an empty response.");
-    return text;
+    ];
+    let structured: z.infer<typeof discussionReplySchema> | undefined;
+    try {
+      structured = await model(options)
+        .withStructuredOutput(discussionReplySchema, { name: "discussion_reply" })
+        .invoke(conversationMessages);
+    } catch {
+      // Fall back to a plain-text turn when structured output is unavailable for this model or API mode.
+    }
+    if (!structured) {
+      const fallback = await model(options).invoke(conversationMessages);
+      const content = responseText(fallback.content);
+      if (!content) throw new Error("The Prompt Director returned an empty response.");
+      return { content };
+    }
+    const content = responseText(structured.content);
+    if (!content) throw new Error("The Prompt Director returned an empty response.");
+    const mood = normalizeMood(structured.mood);
+    return mood ? { content, mood } : { content };
   }
 
   async propose(messages: DiscussionAgentMessage[], options: DiscussionAgentOptions): Promise<string> {

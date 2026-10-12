@@ -500,12 +500,13 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
       const discussionAttachmentMatch = /^\/api\/discussions\/([^/]+)\/attachments\/([^/]+)$/.exec(url.pathname);
       if (request.method === "GET" && url.pathname === "/api/capabilities") {
         sendJson(response, 200, {
-          apiVersion: 7,
+          apiVersion: 8,
           version: APPLICATION_VERSION,
           workflows: ["01-general", "02-jazz", "03-orchestral", "04-album"],
           discussionSessions: true,
           creativeSessionTimeline: true,
           discussionImages: { types: ["image/jpeg", "image/png", "image/webp"], maximumBytes: MAX_DISCUSSION_IMAGE_BYTES },
+          discussionMood: true,
           albumPlaylist: true,
           albumExport: true,
           backgroundMusicProducer: { denoiser: "denoising-historical-recordings", outputChannels: 1, listeningReview: "required" },
@@ -595,7 +596,7 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
           targetTotalMinutes: session.taskOptions.targetTotalMinutes,
         });
         sendJson(response, 200, await discussionView(
-          await discussionStore.addMessage(sessionId, "assistant", reply),
+          await discussionStore.addMessage(sessionId, "assistant", reply.content, [], reply.mood),
         ));
         return;
       }

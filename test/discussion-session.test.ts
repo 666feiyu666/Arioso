@@ -1,9 +1,17 @@
-import { readFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import path from "node:path";
 
 import { describe, expect, it, vi } from "vitest";
 
-import type { DiscussionAgent, DiscussionAgentMessage, DiscussionAgentOptions } from "../src/discussion/types.js";
+import { CreativeSessionStore } from "../src/discussion/creative-session-store.js";
+
+import type {
+  DiscussionAgent,
+  DiscussionAgentMessage,
+  DiscussionAgentOptions,
+  DiscussionAgentReply,
+} from "../src/discussion/types.js";
 import { discussionScopeInstructions } from "../src/discussion/langchain-discussion.js";
 import { withWebServer } from "./helpers/web-server.js";
 
@@ -24,10 +32,13 @@ function musicSpec(title = "Approved direction") {
 class StubDiscussionAgent implements DiscussionAgent {
   calls: DiscussionAgentMessage[][] = [];
   options: DiscussionAgentOptions[] = [];
-  async respond(messages: DiscussionAgentMessage[], options: DiscussionAgentOptions): Promise<string> {
+  async respond(messages: DiscussionAgentMessage[], options: DiscussionAgentOptions): Promise<DiscussionAgentReply> {
     this.calls.push(messages);
     this.options.push(options);
-    return "适合温暖、安静、略带怀旧感的下班后音乐。";
+    return {
+      content: "适合温暖、安静、略带怀旧感的下班后音乐。",
+      mood: { label: "平静的怀旧", imagery: "黄昏里慢慢暗下来的暖色灯光" },
+    };
   }
   async propose(messages: DiscussionAgentMessage[], options: DiscussionAgentOptions): Promise<string> {
     this.calls.push(messages);
@@ -57,9 +68,12 @@ describe("creative discussion sessions", () => {
         body: JSON.stringify({ content: "我想做一张温暖但不过分悲伤的音乐专辑。" }),
       });
       expect(response.status).toBe(200);
-      const updated = await response.json() as { messages: Array<{ role: string; content: string }> };
+      const updated = await response.json() as {
+        messages: Array<{ role: string; content: string; mood?: { label: string; imagery: string } }>;
+      };
       expect(updated.messages.map((message: { role: string }) => message.role)).toEqual(["user", "assistant"]);
       expect(updated.messages[1]!.content).toContain("温暖");
+      expect(updated.messages[1]!.mood).toEqual({ label: "平静的怀旧", imagery: "黄昏里慢慢暗下来的暖色灯光" });
       expect(agent.options[0]).toMatchObject({ compositionMode: "single", workflowType: "01-general" });
       expect(await fetch(`${baseUrl}/api/tasks`).then((result) => result.json())).toEqual([]);
     }, { environment: { OPENAI_API_KEY: "test-local-only" }, discussionAgent: agent });
@@ -163,5 +177,29 @@ describe("creative discussion sessions", () => {
       expect(sessions.map((item) => item.id)).toContain(session.id);
       expect(composeMock).toHaveBeenCalledWith(approvedPrompt, expect.any(Object));
     }, { environment: { OPENAI_API_KEY: "test-local-only" }, discussionAgent: agent });
+  });
+});
+
+describe("creative discussion mood persistence", () => {
+  it("loads a legacy session that has no mood field", async () => {
+    const directory = await mkdtemp(path.join(tmpdir(), "arioso-discussions-"));
+    const id = crypto.randomUUID();
+    const now = new Date().toISOString();
+    await mkdir(path.join(directory, id), { recursive: true });
+    await writeFile(path.join(directory, id, "session.json"), JSON.stringify({
+      id,
+      status: "discussing",
+      taskOptions: { mode: "compose", workflowType: "01-general", vocalMode: "instrumental" },
+      messages: [{ id: crypto.randomUUID(), role: "assistant", content: "旧回复", attachmentIds: [], createdAt: now }],
+      attachments: [],
+      createdAt: now,
+      updatedAt: now,
+    }));
+
+    const store = new CreativeSessionStore(directory);
+    await store.initialize();
+    const loaded = store.get(id);
+    expect(loaded?.messages[0]?.content).toBe("旧回复");
+    expect(loaded?.messages[0]?.mood).toBeUndefined();
   });
 });

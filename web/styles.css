@@ -158,6 +158,7 @@ button:focus-visible, textarea:focus-visible, select:focus-visible, input:focus-
 .discussion-message { width: fit-content; max-width: min(76%, 680px); margin: 0 0 12px; padding: 12px 14px; border-radius: 16px 16px 16px 5px; background: #eeeae2; }
 .discussion-message.user { margin-left: auto; border-radius: 16px 16px 5px; color: #fff; background: var(--ink); }
 .discussion-message p { margin: 0; font-size: 13.5px; line-height: 1.72; white-space: pre-wrap; }
+.discussion-mood { display: inline-block; margin-bottom: 8px; padding: 3px 9px; border-radius: 999px; background: rgba(28, 27, 24, 0.08); color: rgba(28, 27, 24, 0.72); font-size: 11.5px; letter-spacing: 0.01em; }
 .discussion-message img { display: block; width: min(260px, 100%); max-height: 140px; margin-bottom: 9px; border-radius: 11px; object-fit: cover; }
 .discussion-next { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-top: 8px; padding: 13px 14px 13px 16px; border: 1px solid rgba(204,90,52,.22); border-radius: 15px; background: #f8f1ea; }
 .discussion-next[hidden] { display: none; }
