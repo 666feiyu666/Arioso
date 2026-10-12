@@ -436,7 +436,7 @@ const state = {
   corpusMode: "none",
   compositionMode: "single",
   workflowType: "01-general",
-  expandedTaskGroup: "01-general",
+  expandedTaskGroup: null,
   supportedWorkflows: new Set(["01-general", "02-jazz"]),
   supportsOrchestralCards: false,
   supportsJazzCorpusToggle: false,
@@ -2006,6 +2006,10 @@ async function loadCapabilities() {
     const response = await fetch("/api/capabilities", { cache: "no-store" });
     if (!response.ok) return;
     const result = await response.json();
+    if (typeof result.version === "string" && result.version) {
+      const versionElement = document.querySelector("#app-version");
+      if (versionElement) versionElement.textContent = `v${result.version}`;
+    }
     if (result.apiVersion < 2 || !Array.isArray(result.workflows)) return;
     state.supportedWorkflows = new Set(result.workflows);
     state.supportsJazzCorpusToggle = result.jazzCorpusToggle === true;

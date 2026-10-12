@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import path from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
@@ -26,6 +27,17 @@ import { isRecord } from "../utils/validation.js";
 import { runBackgroundMusicProducer } from "../producer/background-music-producer.js";
 import { productionArtifactPath } from "../producer/pipeline.js";
 import { PRODUCTION_ARTIFACTS, type ProductionArtifact } from "../producer/types.js";
+
+function readApplicationVersion(): string {
+  try {
+    const manifest = JSON.parse(readFileSync(path.resolve("package.json"), "utf8")) as { version?: unknown };
+    return typeof manifest.version === "string" ? manifest.version : "";
+  } catch {
+    return "";
+  }
+}
+
+const APPLICATION_VERSION = readApplicationVersion();
 
 async function sendAlbumExport(request: IncomingMessage, response: ServerResponse, exported: AlbumAudioExport): Promise<void> {
   const encodedName = encodeURIComponent(exported.fileName)
@@ -489,6 +501,7 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
       if (request.method === "GET" && url.pathname === "/api/capabilities") {
         sendJson(response, 200, {
           apiVersion: 7,
+          version: APPLICATION_VERSION,
           workflows: ["01-general", "02-jazz", "03-orchestral", "04-album"],
           discussionSessions: true,
           creativeSessionTimeline: true,
