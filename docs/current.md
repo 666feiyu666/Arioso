@@ -226,6 +226,7 @@ an isolated file-stitching feature with no stable musical context.
 - settings and credential storage: `src/config/settings.ts`
 - local server and task persistence: `src/web/server.ts`
 - creative discussion sessions: `src/discussion/`
+- local prompt-directing instructions: `skills/prompt-directing-skill/`
 - creative-session state graph: `src/discussion/session-graph.ts`
 - browser client: `web/`
 - regression behavior: `test/`

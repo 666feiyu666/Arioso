@@ -1,34 +1,12 @@
 import { AIMessage, HumanMessage, SystemMessage, type BaseMessage } from "@langchain/core/messages";
 import { ChatOpenAI } from "@langchain/openai";
 
+import { loadPromptDirectingSkill } from "./prompt-directing-skill.js";
 import type {
   DiscussionAgent,
   DiscussionAgentMessage,
   DiscussionAgentOptions,
 } from "./types.js";
-
-const DISCUSSION_INSTRUCTIONS = `
-You are Arioso Prompt Director. Help the user discuss the musical direction before composition.
-- Reply in the user's language as plain text without Markdown.
-- Give only a compact direction draft: normally two to four sentences in one short paragraph.
-- Discuss intent, scene, mood, musical character, instrumentation, structure, or production only when useful.
-- When images are provided, translate visible atmosphere, setting, color, light, texture, and implied activity into possible audible qualities. Do not invent factual provenance for an image.
-- Do not interrogate the user. Ask at most one question only when a conflict prevents a useful direction; otherwise make restrained suggestions.
-- Do not write, label, or introduce a copy-ready final prompt. The application has a separate action for generating it.
-- Do not claim to have generated audio or started composition.
-- Describe high-level traits instead of imitating or reproducing an existing work's identifiable melody or lyrics.
-`.trim();
-
-const PROPOSAL_INSTRUCTIONS = `
-You are Arioso Prompt Director. Convert the complete discussion into one concise, production-useful music request for Arioso's existing Composer Agent.
-- Return only the prompt itself: no heading, preamble, quotation marks, markdown, or confirmation question.
-- Preserve the user's explicit purpose, constraints, preferences, and requested scope.
-- Resolve ordinary ambiguity with restrained musical choices supported by the discussion and images.
-- Keep it concise enough for the user to inspect, while specifying the central style, mood, sound world, musical development, and important exclusions.
-- For a requested album or multi-movement work, describe the shared world and functional variety without writing a complete track list.
-- Convert references to existing works into high-level musical characteristics and require original material; never request copying an identifiable melody or lyrics.
-- Reply in the language used by the user unless the user requested another language.
-`.trim();
 
 export function discussionScopeInstructions(options: DiscussionAgentOptions): string {
   if (options.compositionMode === "album") {
@@ -90,8 +68,9 @@ function model(options: DiscussionAgentOptions): ChatOpenAI {
 
 export class LangChainDiscussionAgent implements DiscussionAgent {
   async respond(messages: DiscussionAgentMessage[], options: DiscussionAgentOptions): Promise<string> {
+    const instructions = await loadPromptDirectingSkill("discussion");
     const result = await model(options).invoke([
-      new SystemMessage(`${DISCUSSION_INSTRUCTIONS}\n\n${discussionScopeInstructions(options)}`),
+      new SystemMessage(`${instructions}\n\n${discussionScopeInstructions(options)}`),
       ...conversation(messages),
     ]);
     const text = responseText(result.content);
@@ -100,8 +79,9 @@ export class LangChainDiscussionAgent implements DiscussionAgent {
   }
 
   async propose(messages: DiscussionAgentMessage[], options: DiscussionAgentOptions): Promise<string> {
+    const instructions = await loadPromptDirectingSkill("proposal");
     const result = await model(options).invoke([
-      new SystemMessage(`${PROPOSAL_INSTRUCTIONS}\n\n${discussionScopeInstructions(options)}`),
+      new SystemMessage(`${instructions}\n\n${discussionScopeInstructions(options)}`),
       ...conversation(messages),
       new HumanMessage("Create the final concise prompt from this discussion now."),
     ]);
