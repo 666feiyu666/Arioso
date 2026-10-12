@@ -1,6 +1,6 @@
 # Arioso
 
-Arioso is a local workspace for agent-directed music composition. It turns a
+Arioso is an agentic tool for music composition. It turns a
 musical idea into a structured plan, uses optional corpus knowledge to refine
 that plan, and can send the resulting prompt to Google Lyria for audio
 generation.
@@ -14,9 +14,15 @@ and a command-line interface:
 - multi-track albums with candidate review, playlist ordering, playback, and
   MP3 export.
 
+Creative Discussion and MoodMic add a mood-aware front end to these workflows:
+use the Prompt Director to develop an idea through discussion, optional image
+references, and mood cues, then approve the resulting proposal before
+composition.
+
 ## Interface
 
 ![Arioso browser interface](Assets/arioso-web-interface.png)
+![Mood + Music support](Assets/arioso-moodmic.png)
 
 ## Workflow
 
@@ -24,8 +30,10 @@ and a command-line interface:
 
 ## Example output
 
-Listen to [Afternoon Study](https://www.bilibili.com/video/BV1p5pc6AEX2/), a
-complete piece generated with Arioso.
+Listen to these Arioso outputs:
+
+- [雨泊山影 | When Blue Meets Calm | 学习、阅读、桌游背景音](https://www.bilibili.com/video/BV1jcpR66Ea/?share_source=copy_web&vd_source=db5fe656aa211faf8e79db42720c8bda)
+- [Afternoon Study](https://www.bilibili.com/video/BV1p5pc6AEX2/?share_source=copy_web&vd_source=db5fe656aa211faf8e79db42720c8bda), a complete piece generated with Arioso.
 
 ## Requirements
 

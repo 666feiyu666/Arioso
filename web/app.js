@@ -86,7 +86,7 @@ const translations = {
     sessionScopeAlbumFallback: "主题专辑 · 一组同方向的音乐",
     proposalReady: "提示词已生成", discussionSending: "正在整理想法…", proposalGenerating: "正在生成提示词…",
     discussionMood: "情绪",
-    imageSelected: "参考图片：{name}", imageUploadFailed: "参考图片上传失败。",
+    imageSelected: "参考图片：{name}", imageUploadFailed: "参考图片上传失败。", removeImage: "移除参考图片",
     sessionExecution: "创作执行", sessionWaiting: "任务已提交，正在等待 Agent 开始。",
     sessionComposing: "Composer Agent 正在形成完整编曲方案。", sessionGenerating: "编曲完成，正在等待音乐生成结果。",
     sessionAssembling: "各部分已经生成，正在组合完整作品。", sessionProcessing: "正在完成音频后期处理。",
@@ -229,7 +229,7 @@ const translations = {
     sessionScopeAlbumFallback: "Themed album · a coherent collection",
     proposalReady: "Prompt ready", discussionSending: "Developing the idea…", proposalGenerating: "Generating prompt…",
     discussionMood: "Mood",
-    imageSelected: "Reference image: {name}", imageUploadFailed: "Unable to upload the reference image.",
+    imageSelected: "Reference image: {name}", imageUploadFailed: "Unable to upload the reference image.", removeImage: "Remove reference image",
     sessionExecution: "Creation run", sessionWaiting: "The request is queued and waiting for the agent.",
     sessionComposing: "The Composer Agent is building the complete arrangement.", sessionGenerating: "The arrangement is ready; music generation is in progress.",
     sessionAssembling: "The generated parts are being assembled into the complete work.", sessionProcessing: "Audio post-production is in progress.",
@@ -453,7 +453,10 @@ const state = {
   settings: null,
   discussionSession: null,
   discussionSessions: [],
+  discussionPending: null,
+  discussionThinking: false,
   selectedDiscussionImage: null,
+  selectedDiscussionImageUrl: null,
 };
 const elements = {
   entryView: document.querySelector("#entry-view"),
@@ -1552,6 +1555,8 @@ function renderTaskDetail(task) {
 function showEntry() {
   state.selectedTaskId = null;
   state.discussionSession = null;
+  state.discussionPending = null;
+  state.discussionThinking = false;
   elements.entryView.hidden = false;
   elements.albumView.hidden = true;
   elements.homeView.hidden = true;
@@ -1574,6 +1579,8 @@ function showComposer(
   state.workflowType = workflowType;
   if (workflowChanged || state.discussionSession?.status === "submitted") {
     state.discussionSession = null;
+    state.discussionPending = null;
+    state.discussionThinking = false;
     clearSelectedDiscussionImage();
   }
   state.expandedTaskGroup = workflowType;
@@ -1598,6 +1605,8 @@ function showComposer(
 function showAlbums() {
   state.selectedTaskId = null;
   state.discussionSession = null;
+  state.discussionPending = null;
+  state.discussionThinking = false;
   state.workflowType = "04-album";
   state.compositionMode = "album";
   state.expandedTaskGroup = "04-album";
@@ -1615,6 +1624,8 @@ function showAlbums() {
 function selectTask(id) {
   state.selectedTaskId = id;
   state.discussionSession = null;
+  state.discussionPending = null;
+  state.discussionThinking = false;
   elements.discussionPanel.hidden = true;
   const task = state.tasks.find((item) => item.id === id);
   if (!task) return;
@@ -1760,6 +1771,15 @@ function upsertDiscussionSession(session) {
   state.discussionSessions.sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
 }
 
+function showDiscussionSurface() {
+  elements.entryView.hidden = true;
+  elements.albumView.hidden = true;
+  elements.homeView.hidden = true;
+  elements.taskView.hidden = false;
+  elements.composerDock.hidden = false;
+  document.querySelector("#back-home").textContent = t(state.compositionMode === "album" ? "backAlbums" : "backHome");
+}
+
 function enterDiscussionWorkspace(session) {
   state.discussionSession = session;
   const task = latestSessionTask(session);
@@ -1784,22 +1804,39 @@ function enterDiscussionWorkspace(session) {
   else elements.taskDetail.innerHTML = "";
 }
 
+function discussionMessageHtml(message, session) {
+  const images = message.attachmentIds?.map((attachmentId) => {
+    const attachment = session.attachments?.find((candidate) => candidate.id === attachmentId);
+    return attachment
+      ? `<img src="${discussionAttachmentUrl(session.id, attachment.id)}" alt="${escapeHtml(attachment.originalName)}" />`
+      : "";
+  }).join("") || "";
+  const mood = message.mood;
+  const moodBadge = mood && (mood.label || mood.imagery)
+    ? `<span class="discussion-mood" title="${escapeHtml(mood.imagery || "")}">${escapeHtml(t("discussionMood"))} · ${escapeHtml(mood.label || mood.imagery)}</span>`
+    : "";
+  return `<article class="discussion-message ${message.role}">${images}${moodBadge}<p>${escapeHtml(message.content)}</p></article>`;
+}
+
+function pendingDiscussionMessageHtml(pending) {
+  const image = pending.image
+    ? `<img src="${escapeHtml(pending.image.url)}" alt="${escapeHtml(pending.image.name)}" />`
+    : "";
+  const text = pending.content ? `<p>${escapeHtml(pending.content)}</p>` : "";
+  return `<article class="discussion-message user pending">${image}${text}</article>`;
+}
+
+function discussionTypingHtml() {
+  return `<article class="discussion-message assistant typing" role="status" aria-label="${escapeHtml(t("thinking"))}"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></article>`;
+}
+
 function renderDiscussion() {
   const session = state.discussionSession;
-  elements.discussionPanel.hidden = !state.supportsDiscussionSessions || !session;
-  elements.discussionMessages.innerHTML = session?.messages?.map((message) => {
-    const images = message.attachmentIds?.map((attachmentId) => {
-      const attachment = session.attachments?.find((candidate) => candidate.id === attachmentId);
-      return attachment
-        ? `<img src="${discussionAttachmentUrl(session.id, attachment.id)}" alt="${escapeHtml(attachment.originalName)}" />`
-        : "";
-    }).join("") || "";
-    const mood = message.mood;
-    const moodBadge = mood && (mood.label || mood.imagery)
-      ? `<span class="discussion-mood" title="${escapeHtml(mood.imagery || "")}">${escapeHtml(t("discussionMood"))} · ${escapeHtml(mood.label || mood.imagery)}</span>`
-      : "";
-    return `<article class="discussion-message ${message.role}">${images}${moodBadge}<p>${escapeHtml(message.content)}</p></article>`;
-  }).join("") || "";
+  elements.discussionPanel.hidden = !state.supportsDiscussionSessions || (!session && !state.discussionPending);
+  const parts = (session?.messages ?? []).map((message) => discussionMessageHtml(message, session));
+  if (state.discussionPending) parts.push(pendingDiscussionMessageHtml(state.discussionPending));
+  if (state.discussionThinking) parts.push(discussionTypingHtml());
+  elements.discussionMessages.innerHTML = parts.join("");
   const task = latestSessionTask(session);
   elements.discussionScope.textContent = discussionScopeLabel(session?.taskOptions);
   elements.discussionStatus.textContent = session
@@ -1813,7 +1850,7 @@ function renderDiscussion() {
   if (proposal && elements.proposalText.value !== proposal) elements.proposalText.value = proposal;
   elements.generateProposal.disabled = !session?.messages?.some((message) => message.role === "user") || state.submitting;
   if (session) elements.form.hidden = session.status === "submitted";
-  if (session?.messages?.length) {
+  if (parts.length) {
     elements.discussionMessages.scrollTop = elements.discussionMessages.scrollHeight;
   }
   renderProposalSettings();
@@ -1845,11 +1882,36 @@ function discussionScopeLabel(taskOptions = {}) {
   return taskOptions.compositionMode === "orchestral" ? t("sessionScopeOrchestral") : t("sessionScopeSingle");
 }
 
+function releaseSelectedImagePreviewUrl() {
+  if (state.selectedDiscussionImageUrl) {
+    URL.revokeObjectURL(state.selectedDiscussionImageUrl);
+    state.selectedDiscussionImageUrl = null;
+  }
+}
+
+function renderSelectedImagePreview() {
+  const file = state.selectedDiscussionImage;
+  if (!file) {
+    elements.selectedImage.hidden = true;
+    elements.selectedImage.innerHTML = "";
+    return;
+  }
+  releaseSelectedImagePreviewUrl();
+  state.selectedDiscussionImageUrl = URL.createObjectURL(file);
+  elements.selectedImage.hidden = false;
+  elements.selectedImage.innerHTML = `<img src="${escapeHtml(state.selectedDiscussionImageUrl)}" alt="${escapeHtml(file.name)}" />`
+    + `<span class="selected-image-name">${escapeHtml(file.name)}</span>`
+    + `<button type="button" class="selected-image-remove" aria-label="${escapeHtml(t("removeImage"))}" title="${escapeHtml(t("removeImage"))}">×</button>`;
+  elements.selectedImage.querySelector(".selected-image-remove")
+    ?.addEventListener("click", clearSelectedDiscussionImage);
+}
+
 function clearSelectedDiscussionImage() {
   state.selectedDiscussionImage = null;
+  releaseSelectedImagePreviewUrl();
   elements.discussionImage.value = "";
   elements.selectedImage.hidden = true;
-  elements.selectedImage.textContent = "";
+  elements.selectedImage.innerHTML = "";
 }
 
 async function ensureDiscussionSession() {
@@ -1885,28 +1947,49 @@ async function uploadDiscussionImage(session) {
 async function sendDiscussionMessage(event) {
   event.preventDefault();
   if (!state.supportsDiscussionSessions) return submitTask(event);
-  if (state.submitting || (!elements.input.value.trim() && !state.selectedDiscussionImage)) return;
+  const content = elements.input.value.trim();
+  const image = state.selectedDiscussionImage;
+  if (state.submitting || (!content && !image)) return;
+
+  const pendingImage = image
+    ? { url: state.selectedDiscussionImageUrl ?? URL.createObjectURL(image), name: image.name }
+    : null;
+  if (pendingImage) {
+    state.selectedDiscussionImageUrl = null;
+    elements.selectedImage.hidden = true;
+    elements.selectedImage.innerHTML = "";
+  }
+  state.discussionPending = { content, image: pendingImage };
+  state.discussionThinking = true;
   state.submitting = true;
   setButtonBusy(elements.submit, true);
-  elements.message.textContent = t("discussionSending");
+  elements.input.value = "";
+  elements.message.textContent = "";
+  showDiscussionSurface();
+  renderDiscussion();
+  elements.input.focus?.();
+
   try {
     const session = await ensureDiscussionSession();
     const attachmentIds = await uploadDiscussionImage(session);
     const response = await fetch(`/api/discussions/${encodeURIComponent(session.id)}/messages`, {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: elements.input.value, attachmentIds }),
+      body: JSON.stringify({ content, attachmentIds }),
     });
     const updated = await response.json();
     if (!response.ok) throw new Error(updated.error || t("createFailed"));
     state.discussionSession = updated;
     upsertDiscussionSession(updated);
-    elements.input.value = "";
     clearSelectedDiscussionImage();
-    elements.message.textContent = "";
-    renderDiscussion();
   } catch (error) {
     elements.message.textContent = error instanceof Error ? error.message : String(error);
+    if (!state.discussionSession) showComposer(state.corpusMode, state.compositionMode, state.workflowType);
+    if (image) renderSelectedImagePreview();
+    if (!elements.input.value) elements.input.value = content;
   } finally {
+    if (pendingImage) URL.revokeObjectURL(pendingImage.url);
+    state.discussionPending = null;
+    state.discussionThinking = false;
     state.submitting = false;
     setButtonBusy(elements.submit, false);
     renderDiscussion();
@@ -1918,7 +2001,9 @@ async function generateDiscussionProposal() {
   if (!session || state.submitting) return;
   state.submitting = true;
   setButtonBusy(elements.generateProposal, true);
-  elements.message.textContent = t("proposalGenerating");
+  elements.message.textContent = "";
+  state.discussionThinking = true;
+  renderDiscussion();
   try {
     const response = await fetch(`/api/discussions/${encodeURIComponent(session.id)}/proposal`, { method: "POST" });
     const updated = await response.json();
@@ -1930,6 +2015,7 @@ async function generateDiscussionProposal() {
   } catch (error) {
     elements.message.textContent = error instanceof Error ? error.message : String(error);
   } finally {
+    state.discussionThinking = false;
     state.submitting = false;
     setButtonBusy(elements.generateProposal, false);
     renderDiscussion();
@@ -2176,8 +2262,7 @@ elements.discussionImage.addEventListener("change", () => {
     return;
   }
   state.selectedDiscussionImage = file;
-  elements.selectedImage.hidden = false;
-  elements.selectedImage.textContent = t("imageSelected", { name: file.name });
+  renderSelectedImagePreview();
 });
 elements.generateProposal.addEventListener("click", generateDiscussionProposal);
 elements.continueDiscussion.addEventListener("click", () => {

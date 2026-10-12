@@ -8,21 +8,21 @@
     "output": "docs/arioso-current-workflow.html"
   },
   "lanes": [
-    { "id": "intake", "label": "Task Intake" },
-    { "id": "single", "label": "General & Jazz" },
-    { "id": "orchestral", "label": "Orchestral" },
-    { "id": "album", "label": "Album" },
-    { "id": "delivery", "label": "Generation & Delivery" }
+    { "id": "flow", "label": "Arioso Workflow" }
   ],
   "phases": [
-    { "id": "choose", "label": "Choose", "fromCol": 0, "toCol": 1 },
-    { "id": "compose", "label": "Compose", "fromCol": 2, "toCol": 2, "variant": "emphasis" },
-    { "id": "deliver", "label": "Generate & Deliver", "fromCol": 3, "toCol": 5, "variant": "dashed" }
+    { "id": "intake", "label": "Intake + discuss", "fromCol": 0, "toCol": 2, "variant": "emphasis" },
+    { "id": "compose", "label": "Compose + deliver", "fromCol": 3, "toCol": 3, "variant": "emphasis" }
+  ],
+  "groups": [
+    { "id": "discussion_loop", "label": "Conversation + proposal", "lane": "flow", "fromCol": 1, "toCol": 2, "variant": "emphasis" },
+    { "id": "composition_modes", "label": "Composition modes", "lane": "flow", "fromCol": 3, "toCol": 3, "variant": "dashed" }
   ],
   "mainPath": [
     "task_request",
+    "discussion_session",
     "workflow_router",
-    "single_workflow",
+    "composition_agents",
     "lyria_generation",
     "saved_results"
   ],
@@ -35,43 +35,21 @@
     ]
   },
   "nodes": [
-    { "id": "task_request", "lane": "intake", "col": 0, "type": "frontend", "label": "Music Brief & Settings", "width": 168 },
-    { "id": "workflow_router", "lane": "intake", "col": 1, "type": "backend", "label": "Workflow Router", "width": 152 },
-    { "id": "single_workflow", "lane": "single", "col": 2, "type": "backend", "label": "Composer Agent", "sublabel": "optional Jazz retrieval", "width": 160 },
-    { "id": "orchestral_workflow", "lane": "orchestral", "col": 2, "type": "backend", "label": "Orchestral Agents", "sublabel": "plan and compose movements", "width": 168 },
-    { "id": "album_workflow", "lane": "album", "col": 2, "type": "backend", "label": "Album Agents", "sublabel": "plan, review, and revise", "width": 160 },
-    { "id": "lyria_generation", "lane": "delivery", "col": 3, "type": "cloud", "label": "Google Lyria", "width": 150 },
-    { "id": "saved_results", "lane": "delivery", "col": 4, "type": "database", "label": "Saved Results", "sublabel": "audio, plans, and task records", "width": 164 },
-    { "id": "album_producer", "lane": "delivery", "col": 5, "type": "backend", "label": "Album Producer", "sublabel": "denoise · assemble · export", "width": 160 }
+    { "id": "task_request", "lane": "flow", "col": 0, "type": "frontend", "label": "Music Brief & Settings", "width": 168 },
+    { "id": "discussion_session", "lane": "flow", "col": 1, "type": "backend", "label": "Creative Discussion", "sublabel": "Prompt Director", "width": 168 },
+    { "id": "workflow_router", "lane": "flow", "col": 2, "type": "backend", "label": "Workflow Router", "sublabel": "approved prompt or direct task", "width": 168 },
+    { "id": "composition_agents", "lane": "flow", "col": 3, "type": "backend", "label": "Composition Agents", "sublabel": "general/Jazz · orchestral · album", "width": 180 },
+    { "id": "lyria_generation", "lane": "flow", "col": 3, "type": "cloud", "label": "Google Lyria", "width": 150, "yOffset": 80 },
+    { "id": "saved_results", "lane": "flow", "col": 3, "type": "database", "label": "Saved Results", "sublabel": "audio, plans, and task records", "width": 164, "yOffset": 160 },
+    { "id": "album_producer", "lane": "flow", "col": 3, "type": "backend", "label": "Album Producer", "sublabel": "denoise · assemble · export", "width": 160, "yOffset": 240 }
   ],
   "edges": [
-    { "id": "create_task", "from": "task_request", "to": "workflow_router", "label": "queue task", "variant": "emphasis", "role": "main" },
-    { "id": "choose_single", "from": "workflow_router", "to": "single_workflow", "label": "general or Jazz", "variant": "emphasis", "role": "main" },
-    { "id": "choose_orchestral", "from": "workflow_router", "to": "orchestral_workflow", "label": "orchestral", "variant": "default", "role": "branch" },
-    { "id": "choose_album", "from": "workflow_router", "to": "album_workflow", "label": "album", "variant": "default", "role": "branch" },
-    { "id": "generate_single", "from": "single_workflow", "to": "lyria_generation", "label": "MusicSpec prompt", "variant": "emphasis" },
-    { "id": "generate_movements", "from": "orchestral_workflow", "to": "lyria_generation", "label": "movement prompts", "variant": "default" },
-    { "id": "generate_album", "from": "album_workflow", "to": "lyria_generation", "label": "reviewed track prompts", "variant": "default" },
-    { "id": "persist_results", "from": "lyria_generation", "to": "saved_results", "label": "audio and metadata", "variant": "emphasis", "role": "main" },
-    { "id": "postproduce_album", "from": "saved_results", "to": "album_producer", "label": "selected album path", "variant": "dashed", "role": "branch" }
-  ],
-  "cards": [
-    {
-      "dot": "cyan",
-      "title": "Composition Modes",
-      "items": [
-        "Compose-only returns structured plans before Google Lyria",
-        "Jazz optionally adds local corpus evidence before composition"
-      ]
-    },
-    {
-      "dot": "amber",
-      "title": "Delivered Results",
-      "items": [
-        "Single pieces: MusicSpec, task record, and optional MP3",
-        "Orchestral works: movement plans and assembled audio",
-        "Albums: reviewed candidates, playlist export, or optional denoised WAV and MP4"
-      ]
-    }
+    { "id": "create_task", "from": "task_request", "to": "discussion_session", "label": "start discussion", "variant": "emphasis", "role": "main" },
+    { "id": "approved_prompt", "from": "discussion_session", "to": "workflow_router", "label": "approved proposal", "variant": "emphasis", "role": "main" },
+    { "id": "direct_task", "from": "task_request", "to": "workflow_router", "label": "direct task API", "variant": "dashed", "role": "branch", "route": "up-channel" },
+    { "id": "choose_composition", "from": "workflow_router", "to": "composition_agents", "label": "mode", "variant": "emphasis", "role": "main" },
+    { "id": "generate_composition", "from": "composition_agents", "to": "lyria_generation", "variant": "emphasis", "role": "main", "fromSide": "bottom", "toSide": "top", "route": "straight" },
+    { "id": "persist_results", "from": "lyria_generation", "to": "saved_results", "variant": "emphasis", "role": "main", "fromSide": "bottom", "toSide": "top", "route": "straight" },
+    { "id": "postproduce_album", "from": "saved_results", "to": "album_producer", "variant": "dashed", "role": "branch", "fromSide": "bottom", "toSide": "top", "route": "straight" }
   ]
 }
