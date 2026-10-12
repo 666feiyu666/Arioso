@@ -238,6 +238,15 @@ describe("creative discussion sessions", () => {
       discussionAgent: agent,
     });
   });
+
+  it("states the supported duration for each scope", () => {
+    const base: DiscussionAgentOptions = {
+      apiKey: "test", model: "test", language: "zh-CN", workflowType: "01-general", compositionMode: "single",
+    };
+    expect(discussionScopeInstructions(base)).toContain("3 minutes");
+    expect(discussionScopeInstructions({ ...base, compositionMode: "orchestral" })).toContain("5 and 12 minutes");
+    expect(discussionScopeInstructions({ ...base, workflowType: "04-album", compositionMode: "album" })).toContain("1–3 minutes");
+  });
 });
 
 describe("creative discussion mood persistence", () => {

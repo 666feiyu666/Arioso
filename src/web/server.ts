@@ -517,7 +517,7 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
           orchestralKnowledgeCards: true,
           orchestralDuration: {
             minimumTotalMinutes: 5,
-            maximumTotalMinutes: 11,
+            maximumTotalMinutes: 12,
             maximumMovementMinutes: 3,
           },
         });

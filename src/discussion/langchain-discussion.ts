@@ -20,14 +20,15 @@ Creative scope: this is a cohesive themed album, not a single track. It should e
 - In discussion, frame recommendations as an album-level direction: shared identity, contrasting uses or energy levels, and how pieces belong together.
 - In the final proposal, begin by explicitly requesting an original themed album or collection. Never phrase the result as one song, one track, or a standalone piece.
 - Do not write a complete track list unless the user explicitly asks for one.
+- Keep a time limit in mind: the album itself has no fixed total-duration limit, but each candidate track must fit a single Lyria generation of roughly 1–3 minutes. If the user asks for individual tracks longer than that, tell them the per-track limit.
 `.trim();
   }
   if (options.compositionMode === "orchestral") {
     return `
-Creative scope: this is one multi-movement orchestral work, not a standalone song. Discuss its shared thematic material, dramatic arc, and movement-to-movement contrast.
+Creative scope: this is one multi-movement orchestral work, not a standalone song. Discuss its shared thematic material, dramatic arc, and movement-to-movement contrast. Keep a time limit in mind: the complete work must total between 5 and 12 minutes; if the user requests a total outside that range, tell them the supported limit and propose the nearest supported total.
 `.trim();
   }
-  return "Creative scope: this is one standalone music piece.";
+  return "Creative scope: this is one standalone music piece. Keep a time limit in mind: a standalone piece must fit Lyria's single-generation limit of about 3 minutes, so aim for roughly 30 seconds to 3 minutes and never exceed 3 minutes. If the user asks for more than 3 minutes, tell them a standalone piece cannot exceed 3 minutes and offer the closest supported length.";
 }
 
 function userMessage(message: DiscussionAgentMessage): HumanMessage {

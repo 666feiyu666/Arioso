@@ -39,4 +39,12 @@ describe("prompt directing skill", () => {
     expect(discussion).toContain("musical imagery or synesthesia");
     expect(proposal).toContain("emotional tone settled in the discussion");
   });
+
+  it("keeps duration in view while directing and committing to a prompt", async () => {
+    const discussion = await loadPromptDirectingSkill("discussion");
+    const proposal = await loadPromptDirectingSkill("proposal");
+
+    expect(discussion).toContain("Keep duration in mind");
+    expect(proposal).toContain("State the intended duration explicitly");
+  });
 });

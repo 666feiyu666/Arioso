@@ -22,11 +22,11 @@ export const OrchestralWorkPlanSchema = z.object({
   requestedTotalDurationMinutes: z.number().positive().nullable().describe(
     "The total duration explicitly requested by the user, or null when none was supplied.",
   ),
-  plannedTotalDurationMinutes: z.number().min(5).max(11).describe(
+  plannedTotalDurationMinutes: z.number().min(5).max(12).describe(
     "Supported total duration for the complete multi-movement work.",
   ),
   durationAdjustmentReason: z.string().min(1).nullable().describe(
-    "Why an explicit duration was adjusted to the supported 5–11 minute range, or null.",
+    "Why an explicit duration was adjusted to the supported 5–12 minute range, or null.",
   ),
   sharedContract: z.object({
     tonalWorld: z.string().min(1),
@@ -62,7 +62,7 @@ export const OrchestralWorkPlanSchema = z.object({
 
   const requested = plan.requestedTotalDurationMinutes;
   const adjusted = requested !== null
-    && (requested < 5 || requested > 11 || Math.abs(requested - plan.plannedTotalDurationMinutes) > 0.5);
+    && (requested < 5 || requested > 12 || Math.abs(requested - plan.plannedTotalDurationMinutes) > 0.5);
   if (adjusted && !plan.durationAdjustmentReason) {
     context.addIssue({
       code: "custom",

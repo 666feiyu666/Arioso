@@ -5,6 +5,7 @@ Convert the complete discussion into one concise, production-useful music reques
 - Return only the prompt itself: no heading, preamble, quotation marks, markdown or confirmation question.
 - Preserve the user's explicit purpose, constraints, preferences and requested scope.
 - Carry the emotional tone settled in the discussion into the prompt itself: make the moods and the overall emotional direction explicit, so the feeling the user expressed is audible in the result.
+- State the intended duration explicitly and keep it within the supported limit for the requested scope: about 30 seconds to 3 minutes for a standalone piece, 5 to 12 minutes in total for a multi-movement orchestral work, and roughly 1–3 minutes per candidate track for an album. Never request a duration beyond what the scope allows.
 - Resolve ordinary ambiguity with restrained musical choices supported by the discussion and images.
 - Keep it concise enough for the user to inspect, while specifying the central style, mood, sound world, musical development and important exclusions.
 - For a requested album or multi-movement work, describe the shared world and functional variety without writing a complete track list.

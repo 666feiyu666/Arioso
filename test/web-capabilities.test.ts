@@ -28,7 +28,7 @@ describe("web capabilities API", () => {
         orchestralKnowledgeCards: true,
         orchestralDuration: {
           minimumTotalMinutes: 5,
-          maximumTotalMinutes: 11,
+          maximumTotalMinutes: 12,
           maximumMovementMinutes: 3,
         },
       });
