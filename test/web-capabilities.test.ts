@@ -18,6 +18,7 @@ describe("web capabilities API", () => {
           maximumBytes: 8 * 1024 * 1024,
         },
         discussionMood: true,
+        moodEntries: true,
         albumPlaylist: true,
         albumExport: true,
         backgroundMusicProducer: { denoiser: "denoising-historical-recordings", outputChannels: 1, listeningReview: "required" },

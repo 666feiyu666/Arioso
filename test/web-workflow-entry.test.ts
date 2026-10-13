@@ -5,7 +5,7 @@ import { withWebServer } from "./helpers/web-server.js";
 describe("workflow entry page", () => {
   it("serves each workflow choice with its matching composition and corpus modes", async () => {
     await withWebServer(async ({ baseUrl }) => {
-      const response = await fetch(`${baseUrl}/`);
+      const response = await fetch(`${baseUrl}/workflow.html`);
       expect(response.status).toBe(200);
       expect(response.headers.get("content-type")).toContain("text/html");
       const html = await response.text();

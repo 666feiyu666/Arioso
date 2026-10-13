@@ -22,6 +22,7 @@ import {
 import { LyriaClient } from "../lyria/lyria-client.js";
 import { listOrchestralKnowledgeCards } from "../retrieval/orchestral-cards.js";
 import { TaskStore, parseTaskInput, type AlbumAdmission, type AlbumAudioExport, type MusicTask } from "./task-store.js";
+import { MoodEntryStore, isCalendarDate, isMoodGroup, type MoodEntryInput } from "./mood-store.js";
 import { HttpError, readBinaryBody, readJsonBody, sendAudio, sendFile, sendJson, serveStatic } from "./http.js";
 import { isRecord } from "../utils/validation.js";
 import { runBackgroundMusicProducer } from "../producer/background-music-producer.js";
@@ -432,6 +433,59 @@ function decodedFileName(value: string | null): string {
   }
 }
 
+function moodText(value: unknown, field: string): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (typeof value !== "string") throw new HttpError(400, `${field} must be text.`);
+  const trimmed = value.trim();
+  if (trimmed.length > 2000) throw new HttpError(400, `${field} is too long.`);
+  return trimmed || undefined;
+}
+
+function parseMoodEntryInput(value: unknown): MoodEntryInput {
+  if (!isRecord(value)) throw new HttpError(400, "A feeling is required.");
+  if (!isCalendarDate(value.date)) throw new HttpError(400, "A calendar date (YYYY-MM-DD) is required.");
+  if (!isMoodGroup(value.group)) throw new HttpError(400, "A known feeling group is required.");
+  if (typeof value.emotion !== "string" || !value.emotion.trim() || value.emotion.trim().length > 64) {
+    throw new HttpError(400, "Choose an emotion word.");
+  }
+  if (value.retrospective !== undefined && typeof value.retrospective !== "boolean") {
+    throw new HttpError(400, "retrospective must be a boolean.");
+  }
+  return {
+    date: value.date,
+    group: value.group,
+    emotion: value.emotion.trim(),
+    note: moodText(value.note, "note"),
+    musicFeeling: moodText(value.musicFeeling, "musicFeeling"),
+    ...(value.retrospective === true ? { retrospective: true } : {}),
+  };
+}
+
+function parseMoodEntryPatch(value: unknown) {
+  if (!isRecord(value)) throw new HttpError(400, "A feeling update is required.");
+  if (value.date !== undefined && !isCalendarDate(value.date)) {
+    throw new HttpError(400, "A calendar date (YYYY-MM-DD) is required.");
+  }
+  if (value.group !== undefined && !isMoodGroup(value.group)) {
+    throw new HttpError(400, "A known feeling group is required.");
+  }
+  if (value.emotion !== undefined
+    && (typeof value.emotion !== "string" || !value.emotion.trim())) {
+    throw new HttpError(400, "Choose an emotion word.");
+  }
+  if (value.retrospective !== undefined && typeof value.retrospective !== "boolean") {
+    throw new HttpError(400, "retrospective must be a boolean.");
+  }
+  return {
+    ...(value.date !== undefined ? { date: value.date } : {}),
+    ...(value.group !== undefined ? { group: value.group } : {}),
+    ...(value.emotion !== undefined ? { emotion: value.emotion.trim().slice(0, 64) } : {}),
+    ...(value.note !== undefined ? { note: moodText(value.note, "note") } : {}),
+    ...(value.musicFeeling !== undefined ? { musicFeeling: moodText(value.musicFeeling, "musicFeeling") } : {}),
+    ...(value.retrospective !== undefined ? { retrospective: value.retrospective } : {}),
+  };
+}
+
 export async function createAriosoServer(options: AriosoServerOptions = {}) {
   const baseEnvironment = options.environment ?? process.env;
   const settings = new SettingsStore({
@@ -447,9 +501,11 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
   const outputDirectory = environment.ARIOSO_OUTPUT_DIR ?? "outputs";
   const store = new TaskStore(path.resolve(outputDirectory, "tasks"));
   const discussionStore = new CreativeSessionStore(path.resolve(outputDirectory, "discussions"));
+  const moodStore = new MoodEntryStore(path.resolve(outputDirectory, "moodmic", "entries.json"));
   const discussionAgent = options.discussionAgent ?? new LangChainDiscussionAgent();
   await store.initialize();
   await discussionStore.initialize();
+  await moodStore.initialize();
   const activeTaskIds = new Set<string>();
   const activeDiscussionSubmissions = new Set<string>();
   const discussionView = async (session: CreativeSession) => {
@@ -498,6 +554,8 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
       const discussionSubmitMatch = /^\/api\/discussions\/([^/]+)\/submit$/.exec(url.pathname);
       const discussionAttachmentsMatch = /^\/api\/discussions\/([^/]+)\/attachments$/.exec(url.pathname);
       const discussionAttachmentMatch = /^\/api\/discussions\/([^/]+)\/attachments\/([^/]+)$/.exec(url.pathname);
+      const moodEntryMatch = /^\/api\/mood-entries\/([^/]+)$/.exec(url.pathname);
+      const moodEntryTaskMatch = /^\/api\/mood-entries\/([^/]+)\/tasks$/.exec(url.pathname);
       if (request.method === "GET" && url.pathname === "/api/capabilities") {
         sendJson(response, 200, {
           apiVersion: 8,
@@ -507,6 +565,7 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
           creativeSessionTimeline: true,
           discussionImages: { types: ["image/jpeg", "image/png", "image/webp"], maximumBytes: MAX_DISCUSSION_IMAGE_BYTES },
           discussionMood: true,
+          moodEntries: true,
           albumPlaylist: true,
           albumExport: true,
           backgroundMusicProducer: { denoiser: "denoising-historical-recordings", outputChannels: 1, listeningReview: "required" },
@@ -640,6 +699,10 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
               ...(typeof value.mode === "string" ? { mode: value.mode } : {}),
               ...(typeof value.lyriaModel === "string" ? { lyriaModel: value.lyriaModel } : {}),
               ...(typeof value.vocalMode === "string" ? { vocalMode: value.vocalMode } : {}),
+              // The "why not jazz" invitation can change before creation, so the
+              // chosen reference corpus is authoritative at submit time.
+              ...(typeof value.corpusMode === "string" ? { corpusMode: value.corpusMode } : {}),
+              ...(typeof value.workflowType === "string" ? { workflowType: value.workflowType } : {}),
             };
         activeDiscussionSubmissions.add(sessionId);
         try {
@@ -660,6 +723,49 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
         } finally {
           activeDiscussionSubmissions.delete(sessionId);
         }
+        return;
+      }
+
+      if (request.method === "GET" && url.pathname === "/api/mood-entries") {
+        sendJson(response, 200, {
+          entries: moodStore.list().map((entry) => ({
+            ...entry,
+            tasks: entry.taskIds.flatMap((id) => {
+              const task = store.get(id);
+              return task ? [task] : [];
+            }),
+          })),
+        });
+        return;
+      }
+
+      if (request.method === "POST" && url.pathname === "/api/mood-entries") {
+        sendJson(response, 201, await moodStore.create(parseMoodEntryInput(await readJsonBody(request))));
+        return;
+      }
+
+      if (moodEntryMatch?.[1]) {
+        const entryId = moodEntryMatch[1];
+        if (!moodStore.get(entryId)) throw new HttpError(404, "Mood entry not found.");
+        if (request.method === "PATCH") {
+          sendJson(response, 200, await moodStore.update(entryId, parseMoodEntryPatch(await readJsonBody(request))));
+          return;
+        }
+        if (request.method === "DELETE") {
+          await moodStore.remove(entryId);
+          sendJson(response, 200, { removed: entryId });
+          return;
+        }
+      }
+
+      if (request.method === "POST" && moodEntryTaskMatch?.[1]) {
+        const entryId = moodEntryTaskMatch[1];
+        if (!moodStore.get(entryId)) throw new HttpError(404, "Mood entry not found.");
+        const value = await readJsonBody(request);
+        if (!isRecord(value) || typeof value.taskId !== "string" || !store.get(value.taskId)) {
+          throw new HttpError(400, "A known task is required to link to this feeling.");
+        }
+        sendJson(response, 200, await moodStore.linkTask(entryId, value.taskId));
         return;
       }
 
