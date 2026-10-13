@@ -23,6 +23,8 @@ import { LyriaClient } from "../lyria/lyria-client.js";
 import { listOrchestralKnowledgeCards } from "../retrieval/orchestral-cards.js";
 import { TaskStore, parseTaskInput, type AlbumAdmission, type AlbumAudioExport, type MusicTask } from "./task-store.js";
 import { MoodEntryStore, isCalendarDate, isMoodGroup, type MoodEntryInput } from "./mood-store.js";
+import { LangChainMoodClassifier, type MoodClassifier } from "./mood-classifier.js";
+import { MoodChatStore, type MoodChat } from "./mood-chat-store.js";
 import { HttpError, readBinaryBody, readJsonBody, sendAudio, sendFile, sendJson, serveStatic } from "./http.js";
 import { isRecord } from "../utils/validation.js";
 import { runBackgroundMusicProducer } from "../producer/background-music-producer.js";
@@ -415,6 +417,7 @@ export interface AriosoServerOptions {
   envPath?: string;
   preferencesPath?: string;
   discussionAgent?: DiscussionAgent;
+  moodClassifier?: MoodClassifier;
 }
 
 function discussionTaskOptions(value: unknown): DiscussionTaskOptions {
@@ -502,12 +505,16 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
   const store = new TaskStore(path.resolve(outputDirectory, "tasks"));
   const discussionStore = new CreativeSessionStore(path.resolve(outputDirectory, "discussions"));
   const moodStore = new MoodEntryStore(path.resolve(outputDirectory, "moodmic", "entries.json"));
+  const moodChatStore = new MoodChatStore(path.resolve(outputDirectory, "moodmic", "chats"));
   const discussionAgent = options.discussionAgent ?? new LangChainDiscussionAgent();
+  const moodClassifier = options.moodClassifier ?? new LangChainMoodClassifier();
   await store.initialize();
   await discussionStore.initialize();
   await moodStore.initialize();
+  await moodChatStore.initialize();
   const activeTaskIds = new Set<string>();
   const activeDiscussionSubmissions = new Set<string>();
+  const activeMoodSubmissions = new Set<string>();
   const discussionView = async (session: CreativeSession) => {
     const taskIds = session.taskIds ?? (session.submittedTaskId ? [session.submittedTaskId] : []);
     const tasks = taskIds.flatMap((id) => {
@@ -519,6 +526,18 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
       ...session,
       taskIds,
       phase: await resolveCreativeSessionPhase(session.status, latestTask?.status),
+      tasks,
+    };
+  };
+  const moodChatView = async (chat: MoodChat) => {
+    const tasks = chat.taskIds.flatMap((id) => {
+      const task = store.get(id);
+      return task ? [task] : [];
+    });
+    const latestTask = tasks.at(-1);
+    return {
+      ...chat,
+      phase: await resolveCreativeSessionPhase(chat.status, latestTask?.status),
       tasks,
     };
   };
@@ -554,6 +573,12 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
       const discussionSubmitMatch = /^\/api\/discussions\/([^/]+)\/submit$/.exec(url.pathname);
       const discussionAttachmentsMatch = /^\/api\/discussions\/([^/]+)\/attachments$/.exec(url.pathname);
       const discussionAttachmentMatch = /^\/api\/discussions\/([^/]+)\/attachments\/([^/]+)$/.exec(url.pathname);
+      const moodChatMatch = /^\/api\/mood-chats\/([^/]+)$/.exec(url.pathname);
+      const moodChatMessagesMatch = /^\/api\/mood-chats\/([^/]+)\/messages$/.exec(url.pathname);
+      const moodChatProposalMatch = /^\/api\/mood-chats\/([^/]+)\/proposal$/.exec(url.pathname);
+      const moodChatSubmitMatch = /^\/api\/mood-chats\/([^/]+)\/submit$/.exec(url.pathname);
+      const moodChatAttachmentsMatch = /^\/api\/mood-chats\/([^/]+)\/attachments$/.exec(url.pathname);
+      const moodChatAttachmentMatch = /^\/api\/mood-chats\/([^/]+)\/attachments\/([^/]+)$/.exec(url.pathname);
       const moodEntryMatch = /^\/api\/mood-entries\/([^/]+)$/.exec(url.pathname);
       const moodEntryTaskMatch = /^\/api\/mood-entries\/([^/]+)\/tasks$/.exec(url.pathname);
       if (request.method === "GET" && url.pathname === "/api/capabilities") {
@@ -726,6 +751,129 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
         return;
       }
 
+      if (request.method === "POST" && url.pathname === "/api/mood-chats") {
+        const body = await readJsonBody(request);
+        const jazz = isRecord(body) && body.jazz === true;
+        sendJson(response, 201, await moodChatView(await moodChatStore.create(jazz)));
+        return;
+      }
+
+      if (request.method === "GET" && url.pathname === "/api/mood-chats") {
+        sendJson(response, 200, await Promise.all(moodChatStore.list().map(moodChatView)));
+        return;
+      }
+
+      if (request.method === "GET" && moodChatMatch?.[1]) {
+        const chat = moodChatStore.get(moodChatMatch[1]);
+        if (!chat) throw new HttpError(404, "Conversation not found.");
+        sendJson(response, 200, await moodChatView(chat));
+        return;
+      }
+
+      if (request.method === "POST" && moodChatAttachmentsMatch?.[1]) {
+        const chatId = moodChatAttachmentsMatch[1];
+        if (!moodChatStore.get(chatId)) throw new HttpError(404, "Conversation not found.");
+        const mimeType = String(request.headers["content-type"] ?? "").split(";", 1)[0]!.trim().toLowerCase();
+        const data = await readBinaryBody(request, MAX_DISCUSSION_IMAGE_BYTES);
+        const chat = await moodChatStore.addAttachment(chatId, {
+          originalName: decodedFileName(url.searchParams.get("name")), mimeType, data,
+        });
+        sendJson(response, 201, await moodChatView(chat));
+        return;
+      }
+
+      if ((request.method === "GET" || request.method === "HEAD")
+        && moodChatAttachmentMatch?.[1] && moodChatAttachmentMatch[2]) {
+        const attachment = moodChatStore.attachmentPath(
+          moodChatAttachmentMatch[1], moodChatAttachmentMatch[2],
+        );
+        if (!attachment) throw new HttpError(404, "Image is not available.");
+        await sendFile(request, response, attachment.path, attachment.mimeType);
+        return;
+      }
+
+      if (request.method === "POST" && moodChatMessagesMatch?.[1]) {
+        const chatId = moodChatMessagesMatch[1];
+        const chat = moodChatStore.get(chatId);
+        if (!chat) throw new HttpError(404, "Conversation not found.");
+        const value = await readJsonBody(request);
+        if (!isRecord(value)
+          || (value.content !== undefined && typeof value.content !== "string")
+          || (value.attachmentIds !== undefined && (!Array.isArray(value.attachmentIds)
+            || !value.attachmentIds.every((id: unknown) => typeof id === "string")))) {
+          throw new HttpError(400, "A valid message is required.");
+        }
+        await moodChatStore.addMessage(
+          chatId, "user", typeof value.content === "string" ? value.content : "",
+          (value.attachmentIds as string[] | undefined) ?? [],
+        );
+        const config = loadConfig(false, await settings.runtimeEnvironment());
+        const reply = await discussionAgent.respond(await moodChatStore.agentMessages(chatId), {
+          apiKey: config.openAiApiKey,
+          model: config.openAiModel,
+          language: await settings.language(),
+          compositionMode: "single",
+          workflowType: chat.jazz ? "02-jazz" : "01-general",
+        });
+        sendJson(response, 200, await moodChatView(
+          await moodChatStore.addMessage(chatId, "assistant", reply.content, [], reply.mood),
+        ));
+        return;
+      }
+
+      if (request.method === "POST" && moodChatProposalMatch?.[1]) {
+        const chatId = moodChatProposalMatch[1];
+        const chat = moodChatStore.get(chatId);
+        if (!chat) throw new HttpError(404, "Conversation not found.");
+        const config = loadConfig(false, await settings.runtimeEnvironment());
+        const proposal = await discussionAgent.propose(await moodChatStore.agentMessages(chatId), {
+          apiKey: config.openAiApiKey,
+          model: config.openAiModel,
+          language: await settings.language(),
+          compositionMode: "single",
+          workflowType: chat.jazz ? "02-jazz" : "01-general",
+        });
+        sendJson(response, 200, await moodChatView(await moodChatStore.setProposal(chatId, proposal)));
+        return;
+      }
+
+      if (request.method === "POST" && moodChatSubmitMatch?.[1]) {
+        const chatId = moodChatSubmitMatch[1];
+        const chat = moodChatStore.get(chatId);
+        if (!chat) throw new HttpError(404, "Conversation not found.");
+        if (chat.status === "submitted" || activeMoodSubmissions.has(chatId)) {
+          throw new HttpError(409, "This conversation has already been submitted.");
+        }
+        const value = await readJsonBody(request);
+        if (!isRecord(value) || typeof value.prompt !== "string" || !value.prompt.trim()) {
+          throw new HttpError(400, "An approved prompt is required.");
+        }
+        const prompt = value.prompt.trim();
+        const jazz = typeof value.corpusMode === "string" ? value.corpusMode === "jazz" : chat.jazz;
+        activeMoodSubmissions.add(chatId);
+        try {
+          await moodChatStore.setProposal(chatId, prompt);
+          const input = parseTaskInput({
+            description: prompt,
+            compositionMode: "single",
+            workflowType: jazz ? "02-jazz" : "01-general",
+            corpusMode: jazz ? "jazz" : "none",
+            mode: typeof value.mode === "string" ? value.mode : "generate",
+            lyriaModel: typeof value.lyriaModel === "string" ? value.lyriaModel : "lyria-3.5",
+            vocalMode: typeof value.vocalMode === "string" ? value.vocalMode : "instrumental",
+          });
+          input.sourceDiscussionId = chatId;
+          const config = loadConfig(input.mode === "generate", await settings.runtimeEnvironment());
+          const task = await store.create(input, config);
+          await moodChatStore.markSubmitted(chatId, task.id, prompt);
+          startTask(task, config);
+          sendJson(response, 202, { chat: await moodChatView(moodChatStore.get(chatId)!), task });
+        } finally {
+          activeMoodSubmissions.delete(chatId);
+        }
+        return;
+      }
+
       if (request.method === "GET" && url.pathname === "/api/mood-entries") {
         sendJson(response, 200, {
           entries: moodStore.list().map((entry) => ({
@@ -741,6 +889,32 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
 
       if (request.method === "POST" && url.pathname === "/api/mood-entries") {
         sendJson(response, 201, await moodStore.create(parseMoodEntryInput(await readJsonBody(request))));
+        return;
+      }
+
+      if (request.method === "POST" && url.pathname === "/api/mood-entries/classify") {
+        const value = await readJsonBody(request);
+        if (!isRecord(value) || typeof value.text !== "string" || !value.text.trim()) {
+          throw new HttpError(400, "A feeling description is required.");
+        }
+        const text = value.text.trim().slice(0, 2000);
+        // Resolve the model configuration best-effort; the classifier itself
+        // falls back to the offline lexicon when no key is available.
+        let apiKey = "";
+        let model = process.env.OPENAI_MODEL ?? "gpt-6-sol";
+        try {
+          const config = loadConfig(false, await settings.runtimeEnvironment());
+          apiKey = config.openAiApiKey;
+          model = config.openAiModel;
+        } catch {
+          /* No model configured: classify offline. */
+        }
+        const result = await moodClassifier.classify(text, {
+          apiKey,
+          model,
+          language: await settings.language(),
+        });
+        sendJson(response, 200, result);
         return;
       }
 

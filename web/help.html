@@ -17,6 +17,7 @@
       </a>
       <div class="tabbar-tabs">
         <a class="tabbar-tab" href="/" data-i18n="tabMoodMic">MoodMic</a>
+        <a class="tabbar-tab" href="/calendar.html" data-i18n="tabCalendar">心情日历</a>
         <a class="tabbar-tab" href="/workflow.html" data-i18n="tabWorkflow">工作流</a>
         <a class="tabbar-tab is-active" href="/help.html" aria-current="page" data-i18n="tabHelp">帮助</a>
       </div>
@@ -42,18 +43,31 @@
       <section class="help-section">
         <h2 data-i18n="helpStepsTitle">怎么用</h2>
         <ol>
-          <li data-i18n="helpStep1">说出心情：写几句话，或点选几个贴近此刻的词。</li>
-          <li data-i18n="helpStep2">选择形态：一首单曲，或一张专辑。</li>
-          <li data-i18n="helpStep3">确认方向：可以继续补充想法，也可以直接采纳当前方向。</li>
-          <li data-i18n="helpStep4">等待创作：界面会显示当前进度。</li>
-          <li data-i18n="helpStep5">试听结果：播放、下载，或回到工作流继续管理。</li>
+          <li data-i18n="helpStep1">描述心情与音乐：在对话里用几句话写下此刻的心情和想要的音乐。</li>
+          <li data-i18n="helpStep2">讨论方向：继续聊，或把共识整理成作曲提示词。</li>
+          <li data-i18n="helpStep3">确认心情：方向确定后会读出一个心情（颜色和词），你可以改。</li>
+          <li data-i18n="helpStep4">开始创作：确认后生成这一首单曲。</li>
+          <li data-i18n="helpStep5">试听结果：播放并下载，也可以在「心情日历」里回看并打开对应的对话。</li>
         </ol>
       </section>
 
       <section class="help-section">
-        <h2 data-i18n="helpShapeTitle">单曲与专辑</h2>
+        <h2 data-i18n="helpColorsTitle">心情颜色</h2>
+        <p data-i18n="helpColorsIntro">
+          MoodMic 用四种颜色表示心情，每种颜色下是一组相近的情绪词。颜色只是分类和选择的方式：
+        </p>
+        <ul>
+          <li data-i18n="helpColorRed">红色 —— 高能量、不愉快：焦虑、愤怒、烦闷、不堪重负。</li>
+          <li data-i18n="helpColorYellow">黄色 —— 高能量、愉快：兴奋、喜悦、充满活力、热情。</li>
+          <li data-i18n="helpColorBlue">蓝色 —— 低能量、不愉快：难过、孤单、疲惫、气馁。</li>
+          <li data-i18n="helpColorGreen">绿色 —— 低能量、愉快：平静、满足、放松、安宁。</li>
+        </ul>
+      </section>
+
+      <section class="help-section">
+        <h2 data-i18n="helpShapeTitle">一首单曲</h2>
         <p data-i18n="helpShapeBody">
-          单曲是一段完整的瞬间；专辑是一组有共同情绪方向的曲子，各有性格，又能连在一起听。两种都可以先按默认设置，之后随时调整。
+          MoodMic 每次把一段心情写成一首完整的单曲。想要多乐章、专辑等更专门的创作，可以在「工作流」页签里进行。
         </p>
       </section>
 
@@ -85,7 +99,7 @@
       const COPY = {
         "zh-CN": {
           pageTitle: "帮助说明 · Arioso",
-          tabMoodMic: "MoodMic", tabWorkflow: "工作流", tabHelp: "帮助", tabBarLabel: "主导航",
+          tabMoodMic: "MoodMic", tabCalendar: "心情日历", tabWorkflow: "工作流", tabHelp: "帮助", tabBarLabel: "主导航",
           switchLanguage: "切换界面语言",
           helpEyebrow: "使用说明",
           helpTitle: "帮助说明",
@@ -93,13 +107,19 @@
           helpAboutTitle: "MoodMic 是什么",
           helpAboutBody: "它把\u201c此刻的心情\u201d变成一段属于你的音乐。你只需要用日常语言说出感受，不用懂乐理。",
           helpStepsTitle: "怎么用",
-          helpStep1: "说出心情：写几句话，或点选几个贴近此刻的词。",
-          helpStep2: "选择形态：一首单曲，或一张专辑。",
-          helpStep3: "确认方向：可以继续补充想法，也可以直接采纳当前方向。",
-          helpStep4: "等待创作：界面会显示当前进度。",
-          helpStep5: "试听结果：播放、下载，或回到工作流继续管理。",
-          helpShapeTitle: "单曲与专辑",
-          helpShapeBody: "单曲是一段完整的瞬间；专辑是一组有共同情绪方向的曲子，各有性格，又能连在一起听。两种都可以先按默认设置，之后随时调整。",
+          helpStep1: "描述心情与音乐：在对话里用几句话写下此刻的心情和想要的音乐。",
+          helpStep2: "讨论方向：继续聊，或把共识整理成作曲提示词。",
+          helpStep3: "确认心情：方向确定后会读出一个心情（颜色和词），你可以改。",
+          helpStep4: "开始创作：确认后生成这一首单曲。",
+          helpStep5: "试听结果：播放并下载，也可以在\u201c心情日历\u201d里回看并打开对应的对话。",
+          helpColorsTitle: "心情颜色",
+          helpColorsIntro: "MoodMic 用四种颜色表示心情，每种颜色下是一组相近的情绪词。颜色只是分类和选择的方式：",
+          helpColorRed: "红色 —— 高能量、不愉快：焦虑、愤怒、烦闷、不堪重负。",
+          helpColorYellow: "黄色 —— 高能量、愉快：兴奋、喜悦、充满活力、热情。",
+          helpColorBlue: "蓝色 —— 低能量、不愉快：难过、孤单、疲惫、气馁。",
+          helpColorGreen: "绿色 —— 低能量、愉快：平静、满足、放松、安宁。",
+          helpShapeTitle: "一首单曲",
+          helpShapeBody: "MoodMic 每次把一段心情写成一首完整的单曲。想要多乐章、专辑等更专门的创作，可以在\u201c工作流\u201d页签里进行。",
           helpWorkflowTitle: "工作流",
           helpWorkflowBody: "顶部的\u201c工作流\u201d页签里，有四种更专门的创作方式：",
           helpWf1: "无语料生成：直接使用模型已有的音乐知识。",
@@ -113,7 +133,7 @@
         },
         en: {
           pageTitle: "Help · Arioso",
-          tabMoodMic: "MoodMic", tabWorkflow: "Workflow", tabHelp: "Help", tabBarLabel: "Tab navigation",
+          tabMoodMic: "MoodMic", tabCalendar: "Mood calendar", tabWorkflow: "Workflow", tabHelp: "Help", tabBarLabel: "Tab navigation",
           switchLanguage: "Switch interface language",
           helpEyebrow: "HELP",
           helpTitle: "Help",
@@ -121,14 +141,19 @@
           helpAboutTitle: "What MoodMic is",
           helpAboutBody: "It turns how you feel right now into music of your own. You describe the feeling in everyday words — no musical training needed.",
           helpStepsTitle: "How it works",
-          helpStep1: "Say the mood: write a few lines, or pick a few words close to this moment.",
-          helpStep2: "Choose the form: a single piece, or an album.",
-          helpStep3: "Confirm the direction: add more thoughts, or accept the current direction.",
-          helpStep4: "Wait for creation: the page shows the current progress.",
-          helpStep5: "Listen: play, download, or continue managing it in the workflow studio.",
-          helpShapeTitle: "A piece or an album",
-          helpShapeBody: "A piece is one complete moment; an album is a set of tracks with a shared emotional direction — individual characters, listenable as a whole. Both start from sensible defaults you can change later.",
-          helpWorkflowTitle: "Workflows",
+          helpStep1: "Describe the mood and the music: write a few lines in the conversation about how you feel and what you want.",
+          helpStep2: "Discuss the direction: keep chatting, or turn the agreement into the composition prompt.",
+          helpStep3: "Confirm the feeling: once the direction is set, a feeling is read out (a colour and a word) — change it any time.",
+          helpStep4: "Start creating: confirm to generate this one piece.",
+          helpStep5: "Listen: play and download it, or look back at it in the mood calendar and open the conversation.",
+          helpColorsTitle: "Feeling colours",
+          helpColorsIntro: "MoodMic uses four colours for feelings, each covering a group of related emotion words. The colour is just how they are grouped and chosen:",
+          helpColorRed: "Red — high energy, unpleasant: anxious, angry, frustrated, overwhelmed.",
+          helpColorYellow: "Yellow — high energy, pleasant: excited, joyful, energised, enthusiastic.",
+          helpColorBlue: "Blue — low energy, unpleasant: sad, lonely, drained, discouraged.",
+          helpColorGreen: "Green — low energy, pleasant: calm, content, relaxed, peaceful.",
+          helpShapeTitle: "One piece",
+          helpShapeBody: "MoodMic turns one feeling into one complete piece. For multi-movement or album work, use the \u201cWorkflows\u201d tab.",          helpWorkflowTitle: "Workflows",
           helpWorkflowBody: "The \u201cWorkflows\u201d tab at the top holds four more specialised ways to create:",
           helpWf1: "Model-only: compose straight from the model's existing musical knowledge.",
           helpWf2: "Jazz corpus: retrieve from a local Jazz corpus before arranging.",

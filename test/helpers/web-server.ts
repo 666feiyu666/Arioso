@@ -6,6 +6,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 
 import type { DiscussionAgent } from "../../src/discussion/types.js";
+import type { MoodClassifier } from "../../src/web/mood-classifier.js";
 import { createAriosoServer } from "../../src/web/server.js";
 
 interface TestServer {
@@ -20,6 +21,7 @@ export async function withWebServer(
     prepare?: (root: string) => Promise<void>;
     environment?: NodeJS.ProcessEnv;
     discussionAgent?: DiscussionAgent;
+    moodClassifier?: MoodClassifier;
   } = {},
 ): Promise<void> {
   const root = await mkdtemp(path.join(tmpdir(), "arioso-web-test-"));
@@ -31,6 +33,7 @@ export async function withWebServer(
       preferencesPath: path.join(root, "settings.json"),
       environment: { ...options.environment, ARIOSO_OUTPUT_DIR: path.join(root, "outputs") },
       ...(options.discussionAgent ? { discussionAgent: options.discussionAgent } : {}),
+      ...(options.moodClassifier ? { moodClassifier: options.moodClassifier } : {}),
     });
     server.listen(0, "127.0.0.1");
     await once(server, "listening");

@@ -17,6 +17,7 @@
       </a>
       <div class="tabbar-tabs">
         <a class="tabbar-tab is-active" href="/" aria-current="page" data-i18n="tabMoodMic">MoodMic</a>
+        <a class="tabbar-tab" href="/calendar.html" data-i18n="tabCalendar">心情日历</a>
         <a class="tabbar-tab" href="/workflow.html" data-i18n="tabWorkflow">工作流</a>
         <a class="tabbar-tab" href="/help.html" data-i18n="tabHelp">帮助</a>
       </div>
@@ -25,8 +26,9 @@
       </div>
     </nav>
 
-    <main class="mm-main">
-      <div class="mm-stage" id="mm-stage" aria-live="polite"></div>
+    <main class="mm-layout">
+      <aside class="mm-side" id="mm-side" aria-label="对话记录" data-i18n-aria-label="historyLabel"></aside>
+      <section class="mm-chat" id="mm-stage" aria-live="polite"></section>
     </main>
 
     <script type="module" src="/moodmic.js"></script>
