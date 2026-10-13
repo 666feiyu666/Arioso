@@ -105,10 +105,9 @@ export function formatDayLabel(date, language) {
     : `${year} 年 ${month} 月 ${day} 日`;
 }
 
-// Marker background for one calendar day: solid for a single check-in, or equal
-// colour segments in chronological order, clockwise from the top.
-export function markerStyle(groupIds) {
-  const colors = groupIds.map((id) => groupById(id).color);
+// Marker background for one calendar day: solid for a single colour, or equal
+// colour segments in the given order, clockwise from the top.
+export function markerStyle(colors) {
   if (colors.length <= 1) return `background:${colors[0] ?? "transparent"}`;
   const n = colors.length;
   const stops = colors

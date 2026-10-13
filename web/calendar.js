@@ -1,13 +1,15 @@
-// The mood calendar page (/calendar.html): a month grid of feelings and music,
-// plus a detail panel for the selected day.
+// The mood calendar page (/calendar.html): a month grid of the music that was
+// actually made, plus a detail panel for the selected day.
 //
-// Feeling records are not entered here. This page reads what was recorded while
-// creating music, lets you re-colour a record, and links each record back to the
-// conversation it came from.
+// The grid is built from the pieces that still exist (GET /api/tasks) — every
+// piece is placed on the day it was created. A piece keeps the colour of the
+// mood recorded when it was made; a piece with no matching record (for example
+// one started in the workflow studio) uses the brand colour. Nothing is drawn
+// from history alone: delete a piece and it leaves the calendar.
 
 import {
   GROUPS, WEEKDAYS, api, applyI18n, dateParts, emotionLabel, esc,
-  groupById, groupName, markerStyle, entryHasMusic, readLanguage, persistLanguage,
+  groupById, groupName, markerStyle, readLanguage, persistLanguage,
 } from "./mood-common.js";
 
 const COPY = {
@@ -16,28 +18,26 @@ const COPY = {
     tabMoodMic: "MoodMic", tabCalendar: "心情日历", tabWorkflow: "工作流", tabHelp: "帮助",
     tabBarLabel: "主导航", switchLanguage: "切换界面语言",
     title: "我的心情日历",
-    lead: "每一天的圆点由当天的记录组成，颜色顺序就是记录的顺序。",
+    lead: "每一天的圆点，来自当天真正做出来的作品；颜色就是记录时的心情。",
     legendTitle: "四种颜色的含义",
     prevMonth: "上个月", nextMonth: "下个月",
-    emptyDay: "这一天还没有记录。",
-    daySummary: (count) => `${count} 条心情记录`,
-    daySummaryMusic: (count) => `${count} 条记录 · 有可播放的音乐`,
-    pickDay: "选择日历里的某一天，查看当天的记录。",
-    retrospective: "补记",
+    emptyDay: "这一天还没有作品。",
+    daySummary: (count) => `${count} 件作品`,
+    daySummaryMusic: (count) => `${count} 件作品 · 有可播放的音乐`,
+    pickDay: "选择日历里的某一天，查看当天做出的作品。",
+    untitledWork: "未命名作品",
     viewChat: "查看这次对话",
-    editColor: "编辑颜色",
+    editColor: "编辑心情颜色",
     cancel: "取消",
     save: "保存",
     moodColorLabel: "颜色",
     moodWordLabel: "情绪词",
     needPick: "先选一个颜色和词。",
-    noMusicYet: "还没有音乐",
     download: "下载音频",
     tryAgain: "再试一次",
     statusQueued: "排队中", statusComposing: "正在构思编曲", statusGenerating: "正在生成音频",
     statusAssembling: "正在拼接乐章", statusProcessing: "正在后期处理",
     statusCompleted: "已完成", statusFailed: "未完成",
-    summaryMusic: "音乐的感觉",
     loading: "正在准备…",
     errorGeneric: "出了点问题，请再试一次。",
   },
@@ -46,28 +46,26 @@ const COPY = {
     tabMoodMic: "MoodMic", tabCalendar: "Mood calendar", tabWorkflow: "Workflow", tabHelp: "Help",
     tabBarLabel: "Tab navigation", switchLanguage: "Switch interface language",
     title: "My mood calendar",
-    lead: "Each day's circle is made of that day's check-ins, in the order you recorded them.",
+    lead: "Each day's circle is built from the pieces you actually made — coloured by the mood you recorded.",
     legendTitle: "What the four colours mean",
     prevMonth: "Previous month", nextMonth: "Next month",
-    emptyDay: "No check-in on this day yet.",
-    daySummary: (count) => `${count} check-in${count === 1 ? "" : "s"}`,
-    daySummaryMusic: (count) => `${count} check-in${count === 1 ? "" : "s"} · music to play`,
-    pickDay: "Pick a day in the calendar to see its check-ins.",
-    retrospective: "Recorded later",
+    emptyDay: "No pieces made on this day yet.",
+    daySummary: (count) => `${count} piece${count === 1 ? "" : "s"}`,
+    daySummaryMusic: (count) => `${count} piece${count === 1 ? "" : "s"} · music to play`,
+    pickDay: "Pick a day in the calendar to see the pieces you made.",
+    untitledWork: "Untitled work",
     viewChat: "Open this conversation",
-    editColor: "Edit colour",
+    editColor: "Edit mood colour",
     cancel: "Cancel",
     save: "Save",
     moodColorLabel: "Colour",
     moodWordLabel: "Emotion word",
     needPick: "Pick a colour and a word first.",
-    noMusicYet: "No music yet",
     download: "Download audio",
     tryAgain: "Try again",
     statusQueued: "Queued", statusComposing: "Shaping the arrangement", statusGenerating: "Generating audio",
     statusAssembling: "Assembling movements", statusProcessing: "Post-processing",
     statusCompleted: "Completed", statusFailed: "Not finished",
-    summaryMusic: "Feeling of the music",
     loading: "Getting ready…",
     errorGeneric: "Something went wrong. Please try again.",
   },
@@ -84,7 +82,8 @@ const langToggle = document.querySelector("#lang-toggle");
 
 const state = {
   language: "zh-CN",
-  entries: [],
+  pieces: [],
+  taskEntry: new Map(),
   loaded: false,
   month: null,
   selectedDate: null,
@@ -109,16 +108,30 @@ function todayISO() {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 }
 
-function entriesOn(date) {
-  return state.entries
-    .filter((entry) => entry.date === date)
-    .slice()
-    .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+// The local calendar day a piece belongs to, from its creation time.
+function taskDate(task) {
+  const date = new Date(task.createdAt);
+  if (Number.isNaN(date.getTime())) return "";
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
-function chatIdFor(entry) {
-  const task = (entry.tasks ?? []).find((item) => item.sourceDiscussionId);
-  return task?.sourceDiscussionId ?? null;
+// One piece per MoodMic conversation — the latest one, exactly the piece the
+// MoodMic front end shows. Workflow-studio tasks belong to no conversation, so
+// they never reach this calendar.
+function piecesOn(date) {
+  return state.pieces
+    .filter(({ task }) => taskDate(task) === date)
+    .slice()
+    .sort((a, b) => String(a.task.createdAt).localeCompare(String(b.task.createdAt)));
+}
+
+function entryForTask(task) {
+  return state.taskEntry.get(task.id) ?? null;
+}
+
+function colorForTask(task) {
+  const entry = entryForTask(task);
+  return entry ? groupById(entry.group).color : "var(--brand)";
 }
 
 // ---------------------------------------------------------------------------
@@ -172,23 +185,20 @@ function renderCalendar() {
   }
   for (let day = 1; day <= daysInMonth; day += 1) {
     const iso = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-    const list = entriesOn(iso);
+    const list = piecesOn(iso);
     const isToday = iso === today;
-    const hasMusic = list.some(entryHasMusic);
+    const hasMusic = list.some(({ task }) => task.status === "completed");
     const summary = list.length
       ? (hasMusic ? t("daySummaryMusic", list.length) : t("daySummary", list.length))
       : t("emptyDay");
-    const words = list.map((entry) => emotionLabel(entry.group, entry.emotion, state.language)).join(" · ");
-    const label = list.length
-      ? `${monthLabel} ${day} — ${words}. ${summary}`
-      : `${monthLabel} ${day} — ${summary}`;
+    const label = `${monthLabel} ${day} — ${summary}`;
     cells.push(`
       <li class="mm-day${list.length ? " has-entry" : ""}${isToday ? " is-today" : ""}">
         <button class="mm-day-btn" type="button" data-date="${iso}"
           aria-label="${esc(label)}" aria-pressed="${state.selectedDate === iso ? "true" : "false"}"
           title="${esc(label)}">
           <span class="mm-day-number">${day}</span>
-          ${list.length ? `<span class="mm-marker" style="${markerStyle(list.map((entry) => entry.group))}"></span>
+          ${list.length ? `<span class="mm-marker" style="${markerStyle(list.map(({ task }) => colorForTask(task)))}"></span>
             <span class="mm-day-count">${list.length}</span>` : ""}
           ${hasMusic ? `<span class="mm-day-note" aria-hidden="true">♪</span>` : ""}
         </button>
@@ -232,7 +242,7 @@ function renderDetail() {
     return `<div class="mm-card"><p class="e-hint">${esc(t("pickDay"))}</p></div>`;
   }
   const date = state.selectedDate;
-  const list = entriesOn(date);
+  const list = piecesOn(date);
   const label = state.language === "en"
     ? new Date(`${date}T00:00:00`).toLocaleDateString("en", { weekday: "long", month: "long", day: "numeric" })
     : `${dateParts(date).year} 年 ${dateParts(date).month} 月 ${dateParts(date).day} 日`;
@@ -242,49 +252,42 @@ function renderDetail() {
       <div class="mm-day-detail-head">
         <h3>${esc(label)}</h3>
       </div>
-      ${list.length ? list.map(renderEntryCard).join("") : `<div class="mm-card"><p class="e-hint">${esc(t("emptyDay"))}</p></div>`}
+      ${list.length ? list.map(renderTaskCard).join("") : `<div class="mm-card"><p class="e-hint">${esc(t("emptyDay"))}</p></div>`}
     </section>
   `;
 }
 
-function renderEntryCard(entry) {
-  const group = groupById(entry.group);
-  const time = new Date(entry.createdAt).toLocaleTimeString(
-    state.language === "en" ? "en" : "zh-CN", { hour: "2-digit", minute: "2-digit" },
-  );
-  const tasks = entry.tasks ?? [];
-  const chatId = chatIdFor(entry);
-  const editing = state.editingId === entry.id;
+function renderTaskCard({ task, chat }) {
+  const entry = entryForTask(task);
+  const group = entry ? groupById(entry.group) : null;
+  const color = group ? group.color : "var(--brand)";
+  const chatId = chat?.id ?? null;
+  const editing = entry && state.editingId === entry.id;
 
   return `
-    <article class="mm-card mm-entry" style="--group:${group.color}">
+    <article class="mm-card mm-entry" style="--group:${color}">
       <header class="mm-entry-head">
-        <span class="mm-dot" style="background:${group.color}"></span>
-        <strong>${esc(emotionLabel(entry.group, entry.emotion, state.language))}</strong>
-        <span class="mm-entry-time">${esc(time)}</span>
-        ${entry.retrospective ? `<span class="mm-tag">${esc(t("retrospective"))}</span>` : ""}
+        <span class="mm-dot" style="background:${color}"></span>
+        <strong>${esc(task.title || t("untitledWork"))}</strong>
+        ${entry ? `<span class="mm-entry-time">${esc(emotionLabel(entry.group, entry.emotion, state.language))}</span>` : ""}
       </header>
-      ${entry.note ? `<p class="mm-entry-note">${esc(entry.note)}</p>` : ""}
-      ${entry.musicFeeling ? `<p class="mm-entry-music"><span>${esc(t("summaryMusic"))}</span> ${esc(entry.musicFeeling)}</p>` : ""}
+      ${task.description ? `<p class="mm-entry-note">${esc(task.description)}</p>` : ""}
       <div class="mm-entry-music-list">
-        ${tasks.length ? tasks.map((task) => `
-          <div class="mm-entry-task">
-            <span class="mm-entry-task-title">${esc(task.title || emotionLabel(entry.group, entry.emotion, state.language))}</span>
-            <span class="mm-entry-task-status">${esc(taskLine(task))}</span>
-            ${task.status === "completed"
-              ? `<audio class="mm-mini-player" controls preload="none" src="/api/tasks/${encodeURIComponent(task.id)}/audio"></audio>
-                 <a class="e-btn e-btn-ghost" href="/api/tasks/${encodeURIComponent(task.id)}/audio" download>${esc(t("download"))}</a>`
-              : task.status === "failed"
-                ? `<button class="e-btn e-btn-ghost" type="button" data-retry="${esc(task.id)}">${esc(t("tryAgain"))}</button>`
-                : ""}
-          </div>
-        `).join("") : `<span class="e-hint">${esc(t("noMusicYet"))}</span>`}
+        <div class="mm-entry-task">
+          <span class="mm-entry-task-status">${esc(taskLine(task))}</span>
+          ${task.status === "completed"
+            ? `<audio class="mm-mini-player" controls preload="none" src="/api/tasks/${encodeURIComponent(task.id)}/audio"></audio>
+               <a class="e-btn e-btn-ghost" href="/api/tasks/${encodeURIComponent(task.id)}/audio" download>${esc(t("download"))}</a>`
+            : task.status === "failed"
+              ? `<button class="e-btn e-btn-ghost" type="button" data-retry="${esc(task.id)}">${esc(t("tryAgain"))}</button>`
+              : ""}
+        </div>
       </div>
-      ${editing ? renderColorEditor(entry) : `
+      ${entry ? (editing ? renderColorEditor(entry) : `
         <div class="mm-entry-actions">
           ${chatId ? `<a class="e-btn e-btn-secondary" href="/?chat=${encodeURIComponent(chatId)}">${esc(t("viewChat"))} →</a>` : ""}
           <button class="e-btn e-btn-ghost" type="button" data-edit="${esc(entry.id)}">${esc(t("editColor"))}</button>
-        </div>`}
+        </div>`) : ""}
     </article>
   `;
 }
@@ -333,7 +336,7 @@ function bind() {
   }
   for (const button of stage.querySelectorAll("[data-edit]")) {
     button.addEventListener("click", () => {
-      const entry = state.entries.find((item) => item.id === button.dataset.edit);
+      const entry = [...state.taskEntry.values()].find((item) => item.id === button.dataset.edit);
       if (!entry) return;
       state.editingId = entry.id;
       state.draft = { group: entry.group, emotion: entry.emotion };
@@ -378,7 +381,7 @@ async function saveColor(entryId) {
     });
     state.editingId = null;
     state.draft = { group: null, emotion: null };
-    await loadEntries();
+    await loadData();
   } catch (error) {
     state.message = error instanceof Error ? error.message : String(error);
     state.messageError = true;
@@ -397,9 +400,10 @@ function shiftMonth(delta) {
 }
 
 async function retryAsNewAttempt(taskId) {
-  const entry = state.entries.find((item) => (item.tasks ?? []).some((task) => task.id === taskId));
-  const task = entry?.tasks?.find((item) => item.id === taskId);
-  if (!task) return;
+  const piece = state.pieces.find(({ task }) => task.id === taskId);
+  if (!piece) return;
+  const task = piece.task;
+  const entry = entryForTask(task);
   state.message = "";
   try {
     const created = await api("/api/tasks", {
@@ -414,14 +418,16 @@ async function retryAsNewAttempt(taskId) {
         lyriaModel: task.lyriaModel,
       }),
     });
-    await api(`/api/mood-entries/${encodeURIComponent(entry.id)}/tasks`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ taskId: created.id }),
-    });
+    if (entry) {
+      await api(`/api/mood-entries/${encodeURIComponent(entry.id)}/tasks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ taskId: created.id }),
+      });
+    }
     state.message = t("statusQueued");
     state.messageError = false;
-    await loadEntries();
+    await loadData();
   } catch (error) {
     state.message = error instanceof Error ? error.message : String(error);
     state.messageError = true;
@@ -429,9 +435,26 @@ async function retryAsNewAttempt(taskId) {
   render();
 }
 
-async function loadEntries() {
-  const data = await api("/api/mood-entries");
-  state.entries = Array.isArray(data?.entries) ? data.entries : [];
+async function loadData() {
+  const [chatsData, entriesData] = await Promise.all([
+    api("/api/mood-chats"),
+    api("/api/mood-entries"),
+  ]);
+  const chats = Array.isArray(chatsData) ? chatsData : [];
+  const entries = Array.isArray(entriesData?.entries) ? entriesData.entries : [];
+  const byTask = new Map();
+  for (const entry of entries) {
+    for (const taskId of entry.taskIds ?? []) {
+      byTask.set(taskId, entry);
+    }
+  }
+  state.taskEntry = byTask;
+  // One piece per conversation, taken from the latest task — the same piece
+  // MoodMic itself displays for that conversation.
+  state.pieces = chats.flatMap((chat) => {
+    const task = (chat.tasks ?? []).at(-1);
+    return task ? [{ task, chat }] : [];
+  });
   state.loaded = true;
 }
 
@@ -441,7 +464,7 @@ async function boot() {
   state.month = { year: now.getFullYear(), month: now.getMonth() + 1 };
   render();
   try {
-    await loadEntries();
+    await loadData();
   } catch {
     state.loaded = true;
   }

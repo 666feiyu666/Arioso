@@ -30,6 +30,7 @@
   padding: 24px 18px 24px 0;
   border-right: 1px solid var(--line);
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .mm-new {
@@ -41,11 +42,13 @@
   margin: 0;
   padding: 0;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 5px;
 }
 
 .mm-side-item {
   width: 100%;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 3px;
@@ -70,6 +73,7 @@
 }
 
 .mm-side-title {
+  max-width: 100%;
   font-weight: 600;
   font-size: 0.9rem;
   white-space: nowrap;
@@ -835,7 +839,6 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
-  max-height: 42vh;
   overflow-y: auto;
   padding-right: 4px;
 }
@@ -1129,6 +1132,31 @@
 .mm-player {
   width: 100%;
   margin: 8px 0 4px;
+}
+
+.mm-prompt {
+  margin: 12px 0 0;
+}
+
+.mm-prompt summary {
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--brand-deep);
+}
+
+.mm-prompt-body {
+  margin-top: 10px;
+  padding: 16px 18px;
+  border-left: 3px solid var(--brand);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  color: var(--ink-soft);
+  background: var(--surface-2);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .mm-error-box {

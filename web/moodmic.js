@@ -86,6 +86,7 @@ const COPY = {
     phaseProcessing: "正在做最后的整理与导出…",
     phaseWaiting: "正在准备…",
     listenTitle: "你的音乐。",
+    lyriaPrompt: "Lyria 生成提示",
     download: "下载音频",
     tryAgain: "再试一次",
     createAnother: "开始新的对话",
@@ -147,6 +148,7 @@ const COPY = {
     phaseProcessing: "Doing the final assembly and export…",
     phaseWaiting: "Getting ready…",
     listenTitle: "Your music.",
+    lyriaPrompt: "Lyria generation prompt",
     download: "Download audio",
     tryAgain: "Try again",
     createAnother: "Start a new chat",
@@ -183,6 +185,7 @@ const state = {
   pending: null,
   thinking: false,
   sending: false,
+  threadSignature: null,
   replyDraft: "",
   proposal: "",
   judged: false,
@@ -254,6 +257,8 @@ function render() {
 }
 
 function renderSidebar() {
+  // Keep the reader's place: re-rendering the list must not jump the sidebar.
+  const previousScrollTop = side.scrollTop;
   side.innerHTML = `
     <button class="e-btn e-btn-secondary mm-new" type="button" id="mm-new">＋ ${esc(t("newChat"))}</button>
     ${state.discussions.length ? `<ul class="mm-side-list">${state.discussions.map((discussion) => {
@@ -272,6 +277,7 @@ function renderSidebar() {
   for (const button of side.querySelectorAll("[data-open]")) {
     button.addEventListener("click", () => openDiscussion(button.dataset.open));
   }
+  side.scrollTop = previousScrollTop;
 }
 
 function sideMeta(session) {
@@ -325,7 +331,27 @@ function renderExamples() {
   `;
 }
 
+// A stable fingerprint of what the thread is showing. When it changes, new
+// output has arrived and the thread follows it down; otherwise the reader's
+// position is kept, so a plain re-render never jumps the view.
+function threadSignature() {
+  const session = state.session;
+  const submitted = sessionTasks(session).length > 0 || session?.status === "submitted";
+  return [
+    session ? 1 : 0,
+    session?.messages?.length ?? 0,
+    state.pending ? 1 : 0,
+    state.thinking ? 1 : 0,
+    state.proposal ? 1 : 0,
+    state.busy ? 1 : 0,
+    submitted ? 1 : 0,
+  ].join(":");
+}
+
 function renderChat() {
+  const previousThread = stage.querySelector("#mm-thread");
+  const previousScrollTop = previousThread ? previousThread.scrollTop : 0;
+  const previousSignature = state.threadSignature ?? null;
   stage.innerHTML = `
     ${mainHead()}
     <div class="mm-thread${state.session ? "" : " is-empty"}" id="mm-thread">${renderThread()}</div>
@@ -333,6 +359,16 @@ function renderChat() {
     ${messageLine()}
   `;
   bindChat();
+  const thread = stage.querySelector("#mm-thread");
+  if (thread) {
+    const signature = threadSignature();
+    if (previousSignature !== null && signature !== previousSignature) {
+      thread.scrollTop = thread.scrollHeight;
+    } else {
+      thread.scrollTop = previousScrollTop;
+    }
+    state.threadSignature = signature;
+  }
 }
 
 function messageLine() {
@@ -377,7 +413,7 @@ function renderThread() {
             <strong>${esc(t("directionReady"))}</strong>
             <span>${esc(t("directionReadyHint"))}</span>
           </div>
-          <button class="e-btn e-btn-primary" type="button" id="mm-make-prompt">${esc(t("makePrompt"))} →</button>
+          <button class="e-btn e-btn-primary${state.busy ? " is-loading" : ""}" type="button" id="mm-make-prompt" ${state.busy ? "disabled" : ""}>${esc(t("makePrompt"))} →</button>
         </div>
       `);
     }
@@ -451,7 +487,7 @@ function renderProposal() {
         <span>${esc(t("promptHint"))}</span>
       </div>
       <textarea class="e-textarea" id="mm-proposal-text" maxlength="8000">${esc(state.proposal)}</textarea>
-      <div class="mm-jazz">
+      <div class="mm-jazz${state.jazz ? " is-on" : ""}">
         <button class="mm-jazz-btn" type="button" id="mm-jazz" aria-pressed="${state.jazz}">why not jazz</button>
         <span class="mm-jazz-note">${esc(t("jazzExplain"))}</span>
       </div>
@@ -524,6 +560,11 @@ function renderResult() {
       <h3 class="mm-result-title">${esc(task.title || t("listenTitle"))}</h3>
       ${task.description ? `<p class="mm-result-desc">${esc(task.description)}</p>` : ""}
       <audio class="mm-player" controls preload="metadata" src="/api/tasks/${encodeURIComponent(task.id)}/audio"></audio>
+      ${task.musicSpec?.lyriaPrompt ? `
+      <details class="mm-prompt">
+        <summary>${esc(t("lyriaPrompt"))}</summary>
+        <div class="mm-prompt-body">${esc(task.musicSpec.lyriaPrompt)}</div>
+      </details>` : ""}
       <div class="mm-foot-actions">
         <a class="e-btn e-btn-secondary" href="/api/tasks/${encodeURIComponent(task.id)}/audio" download>${esc(t("download"))}</a>
         <button class="e-btn e-btn-primary" type="button" id="mm-new-2">${esc(t("createAnother"))}</button>

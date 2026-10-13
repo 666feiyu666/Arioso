@@ -457,6 +457,7 @@ const state = {
   discussionSessions: [],
   discussionPending: null,
   discussionThinking: false,
+  discussionSignature: null,
   selectedDiscussionImage: null,
   selectedDiscussionImageUrl: null,
 };
@@ -1270,6 +1271,8 @@ function renderTaskList() {
   const legacyTasks = state.tasks.filter((task) => !sessionTaskIds.has(task.id));
   elements.taskCount.textContent = String(state.discussionSessions.length + legacyTasks.length);
   const workflowTypes = ["01-general", "02-jazz", "03-orchestral", "04-album"];
+  // Keep the reader's place: re-rendering the list must not jump the sidebar.
+  const previousScrollTop = elements.taskList.scrollTop;
   elements.taskList.innerHTML = workflowTypes.map((workflowType) => {
     const sessions = state.discussionSessions.filter((session) =>
       (session.taskOptions?.workflowType || workflowTypeForTask(latestSessionTask(session) || {})) === workflowType,
@@ -1351,6 +1354,7 @@ function renderTaskList() {
   elements.taskList.querySelectorAll("[data-play-task]").forEach((button) => {
     button.addEventListener("click", () => playTask(button.dataset.playTask));
   });
+  elements.taskList.scrollTop = previousScrollTop;
   syncPlaybackControls();
 }
 
@@ -1839,11 +1843,10 @@ function renderDiscussion() {
   if (state.discussionPending) parts.push(pendingDiscussionMessageHtml(state.discussionPending));
   if (state.discussionThinking) parts.push(discussionTypingHtml());
   const list = elements.discussionMessages;
-  // Only follow the newest message when the reader is already at the bottom.
-  // Otherwise keep their position, so an update never yanks the list down.
-  const followBottom = list.childElementCount === 0
-    || list.scrollHeight - list.scrollTop - list.clientHeight <= 32;
+  // Don't scroll on a plain re-render; only follow the newest message when new
+  // output has actually arrived, so an update never yanks the reader away.
   const previousScrollTop = list.scrollTop;
+  const previousSignature = state.discussionSignature ?? null;
   list.innerHTML = parts.join("");
   const task = latestSessionTask(session);
   elements.discussionScope.textContent = discussionScopeLabel(session?.taskOptions);
@@ -1858,8 +1861,16 @@ function renderDiscussion() {
   if (proposal && elements.proposalText.value !== proposal) elements.proposalText.value = proposal;
   elements.generateProposal.disabled = !session?.messages?.some((message) => message.role === "user") || state.submitting;
   if (session) elements.form.hidden = session.status === "submitted";
-  if (parts.length) {
-    list.scrollTop = followBottom ? list.scrollHeight : previousScrollTop;
+  const signature = [
+    session?.messages?.length ?? 0,
+    state.discussionPending ? 1 : 0,
+    state.discussionThinking ? 1 : 0,
+  ].join(":");
+  state.discussionSignature = signature;
+  if (previousSignature !== null && signature !== previousSignature) {
+    list.scrollTop = list.scrollHeight;
+  } else {
+    list.scrollTop = previousScrollTop;
   }
   renderProposalSettings();
 }
