@@ -1,15 +1,6 @@
-/* Shared top tab-bar navigation across MoodMic, Workflow and Help pages.
-   Self-contained: defines its own tokens so it can be linked alongside both
-   editorial.css (MoodMic/Help) and styles.css (Workflow) without conflicts. */
-
-:root {
-  --tabbar-h: 62px;
-  --tabbar-surface: rgba(247, 242, 233, 0.92);
-  --tabbar-line: rgba(43, 38, 32, 0.12);
-  --tabbar-ink: #2b2620;
-  --tabbar-muted: #8c8271;
-  --tabbar-accent: #b1642f;
-}
+/* Shared top navigation — the studio "transport bar" that runs across
+   MoodMic, the mood calendar, the workflow studio and help. Loaded on every
+   page after theme.css, so it only consumes tokens. */
 
 .tabbar {
   position: fixed;
@@ -18,12 +9,12 @@
   height: var(--tabbar-h);
   display: flex;
   align-items: center;
-  gap: 30px;
-  padding: 0 clamp(18px, 4vw, 40px);
-  background: var(--tabbar-surface);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--tabbar-line);
+  gap: 34px;
+  padding: 0 clamp(16px, 4vw, 36px);
+  background: color-mix(in srgb, var(--surface) 86%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
 }
 
 .tabbar-brand {
@@ -35,27 +26,30 @@
 }
 
 .tabbar-brand .mark {
-  width: 34px;
-  height: 34px;
+  width: 26px;
+  height: 26px;
   display: grid;
   place-items: center;
-  border-radius: 50%;
-  background: var(--tabbar-ink);
-  color: #f7f2e9;
-  font-family: Georgia, "Noto Serif SC", serif;
-  font-size: 1.05rem;
+  border-radius: 7px;
+  background: var(--ink);
+  color: var(--surface);
+  font-family: var(--display);
+  font-size: 0.94rem;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .tabbar-brand .name {
-  font-family: Georgia, "Noto Serif SC", serif;
-  font-size: 1.18rem;
-  letter-spacing: -0.01em;
+  font-family: var(--display);
+  font-size: 1.06rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .tabbar-tabs {
   display: flex;
   align-items: stretch;
-  gap: 8px;
+  gap: 4px;
   height: 100%;
 }
 
@@ -63,31 +57,31 @@
   position: relative;
   display: inline-flex;
   align-items: center;
-  padding: 0 10px;
-  color: var(--tabbar-muted);
+  padding: 0 12px;
+  color: var(--muted);
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.93rem;
   text-decoration: none;
   transition: color 0.16s ease;
 }
 
 .tabbar-tab:hover {
-  color: var(--tabbar-ink);
+  color: var(--ink);
 }
 
 .tabbar-tab.is-active {
-  color: var(--tabbar-ink);
+  color: var(--ink);
 }
 
 .tabbar-tab.is-active::after {
   content: "";
   position: absolute;
-  left: 6px;
-  right: 6px;
+  left: 12px;
+  right: 12px;
   bottom: 0;
-  height: 2px;
-  border-radius: 2px 2px 0 0;
-  background: var(--tabbar-accent);
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--brand);
 }
 
 .tabbar-end {
@@ -97,13 +91,12 @@
   gap: 10px;
 }
 
-/* Every page with the tab bar gets pushed below it. */
+/* Every page with the bar is pushed below it. */
 body.has-tabbar {
   padding-top: var(--tabbar-h);
 }
 
-/* The workflow studio fixes/positions its own sidebar and shell against the
-   viewport top, so those need to start below the tab bar. */
+/* The workflow studio anchors its sidebar and shell to the viewport top. */
 body.has-tabbar .app-shell {
   min-height: calc(100vh - var(--tabbar-h));
 }
@@ -118,11 +111,21 @@ body.has-tabbar .brand-row {
 
 @media (max-width: 640px) {
   .tabbar {
-    gap: 14px;
+    gap: 12px;
     padding: 0 14px;
   }
 
   .tabbar-brand .name {
     display: none;
+  }
+
+  .tabbar-tab {
+    padding: 0 8px;
+    font-size: 0.88rem;
+  }
+
+  .tabbar-tab.is-active::after {
+    left: 8px;
+    right: 8px;
   }
 }

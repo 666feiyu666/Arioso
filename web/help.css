@@ -1,35 +1,42 @@
-/* Arioso · Help page */
+/* Arioso · Help page — a plain document column. No decorative eyebrows. */
+
+/* The melody backdrop belongs to the music pages; help stays plain. */
+body.help-page {
+  background-image: none;
+}
 
 .help-main {
-  max-width: 760px;
+  max-width: 720px;
   margin: 0 auto;
-  padding: clamp(28px, 6vh, 56px) clamp(20px, 5vw, 40px) 96px;
+  padding: clamp(30px, 7vh, 64px) clamp(20px, 5vw, 40px) 110px;
 }
 
 .help-title {
-  font-size: clamp(1.9rem, 4vw, 2.6rem);
-  margin: 12px 0 10px;
+  font-size: clamp(1.9rem, 4vw, 2.5rem);
+  margin: 0 0 14px;
 }
 
 .help-intro {
-  margin: 0 0 34px;
+  margin: 0 0 40px;
   color: var(--ink-soft);
   font-size: 1.05rem;
+  line-height: 1.7;
 }
 
 .help-section {
-  padding: 24px 0;
+  padding: 26px 0;
   border-top: 1px solid var(--line);
 }
 
 .help-section h2 {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   margin: 0 0 12px;
 }
 
 .help-section p {
   margin: 0 0 10px;
   color: var(--ink-soft);
+  line-height: 1.75;
 }
 
 .help-section p:last-child {
@@ -39,12 +46,13 @@
 .help-section ol,
 .help-section ul {
   margin: 0;
-  padding-left: 1.25em;
+  padding-left: 1.3em;
   color: var(--ink-soft);
+  line-height: 1.75;
 }
 
 .help-section li {
-  margin: 6px 0;
+  margin: 7px 0;
 }
 
 .help-section li strong {
@@ -56,5 +64,5 @@
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
-  margin-top: 34px;
+  margin-top: 38px;
 }

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="560" viewBox="0 0 1600 560" fill="none">
+  <!-- A melody contour: pitch over time, kept a whisper above the page. -->
+  <path d="M0 330 C160 330 220 120 380 150 C540 180 600 430 760 405 C920 380 980 165 1140 190 C1300 215 1360 440 1520 405 C1560 397 1580 375 1600 360"
+        stroke="#c6c0f0" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Four notes sitting on the line, one per feeling colour. -->
+  <circle cx="380" cy="150" r="6.5" fill="#e8ebf1" stroke="#e87575" stroke-width="3"/>
+  <circle cx="760" cy="405" r="6.5" fill="#e8ebf1" stroke="#e9bd46" stroke-width="3"/>
+  <circle cx="1140" cy="190" r="6.5" fill="#e8ebf1" stroke="#779dd6" stroke-width="3"/>
+  <circle cx="1520" cy="405" r="6.5" fill="#e8ebf1" stroke="#83b59a" stroke-width="3"/>
+</svg>

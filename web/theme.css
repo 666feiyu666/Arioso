@@ -1,0 +1,216 @@
+/* Arioso · Signal Studio
+   Single source of design tokens for every page (MoodMic, mood calendar,
+   workflow studio, help). Loaded first; page stylesheets build on it. */
+
+:root {
+  color-scheme: light;
+
+  /* Surfaces — cool, studio-neutral, deliberately away from warm paper */
+  --bg: #e8ebf1;
+  --surface: #ffffff;
+  --surface-2: #f2f4f8;
+  --surface-3: #e7ebf2;
+  --overlay: rgba(16, 21, 31, 0.42);
+
+  /* Ink */
+  --ink: #10151f;
+  --ink-soft: #454d5e;
+  --muted: #767f92;
+  --faint: #9aa2b2;
+
+  /* Lines */
+  --line: #dbdfe8;
+  --line-strong: #c1c7d3;
+
+  /* Brand + signals */
+  --brand: #5546e0;
+  --brand-deep: #3a2ec0;
+  --brand-soft: #e9e6fb;
+  --record: #e5484d;
+  --record-deep: #bd2b30;
+  --ok: #2f9d78;
+  --ok-soft: #e3f3ec;
+  --danger: #c8433a;
+  --danger-soft: #fbece9;
+
+  /* Mood signal colours — mirrors web/mood-common.js */
+  --mood-coral: #e87575;
+  --mood-gold: #e9bd46;
+  --mood-blue: #779dd6;
+  --mood-sage: #83b59a;
+
+  /* Type */
+  --sans: "Archivo", "PingFang SC", "Microsoft YaHei", "Noto Sans SC",
+    system-ui, sans-serif;
+  --display: var(--sans);
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Consolas,
+    "Courier New", monospace;
+
+  /* Shape — restrained radii, hierarchy from lines and tone, not float */
+  --radius-lg: 15px;
+  --radius-md: 11px;
+  --radius-sm: 7px;
+
+  /* Motion */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  --tabbar-h: 60px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: var(--bg);
+  background-image: url("melody.svg");
+  background-repeat: no-repeat;
+  background-position: center 42%;
+  background-size: min(1760px, 140%) auto;
+  background-attachment: fixed;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.017em;
+  color: var(--ink);
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+textarea,
+select,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+button,
+select {
+  cursor: pointer;
+}
+
+img {
+  max-width: 100%;
+}
+
+/* Tabular figures for anything that reads as data. */
+.num,
+output,
+time {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+::selection {
+  color: var(--ink);
+  background: var(--brand-soft);
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Slim, theme-matched scrollbars ----------------------------------------- */
+
+.task-list,
+.mm-side,
+.mm-thread,
+.discussion-messages,
+.settings-dialog,
+.album-view,
+.help-main {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+.task-list::-webkit-scrollbar,
+.mm-side::-webkit-scrollbar,
+.mm-thread::-webkit-scrollbar,
+.discussion-messages::-webkit-scrollbar,
+.settings-dialog::-webkit-scrollbar,
+.album-view::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+.task-list::-webkit-scrollbar-thumb,
+.mm-side::-webkit-scrollbar-thumb,
+.mm-thread::-webkit-scrollbar-thumb,
+.discussion-messages::-webkit-scrollbar-thumb,
+.settings-dialog::-webkit-scrollbar-thumb,
+.album-view::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: var(--line-strong);
+  background-clip: padding-box;
+}
+
+.task-list::-webkit-scrollbar-thumb:hover,
+.mm-side::-webkit-scrollbar-thumb:hover,
+.mm-thread::-webkit-scrollbar-thumb:hover,
+.discussion-messages::-webkit-scrollbar-thumb:hover,
+.settings-dialog::-webkit-scrollbar-thumb:hover,
+.album-view::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+  background-clip: padding-box;
+}
+
+.task-list::-webkit-scrollbar-track,
+.mm-side::-webkit-scrollbar-track,
+.mm-thread::-webkit-scrollbar-track,
+.discussion-messages::-webkit-scrollbar-track,
+.settings-dialog::-webkit-scrollbar-track,
+.album-view::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.e-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

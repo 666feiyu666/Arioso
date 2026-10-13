@@ -11,6 +11,28 @@ import {
   persistLanguage, readLanguage,
 } from "./mood-common.js";
 
+// Four starting prompts, one per feeling colour. They fill the otherwise
+// empty MoodMic screen and reuse the four mood signals already defined in
+// mood-common.js (coral / gold / blue / sage).
+const EXAMPLES = {
+  coral: {
+    zh: "雨还没停，我需要一段能接住这点烦躁的音乐。",
+    en: "The rain won't let up — I want something to hold this restlessness.",
+  },
+  gold: {
+    zh: "今晚很兴奋，想要一首明亮、让人想动起来的曲子。",
+    en: "I'm wired tonight — give me something bright and kinetic.",
+  },
+  blue: {
+    zh: "有点累，也有点孤单，想要一段慢慢流淌的音乐。",
+    en: "Tired and a little lonely — a slower current of music.",
+  },
+  sage: {
+    zh: "现在很平静，来一段让下午更松弛的声音。",
+    en: "Calm right now — something to make the afternoon looser.",
+  },
+};
+
 const COPY = {
   "zh-CN": {
     pageTitle: "MoodMic · 把心情变成音乐",
@@ -22,6 +44,7 @@ const COPY = {
     untitled: "新对话",
     greeting: "把此刻的心情变成音乐。",
     greetingLead: "用你自己的话写下此刻的心情和想要的音乐。",
+    examplesLead: "不知道从哪写起？点一种心情，先起个头。",
     composerPlaceholder: "说说此刻的心情，和想要的音乐…",
     composerHint: "Enter 发送，Shift + Enter 换行",
     send: "发送",
@@ -82,6 +105,7 @@ const COPY = {
     untitled: "New chat",
     greeting: "Turn how you feel into music.",
     greetingLead: "Describe the feeling and the music you want in your own words.",
+    examplesLead: "Not sure where to start? Pick a feeling to get you going.",
     composerPlaceholder: "Describe how you feel, and the music you want…",
     composerHint: "Enter to send, Shift + Enter for a new line",
     send: "Send",
@@ -270,10 +294,41 @@ function mainHead() {
   `;
 }
 
+function renderExamples() {
+  const key = state.language === "en" ? "en" : "zh";
+  const rows = [70, 150, 80, 150];
+  const dots = GROUPS.map((group, index) => `
+        <circle class="mm-melody-dot" data-point="${group.id}"
+          cx="${(index + 0.5) * 250}" cy="${rows[index]}" r="7"
+          fill="var(--bg)" stroke="${group.color}" stroke-width="3"
+          vector-effect="non-scaling-stroke" />`).join("");
+  return `
+    <div class="mm-examples">
+      <svg class="mm-melody" viewBox="0 0 1000 220" preserveAspectRatio="xMidYMid meet"
+        aria-hidden="true" focusable="false">
+        <path class="mm-melody-path"
+          d="M0,110 C41.7,110 83.3,70 125,70 C208.3,70 291.7,150 375,150 C458.3,150 541.7,80 625,80 C708.3,80 791.7,150 875,150 C916.7,150 958.3,110 1000,110"
+          fill="none" stroke-width="2.5" stroke-linecap="round" vector-effect="non-scaling-stroke" />${dots}
+      </svg>
+      <p class="mm-examples-lead">${esc(t("examplesLead"))}</p>
+      <div class="mm-examples-grid">
+        ${GROUPS.map((group) => {
+          const text = EXAMPLES[group.id]?.[key] ?? "";
+          return `
+          <button class="mm-example" type="button" data-example="${esc(text)}" data-example-group="${group.id}" style="--group:${group.color}">
+            <span class="mm-example-mood"><span class="mm-example-swatch" aria-hidden="true"></span>${esc(groupName(group, state.language))}</span>
+            <span class="mm-example-text">${esc(text)}</span>
+          </button>`;
+        }).join("")}
+      </div>
+    </div>
+  `;
+}
+
 function renderChat() {
   stage.innerHTML = `
     ${mainHead()}
-    <div class="mm-thread" id="mm-thread">${renderThread()}</div>
+    <div class="mm-thread${state.session ? "" : " is-empty"}" id="mm-thread">${renderThread()}</div>
     ${renderComposer()}
     ${messageLine()}
   `;
@@ -298,6 +353,7 @@ function messageImages(message) {
 function renderThread() {
   const session = state.session;
   const parts = [];
+  if (!session) parts.push(renderExamples());
   for (const message of session?.messages ?? []) {
     parts.push(`<article class="mm-msg ${message.role}">${messageImages(message)}${esc(message.content)}</article>`);
   }
@@ -565,6 +621,31 @@ function bindChat() {
   }
   stage.querySelector("#mm-retry")?.addEventListener("click", () => retryAsNewAttempt(state.session?.tasks?.at(-1)?.id));
   stage.querySelector("#mm-new-2")?.addEventListener("click", newChat);
+  for (const button of stage.querySelectorAll("[data-example]")) {
+    button.addEventListener("click", () => {
+      // Fill the composer in place — no re-render, so the melody curve and its
+      // four points keep their state instead of replaying the entrance.
+      state.input = button.dataset.example;
+      const input = stage.querySelector("#mm-input");
+      if (input) {
+        input.value = state.input;
+        input.focus();
+        input.setSelectionRange(input.value.length, input.value.length);
+      }
+    });
+  }
+  // Link each example card to its data point on the melody curve.
+  for (const card of stage.querySelectorAll("[data-example-group]")) {
+    const dot = stage.querySelector(`.mm-melody-dot[data-point="${card.dataset.exampleGroup}"]`);
+    const setActive = (on) => {
+      card.classList.toggle("is-active", on);
+      dot?.classList.toggle("is-active", on);
+    };
+    card.addEventListener("mouseenter", () => setActive(true));
+    card.addEventListener("mouseleave", () => setActive(false));
+    card.addEventListener("focus", () => setActive(true));
+    card.addEventListener("blur", () => setActive(false));
+  }
 }
 
 // ---------------------------------------------------------------------------

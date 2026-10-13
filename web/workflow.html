@@ -3,8 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#f4f1ea" />
+    <meta name="theme-color" content="#e8ebf1" />
     <title>Arioso · AI 音乐工坊</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/theme.css" />
     <link rel="stylesheet" href="/styles.css" />
     <link rel="stylesheet" href="/nav.css" />
   </head>
@@ -26,7 +30,6 @@
         <div class="brand-row">
           <div class="brand-mark" aria-hidden="true">A</div>
           <div>
-            <p class="eyebrow">AI MUSIC STUDIO</p>
             <h1>Arioso</h1>
           </div>
         </div>
@@ -55,7 +58,6 @@
       <main class="workspace">
         <section id="entry-view" class="view entry-view">
           <div class="entry-hero">
-            <p class="eyebrow accent" data-i18n="entryEyebrow">CHOOSE A WORKFLOW</p>
             <h2 data-i18n-html="entryTitle">选择音乐的<br />创作方式。</h2>
             <p data-i18n="entryCopy">从模型自身知识开始，或让 Jazz 语料为编曲提供参考。</p>
           </div>
@@ -103,7 +105,7 @@
         <section id="album-view" class="view album-view" hidden>
           <button class="back-button" id="back-albums-entry" type="button" data-i18n="backEntry">← 返回生成方式选择</button>
           <header class="album-shelf-header">
-            <div><p class="eyebrow accent">04 · ALBUMS</p><h2 data-i18n="yourAlbums">你的专辑。</h2><p data-i18n="albumShelfCopy">打开一张专辑，听听候选曲，再选出你想收录的声音。</p></div>
+            <div><h2 data-i18n="yourAlbums">你的专辑。</h2><p data-i18n="albumShelfCopy">打开一张专辑，听听候选曲，再选出你想收录的声音。</p></div>
             <button class="primary-button" id="create-album" type="button" data-i18n="newAlbum">＋ 新建专辑</button>
           </header>
           <div class="album-grid" id="album-grid"></div>
@@ -145,7 +147,6 @@
           <section class="examples-section" aria-labelledby="examples-title">
             <div class="section-title-row">
               <div>
-                <p class="eyebrow">STARTING POINTS</p>
                 <h3 id="examples-title" data-i18n="examplesTitle">从一个声音画面开始</h3>
               </div>
               <p data-i18n="examplesHint">选择示例后仍可自由修改</p>
@@ -158,7 +159,7 @@
           <button class="back-button" id="back-home" type="button" data-i18n="backHome">← 返回创作台</button>
           <section class="discussion-panel" id="discussion-panel" aria-label="创作讨论" data-i18n-aria-label="creativeDiscussion" hidden>
             <div class="discussion-heading">
-              <div><span class="eyebrow" data-i18n="promptDirector">PROMPT DIRECTOR</span><strong data-i18n="creativeDiscussion">创作讨论</strong><span class="discussion-scope" id="discussion-scope"></span></div>
+              <div><strong data-i18n="creativeDiscussion">创作讨论</strong><span class="discussion-scope" id="discussion-scope"></span></div>
               <span class="discussion-status" id="discussion-status"></span>
             </div>
             <div class="discussion-messages" id="discussion-messages" aria-live="polite"></div>
@@ -256,7 +257,6 @@
       <form id="settings-form">
         <header class="settings-header">
           <div>
-            <p class="eyebrow" data-i18n="preferences">PREFERENCES</p>
             <h2 data-i18n="settings">设置</h2>
           </div>
           <button class="dialog-close" id="close-settings" type="button" aria-label="关闭" data-i18n-aria-label="close">×</button>
@@ -321,7 +321,6 @@
       <form method="dialog">
         <header class="settings-header">
           <div>
-            <p class="eyebrow" data-i18n="confirmEyebrow">CONFIRM</p>
             <h2 id="confirm-title"></h2>
           </div>
         </header>
