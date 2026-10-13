@@ -29,9 +29,9 @@ const COPY = {
     albumOptionsHint: "可以先按默认，之后随时能改。",
     clarifyEyebrow: "STEP 3 · 方向",
     clarifyTitle: "说说你更具体的期待。",
-    clarifyLead: "MoodMic 会先和你确认方向，再开始创作。",
+    clarifyLead: "多补充一点，音乐会更容易贴近你的心情。",
     director: "创作讨论",
-    directorHint: "Prompt Director · 正在理解你的心情",
+    directorHint: "你可以随时补充",
     replyPlaceholder: "补充你的想法：想要的乐器、节奏、画面，或者不想要的东西……",
     send: "发送",
     thinking: "正在理解你的心情…",
@@ -39,7 +39,7 @@ const COPY = {
     directionReadyHint: "你可以继续补充，或把当前共识整理成最终提示词。",
     makePrompt: "使用当前方向",
     promptLabel: "作曲提示词",
-    promptHint: "可编辑；以下内容将直接交给 Composer Agent",
+    promptHint: "可编辑；确认后即可开始创作。",
     advanced: "更多设置",
     generationMode: "生成模式",
     modeGenerate: "编曲并生成音乐",
@@ -108,9 +108,9 @@ const COPY = {
     albumOptionsHint: "Defaults are fine — you can change this later.",
     clarifyEyebrow: "STEP 3 · DIRECTION",
     clarifyTitle: "Tell us a bit more.",
-    clarifyLead: "MoodMic will confirm the direction with you before creating anything.",
+    clarifyLead: "A little more detail helps the music fit your mood.",
     director: "Creative discussion",
-    directorHint: "Prompt Director · reading your mood",
+    directorHint: "Add anything you like",
     replyPlaceholder: "Add your thoughts: instruments, tempo, imagery — or what you don't want…",
     send: "Send",
     thinking: "Reading your mood…",
@@ -118,7 +118,7 @@ const COPY = {
     directionReadyHint: "Keep adding, or turn the current agreement into a final prompt.",
     makePrompt: "Use this direction",
     promptLabel: "Composition prompt",
-    promptHint: "Editable; this goes straight to the Composer Agent",
+    promptHint: "Editable — confirm to begin.",
     advanced: "More settings",
     generationMode: "Mode",
     modeGenerate: "Arrange & generate music",
@@ -553,7 +553,6 @@ function renderClarify() {
     <div class="mm-card mm-discussion">
       <div class="mm-disc-head">
         <div>
-          <p class="e-eyebrow">PROMPT DIRECTOR</p>
           <strong>${esc(t("director"))}</strong>
         </div>
         <span class="mm-disc-status">${esc(state.thinking ? t("thinking") : t("directorHint"))}</span>

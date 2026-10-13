@@ -128,12 +128,6 @@
   transition: transform 0.2s ease;
 }
 
-.landing-foot {
-  margin: clamp(32px, 6vh, 56px) 0 0;
-  font-size: 0.85rem;
-  color: var(--muted);
-}
-
 @media (max-width: 720px) {
   .landing-entries {
     grid-template-columns: 1fr;
