@@ -1,0 +1,256 @@
+/* MoodMic · editorial theme
+   Warm, personal, print-inspired styling shared by the landing page and the
+   MoodMic experience. Kept separate from the workflow studio's styles.css. */
+
+:root {
+  --paper: #f6f1e7;
+  --paper-deep: #efe7d8;
+  --card: #fffdf8;
+  --ink: #2b2620;
+  --ink-soft: #5b5348;
+  --muted: #8c8271;
+  --line: #e2d7c3;
+  --line-strong: #d3c4aa;
+  --accent: #b1642f;
+  --accent-deep: #8f4c1f;
+  --accent-soft: #f3e2d2;
+  --teal: #3f6b63;
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
+    "Songti SC", "Noto Serif SC", "Source Han Serif SC", serif;
+  --sans: system-ui, -apple-system, "Segoe UI", "PingFang SC",
+    "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
+  --radius-lg: 22px;
+  --radius-md: 14px;
+  --radius-sm: 9px;
+  --shadow-card: 0 18px 40px -28px rgba(64, 44, 20, 0.55);
+  --shadow-lift: 0 26px 60px -34px rgba(64, 44, 20, 0.62);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+}
+
+body.e-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(120% 90% at 12% -10%, #fbf5e9 0%, rgba(251, 245, 233, 0) 55%),
+    radial-gradient(120% 90% at 100% 0%, #f4ece0 0%, rgba(244, 236, 224, 0) 45%),
+    var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--serif);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: var(--ink);
+}
+
+a {
+  color: inherit;
+}
+
+.e-eyebrow {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.e-eyebrow.accent {
+  color: var(--accent-deep);
+}
+
+/* Top bar ---------------------------------------------------------------- */
+
+.e-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px clamp(20px, 5vw, 56px);
+}
+
+.e-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.e-brand-mark {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--serif);
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.e-brand h1 {
+  font-size: 1.25rem;
+  line-height: 1.1;
+}
+
+.e-brand .e-eyebrow {
+  font-size: 0.62rem;
+  letter-spacing: 0.24em;
+  margin-bottom: 2px;
+}
+
+.e-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Buttons ---------------------------------------------------------------- */
+
+.e-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font: inherit;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  padding: 11px 20px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease,
+    border-color 0.18s ease, color 0.18s ease;
+}
+
+.e-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.e-btn-primary {
+  background: var(--accent);
+  color: #fff8f0;
+  box-shadow: 0 14px 26px -16px rgba(143, 76, 31, 0.9);
+}
+
+.e-btn-primary:hover:not(:disabled) {
+  background: var(--accent-deep);
+  transform: translateY(-1px);
+}
+
+.e-btn-secondary {
+  background: var(--card);
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+
+.e-btn-secondary:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent-deep);
+  transform: translateY(-1px);
+}
+
+.e-btn-ghost {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--ink-soft);
+  padding: 8px 16px;
+  font-size: 0.85rem;
+}
+
+.e-btn-ghost:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent-deep);
+}
+
+/* Fields ----------------------------------------------------------------- */
+
+.e-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.e-field > span {
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.e-input,
+.e-select,
+.e-textarea {
+  font: inherit;
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  width: 100%;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.e-textarea {
+  resize: vertical;
+  min-height: 96px;
+  line-height: 1.7;
+}
+
+.e-input:focus,
+.e-select:focus,
+.e-textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(177, 100, 47, 0.16);
+}
+
+.e-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.e-message {
+  margin: 0;
+  min-height: 1.2em;
+  font-size: 0.9rem;
+  color: var(--accent-deep);
+}
+
+.e-message.error {
+  color: #a53a2a;
+}
+
+/* Utility ---------------------------------------------------------------- */
+
+.e-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
