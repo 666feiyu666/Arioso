@@ -1,0 +1,128 @@
+/* Shared top tab-bar navigation across MoodMic, Workflow and Help pages.
+   Self-contained: defines its own tokens so it can be linked alongside both
+   editorial.css (MoodMic/Help) and styles.css (Workflow) without conflicts. */
+
+:root {
+  --tabbar-h: 62px;
+  --tabbar-surface: rgba(247, 242, 233, 0.92);
+  --tabbar-line: rgba(43, 38, 32, 0.12);
+  --tabbar-ink: #2b2620;
+  --tabbar-muted: #8c8271;
+  --tabbar-accent: #b1642f;
+}
+
+.tabbar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 40;
+  height: var(--tabbar-h);
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  padding: 0 clamp(18px, 4vw, 40px);
+  background: var(--tabbar-surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--tabbar-line);
+}
+
+.tabbar-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.tabbar-brand .mark {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--tabbar-ink);
+  color: #f7f2e9;
+  font-family: Georgia, "Noto Serif SC", serif;
+  font-size: 1.05rem;
+}
+
+.tabbar-brand .name {
+  font-family: Georgia, "Noto Serif SC", serif;
+  font-size: 1.18rem;
+  letter-spacing: -0.01em;
+}
+
+.tabbar-tabs {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  height: 100%;
+}
+
+.tabbar-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  color: var(--tabbar-muted);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: color 0.16s ease;
+}
+
+.tabbar-tab:hover {
+  color: var(--tabbar-ink);
+}
+
+.tabbar-tab.is-active {
+  color: var(--tabbar-ink);
+}
+
+.tabbar-tab.is-active::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: var(--tabbar-accent);
+}
+
+.tabbar-end {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Every page with the tab bar gets pushed below it. */
+body.has-tabbar {
+  padding-top: var(--tabbar-h);
+}
+
+/* The workflow studio fixes/positions its own sidebar and shell against the
+   viewport top, so those need to start below the tab bar. */
+body.has-tabbar .app-shell {
+  min-height: calc(100vh - var(--tabbar-h));
+}
+
+body.has-tabbar .sidebar {
+  top: var(--tabbar-h);
+}
+
+body.has-tabbar .brand-row {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .tabbar {
+    gap: 14px;
+    padding: 0 14px;
+  }
+
+  .tabbar-brand .name {
+    display: none;
+  }
+}

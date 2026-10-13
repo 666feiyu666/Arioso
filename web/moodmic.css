@@ -7,17 +7,6 @@
   padding: clamp(12px, 3vh, 32px) clamp(20px, 5vw, 48px) 96px;
 }
 
-.mm-brand-chip {
-  font-size: 0.68rem;
-  letter-spacing: 0.3em;
-  font-weight: 700;
-  color: var(--accent-deep);
-  border: 1px solid var(--accent-soft);
-  background: #fff9f1;
-  padding: 6px 12px;
-  border-radius: 999px;
-}
-
 /* Stage + step transitions ------------------------------------------------- */
 
 .mm-stage {

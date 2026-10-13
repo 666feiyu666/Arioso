@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f6f1e7" />
+    <title>帮助说明 · Arioso</title>
+    <link rel="stylesheet" href="/editorial.css" />
+    <link rel="stylesheet" href="/nav.css" />
+    <link rel="stylesheet" href="/help.css" />
+  </head>
+  <body class="e-page has-tabbar help-page">
+    <nav class="tabbar" aria-label="主导航">
+      <a class="tabbar-brand" href="/">
+        <span class="mark" aria-hidden="true">A</span>
+        <span class="name">Arioso</span>
+      </a>
+      <div class="tabbar-tabs">
+        <a class="tabbar-tab" href="/">MoodMic</a>
+        <a class="tabbar-tab" href="/workflow.html">工作流</a>
+        <a class="tabbar-tab is-active" href="/help.html" aria-current="page">帮助</a>
+      </div>
+      <div class="tabbar-end">
+        <button class="e-btn e-btn-ghost" id="lang-toggle" type="button" aria-label="Switch language">EN</button>
+      </div>
+    </nav>
+
+    <main class="help-main">
+      <p class="e-eyebrow accent" data-i18n="helpEyebrow">HELP · 帮助说明</p>
+      <h1 class="help-title" data-i18n="helpTitle">帮助说明</h1>
+      <p class="help-intro" data-i18n="helpIntro">
+        这里简单说明 MoodMic 怎么用、它在做什么，以及工作流里的几种创作方式。
+      </p>
+
+      <section class="help-section">
+        <h2 data-i18n="helpAboutTitle">MoodMic 是什么</h2>
+        <p data-i18n="helpAboutBody">
+          它把"此刻的心情"变成一段属于你的音乐。你只需要用日常语言说出感受，不用懂乐理。
+        </p>
+      </section>
+
+      <section class="help-section">
+        <h2 data-i18n="helpStepsTitle">怎么用</h2>
+        <ol>
+          <li data-i18n="helpStep1">说出心情：写几句话，或点选几个贴近此刻的词。</li>
+          <li data-i18n="helpStep2">选择形态：一首单曲，或一张专辑。</li>
+          <li data-i18n="helpStep3">确认方向：可以继续补充想法，也可以直接采纳当前方向。</li>
+          <li data-i18n="helpStep4">等待创作：界面会显示当前进度。</li>
+          <li data-i18n="helpStep5">试听结果：播放、下载，或回到工作流继续管理。</li>
+        </ol>
+      </section>
+
+      <section class="help-section">
+        <h2 data-i18n="helpShapeTitle">单曲与专辑</h2>
+        <p data-i18n="helpShapeBody">
+          单曲是一段完整的瞬间；专辑是一组有共同情绪方向的曲子，各有性格，又能连在一起听。两种都可以先按默认设置，之后随时调整。
+        </p>
+      </section>
+
+      <section class="help-section">
+        <h2 data-i18n="helpWorkflowTitle">工作流</h2>
+        <p data-i18n="helpWorkflowBody">顶部的"工作流"页签里，有四种更专门的创作方式：</p>
+        <ul>
+          <li data-i18n="helpWf1">无语料生成：直接使用模型已有的音乐知识。</li>
+          <li data-i18n="helpWf2">Jazz 语料生成：先检索本地 Jazz 语料再编曲。</li>
+          <li data-i18n="helpWf3">管弦乐作曲：规划统一主题与多个乐章。</li>
+          <li data-i18n="helpWf4">多曲目专辑：一次生成整批候选曲，挑选后组成专辑。</li>
+        </ul>
+      </section>
+
+      <section class="help-section">
+        <h2 data-i18n="helpSetupTitle">开始之前</h2>
+        <p data-i18n="helpSetupBody">
+          生成音乐需要 API Key。在工作流页面左下角的"设置"里填入即可；Key 只保存在本机。
+        </p>
+      </section>
+
+      <div class="help-links">
+        <a class="e-btn e-btn-primary" href="/" data-i18n="helpStart">开始创作</a>
+        <a class="e-btn e-btn-secondary" href="/workflow.html" data-i18n="helpOpenWorkflow">打开工作流</a>
+      </div>
+    </main>
+
+    <script type="module">
+      const COPY = {
+        "zh-CN": {
+          helpEyebrow: "HELP · 帮助说明",
+          helpTitle: "帮助说明",
+          helpIntro: "这里简单说明 MoodMic 怎么用、它在做什么，以及工作流里的几种创作方式。",
+          helpAboutTitle: "MoodMic 是什么",
+          helpAboutBody: "它把\u201c此刻的心情\u201d变成一段属于你的音乐。你只需要用日常语言说出感受，不用懂乐理。",
+          helpStepsTitle: "怎么用",
+          helpStep1: "说出心情：写几句话，或点选几个贴近此刻的词。",
+          helpStep2: "选择形态：一首单曲，或一张专辑。",
+          helpStep3: "确认方向：可以继续补充想法，也可以直接采纳当前方向。",
+          helpStep4: "等待创作：界面会显示当前进度。",
+          helpStep5: "试听结果：播放、下载，或回到工作流继续管理。",
+          helpShapeTitle: "单曲与专辑",
+          helpShapeBody: "单曲是一段完整的瞬间；专辑是一组有共同情绪方向的曲子，各有性格，又能连在一起听。两种都可以先按默认设置，之后随时调整。",
+          helpWorkflowTitle: "工作流",
+          helpWorkflowBody: "顶部的\u201c工作流\u201d页签里，有四种更专门的创作方式：",
+          helpWf1: "无语料生成：直接使用模型已有的音乐知识。",
+          helpWf2: "Jazz 语料生成：先检索本地 Jazz 语料再编曲。",
+          helpWf3: "管弦乐作曲：规划统一主题与多个乐章。",
+          helpWf4: "多曲目专辑：一次生成整批候选曲，挑选后组成专辑。",
+          helpSetupTitle: "开始之前",
+          helpSetupBody: "生成音乐需要 API Key。在工作流页面左下角的\u201c设置\u201d里填入即可；Key 只保存在本机。",
+          helpStart: "开始创作",
+          helpOpenWorkflow: "打开工作流",
+        },
+        en: {
+          helpEyebrow: "HELP",
+          helpTitle: "Help",
+          helpIntro: "A short guide to what MoodMic does, how to use it, and the creation modes in the workflow studio.",
+          helpAboutTitle: "What MoodMic is",
+          helpAboutBody: "It turns how you feel right now into music of your own. You describe the feeling in everyday words — no musical training needed.",
+          helpStepsTitle: "How it works",
+          helpStep1: "Say the mood: write a few lines, or pick a few words close to this moment.",
+          helpStep2: "Choose the form: a single piece, or an album.",
+          helpStep3: "Confirm the direction: add more thoughts, or accept the current direction.",
+          helpStep4: "Wait for creation: the page shows the current progress.",
+          helpStep5: "Listen: play, download, or continue managing it in the workflow studio.",
+          helpShapeTitle: "A piece or an album",
+          helpShapeBody: "A piece is one complete moment; an album is a set of tracks with a shared emotional direction — individual characters, listenable as a whole. Both start from sensible defaults you can change later.",
+          helpWorkflowTitle: "Workflows",
+          helpWorkflowBody: "The \u201cWorkflows\u201d tab at the top holds four more specialised ways to create:",
+          helpWf1: "Model-only: compose straight from the model's existing musical knowledge.",
+          helpWf2: "Jazz corpus: retrieve from a local Jazz corpus before arranging.",
+          helpWf3: "Orchestral: plan one theme across several movements.",
+          helpWf4: "Multi-track album: generate a batch of candidates and build an album from them.",
+          helpSetupTitle: "Before you start",
+          helpSetupBody: "Generating music needs an API key. Add it under \u201cSettings\u201d at the bottom-left of the workflow page; the key stays on this machine.",
+          helpStart: "Start creating",
+          helpOpenWorkflow: "Open workflows",
+        },
+      };
+
+      const toggle = document.querySelector("#lang-toggle");
+      let language = "zh-CN";
+
+      function apply() {
+        const dict = COPY[language] ?? COPY["zh-CN"];
+        document.documentElement.lang = language;
+        for (const node of document.querySelectorAll("[data-i18n]")) {
+          const value = dict[node.dataset.i18n];
+          if (value !== undefined) node.textContent = value;
+        }
+        toggle.textContent = language === "zh-CN" ? "EN" : "中文";
+      }
+
+      async function setLanguage(next, persist) {
+        language = next;
+        apply();
+        if (persist) {
+          try {
+            await fetch("/api/settings", {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ language: next }),
+            });
+          } catch {
+            /* Language preference is best-effort. */
+          }
+        }
+      }
+
+      toggle.addEventListener("click", () => setLanguage(language === "zh-CN" ? "en" : "zh-CN", true));
+
+      try {
+        const response = await fetch("/api/settings", { cache: "no-store" });
+        if (response.ok) {
+          const settings = await response.json();
+          if (settings.language === "en" || settings.language === "zh-CN") language = settings.language;
+        }
+      } catch {
+        /* Fall back to the default language. */
+      }
+      apply();
+    </script>
+  </body>
+</html>

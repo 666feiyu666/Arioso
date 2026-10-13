@@ -6,8 +6,20 @@
     <meta name="theme-color" content="#f4f1ea" />
     <title>Arioso · AI 音乐工坊</title>
     <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/nav.css" />
   </head>
-  <body>
+  <body class="has-tabbar">
+    <nav class="tabbar" aria-label="主导航">
+      <a class="tabbar-brand" href="/">
+        <span class="mark" aria-hidden="true">A</span>
+        <span class="name">Arioso</span>
+      </a>
+      <div class="tabbar-tabs">
+        <a class="tabbar-tab" href="/">MoodMic</a>
+        <a class="tabbar-tab is-active" href="/workflow.html" aria-current="page">工作流</a>
+        <a class="tabbar-tab" href="/help.html">帮助</a>
+      </div>
+    </nav>
     <div class="app-shell">
       <aside class="sidebar">
         <div class="brand-row">

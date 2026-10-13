@@ -4,123 +4,31 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#f6f1e7" />
-    <title>Arioso · 选择入口</title>
+    <title>MoodMic · 把心情变成音乐</title>
     <link rel="stylesheet" href="/editorial.css" />
-    <link rel="stylesheet" href="/landing.css" />
+    <link rel="stylesheet" href="/nav.css" />
+    <link rel="stylesheet" href="/moodmic.css" />
   </head>
-  <body class="e-page landing">
-    <header class="e-topbar">
-      <a class="e-brand" href="/">
-        <span class="e-brand-mark" aria-hidden="true">A</span>
-        <span>
-          <p class="e-eyebrow">AI MUSIC STUDIO</p>
-          <h1>Arioso</h1>
-        </span>
+  <body class="e-page mm has-tabbar">
+    <nav class="tabbar" aria-label="主导航">
+      <a class="tabbar-brand" href="/">
+        <span class="mark" aria-hidden="true">A</span>
+        <span class="name">Arioso</span>
       </a>
-      <div class="e-topbar-actions">
+      <div class="tabbar-tabs">
+        <a class="tabbar-tab is-active" href="/" aria-current="page">MoodMic</a>
+        <a class="tabbar-tab" href="/workflow.html">工作流</a>
+        <a class="tabbar-tab" href="/help.html">帮助</a>
+      </div>
+      <div class="tabbar-end">
         <button class="e-btn e-btn-ghost" id="lang-toggle" type="button" aria-label="Switch language">EN</button>
       </div>
-    </header>
+    </nav>
 
-    <main class="landing-main">
-      <div class="landing-intro">
-        <p class="e-eyebrow accent" data-i18n="landingEyebrow">CHOOSE YOUR ENTRANCE</p>
-        <h2 class="landing-title" data-i18n-html="landingTitle">从一个心情，<br />或一套工作流开始。</h2>
-        <p class="landing-copy" data-i18n="landingCopy">说一句心情，或选一种流程，剩下的交给我们。</p>
-      </div>
-
-      <div class="landing-entries">
-        <a class="entry-card entry-moodmic" href="/moodmic.html">
-          <span class="entry-badge">MOODMIC</span>
-          <h3 data-i18n="moodmicEntryTitle">把心情变成音乐</h3>
-          <p data-i18n="moodmicEntryCopy">
-            说出现在的心情与想传达的感觉，选择一首单曲或一张专辑，然后听着它诞生。
-          </p>
-          <span class="entry-cta"><span data-i18n="moodmicEntryCta">进入 MoodMic</span> <span aria-hidden="true">→</span></span>
-        </a>
-
-        <a class="entry-card entry-workflow" href="/workflow.html">
-          <span class="entry-badge">WORKFLOW</span>
-          <h3 data-i18n="workflowEntryTitle">使用工作流创作</h3>
-          <p data-i18n="workflowEntryCopy">
-            四种专业流程：无语料生成、Jazz 语料生成、管弦乐作曲，以及多曲目专辑制作。
-          </p>
-          <span class="entry-cta"><span data-i18n="workflowEntryCta">进入工作流</span> <span aria-hidden="true">→</span></span>
-        </a>
-      </div>
+    <main class="mm-main">
+      <div class="mm-stage" id="mm-stage" aria-live="polite"></div>
     </main>
 
-    <script type="module">
-      const COPY = {
-        "zh-CN": {
-          landingEyebrow: "CHOOSE YOUR ENTRANCE",
-          landingTitle: "从一个心情，<br />或一套工作流开始。",
-          landingCopy: "说一句心情，或选一种流程，剩下的交给我们。",
-          moodmicEntryTitle: "把心情变成音乐",
-          moodmicEntryCopy: "说出现在的心情与想传达的感觉，选择一首单曲或一张专辑，然后听着它诞生。",
-          moodmicEntryCta: "进入 MoodMic",
-          workflowEntryTitle: "使用工作流创作",
-          workflowEntryCopy: "四种创作方式：无语料生成、Jazz 语料生成、管弦乐作曲、多曲目专辑。",
-          workflowEntryCta: "进入工作流",
-        },
-        en: {
-          landingEyebrow: "CHOOSE YOUR ENTRANCE",
-          landingTitle: "Start from a mood,<br />or from a workflow.",
-          landingCopy: "Say a few words about how you feel, or pick a workflow — we'll take it from there.",
-          moodmicEntryTitle: "Turn a mood into music",
-          moodmicEntryCopy: "Describe how you feel and what the music should carry, choose a single piece or an album, then hear it come to life.",
-          moodmicEntryCta: "Enter MoodMic",
-          workflowEntryTitle: "Compose with a workflow",
-          workflowEntryCopy: "Four ways to compose: model-only generation, Jazz corpus retrieval, orchestral works, and multi-track albums.",
-          workflowEntryCta: "Enter workflows",
-        },
-      };
-
-      const toggle = document.querySelector("#lang-toggle");
-      let language = "zh-CN";
-
-      function apply() {
-        const dict = COPY[language] ?? COPY["zh-CN"];
-        document.documentElement.lang = language;
-        for (const node of document.querySelectorAll("[data-i18n]")) {
-          const value = dict[node.dataset.i18n];
-          if (value !== undefined) node.textContent = value;
-        }
-        for (const node of document.querySelectorAll("[data-i18n-html]")) {
-          const value = dict[node.dataset.i18nHtml];
-          if (value !== undefined) node.innerHTML = value;
-        }
-        toggle.textContent = language === "zh-CN" ? "EN" : "中文";
-      }
-
-      async function setLanguage(next, persist) {
-        language = next;
-        apply();
-        if (persist) {
-          try {
-            await fetch("/api/settings", {
-              method: "PUT",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ language: next }),
-            });
-          } catch {
-            /* Language preference is best-effort. */
-          }
-        }
-      }
-
-      toggle.addEventListener("click", () => setLanguage(language === "zh-CN" ? "en" : "zh-CN", true));
-
-      try {
-        const response = await fetch("/api/settings", { cache: "no-store" });
-        if (response.ok) {
-          const settings = await response.json();
-          if (settings.language === "en" || settings.language === "zh-CN") language = settings.language;
-        }
-      } catch {
-        /* Fall back to the default language. */
-      }
-      apply();
-    </script>
+    <script type="module" src="/moodmic.js"></script>
   </body>
 </html>
