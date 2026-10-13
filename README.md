@@ -1,35 +1,65 @@
 # Arioso
 
-Arioso is an agentic tool for music composition. It turns a
-musical idea into a structured plan, uses optional corpus knowledge to refine
-that plan, and can send the resulting prompt to Google Lyria for audio
-generation.
+Arioso turns a musical idea into finished music. Describe what you want in
+plain words, refine it in conversation, and Arioso plans the piece and
+generates the audio — from a single track to a full album.
 
-Arioso now supports four workflows through a bilingual browser interface
-and a command-line interface:
+Arioso ships as a bilingual browser studio and a command-line interface, and
+supports four ways to create music:
 
 - general composition from a free-form brief;
-- Jazz composition with local corpus retrieval;
+- Jazz composition in the style of the standards;
 - coherent multi-movement orchestral works; and
 - multi-track albums with candidate review, playlist ordering, playback, and
   MP3 export.
 
-Creative Discussion and MoodMic add a mood-aware front end to these workflows:
-use the Prompt Director to develop an idea through discussion, optional image
-references, and mood cues, then approve the resulting proposal before
-composition.
+MoodMic is a mood-aware starting point for these workflows: develop an idea
+through creative discussion, optional image references, and mood cues, then
+approve the resulting proposal before composition. Every check-in is recorded
+on a mood calendar, so you can look back at a feeling and reopen the music it
+produced.
 
 ## Interface
 
-### Four Specific Workflow 
-![Arioso browser interface](Assets/arioso-web-interface.png)
+Arioso runs as a bilingual web studio (简体中文 / English) alongside the
+command line. The browser interface has four tabs: **MoodMic**, **Mood
+calendar**, **Workflows**, and **Help**.
 
-### Mood + Music
-![Mood + Music support](Assets/arioso-moodmic.png)
+### Workflows
+
+The Workflows tab opens on four ways to create music — one piece from the
+model's own knowledge, a Jazz piece grounded in the standards, a multi-movement
+orchestral work, and a multi-track album. Each is a card marked with its own
+colour; entering one opens that workflow's composer.
+
+![Arioso workflow studio](Assets/arioso-workflow.png)
+
+The album workflow walks an idea through creative discussion before composition,
+then lines up the generated candidates as a playlist you can audition and
+export.
+
+![Arioso album and playlist workflow](Assets/arioso-playlist.png)
+
+### MoodMic
+
+MoodMic turns how you feel right now into a single piece. Describe the feeling
+in everyday words; once a direction is agreed, a mood is read out — a colour
+and a word — which you can change before creating. On an empty conversation you
+can start from four example feelings, one per mood colour; picking one fills
+the composer, and the same four colours carry through the interface and the
+mood calendar.
+
+![MoodMic](Assets/arioso-moodmic.png)
+
+### Mood calendar
+
+Every check-in from MoodMic is marked on a month grid with the colour of that
+day's feeling, in the order the entries were made. Pick a day to read it back
+and reopen the conversation behind it.
 
 ## Workflow
 
-![Arioso current workflow](Assets/arioso-current-workflow.png)
+![Arioso agentic workflow](Assets/arioso-agentic-workflow.png)
 
 ## Example output
 

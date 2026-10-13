@@ -1838,7 +1838,13 @@ function renderDiscussion() {
   const parts = (session?.messages ?? []).map((message) => discussionMessageHtml(message, session));
   if (state.discussionPending) parts.push(pendingDiscussionMessageHtml(state.discussionPending));
   if (state.discussionThinking) parts.push(discussionTypingHtml());
-  elements.discussionMessages.innerHTML = parts.join("");
+  const list = elements.discussionMessages;
+  // Only follow the newest message when the reader is already at the bottom.
+  // Otherwise keep their position, so an update never yanks the list down.
+  const followBottom = list.childElementCount === 0
+    || list.scrollHeight - list.scrollTop - list.clientHeight <= 32;
+  const previousScrollTop = list.scrollTop;
+  list.innerHTML = parts.join("");
   const task = latestSessionTask(session);
   elements.discussionScope.textContent = discussionScopeLabel(session?.taskOptions);
   elements.discussionStatus.textContent = session
@@ -1853,7 +1859,7 @@ function renderDiscussion() {
   elements.generateProposal.disabled = !session?.messages?.some((message) => message.role === "user") || state.submitting;
   if (session) elements.form.hidden = session.status === "submitted";
   if (parts.length) {
-    elements.discussionMessages.scrollTop = elements.discussionMessages.scrollHeight;
+    list.scrollTop = followBottom ? list.scrollHeight : previousScrollTop;
   }
   renderProposalSettings();
 }
