@@ -1177,6 +1177,24 @@
   flex-wrap: wrap;
 }
 
+.mm-review-title { margin: 0 0 6px; }
+.mm-review-lead { color: var(--text-soft); margin: 0 0 16px; }
+
+.mm-review-note {
+  border: 1px solid color-mix(in srgb, var(--group, var(--line)) 35%, var(--line));
+  background: color-mix(in srgb, var(--group, var(--line)) 8%, var(--surface));
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  margin-top: 16px;
+}
+
+.mm-review-note strong { display: block; margin-bottom: 6px; }
+.mm-review-summary { color: var(--text-soft); display: block; }
+
+.mm-review-points { margin-top: 12px; }
+.mm-review-points > span { color: var(--text-soft); font-size: 0.9em; }
+.mm-review-points ul { margin: 6px 0 0; padding-left: 18px; }
+
 /* MoodMic home carries its own interactive melody; drop the page backdrop. */
 body.mm-home {
   background-image: none;

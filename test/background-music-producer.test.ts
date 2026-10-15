@@ -18,7 +18,7 @@ vi.mock("../src/composer/album-agent.js", () => ({
 }));
 vi.mock("../src/lyria/lyria-client.js", () => ({ LyriaClient: class { generate = mocks.generate; } }));
 
-const config = { openAiApiKey: "test", openAiModel: "test", geminiApiKey: "test", lyriaModel: "lyria-3.5", outputDirectory: "unused" };
+const config = { openAiApiKey: "test", openAiModel: "test", geminiApiKey: "test", geminiReviewModel: "test", lyriaModel: "lyria-3.5", outputDirectory: "unused" };
 const roots: string[] = [];
 const hash = (data: Uint8Array) => createHash("sha256").update(data).digest("hex");
 

@@ -81,6 +81,14 @@ const COPY = {
     statusQueued: "排队中", statusComposing: "正在构思编曲", statusGenerating: "正在生成音频",
     statusAssembling: "正在拼接乐章", statusProcessing: "正在后期处理",
     statusCompleted: "已完成", statusFailed: "未完成",
+    statusReview: "待你确认",
+    reviewTitle: "这首音乐符合你的想法吗？",
+    reviewLead: "先听一遍。如果和你的需求明显不符，可以重新生成；觉得可以就保留这首。",
+    reviewMatchNote: "自动检查认为这首音乐基本符合你的需求。",
+    reviewMismatchNote: "自动检查发现它可能与你的需求有明显出入。",
+    reviewPointsLabel: "核对要点",
+    reviewRegenerate: "重新生成",
+    reviewKeep: "保留这首",
     phaseComposing: "正在把你的想法整理成完整的音乐规格…",
     phaseGenerating: "正在把这段编曲变成声音…",
     phaseProcessing: "正在做最后的整理与导出…",
@@ -143,6 +151,14 @@ const COPY = {
     statusQueued: "Queued", statusComposing: "Shaping the arrangement", statusGenerating: "Generating audio",
     statusAssembling: "Assembling movements", statusProcessing: "Post-processing",
     statusCompleted: "Completed", statusFailed: "Not finished",
+    statusReview: "Needs your confirmation",
+    reviewTitle: "Does this music match what you asked for?",
+    reviewLead: "Listen first. If it clearly misses the request, regenerate; if it works, keep this one.",
+    reviewMatchNote: "The automatic check found this broadly matches your request.",
+    reviewMismatchNote: "The automatic check found a clear mismatch with your request.",
+    reviewPointsLabel: "Checkpoints",
+    reviewRegenerate: "Regenerate",
+    reviewKeep: "Keep this",
     phaseComposing: "Shaping your idea into a complete musical spec…",
     phaseGenerating: "Turning that arrangement into sound…",
     phaseProcessing: "Doing the final assembly and export…",
@@ -162,7 +178,7 @@ const COPY = {
 
 const STATUS_KEYS = {
   queued: "statusQueued", composing: "statusComposing", generating: "statusGenerating",
-  assembling: "statusAssembling", processing: "statusProcessing",
+  review: "statusReview", assembling: "statusAssembling", processing: "statusProcessing",
   completed: "statusCompleted", failed: "statusFailed",
 };
 
@@ -544,6 +560,26 @@ function renderResult() {
         </div>
       </div>`;
   }
+  if (task.status === "review") {
+    const review = task.musicReview;
+    const points = review?.mismatchedPoints ?? [];
+    const note = review?.verdict === "match" ? t("reviewMatchNote") : t("reviewMismatchNote");
+    return `
+      <div class="mm-block mm-result mm-review" style="--group:${group?.color ?? "#b1642f"}">
+        <h3 class="mm-review-title">${esc(t("reviewTitle"))}</h3>
+        <p class="mm-review-lead">${esc(t("reviewLead"))}</p>
+        <audio class="mm-player" controls preload="metadata" src="/api/tasks/${encodeURIComponent(task.id)}/audio"></audio>
+        <div class="mm-review-note">
+          <strong>${esc(note)}</strong>
+          ${review?.summary ? `<span class="mm-review-summary">${esc(review.summary)}</span>` : ""}
+          ${points.length ? `<div class="mm-review-points"><span>${esc(t("reviewPointsLabel"))}</span><ul>${points.map((point) => `<li>${esc(point)}</li>`).join("")}</ul></div>` : ""}
+        </div>
+        <div class="mm-foot-actions">
+          <button class="e-btn e-btn-primary" type="button" id="mm-review-regenerate" ${state.busy ? "disabled" : ""}>${esc(t("reviewRegenerate"))}</button>
+          <button class="e-btn e-btn-secondary" type="button" id="mm-review-keep" ${state.busy ? "disabled" : ""}>${esc(t("reviewKeep"))}</button>
+        </div>
+      </div>`;
+  }
   if (task.status !== "completed") {
     const progress = `
       <div class="mm-progress">
@@ -662,6 +698,8 @@ function bindChat() {
   }
   stage.querySelector("#mm-retry")?.addEventListener("click", () => retryAsNewAttempt(state.session?.tasks?.at(-1)?.id));
   stage.querySelector("#mm-new-2")?.addEventListener("click", newChat);
+  stage.querySelector("#mm-review-regenerate")?.addEventListener("click", () => decideReview("regenerate"));
+  stage.querySelector("#mm-review-keep")?.addEventListener("click", () => decideReview("keep"));
   for (const button of stage.querySelectorAll("[data-example]")) {
     button.addEventListener("click", () => {
       // Fill the composer in place — no re-render, so the melody curve and its
@@ -903,6 +941,30 @@ async function retryAsNewAttempt(taskId) {
   }
 }
 
+async function decideReview(decision) {
+  const task = activeTask();
+  if (!task || state.busy || task.status !== "review") return;
+  state.busy = true;
+  state.message = "";
+  render();
+  try {
+    const updated = await api(`/api/tasks/${encodeURIComponent(task.id)}/review`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ decision }),
+    });
+    state.task = updated;
+    state.busy = false;
+    render();
+    if (decision === "regenerate") pollTask();
+  } catch (error) {
+    state.busy = false;
+    state.message = error instanceof Error ? error.message : String(error);
+    state.messageError = true;
+    render();
+  }
+}
+
 function pollTask() {
   clearTimeout(state.pollTimer);
   const id = activeTask()?.id;
@@ -911,7 +973,7 @@ function pollTask() {
     try {
       const task = await api(`/api/tasks/${encodeURIComponent(id)}`);
       state.task = task;
-      if (task.status === "completed" || task.status === "failed") {
+      if (task.status === "completed" || task.status === "failed" || task.status === "review") {
         await loadEntries();
         await loadDiscussions();
         render();

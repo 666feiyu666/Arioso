@@ -20,6 +20,7 @@ import {
   type DiscussionTaskOptions,
 } from "../discussion/types.js";
 import { LyriaClient } from "../lyria/lyria-client.js";
+import { runMoodMicGeneration } from "../moodmic/moodmic-graph.js";
 import { listOrchestralKnowledgeCards } from "../retrieval/orchestral-cards.js";
 import { TaskStore, parseTaskInput, type AlbumAdmission, type AlbumAudioExport, type MusicTask } from "./task-store.js";
 import { MoodEntryStore, isCalendarDate, isMoodGroup, type MoodEntryInput } from "./mood-store.js";
@@ -92,6 +93,7 @@ async function runTask(
   task: MusicTask,
   config: AriosoConfig,
   albumTrackId?: string,
+  language?: InterfaceLanguage,
 ): Promise<void> {
   try {
     if (task.compositionMode === "album") {
@@ -129,6 +131,15 @@ async function runTask(
 
     if (task.mode === "compose") {
       await store.update(task.id, { status: "completed", error: undefined });
+      return;
+    }
+
+    // MoodMic creations run the generation check: generate, let Gemini listen,
+    // then deliver or pause for the user's regenerate/keep decision.
+    if (task.moodChatId) {
+      await runMoodMicGeneration(store, store.get(task.id) ?? task, config, {
+        ...(language ? { language } : {}),
+      });
       return;
     }
 
@@ -543,7 +554,10 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
   };
   const startTask = (task: MusicTask, config: AriosoConfig, albumTrackId?: string): void => {
     activeTaskIds.add(task.id);
-    void runTask(store, task, config, albumTrackId)
+    void (async () => {
+      const language = task.moodChatId ? await settings.language() : undefined;
+      await runTask(store, task, config, albumTrackId, language);
+    })()
       .catch((error: unknown) => {
         const message = error instanceof Error ? error.message : String(error);
         console.error(`Unable to persist task ${task.id}: ${message}`);
@@ -566,6 +580,7 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
       const albumPlaylistMatch = /^\/api\/tasks\/([^/]+)\/album\/playlist$/.exec(url.pathname);
       const productionArtifactMatch = /^\/api\/tasks\/([^/]+)\/production\/(audio|video|tracklist|manifest)$/.exec(url.pathname);
       const retryMatch = /^\/api\/tasks\/([^/]+)\/retry$/.exec(url.pathname);
+      const reviewDecisionMatch = /^\/api\/tasks\/([^/]+)\/review$/.exec(url.pathname);
       const credentialMatch = /^\/api\/settings\/credentials\/(openai|gemini)$/.exec(url.pathname);
       const discussionMatch = /^\/api\/discussions\/([^/]+)$/.exec(url.pathname);
       const discussionMessagesMatch = /^\/api\/discussions\/([^/]+)\/messages$/.exec(url.pathname);
@@ -863,6 +878,7 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
             vocalMode: typeof value.vocalMode === "string" ? value.vocalMode : "instrumental",
           });
           input.sourceDiscussionId = chatId;
+          input.moodChatId = chatId;
           const config = loadConfig(input.mode === "generate", await settings.runtimeEnvironment());
           const task = await store.create(input, config);
           await moodChatStore.markSubmitted(chatId, task.id, prompt);
@@ -1031,7 +1047,13 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
       }
 
       if (request.method === "POST" && url.pathname === "/api/tasks") {
-        const input = parseTaskInput(await readJsonBody(request));
+        const body = await readJsonBody(request);
+        const input = parseTaskInput(body);
+        // A MoodMic "try again" creates a fresh attempt; keep it inside the
+        // generation check when it names a known conversation.
+        if (isRecord(body) && typeof body.moodChatId === "string" && moodChatStore.get(body.moodChatId)) {
+          input.moodChatId = body.moodChatId;
+        }
         const config = loadConfig(
           input.mode === "generate",
           await settings.runtimeEnvironment(),
@@ -1159,6 +1181,38 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
         const audioPath = task && track ? store.albumTrackAudioPath(task, track) : undefined;
         if (!task || !track || !audioPath) throw new HttpError(404, "Candidate audio is not available.");
         await sendAudio(request, response, audioPath);
+        return;
+      }
+
+      if (request.method === "POST" && reviewDecisionMatch?.[1]) {
+        const task = store.get(reviewDecisionMatch[1]);
+        if (!task || !task.moodChatId) throw new HttpError(404, "MoodMic task not found.");
+        if (task.status !== "review") {
+          throw new HttpError(409, "This task is not awaiting a review decision.");
+        }
+        if (activeTaskIds.has(task.id)) throw new HttpError(409, "This task is already being processed.");
+        const value = await readJsonBody(request);
+        if (!isRecord(value) || (value.decision !== "regenerate" && value.decision !== "keep")) {
+          throw new HttpError(400, "A review decision of \"regenerate\" or \"keep\" is required.");
+        }
+        if (value.decision === "keep") {
+          sendJson(response, 200, await store.update(task.id, { status: "completed", error: undefined }));
+          return;
+        }
+        const config = loadConfig(true, await settings.runtimeEnvironment());
+        if (store.get(task.id)?.status !== "review" || activeTaskIds.has(task.id)) {
+          throw new HttpError(409, "This task is not awaiting a review decision.");
+        }
+        activeTaskIds.add(task.id);
+        let queued: MusicTask;
+        try {
+          queued = await store.update(task.id, { status: "queued", error: undefined });
+        } catch (error) {
+          activeTaskIds.delete(task.id);
+          throw error;
+        }
+        startTask(queued, config);
+        sendJson(response, 202, queued);
         return;
       }
 

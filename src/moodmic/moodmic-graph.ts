@@ -1,0 +1,180 @@
+import { readFile } from "node:fs/promises";
+
+import { Annotation, END, START, StateGraph } from "@langchain/langgraph";
+
+import type { AriosoConfig } from "../config/env.js";
+import { LyriaClient } from "../lyria/lyria-client.js";
+import type { MusicSpec } from "../schema/music-spec.js";
+import type { MusicTask, TaskStore } from "../web/task-store.js";
+import {
+  GeminiMusicReviewer,
+  type MusicReview,
+  type MusicReviewRecord,
+  type MusicReviewer,
+  type MusicReviewVerdict,
+} from "./music-review.js";
+
+const MoodMicReviewState = Annotation.Root({
+  taskId: Annotation<string>,
+  attempt: Annotation<number>,
+  // The review node always runs before this channel is read; the initial
+  // placeholder only keeps the channel defined for the routing edge.
+  verdict: Annotation<MusicReviewVerdict>({
+    reducer: (_previous, next) => next,
+    default: () => "mismatch",
+  }),
+});
+
+type MoodMicReviewStateValue = typeof MoodMicReviewState.State;
+
+export interface GeneratedAudio {
+  audio: Buffer;
+  generatedText: string | null;
+}
+
+export interface MoodMicReviewGraphDeps {
+  store: TaskStore;
+  config: AriosoConfig;
+  language?: "zh-CN" | "en";
+  /** Overridable for tests; defaults to the Lyria client. */
+  generate?: (spec: MusicSpec, model: string) => Promise<GeneratedAudio>;
+  /** Overridable for tests; defaults to the Gemini audio reviewer. */
+  reviewer?: MusicReviewer;
+}
+
+function defaultGenerate(config: AriosoConfig) {
+  return async (spec: MusicSpec, model: string): Promise<GeneratedAudio> => {
+    const client = new LyriaClient(config.geminiApiKey ?? "");
+    return client.generate(spec.lyriaPrompt, { model });
+  };
+}
+
+function defaultReviewer(config: AriosoConfig): MusicReviewer {
+  return new GeminiMusicReviewer(config.geminiApiKey ?? "", config.geminiReviewModel);
+}
+
+function requireTask(store: TaskStore, taskId: string): MusicTask {
+  const task = store.get(taskId);
+  if (!task) throw new Error(`Unknown task: ${taskId}`);
+  return task;
+}
+
+function unavailableReview(language: "zh-CN" | "en" | undefined, attempt: number, model: string): MusicReview {
+  return {
+    verdict: "match",
+    summary: language === "en"
+      ? "The automatic check could not run, so this piece was delivered as-is."
+      : "自动检查未能完成，已按原样交付这首音乐。",
+    matchedPoints: [],
+    mismatchedPoints: [],
+  };
+}
+
+/**
+ * A LangGraph generation check for MoodMic: generate the audio, let Gemini
+ * listen and compare it with the request, then either deliver it or pause the
+ * task in the `review` state so the user can regenerate or keep the result.
+ */
+export function buildMoodMicReviewGraph(deps: MoodMicReviewGraphDeps) {
+  const { store, config } = deps;
+  const generate = deps.generate ?? defaultGenerate(config);
+  const reviewer = deps.reviewer ?? defaultReviewer(config);
+  const model = config.geminiReviewModel;
+  const language = deps.language;
+
+  const generateNode = async (state: MoodMicReviewStateValue) => {
+    const task = requireTask(store, state.taskId);
+    const spec = task.musicSpec;
+    if (!spec) throw new Error("A composed music spec is required before generation.");
+    await store.update(task.id, { status: "generating", error: undefined });
+    const generated = await generate(spec, task.lyriaModel);
+    const audioFile = await store.writeAudio(task, generated.audio);
+    await store.update(task.id, {
+      audioFile,
+      generatedText: generated.generatedText,
+      error: undefined,
+    });
+    return {};
+  };
+
+  const reviewNode = async (state: MoodMicReviewStateValue) => {
+    const task = requireTask(store, state.taskId);
+    const attempt = (task.reviewAttempt ?? 0) + 1;
+    let review: MusicReview;
+    try {
+      const audioPath = store.audioPath(task);
+      if (!audioPath) throw new Error("Generated audio is not available for review.");
+      review = await reviewer.review({
+        audio: await readFile(audioPath),
+        description: task.description,
+        ...(task.musicSpec ? { spec: task.musicSpec } : {}),
+        ...(language ? { language } : {}),
+      });
+    } catch (error) {
+      console.error(`Music review unavailable for task ${task.id}: ${error instanceof Error ? error.message : String(error)}`);
+      review = unavailableReview(language, attempt, model);
+    }
+    const record: MusicReviewRecord = {
+      ...review,
+      model,
+      attempt,
+      reviewedAt: new Date().toISOString(),
+      ...(task.audioFile ? { audioFile: task.audioFile } : {}),
+    };
+    await store.update(task.id, { musicReview: record, reviewAttempt: attempt });
+    return { attempt, verdict: review.verdict };
+  };
+
+  const deliverNode = async (state: MoodMicReviewStateValue) => {
+    await store.update(state.taskId, { status: "completed", error: undefined });
+    return {};
+  };
+
+  const holdNode = async (state: MoodMicReviewStateValue) => {
+    await store.update(state.taskId, { status: "review", error: undefined });
+    return {};
+  };
+
+  return new StateGraph(MoodMicReviewState)
+    .addNode("generate", generateNode)
+    .addNode("review", reviewNode)
+    .addNode("deliver", deliverNode)
+    .addNode("hold", holdNode)
+    .addEdge(START, "generate")
+    .addEdge("generate", "review")
+    .addConditionalEdges("review", (state: MoodMicReviewStateValue) =>
+      state.verdict === "match" ? "deliver" : "hold", {
+      deliver: "deliver",
+      hold: "hold",
+    })
+    .addEdge("deliver", END)
+    .addEdge("hold", END)
+    .compile();
+}
+
+export interface MoodMicGenerationResult {
+  verdict: MusicReviewVerdict;
+  attempt: number;
+}
+
+/** Run one MoodMic generation attempt: compose is already done, so generate then review. */
+export async function runMoodMicGeneration(
+  store: TaskStore,
+  task: MusicTask,
+  config: AriosoConfig,
+  options: { language?: "zh-CN" | "en"; generate?: MoodMicReviewGraphDeps["generate"]; reviewer?: MusicReviewer } = {},
+): Promise<MoodMicGenerationResult> {
+  const graph = buildMoodMicReviewGraph({
+    store,
+    config,
+    ...(options.language ? { language: options.language } : {}),
+    ...(options.generate ? { generate: options.generate } : {}),
+    ...(options.reviewer ? { reviewer: options.reviewer } : {}),
+  });
+  const result = await graph.invoke({
+    taskId: task.id,
+    attempt: task.reviewAttempt ?? 0,
+    verdict: "mismatch",
+  });
+  return { verdict: result.verdict, attempt: result.attempt };
+}

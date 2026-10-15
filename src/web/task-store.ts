@@ -19,9 +19,10 @@ import type { OrchestralMovementPlan, OrchestralWorkPlan } from "../schema/orche
 import { writeTextFileAtomic } from "../utils/files.js";
 import { isRecord } from "../utils/validation.js";
 import { isProductionRunId, type AlbumProduction } from "../producer/types.js";
+import type { MusicReviewRecord } from "../moodmic/music-review.js";
 
 export type TaskMode = "compose" | "generate";
-export type TaskStatus = "queued" | "composing" | "generating" | "assembling" | "processing" | "completed" | "failed";
+export type TaskStatus = "queued" | "composing" | "generating" | "review" | "assembling" | "processing" | "completed" | "failed";
 export type VocalMode = "auto" | "instrumental" | "vocals";
 export type CorpusMode = "none" | "jazz";
 export type CompositionMode = "single" | "orchestral" | "album";
@@ -145,6 +146,10 @@ export interface MusicTask {
   audioFile?: string;
   error?: string | undefined;
   sourceDiscussionId?: string;
+  /** Set only for MoodMic creations; marks a task that runs the generation check. */
+  moodChatId?: string;
+  musicReview?: MusicReviewRecord;
+  reviewAttempt?: number;
 }
 
 export interface CreateTaskInput {
@@ -160,6 +165,7 @@ export interface CreateTaskInput {
   targetTotalMinutes?: number;
   produceAlbum?: boolean;
   sourceDiscussionId?: string;
+  moodChatId?: string;
 }
 
 function isSafeFileName(value: unknown): value is string {
@@ -174,7 +180,7 @@ function isSafeFileName(value: unknown): value is string {
 }
 
 const TASK_STATUSES: readonly TaskStatus[] = [
-  "queued", "composing", "generating", "assembling", "processing", "completed", "failed",
+  "queued", "composing", "generating", "review", "assembling", "processing", "completed", "failed",
 ];
 const ACTIVE_TASK_STATUSES: readonly TaskStatus[] = [
   "queued", "composing", "generating", "assembling", "processing",
@@ -225,7 +231,20 @@ function isTaskRecord(value: unknown): value is MusicTask {
     && (production.runId === undefined || isProductionRunId(production.runId))
     && (production.videoCreated === undefined || typeof production.videoCreated === "boolean")
     && productionProgressValid);
-  return movementsValid && tracksValid && playlistValid && albumPlanValid && productionValid;
+  const review = value.musicReview;
+  const musicReviewValid = review === undefined || (isRecord(review)
+    && (review.verdict === "match" || review.verdict === "mismatch")
+    && typeof review.summary === "string"
+    && Array.isArray(review.matchedPoints) && review.matchedPoints.every((point: unknown) => typeof point === "string")
+    && Array.isArray(review.mismatchedPoints) && review.mismatchedPoints.every((point: unknown) => typeof point === "string")
+    && typeof review.model === "string"
+    && Number.isInteger(review.attempt) && Number(review.attempt) >= 0
+    && typeof review.reviewedAt === "string");
+  const moodChatValid = value.moodChatId === undefined || isSafeFileName(value.moodChatId);
+  const reviewAttemptValid = value.reviewAttempt === undefined
+    || (Number.isInteger(value.reviewAttempt) && Number(value.reviewAttempt) >= 0);
+  return movementsValid && tracksValid && playlistValid && albumPlanValid && productionValid
+    && musicReviewValid && moodChatValid && reviewAttemptValid;
 }
 
 function safeAudioName(value: string | undefined, fallback: string): string {
@@ -511,6 +530,7 @@ export class TaskStore {
       createdAt: now,
       updatedAt: now,
       ...(input.sourceDiscussionId ? { sourceDiscussionId: input.sourceDiscussionId } : {}),
+      ...(input.moodChatId ? { moodChatId: input.moodChatId } : {}),
     };
     this.#tasks.set(task.id, task);
     this.#taskDirectories.set(task.id, this.taskDirectory(task));

@@ -178,7 +178,7 @@ describe("album generation continuation", () => {
       const task = store.get("album-task")!;
       await runAlbumTask(store, task, {
         openAiApiKey: "test-local", openAiModel: "test", geminiApiKey: "test-local",
-        lyriaModel: "lyria-3.5", outputDirectory: path.join(root, "outputs"),
+        geminiReviewModel: "test", lyriaModel: "lyria-3.5", outputDirectory: path.join(root, "outputs"),
       });
       for (const mock of [generateMock, planMock, composeMock, reviewMock, reviseMock]) {
         expect(mock).not.toHaveBeenCalled();

@@ -4,6 +4,7 @@ const EnvironmentSchema = z.object({
   OPENAI_API_KEY: z.string().trim().min(1, "OPENAI_API_KEY is required."),
   OPENAI_MODEL: z.string().trim().min(1).default("gpt-6-sol"),
   GEMINI_API_KEY: z.string().trim().min(1).optional(),
+  GEMINI_REVIEW_MODEL: z.string().trim().min(1).default("gemini-3.5-flash"),
   LYRIA_MODEL: z.string().trim().min(1).default("lyria-3-clip-preview"),
   ARIOSO_OUTPUT_DIR: z.string().trim().min(1).default("outputs"),
 });
@@ -12,6 +13,7 @@ export interface AriosoConfig {
   openAiApiKey: string;
   openAiModel: string;
   geminiApiKey: string | undefined;
+  geminiReviewModel: string;
   lyriaModel: string;
   outputDirectory: string;
   pipelinePython?: string;
@@ -37,6 +39,7 @@ export function loadConfig(
     openAiApiKey: parsed.data.OPENAI_API_KEY,
     openAiModel: parsed.data.OPENAI_MODEL,
     geminiApiKey: parsed.data.GEMINI_API_KEY,
+    geminiReviewModel: parsed.data.GEMINI_REVIEW_MODEL,
     lyriaModel: parsed.data.LYRIA_MODEL,
     outputDirectory: parsed.data.ARIOSO_OUTPUT_DIR,
     ...(environment.ARIOSO_PIPELINE_PYTHON ? { pipelinePython: environment.ARIOSO_PIPELINE_PYTHON } : {}),
