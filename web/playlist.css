@@ -1,0 +1,334 @@
+/* Playlist (test): build an album from MoodMic conversations and music.
+   Colours and radii come from theme.css so the page sits with the rest of
+   Arioso; only the layout and the states unique to this page live here. */
+
+.pl-page {
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.pl-main {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 32px 24px 88px;
+}
+
+.pl-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.pl-head h1 {
+  margin: 0 0 6px;
+  font-size: 1.7rem;
+  letter-spacing: -0.01em;
+}
+
+.pl-head p {
+  margin: 0;
+  max-width: 60ch;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.pl-eyebrow {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 10px;
+}
+
+.pl-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 18px;
+  padding: 6px 10px 6px 6px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.pl-back:hover { color: var(--ink); }
+
+/* ---- buttons ---- */
+
+.pl-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.16s var(--ease), background 0.16s var(--ease), transform 0.16s var(--ease);
+}
+
+.pl-btn:hover { transform: translateY(-1px); border-color: var(--brand); }
+.pl-btn:focus-visible { outline: 2px solid color-mix(in srgb, var(--brand) 55%, transparent); outline-offset: 2px; }
+.pl-btn[disabled] { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+.pl-btn-primary {
+  border-color: transparent;
+  background: var(--ink);
+  color: var(--surface);
+}
+
+.pl-btn-primary:hover { border-color: transparent; background: color-mix(in srgb, var(--ink) 88%, var(--brand)); }
+
+.pl-btn-quiet {
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.pl-btn.is-on {
+  border-color: var(--brand);
+  background: color-mix(in srgb, var(--brand) 12%, var(--surface));
+}
+
+/* ---- shelf ---- */
+
+.pl-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.pl-card {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  text-align: left;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+  transition: transform 0.16s var(--ease), border-color 0.16s var(--ease), box-shadow 0.16s var(--ease);
+}
+
+.pl-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 14%, transparent);
+}
+
+.pl-card strong { font-size: 1.02rem; }
+
+.pl-card-meta { color: var(--muted); font-size: 0.84rem; }
+
+.pl-card-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--brand);
+}
+
+.pl-empty {
+  padding: 48px 8px;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* ---- create ---- */
+
+.pl-form { display: grid; gap: 26px; }
+
+.pl-section > h2 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+}
+
+.pl-section > p { margin: 0 0 14px; color: var(--muted); line-height: 1.6; }
+
+.pl-refs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.pl-ref {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  text-align: left;
+  padding: 14px 16px 14px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.16s var(--ease), box-shadow 0.16s var(--ease);
+}
+
+.pl-ref::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+  background: var(--brand);
+  opacity: 0.35;
+}
+
+.pl-ref:hover { border-color: var(--brand); }
+
+.pl-ref.is-on {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 18%, transparent);
+}
+
+.pl-ref.is-on::before { opacity: 1; }
+
+.pl-ref-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+
+.pl-ref-check {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  border: 1.5px solid var(--line);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 0.7rem;
+  color: transparent;
+}
+
+.pl-ref.is-on .pl-ref-check {
+  border-color: var(--brand);
+  background: var(--brand);
+  color: var(--surface);
+}
+
+.pl-ref strong { font-size: 0.95rem; }
+.pl-ref p { margin: 0; color: var(--muted); font-size: 0.85rem; line-height: 1.5; }
+
+.pl-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.pl-tag {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brand) 10%, var(--surface));
+  color: color-mix(in srgb, var(--brand) 70%, var(--ink));
+  font-size: 0.72rem;
+}
+
+.pl-fields {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.pl-field { display: grid; gap: 6px; }
+.pl-field span { font-size: 0.82rem; color: var(--muted); }
+
+.pl-field select,
+.pl-field textarea {
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md, 10px);
+  padding: 10px 12px;
+}
+
+.pl-field textarea { width: min(640px, 100%); min-height: 96px; resize: vertical; line-height: 1.55; }
+
+.pl-refresh { align-self: center; }
+
+/* ---- detail ---- */
+
+.pl-detail-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 10px; }
+.pl-detail-head h1 { margin: 0 0 4px; font-size: 1.5rem; }
+.pl-detail-head p { margin: 0; color: var(--muted); max-width: 62ch; line-height: 1.6; }
+
+.pl-progress { display: flex; align-items: center; gap: 12px; margin: 14px 0 20px; color: var(--muted); font-size: 0.88rem; }
+
+.pl-bar { flex: 1; height: 6px; border-radius: 999px; background: color-mix(in srgb, var(--ink) 8%, transparent); overflow: hidden; }
+.pl-bar i { display: block; height: 100%; background: var(--brand); transition: width 0.4s var(--ease); }
+
+.pl-toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+
+.pl-tracks { display: grid; gap: 8px; }
+
+.pl-track {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md, 12px);
+  background: var(--surface);
+}
+
+.pl-track.is-excluded { opacity: 0.5; }
+.pl-track.is-included { border-color: var(--brand); }
+
+.pl-track-number {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.82rem;
+  color: var(--muted);
+  min-width: 1.6em;
+}
+
+.pl-play {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.pl-play:hover { border-color: var(--brand); }
+.pl-play.is-playing { border-color: var(--brand); background: color-mix(in srgb, var(--brand) 14%, var(--surface)); }
+
+.pl-track-body { min-width: 0; }
+.pl-track-body strong { display: block; font-size: 0.95rem; }
+.pl-track-body span { color: var(--muted); font-size: 0.8rem; }
+
+.pl-track-actions { display: flex; gap: 8px; align-items: center; }
+
+.pl-note {
+  border: 1px solid color-mix(in srgb, var(--brand) 35%, var(--line));
+  background: color-mix(in srgb, var(--brand) 7%, var(--surface));
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  line-height: 1.6;
+}
+
+.pl-message { margin-top: 14px; color: var(--danger, #b1412a); }
+
+@media (max-width: 560px) {
+  .pl-track { grid-template-columns: auto 1fr; grid-template-areas: "num play" "body actions"; row-gap: 10px; }
+  .pl-track-number { grid-area: num; }
+  .pl-play { grid-area: play; }
+  .pl-track-body { grid-area: body; }
+  .pl-track-actions { grid-area: actions; justify-content: flex-end; }
+}

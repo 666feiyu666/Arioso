@@ -20,19 +20,21 @@ import { writeTextFileAtomic } from "../utils/files.js";
 import { isRecord } from "../utils/validation.js";
 import { isProductionRunId, type AlbumProduction } from "../producer/types.js";
 import type { MusicReviewRecord } from "../moodmic/music-review.js";
+import { isPlaylistReference, type PlaylistReference } from "../playlist/reference.js";
 
 export type TaskMode = "compose" | "generate";
 export type TaskStatus = "queued" | "composing" | "generating" | "review" | "assembling" | "processing" | "completed" | "failed";
 export type VocalMode = "auto" | "instrumental" | "vocals";
 export type CorpusMode = "none" | "jazz";
 export type CompositionMode = "single" | "orchestral" | "album";
-export type WorkflowType = "01-general" | "02-jazz" | "03-orchestral" | "04-album";
+export type WorkflowType = "01-general" | "02-jazz" | "03-orchestral" | "04-album" | "05-playlist";
 
 const WORKFLOW_TYPES: readonly WorkflowType[] = [
   "01-general",
   "02-jazz",
   "03-orchestral",
   "04-album",
+  "05-playlist",
 ];
 
 function isWorkflowType(value: unknown): value is WorkflowType {
@@ -150,6 +152,8 @@ export interface MusicTask {
   moodChatId?: string;
   musicReview?: MusicReviewRecord;
   reviewAttempt?: number;
+  /** MoodMic creations reused as references when planning a Playlist album. */
+  playlistReferences?: PlaylistReference[];
 }
 
 export interface CreateTaskInput {
@@ -166,6 +170,7 @@ export interface CreateTaskInput {
   produceAlbum?: boolean;
   sourceDiscussionId?: string;
   moodChatId?: string;
+  playlistReferences?: PlaylistReference[];
 }
 
 function isSafeFileName(value: unknown): value is string {
@@ -243,8 +248,10 @@ function isTaskRecord(value: unknown): value is MusicTask {
   const moodChatValid = value.moodChatId === undefined || isSafeFileName(value.moodChatId);
   const reviewAttemptValid = value.reviewAttempt === undefined
     || (Number.isInteger(value.reviewAttempt) && Number(value.reviewAttempt) >= 0);
+  const referencesValid = value.playlistReferences === undefined
+    || (Array.isArray(value.playlistReferences) && value.playlistReferences.every(isPlaylistReference));
   return movementsValid && tracksValid && playlistValid && albumPlanValid && productionValid
-    && musicReviewValid && moodChatValid && reviewAttemptValid;
+    && musicReviewValid && moodChatValid && reviewAttemptValid && referencesValid;
 }
 
 function safeAudioName(value: string | undefined, fallback: string): string {
@@ -324,7 +331,7 @@ export async function organizeTaskStorage(
     }
     task.workflowType = inferWorkflowType(task);
     task.compositionMode = task.workflowType === "03-orchestral" ? "orchestral"
-      : task.workflowType === "04-album" ? "album" : "single";
+      : ["04-album", "05-playlist"].includes(task.workflowType) ? "album" : "single";
     task.corpusMode = corpusModeForWorkflow(task.workflowType, task.corpusMode);
     const taskDirectory = path.join(directory, task.workflowType, task.id);
     const recordPath = path.join(taskDirectory, "task.json");
@@ -444,7 +451,7 @@ export class TaskStore {
       const task = value;
       task.workflowType = inferWorkflowType(task);
       task.compositionMode = task.workflowType === "03-orchestral" ? "orchestral"
-      : task.workflowType === "04-album" ? "album" : "single";
+      : ["04-album", "05-playlist"].includes(task.workflowType) ? "album" : "single";
       task.corpusMode = corpusModeForWorkflow(task.workflowType, task.corpusMode);
 
       let interrupted = false;
@@ -531,6 +538,7 @@ export class TaskStore {
       updatedAt: now,
       ...(input.sourceDiscussionId ? { sourceDiscussionId: input.sourceDiscussionId } : {}),
       ...(input.moodChatId ? { moodChatId: input.moodChatId } : {}),
+      ...(input.playlistReferences?.length ? { playlistReferences: input.playlistReferences } : {}),
     };
     this.#tasks.set(task.id, task);
     this.#taskDirectories.set(task.id, this.taskDirectory(task));
@@ -948,7 +956,7 @@ export function parseTaskInput(value: unknown): CreateTaskInput {
   const corpusMode = corpusModeForWorkflow(workflowType, candidate.corpusMode);
   const compositionMode: CompositionMode = workflowType === "03-orchestral"
     ? "orchestral"
-    : workflowType === "04-album" ? "album" : "single";
+    : ["04-album", "05-playlist"].includes(workflowType) ? "album" : "single";
   const candidateCount = candidate.candidateCount ?? 14;
   const targetTotalMinutes = candidate.targetTotalMinutes ?? 35;
   if (candidate.produceAlbum !== undefined && typeof candidate.produceAlbum !== "boolean") {

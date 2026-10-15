@@ -32,13 +32,13 @@ model's own knowledge, a Jazz piece grounded in the standards, a multi-movement
 orchestral work, and a multi-track album. Each is a card marked with its own
 colour; entering one opens that workflow's composer.
 
-![Arioso workflow studio](Assets/arioso-workflow.png)
+![Arioso workflow studio](Assets/figure/arioso-workflow.png)
 
 The album workflow walks an idea through creative discussion before composition,
 then lines up the generated candidates as a playlist you can audition and
 export.
 
-![Arioso album and playlist workflow](Assets/arioso-playlist.png)
+![Arioso album and playlist workflow](Assets/figure/arioso-playlist.png)
 
 ### MoodMic
 
@@ -49,7 +49,7 @@ can start from four example feelings, one per mood colour; picking one fills
 the composer, and the same four colours carry through the interface and the
 mood calendar.
 
-![MoodMic](Assets/arioso-moodmic.png)
+![MoodMic](Assets/figure/arioso-moodmic.png)
 
 ### Mood calendar
 
@@ -59,7 +59,7 @@ and reopen the conversation behind it.
 
 ## Workflow
 
-![Arioso agentic workflow](Assets/arioso-agentic-workflow.png)
+![Arioso agentic workflow](Assets/figure/arioso-agentic-workflow.png)
 
 ## Example output
 

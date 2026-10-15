@@ -13,6 +13,7 @@ import {
   type AlbumReview,
 } from "../schema/album-plan.js";
 import { MusicSpecSchema, type MusicSpec } from "../schema/music-spec.js";
+import type { PlaylistReference } from "../playlist/reference.js";
 import { runComposerAgent } from "./agent-runner.js";
 import { buildAlbumLyriaPrompt } from "./album-prompt.js";
 import { composeMusic, type ComposeMusicOptions } from "./composer-agent.js";
@@ -30,6 +31,10 @@ You are Arioso's album author and planner. Develop one complete batch of indepen
 - Use accurate instrument names and playing techniques. "Hollow-body piano" is not an established piano type. Do not manufacture extra instruments or invented terminology for diversity.
 - Keep every candidate purely instrumental. Preserve the requested musical idiom; do not force jazz when it was not requested.
 - Return the structured plan, with no implementation commentary or hidden reasoning.
+`.trim();
+
+const REFERENCE_INSTRUCTIONS = `
+The user selected MoodMic creations as references for this album. Treat them as the album's artistic starting point: draw on their mood, texture, instrumentation, energy and production so the album stays recognisably in their family, while still serving the user's own description. Never copy a single reference literally, reuse its title, or let one reference dominate a candidate. When a reference contradicts the description, the description wins.
 `.trim();
 
 const REVIEWER_INSTRUCTIONS = `
@@ -51,6 +56,8 @@ export interface AlbumAgentOptions {
   lyriaModel?: string;
   candidateCount?: number;
   targetTotalMinutes?: number;
+  /** MoodMic creations to plan from. */
+  references?: PlaylistReference[];
   genre?: NonNullable<ComposeMusicOptions["genre"]>;
   vocalMode?: NonNullable<ComposeMusicOptions["vocalMode"]>;
 }
@@ -76,10 +83,16 @@ export async function planAlbum(description: string, options: AlbumAgentOptions 
     || targetTotalMinutes < ALBUM_MIN_TOTAL_MINUTES || targetTotalMinutes > ALBUM_MAX_TOTAL_MINUTES) {
     throw new Error(`The album batch duration target must be ${ALBUM_MIN_TOTAL_MINUTES}–${ALBUM_MAX_TOTAL_MINUTES} minutes.`);
   }
+  const references = options.references ?? [];
   const skill = await loadComposerSkill("album");
   const agent = new Agent({
     name: "Arioso Album Author",
-    instructions: [PLANNER_INSTRUCTIONS, `Target Lyria model: ${targetModel(options)}`, skill].join("\n\n"),
+    instructions: [
+      PLANNER_INSTRUCTIONS,
+      references.length ? REFERENCE_INSTRUCTIONS : "",
+      `Target Lyria model: ${targetModel(options)}`,
+      skill,
+    ].filter(Boolean).join("\n\n"),
     model: options.model ?? process.env.OPENAI_MODEL ?? "gpt-6-sol",
     outputType: AlbumPlanDraftSchema,
   });
@@ -89,6 +102,13 @@ export async function planAlbum(description: string, options: AlbumAgentOptions 
     targetTotalMinutes,
     durationRangeSeconds: [60, 180],
     vocalMode: "instrumental",
+    ...(references.length ? {
+      references: references.map((reference) => ({
+        title: reference.title,
+        intent: reference.prompt,
+        musicSpec: reference.musicSpec ?? null,
+      })),
+    } : {}),
   }), "The album author returned no structured plan.", options.apiKey);
   const plan = AlbumPlanSchema.parse(output);
   if (plan.tracks.length !== candidateCount) throw new Error("The album author returned a different candidate count.");

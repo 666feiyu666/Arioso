@@ -21,6 +21,7 @@ import {
 } from "../discussion/types.js";
 import { LyriaClient } from "../lyria/lyria-client.js";
 import { runMoodMicGeneration } from "../moodmic/moodmic-graph.js";
+import { MAX_PLAYLIST_REFERENCES, type PlaylistReference } from "../playlist/reference.js";
 import { listOrchestralKnowledgeCards } from "../retrieval/orchestral-cards.js";
 import { TaskStore, parseTaskInput, type AlbumAdmission, type AlbumAudioExport, type MusicTask } from "./task-store.js";
 import { MoodEntryStore, isCalendarDate, isMoodGroup, type MoodEntryInput } from "./mood-store.js";
@@ -291,6 +292,7 @@ export async function runAlbumTask(
       ...options,
       candidateCount: current.albumCandidateCount ?? 14,
       targetTotalMinutes: current.albumTargetTotalMinutes ?? 35,
+      ...(current.playlistReferences?.length ? { references: current.playlistReferences } : {}),
     });
     const now = new Date().toISOString();
     current = await store.update(task.id, {
@@ -565,6 +567,30 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
       .finally(() => activeTaskIds.delete(task.id));
   };
 
+  // Resolve a MoodMic conversation into a reference the album planner can use:
+  // the agreed creative intent plus the structured MusicSpec of its music.
+  const playlistReferenceFor = (chatId: string): PlaylistReference | undefined => {
+    const chat = moodChatStore.get(chatId);
+    if (!chat) return undefined;
+    const tasks = chat.taskIds.flatMap((id) => {
+      const candidate = store.get(id);
+      return candidate ? [candidate] : [];
+    });
+    const source = [...tasks].reverse().find((candidate) => candidate.audioFile)
+      ?? [...tasks].reverse().find((candidate) => candidate.musicSpec);
+    const prompt = chat.proposal?.trim()
+      || chat.messages.find((message) => message.role === "user")?.content?.trim()
+      || "";
+    if (!prompt) return undefined;
+    return {
+      chatId: chat.id,
+      title: source?.title?.trim() || prompt.slice(0, 40),
+      prompt,
+      ...(source ? { taskId: source.id } : {}),
+      ...(source?.musicSpec ? { musicSpec: source.musicSpec } : {}),
+    };
+  };
+
   return createServer(async (request, response) => {
     try {
       const url = new URL(request.url ?? "/", "http://localhost");
@@ -598,9 +624,9 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
       const moodEntryTaskMatch = /^\/api\/mood-entries\/([^/]+)\/tasks$/.exec(url.pathname);
       if (request.method === "GET" && url.pathname === "/api/capabilities") {
         sendJson(response, 200, {
-          apiVersion: 8,
+          apiVersion: 9,
           version: APPLICATION_VERSION,
-          workflows: ["01-general", "02-jazz", "03-orchestral", "04-album"],
+          workflows: ["01-general", "02-jazz", "03-orchestral", "04-album", "05-playlist"],
           discussionSessions: true,
           creativeSessionTimeline: true,
           discussionImages: { types: ["image/jpeg", "image/png", "image/webp"], maximumBytes: MAX_DISCUSSION_IMAGE_BYTES },
@@ -611,6 +637,7 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
           backgroundMusicProducer: { denoiser: "denoising-historical-recordings", outputChannels: 1, listeningReview: "required" },
           albumCandidates: { minimum: 12, maximum: 28, default: 14 },
           jazzCorpusToggle: true,
+          playlistReferences: true,
           orchestralAssembly: true,
           orchestralPromptFormat: "orchestral-v1",
           orchestralKnowledgeCards: true,
@@ -1043,6 +1070,57 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
 
       if (request.method === "GET" && url.pathname === "/api/tasks") {
         sendJson(response, 200, store.list());
+        return;
+      }
+
+      if (request.method === "GET" && url.pathname === "/api/playlists/references") {
+        sendJson(response, 200, {
+          references: moodChatStore.list().flatMap((chat) => {
+            const reference = playlistReferenceFor(chat.id);
+            if (!reference) return [];
+            const task = reference.taskId ? store.get(reference.taskId) : undefined;
+            return [{
+              ...reference,
+              createdAt: chat.createdAt,
+              updatedAt: chat.updatedAt,
+              ...(task?.audioFile ? { audioUrl: `/api/tasks/${task.id}/audio` } : {}),
+            }];
+          }),
+        });
+        return;
+      }
+
+      if (request.method === "POST" && url.pathname === "/api/playlists") {
+        const value = await readJsonBody(request);
+        if (!isRecord(value)) throw new HttpError(400, "A playlist request is required.");
+        const referenceChatIds = Array.isArray(value.referenceChatIds)
+          ? value.referenceChatIds.filter((id: unknown): id is string => typeof id === "string")
+          : [];
+        if (referenceChatIds.length > MAX_PLAYLIST_REFERENCES) {
+          throw new HttpError(400, `Choose at most ${MAX_PLAYLIST_REFERENCES} references.`);
+        }
+        const references: PlaylistReference[] = [];
+        for (const chatId of referenceChatIds) {
+          const reference = playlistReferenceFor(chatId);
+          if (!reference) throw new HttpError(400, "A selected MoodMic creation is unavailable.");
+          references.push(reference);
+        }
+        const input = parseTaskInput({
+          description: value.description,
+          mode: "generate",
+          vocalMode: "instrumental",
+          corpusMode: "none",
+          compositionMode: "album",
+          workflowType: "05-playlist",
+          candidateCount: value.candidateCount,
+          targetTotalMinutes: value.targetTotalMinutes,
+          lyriaModel: "lyria-3.5",
+        });
+        if (references.length) input.playlistReferences = references;
+        const config = loadConfig(true, await settings.runtimeEnvironment());
+        const task = await store.create(input, config);
+        startTask(task, config);
+        sendJson(response, 202, task);
         return;
       }
 

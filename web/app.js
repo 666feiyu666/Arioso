@@ -14,7 +14,7 @@ const translations = {
     productionCreatingVideo: "专辑 WAV 已完成，正在合成 MP4。",
     pageTitle: "Arioso · AI 音乐工坊",
     newTask: "新建任务", tasks: "任务", musicTasks: "音乐任务", settings: "设置",
-    tabMoodMic: "MoodMic", tabCalendar: "心情日历", tabWorkflow: "工作流", tabHelp: "帮助", tabBarLabel: "主导航",
+    tabMoodMic: "MoodMic", tabCalendar: "心情日历", tabWorkflow: "工作流", tabPlaylist: "播放列表（测试）", tabHelp: "帮助", tabBarLabel: "主导航",
     entryEyebrow: "CHOOSE A WORKFLOW", entryTitle: "选择音乐的<br />创作方式。",
     entryCopy: "从单曲、Jazz 语料到多乐章作品，选择适合当前构想的创作方式。",
     workflowChoices: "生成方式", allStyles: "不限风格", jazzOnly: "仅限 Jazz",
@@ -158,7 +158,7 @@ const translations = {
     productionCreatingVideo: "Album WAV complete · creating the MP4.",
     pageTitle: "Arioso · AI Music Studio",
     newTask: "New task", tasks: "Tasks", musicTasks: "Music tasks", settings: "Settings",
-    tabMoodMic: "MoodMic", tabCalendar: "Mood calendar", tabWorkflow: "Workflow", tabHelp: "Help", tabBarLabel: "Tab navigation",
+    tabMoodMic: "MoodMic", tabCalendar: "Mood calendar", tabWorkflow: "Workflow", tabPlaylist: "Playlist (test)", tabHelp: "Help", tabBarLabel: "Tab navigation",
     entryEyebrow: "CHOOSE A WORKFLOW", entryTitle: "Choose how to<br />create your music.",
     entryCopy: "Choose the workflow that fits your idea, from a single piece or Jazz corpus to a multi-movement work.",
     workflowChoices: "Generation workflows", allStyles: "All styles", jazzOnly: "Jazz only",
@@ -609,7 +609,7 @@ function normalizeCorpusMode(value) {
 }
 
 function workflowTypeForTask(task) {
-  if (["01-general", "02-jazz", "03-orchestral", "04-album"].includes(task.workflowType)) {
+  if (["01-general", "02-jazz", "03-orchestral", "04-album", "05-playlist"].includes(task.workflowType)) {
     return task.workflowType;
   }
   if (task.compositionMode === "orchestral") return "03-orchestral";

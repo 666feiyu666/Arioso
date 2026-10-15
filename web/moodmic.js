@@ -45,7 +45,7 @@ const MOOD_AUDIO = {
 const COPY = {
   "zh-CN": {
     pageTitle: "MoodMic · 把心情变成音乐",
-    tabMoodMic: "MoodMic", tabCalendar: "心情日历", tabWorkflow: "工作流", tabHelp: "帮助",
+    tabMoodMic: "MoodMic", tabCalendar: "心情日历", tabWorkflow: "工作流", tabPlaylist: "播放列表（测试）", tabHelp: "帮助",
     tabBarLabel: "主导航", switchLanguage: "切换界面语言",
     historyLabel: "对话记录",
     newChat: "新对话",
@@ -119,7 +119,7 @@ const COPY = {
   },
   en: {
     pageTitle: "MoodMic · Music from your mood",
-    tabMoodMic: "MoodMic", tabCalendar: "Mood calendar", tabWorkflow: "Workflow", tabHelp: "Help",
+    tabMoodMic: "MoodMic", tabCalendar: "Mood calendar", tabWorkflow: "Workflow", tabPlaylist: "Playlist (test)", tabHelp: "Help",
     tabBarLabel: "Tab navigation", switchLanguage: "Switch interface language",
     historyLabel: "Conversations",
     newChat: "New chat",
