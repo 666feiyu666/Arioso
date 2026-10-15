@@ -33,6 +33,15 @@ const EXAMPLES = {
   },
 };
 
+// Each melody point plays a short pre-generated example for its mood group.
+// The files live in Assets/music/ and are served under /assets/.
+const MOOD_AUDIO = {
+  coral: "/assets/music/red-example.mp3",
+  gold: "/assets/music/yellow-example.mp3",
+  blue: "/assets/music/blue-example.mp3",
+  sage: "/assets/music/green-example.mp3",
+};
+
 const COPY = {
   "zh-CN": {
     pageTitle: "MoodMic · 把心情变成音乐",
@@ -44,7 +53,10 @@ const COPY = {
     untitled: "新对话",
     greeting: "把此刻的心情变成音乐。",
     greetingLead: "用你自己的话写下此刻的心情和想要的音乐。",
-    examplesLead: "不知道从哪写起？点一种心情，先起个头。",
+    examplesLead: "不知道从哪写起？点一种心情，先起个头；点彩色的小圆点可以试听这一类的音乐。",
+    playMood: (name) => `试听${name}情绪的音乐`,
+    tapToPlay: "点圆点试听",
+    nowPlaying: "正在播放",
     composerPlaceholder: "说说此刻的心情，和想要的音乐…",
     composerHint: "Enter 发送，Shift + Enter 换行",
     send: "发送",
@@ -114,7 +126,10 @@ const COPY = {
     untitled: "New chat",
     greeting: "Turn how you feel into music.",
     greetingLead: "Describe the feeling and the music you want in your own words.",
-    examplesLead: "Not sure where to start? Pick a feeling to get you going.",
+    examplesLead: "Not sure where to start? Pick a feeling to get you going — tap a coloured dot to hear that mood.",
+    playMood: (name) => `Play the ${name} example`,
+    tapToPlay: "Tap the dot to listen",
+    nowPlaying: "Playing",
     composerPlaceholder: "Describe how you feel, and the music you want…",
     composerHint: "Enter to send, Shift + Enter for a new line",
     send: "Send",
@@ -213,6 +228,8 @@ const state = {
   activeEntryId: null,
   task: null,
   pollTimer: null,
+  playing: null,
+  moodAudio: null,
   busy: false,
   message: "",
   messageError: false,
@@ -319,16 +336,26 @@ function mainHead() {
 function renderExamples() {
   const key = state.language === "en" ? "en" : "zh";
   const rows = [70, 150, 80, 150];
-  const dots = GROUPS.map((group, index) => `
-        <circle class="mm-melody-dot" data-point="${group.id}"
-          cx="${(index + 0.5) * 250}" cy="${rows[index]}" r="7"
-          fill="var(--bg)" stroke="${group.color}" stroke-width="3"
-          vector-effect="non-scaling-stroke" />`).join("");
+  const dots = GROUPS.map((group, index) => {
+    const cx = (index + 0.5) * 250;
+    const cy = rows[index];
+    const playing = state.playing === group.id;
+    return `
+        <g class="mm-melody-point${playing ? " is-playing" : ""}" data-point="${group.id}"
+          style="--group:${group.color}"
+          role="button" tabindex="0" aria-pressed="${playing ? "true" : "false"}"
+          aria-label="${esc(t("playMood", groupName(group, state.language)))}">
+          <circle class="mm-melody-hit" cx="${cx}" cy="${cy}" r="24" fill="transparent" />
+          <circle class="mm-melody-ring" cx="${cx}" cy="${cy}" r="11"
+            fill="none" stroke="${group.color}" stroke-width="2" vector-effect="non-scaling-stroke" />
+          <circle class="mm-melody-dot" cx="${cx}" cy="${cy}" r="8"
+            fill="var(--bg)" stroke="${group.color}" stroke-width="3" vector-effect="non-scaling-stroke" />
+        </g>`;
+  }).join("");
   return `
     <div class="mm-examples">
-      <svg class="mm-melody" viewBox="0 0 1000 220" preserveAspectRatio="xMidYMid meet"
-        aria-hidden="true" focusable="false">
-        <path class="mm-melody-path"
+      <svg class="mm-melody" viewBox="0 0 1000 220" preserveAspectRatio="xMidYMid meet" focusable="false">
+        <path class="mm-melody-path" aria-hidden="true"
           d="M0,110 C41.7,110 83.3,70 125,70 C208.3,70 291.7,150 375,150 C458.3,150 541.7,80 625,80 C708.3,80 791.7,150 875,150 C916.7,150 958.3,110 1000,110"
           fill="none" stroke-width="2.5" stroke-linecap="round" vector-effect="non-scaling-stroke" />${dots}
       </svg>
@@ -336,10 +363,12 @@ function renderExamples() {
       <div class="mm-examples-grid">
         ${GROUPS.map((group) => {
           const text = EXAMPLES[group.id]?.[key] ?? "";
+          const playing = state.playing === group.id;
           return `
-          <button class="mm-example" type="button" data-example="${esc(text)}" data-example-group="${group.id}" style="--group:${group.color}">
+          <button class="mm-example${playing ? " is-playing" : ""}" type="button" data-example="${esc(text)}" data-example-group="${group.id}" style="--group:${group.color}">
             <span class="mm-example-mood"><span class="mm-example-swatch" aria-hidden="true"></span>${esc(groupName(group, state.language))}</span>
             <span class="mm-example-text">${esc(text)}</span>
+            <span class="mm-example-state">${esc(playing ? t("nowPlaying") : t("tapToPlay"))}</span>
           </button>`;
         }).join("")}
       </div>
@@ -725,9 +754,76 @@ function bindChat() {
     card.addEventListener("focus", () => setActive(true));
     card.addEventListener("blur", () => setActive(false));
   }
+  // Each melody point plays its mood's example; only one plays at a time.
+  for (const point of stage.querySelectorAll(".mm-melody-point")) {
+    const groupId = point.dataset.point;
+    point.addEventListener("click", () => toggleMoodAudio(groupId));
+    point.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        toggleMoodAudio(groupId);
+      }
+    });
+  }
 }
 
 // ---------------------------------------------------------------------------
+
+// One shared audio element drives every melody point, so starting a second
+// mood stops the first instead of stacking playback.
+function ensureMoodAudio() {
+  if (state.moodAudio) return state.moodAudio;
+  const audio = new Audio();
+  audio.preload = "none";
+  audio.addEventListener("ended", () => setMoodPlaying(null));
+  audio.addEventListener("error", () => setMoodPlaying(null));
+  state.moodAudio = audio;
+  return audio;
+}
+
+// Reflect the playing mood on the melody points and cards without re-rendering,
+// so the curve keeps its entrance instead of replaying it on every toggle.
+function pushMoodPlayingToDom(groupId) {
+  for (const point of stage.querySelectorAll(".mm-melody-point")) {
+    const on = point.dataset.point === groupId;
+    point.classList.toggle("is-playing", on);
+    point.setAttribute("aria-pressed", on ? "true" : "false");
+  }
+  for (const card of stage.querySelectorAll("[data-example-group]")) {
+    const on = card.dataset.exampleGroup === groupId;
+    card.classList.toggle("is-playing", on);
+    const stateEl = card.querySelector(".mm-example-state");
+    if (stateEl) stateEl.textContent = on ? t("nowPlaying") : t("tapToPlay");
+  }
+}
+
+function setMoodPlaying(groupId) {
+  state.playing = groupId;
+  if (stage) pushMoodPlayingToDom(groupId);
+}
+
+function toggleMoodAudio(groupId) {
+  if (!MOOD_AUDIO[groupId]) return;
+  const audio = ensureMoodAudio();
+  if (state.playing === groupId) {
+    audio.pause();
+    setMoodPlaying(null);
+    return;
+  }
+  audio.src = MOOD_AUDIO[groupId];
+  audio.currentTime = 0;
+  setMoodPlaying(groupId);
+  const started = audio.play();
+  if (started && typeof started.catch === "function") {
+    started.catch(() => setMoodPlaying(null));
+  }
+}
+
+function stopMoodAudio() {
+  if (state.moodAudio) state.moodAudio.pause();
+  state.playing = null;
+  if (stage) pushMoodPlayingToDom(null);
+}
 
 function chatOptions() {
   return { jazz: state.jazz };
@@ -992,6 +1088,7 @@ function pollTask() {
 
 function newChat() {
   clearTimeout(state.pollTimer);
+  stopMoodAudio();
   state.currentId = null;
   state.session = null;
   state.input = "";
@@ -1005,6 +1102,7 @@ function newChat() {
 
 async function openDiscussion(id) {
   clearTimeout(state.pollTimer);
+  stopMoodAudio();
   let session = state.discussions.find((discussion) => discussion.id === id) ?? null;
   if (!session) {
     try {

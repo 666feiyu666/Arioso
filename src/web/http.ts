@@ -5,6 +5,7 @@ import path from "node:path";
 import { pipeline } from "node:stream/promises";
 
 const WEB_ROOT = path.resolve("web");
+const ASSETS_ROOT = path.resolve("Assets");
 const MAX_BODY_BYTES = 64 * 1024;
 const MIME_TYPES: Record<string, string> = {
   ".css": "text/css; charset=utf-8",
@@ -12,7 +13,14 @@ const MIME_TYPES: Record<string, string> = {
   ".js": "text/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
   ".mp3": "audio/mpeg",
+  ".m4a": "audio/mp4",
+  ".wav": "audio/wav",
   ".svg": "image/svg+xml",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".webp": "image/webp",
+  ".gif": "image/gif",
 };
 
 export class HttpError extends Error {
@@ -191,14 +199,15 @@ export async function sendFile(
   await pipeline(createReadStream(filePath), response);
 }
 
-export async function serveStatic(
+async function serveFromRoot(
+  root: string,
   pathname: string,
   response: ServerResponse,
-  method = "GET",
+  method: string,
 ): Promise<void> {
   const relative = pathname === "/" ? "index.html" : pathname.replace(/^\/+/, "");
-  const filePath = path.resolve(WEB_ROOT, relative);
-  const relativePath = path.relative(WEB_ROOT, filePath);
+  const filePath = path.resolve(root, relative);
+  const relativePath = path.relative(root, filePath);
 
   if (relativePath.startsWith("..") || path.isAbsolute(relativePath)) {
     sendJson(response, 404, { error: "Not found." });
@@ -228,4 +237,14 @@ export async function serveStatic(
     }
     throw error;
   }
+}
+
+/** Serve files from the web/ directory (pages, scripts, styles). */
+export function serveStatic(pathname: string, response: ServerResponse, method = "GET"): Promise<void> {
+  return serveFromRoot(WEB_ROOT, pathname, response, method);
+}
+
+/** Serve the project's Assets/ directory, e.g. the mood example audio. */
+export function serveAsset(pathname: string, response: ServerResponse, method = "GET"): Promise<void> {
+  return serveFromRoot(ASSETS_ROOT, pathname, response, method);
 }

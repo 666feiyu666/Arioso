@@ -15,6 +15,8 @@ pnpm-debug.log*
 # Runtime output and generated media
 outputs/
 *.mp3
+# Mood example audio is a hand-made project asset, not generated output.
+!Assets/music/*.mp3
 *.wav
 *.mp4
 *.log

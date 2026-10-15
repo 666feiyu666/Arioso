@@ -26,7 +26,7 @@ import { TaskStore, parseTaskInput, type AlbumAdmission, type AlbumAudioExport, 
 import { MoodEntryStore, isCalendarDate, isMoodGroup, type MoodEntryInput } from "./mood-store.js";
 import { LangChainMoodClassifier, type MoodClassifier } from "./mood-classifier.js";
 import { MoodChatStore, type MoodChat } from "./mood-chat-store.js";
-import { HttpError, readBinaryBody, readJsonBody, sendAudio, sendFile, sendJson, serveStatic } from "./http.js";
+import { HttpError, readBinaryBody, readJsonBody, sendAudio, sendFile, sendJson, serveAsset, serveStatic } from "./http.js";
 import { isRecord } from "../utils/validation.js";
 import { runBackgroundMusicProducer } from "../producer/background-music-producer.js";
 import { productionArtifactPath } from "../producer/pipeline.js";
@@ -1291,6 +1291,12 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
 
       if (url.pathname.startsWith("/api/")) {
         sendJson(response, 404, { error: "Not found." });
+        return;
+      }
+
+      if ((request.method === "GET" || request.method === "HEAD")
+        && url.pathname.startsWith("/assets/")) {
+        await serveAsset(url.pathname.slice("/assets/".length), response, request.method);
         return;
       }
 

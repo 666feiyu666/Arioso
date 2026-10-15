@@ -1239,10 +1239,10 @@ body.mm-home {
   animation: mm-dot-in 0.35s var(--ease) forwards;
 }
 
-.mm-melody-dot:nth-of-type(1) { animation-delay: 0.5s; }
-.mm-melody-dot:nth-of-type(2) { animation-delay: 0.72s; }
-.mm-melody-dot:nth-of-type(3) { animation-delay: 0.94s; }
-.mm-melody-dot:nth-of-type(4) { animation-delay: 1.16s; }
+.mm-melody-point:nth-of-type(1) .mm-melody-dot { animation-delay: 0.5s; }
+.mm-melody-point:nth-of-type(2) .mm-melody-dot { animation-delay: 0.72s; }
+.mm-melody-point:nth-of-type(3) .mm-melody-dot { animation-delay: 0.94s; }
+.mm-melody-point:nth-of-type(4) .mm-melody-dot { animation-delay: 1.16s; }
 
 @keyframes mm-dot-in {
   to { opacity: 1; }
@@ -1250,6 +1250,40 @@ body.mm-home {
 
 .mm-melody-dot.is-active {
   transform: scale(1.9);
+}
+
+/* Melody points are buttons: click or keyboard plays the mood's example. */
+.mm-melody-point {
+  cursor: pointer;
+  outline: none;
+}
+
+.mm-melody-hit { cursor: pointer; }
+
+.mm-melody-ring {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  pointer-events: none;
+}
+
+.mm-melody-point.is-playing .mm-melody-dot {
+  transform: scale(1.35);
+}
+
+.mm-melody-point.is-playing .mm-melody-ring {
+  animation: mm-dot-pulse 1.8s var(--ease) infinite;
+}
+
+@keyframes mm-dot-pulse {
+  0% { opacity: 0.55; transform: scale(1); }
+  70% { opacity: 0; transform: scale(2.6); }
+  100% { opacity: 0; transform: scale(2.6); }
+}
+
+.mm-melody-point:focus-visible .mm-melody-dot {
+  stroke-width: 5;
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--group, #888) 65%, transparent));
 }
 
 .mm-examples-lead {
@@ -1298,6 +1332,21 @@ body.mm-home {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--group) 18%, transparent);
 }
 
+.mm-example.is-playing {
+  transform: translateY(-2px);
+  border-color: var(--group);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--group) 26%, transparent);
+}
+
+.mm-example.is-playing::before {
+  animation: mm-bar-pulse 1.6s var(--ease) infinite;
+}
+
+@keyframes mm-bar-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
 .mm-example:focus-visible {
   outline: none;
   border-color: var(--group);
@@ -1324,6 +1373,17 @@ body.mm-home {
   font-size: 0.9rem;
   line-height: 1.55;
   color: var(--ink);
+}
+
+.mm-example-state {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+
+.mm-example.is-playing .mm-example-state {
+  color: var(--group);
 }
 
 @media (max-width: 720px) {
