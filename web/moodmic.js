@@ -53,9 +53,10 @@ const COPY = {
     untitled: "新对话",
     greeting: "把此刻的心情变成音乐。",
     greetingLead: "用你自己的话写下此刻的心情和想要的音乐。",
-    examplesLead: "不知道从哪写起？点一种心情，先起个头；点彩色的小圆点可以试听这一类的音乐。",
+    examplesLead: "先听听看：点彩色小圆点，或卡片上的「试听」。想写时，点卡片的文字直接起头。",
     playMood: (name) => `试听${name}情绪的音乐`,
-    tapToPlay: "点圆点试听",
+    stopMood: (name) => `暂停${name}情绪的音乐`,
+    listen: "试听",
     nowPlaying: "正在播放",
     composerPlaceholder: "说说此刻的心情，和想要的音乐…",
     composerHint: "Enter 发送，Shift + Enter 换行",
@@ -126,9 +127,10 @@ const COPY = {
     untitled: "New chat",
     greeting: "Turn how you feel into music.",
     greetingLead: "Describe the feeling and the music you want in your own words.",
-    examplesLead: "Not sure where to start? Pick a feeling to get you going — tap a coloured dot to hear that mood.",
+    examplesLead: "Have a listen first: tap a coloured dot, or Listen on a card. To start writing, tap the card's words.",
     playMood: (name) => `Play the ${name} example`,
-    tapToPlay: "Tap the dot to listen",
+    stopMood: (name) => `Pause the ${name} example`,
+    listen: "Listen",
     nowPlaying: "Playing",
     composerPlaceholder: "Describe how you feel, and the music you want…",
     composerHint: "Enter to send, Shift + Enter for a new line",
@@ -364,12 +366,27 @@ function renderExamples() {
         ${GROUPS.map((group) => {
           const text = EXAMPLES[group.id]?.[key] ?? "";
           const playing = state.playing === group.id;
+          const name = groupName(group, state.language);
+          const playLabel = t("playMood", name);
+          const stopLabel = t("stopMood", name);
           return `
-          <button class="mm-example${playing ? " is-playing" : ""}" type="button" data-example="${esc(text)}" data-example-group="${group.id}" style="--group:${group.color}">
-            <span class="mm-example-mood"><span class="mm-example-swatch" aria-hidden="true"></span>${esc(groupName(group, state.language))}</span>
-            <span class="mm-example-text">${esc(text)}</span>
-            <span class="mm-example-state">${esc(playing ? t("nowPlaying") : t("tapToPlay"))}</span>
-          </button>`;
+          <div class="mm-example${playing ? " is-playing" : ""}" data-example-group="${group.id}" style="--group:${group.color}">
+            <button class="mm-example-start" type="button" data-example="${esc(text)}">
+              <span class="mm-example-mood"><span class="mm-example-swatch" aria-hidden="true"></span>${esc(name)}</span>
+              <span class="mm-example-text">${esc(text)}</span>
+            </button>
+            <div class="mm-example-foot">
+              <button class="mm-example-play${playing ? " is-playing" : ""}" type="button" data-play-group="${group.id}"
+                aria-pressed="${playing ? "true" : "false"}"
+                aria-label="${esc(playing ? stopLabel : playLabel)}"
+                data-play-label="${esc(playLabel)}" data-stop-label="${esc(stopLabel)}">
+                <span class="mm-example-play-icon" aria-hidden="true"></span>
+                <span class="mm-example-play-label">${esc(playing ? t("nowPlaying") : t("listen"))}</span>
+              </button>
+              <span class="mm-example-play-time" aria-hidden="true"></span>
+            </div>
+            <span class="mm-example-progress" aria-hidden="true"><i></i></span>
+          </div>`;
         }).join("")}
       </div>
     </div>
@@ -751,12 +768,23 @@ function bindChat() {
     };
     card.addEventListener("mouseenter", () => setActive(true));
     card.addEventListener("mouseleave", () => setActive(false));
-    card.addEventListener("focus", () => setActive(true));
-    card.addEventListener("blur", () => setActive(false));
+    card.addEventListener("focusin", () => setActive(true));
+    card.addEventListener("focusout", () => setActive(false));
   }
-  // Each melody point plays its mood's example; only one plays at a time.
+  // One playing mood at a time, driven by a melody point or a card's Listen.
   for (const point of stage.querySelectorAll(".mm-melody-point")) {
     const groupId = point.dataset.point;
+    const card = stage.querySelector(`.mm-example[data-example-group="${groupId}"]`);
+    // Hovering a point enlarges it (CSS) and lights up its card, so the dot
+    // reads as something to press and which mood it belongs to.
+    const setActive = (on) => {
+      point.classList.toggle("is-active", on);
+      card?.classList.toggle("is-active", on);
+    };
+    point.addEventListener("mouseenter", () => setActive(true));
+    point.addEventListener("mouseleave", () => setActive(false));
+    point.addEventListener("focusin", () => setActive(true));
+    point.addEventListener("focusout", () => setActive(false));
     point.addEventListener("click", () => toggleMoodAudio(groupId));
     point.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") {
@@ -764,6 +792,9 @@ function bindChat() {
         toggleMoodAudio(groupId);
       }
     });
+  }
+  for (const button of stage.querySelectorAll("[data-play-group]")) {
+    button.addEventListener("click", () => toggleMoodAudio(button.dataset.playGroup));
   }
 }
 
@@ -777,8 +808,30 @@ function ensureMoodAudio() {
   audio.preload = "none";
   audio.addEventListener("ended", () => setMoodPlaying(null));
   audio.addEventListener("error", () => setMoodPlaying(null));
+  audio.addEventListener("timeupdate", () => updateMoodPlayback());
+  audio.addEventListener("loadedmetadata", () => updateMoodPlayback());
   state.moodAudio = audio;
   return audio;
+}
+
+function formatClock(seconds) {
+  if (!Number.isFinite(seconds) || seconds < 0) return "";
+  const total = Math.floor(seconds);
+  return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`;
+}
+
+// Draw the current playback position on the card that owns it.
+function updateMoodPlayback() {
+  const audio = state.moodAudio;
+  if (!audio || !state.playing) return;
+  const card = stage.querySelector(`.mm-example[data-example-group="${state.playing}"]`);
+  if (!card) return;
+  const duration = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : 0;
+  const ratio = duration ? Math.min(1, audio.currentTime / duration) : 0;
+  const bar = card.querySelector(".mm-example-progress i");
+  if (bar) bar.style.width = `${(ratio * 100).toFixed(2)}%`;
+  const time = card.querySelector(".mm-example-play-time");
+  if (time) time.textContent = formatClock(audio.currentTime);
 }
 
 // Reflect the playing mood on the melody points and cards without re-rendering,
@@ -792,8 +845,19 @@ function pushMoodPlayingToDom(groupId) {
   for (const card of stage.querySelectorAll("[data-example-group]")) {
     const on = card.dataset.exampleGroup === groupId;
     card.classList.toggle("is-playing", on);
-    const stateEl = card.querySelector(".mm-example-state");
-    if (stateEl) stateEl.textContent = on ? t("nowPlaying") : t("tapToPlay");
+    const bar = card.querySelector(".mm-example-progress i");
+    if (bar) bar.style.width = "0%";
+    const time = card.querySelector(".mm-example-play-time");
+    if (time) time.textContent = "";
+    const play = card.querySelector(".mm-example-play");
+    if (play) {
+      play.classList.toggle("is-playing", on);
+      play.setAttribute("aria-pressed", on ? "true" : "false");
+      const label = on ? play.dataset.stopLabel : play.dataset.playLabel;
+      if (label) play.setAttribute("aria-label", label);
+      const text = play.querySelector(".mm-example-play-label");
+      if (text) text.textContent = on ? t("nowPlaying") : t("listen");
+    }
   }
 }
 

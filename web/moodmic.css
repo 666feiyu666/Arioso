@@ -1281,6 +1281,12 @@ body.mm-home {
   100% { opacity: 0; transform: scale(2.6); }
 }
 
+.mm-melody-point:hover .mm-melody-dot,
+.mm-melody-point.is-active .mm-melody-dot,
+.mm-melody-point:focus-visible .mm-melody-dot {
+  transform: scale(1.9);
+}
+
 .mm-melody-point:focus-visible .mm-melody-dot {
   stroke-width: 5;
   filter: drop-shadow(0 0 4px color-mix(in srgb, var(--group, #888) 65%, transparent));
@@ -1301,17 +1307,14 @@ body.mm-home {
 .mm-example {
   --group: var(--brand);
   position: relative;
-  display: grid;
-  gap: 8px;
-  align-content: start;
-  text-align: left;
-  padding: 15px 16px 15px 18px;
+  display: flex;
+  flex-direction: column;
+  padding: 15px 16px 14px 18px;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background: var(--surface);
   color: var(--ink);
-  font: inherit;
-  cursor: pointer;
+  overflow: hidden;
   transition: transform 0.16s var(--ease), border-color 0.16s var(--ease),
     box-shadow 0.16s var(--ease);
 }
@@ -1347,9 +1350,25 @@ body.mm-home {
   50% { opacity: 0.35; }
 }
 
-.mm-example:focus-visible {
-  outline: none;
+.mm-example:focus-within {
   border-color: var(--group);
+}
+
+.mm-example-start {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  text-align: left;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.mm-example-start:focus-visible {
+  outline: none;
 }
 
 .mm-example-mood {
@@ -1375,15 +1394,99 @@ body.mm-home {
   color: var(--ink);
 }
 
-.mm-example-state {
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--muted);
+.mm-example-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 12px;
 }
 
-.mm-example.is-playing .mm-example-state {
-  color: var(--group);
+.mm-example-play {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px 6px 10px;
+  border: 1px solid color-mix(in srgb, var(--group) 42%, var(--line));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--group) 7%, var(--surface));
+  color: color-mix(in srgb, var(--group) 72%, var(--ink));
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.16s var(--ease), border-color 0.16s var(--ease);
+}
+
+.mm-example-play:hover {
+  background: color-mix(in srgb, var(--group) 15%, var(--surface));
+}
+
+.mm-example-play.is-playing {
+  background: color-mix(in srgb, var(--group) 16%, var(--surface));
+}
+
+.mm-example-play:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--group) 55%, transparent);
+  outline-offset: 2px;
+}
+
+.mm-example-play-icon {
+  position: relative;
+  width: 12px;
+  height: 12px;
+  flex: none;
+}
+
+.mm-example-play-icon::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 0;
+  height: 0;
+  border-left: 9px solid currentColor;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+}
+
+.mm-example-play.is-playing .mm-example-play-icon::before {
+  width: 9px;
+  height: 10px;
+  border: 0;
+  background:
+    linear-gradient(currentColor 0 0) left / 3px 100% no-repeat,
+    linear-gradient(currentColor 0 0) right / 3px 100% no-repeat;
+}
+
+.mm-example-play-time {
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  min-width: 2.5em;
+  text-align: right;
+}
+
+.mm-example-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: color-mix(in srgb, var(--group) 14%, transparent);
+  opacity: 0;
+  transition: opacity 0.2s var(--ease);
+}
+
+.mm-example.is-playing .mm-example-progress {
+  opacity: 1;
+}
+
+.mm-example-progress i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--group);
 }
 
 @media (max-width: 720px) {
