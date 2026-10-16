@@ -67,6 +67,7 @@ const COPY = {
     planIntro: "下面是专辑作者对你参考对话与主题的理解，以及据此展开的构思。确认无误才会开始生成音频。",
     planReviewBadge: "待确认构想",
     planApprovedBadge: "已确认",
+    planDoneBadge: "已完成",
     readingTitle: "系统如何理解你的参考",
     intentLabel: "主题理解",
     readingNoRefs: "这次没有选择参考对话，构思完全来自你的主题描述。",
@@ -167,6 +168,7 @@ const COPY = {
     planIntro: "Here is how the album author read your references and theme, and the plan it drew from them. Audio generation starts only after you confirm.",
     planReviewBadge: "Awaiting review",
     planApprovedBadge: "Confirmed",
+    planDoneBadge: "Completed",
     readingTitle: "How the system understood your references",
     intentLabel: "Your theme, read as",
     readingNoRefs: "No reference conversations were chosen this time, so the plan comes entirely from your theme.",
@@ -600,6 +602,15 @@ function trackRow(task, track, number, scope) {
     </div>`;
 }
 
+// The header badge reflects the task's real state, not just the approval flag,
+// so a playlist generated before confirmation existed still reads correctly.
+function planStateBadge(task) {
+  const phase = task.status === "review" ? "review" : task.status === "completed" ? "done" : "approved";
+  const label = phase === "review" ? t("planReviewBadge")
+    : phase === "done" ? t("planDoneBadge") : t("planApprovedBadge");
+  return `<span class="pl-plan-state${phase === "review" ? "" : " is-approved"}"><span class="pl-state-dot" aria-hidden="true"></span>${esc(label)}</span>`;
+}
+
 function viewDetail() {
   const task = currentTask();
   if (!task) return `<p class="pl-empty">…</p>`;
@@ -622,7 +633,7 @@ function viewDetail() {
         <h1>${esc(plan?.albumTitle || task.title || task.description)}</h1>
         <p>${esc(plan?.albumMind || task.description)}</p>
       </div>
-      ${plan ? `<span class="pl-plan-state${task.playlistPlanApproved ? " is-approved" : ""}"><span class="pl-state-dot" aria-hidden="true"></span>${esc(task.playlistPlanApproved ? t("planApprovedBadge") : t("planReviewBadge"))}</span>` : ""}
+      ${plan ? planStateBadge(task) : ""}
     </header>
 
     ${task.status === "failed"

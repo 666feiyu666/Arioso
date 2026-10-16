@@ -1269,8 +1269,11 @@ function renderExamples() {
 function renderTaskList() {
   const sessionTaskIds = new Set(state.discussionSessions.flatMap((session) => session.taskIds || []));
   const legacyTasks = state.tasks.filter((task) => !sessionTaskIds.has(task.id));
-  elements.taskCount.textContent = String(state.discussionSessions.length + legacyTasks.length);
   const workflowTypes = ["01-general", "02-jazz", "03-orchestral", "04-album"];
+  // Playlist (05) has its own tab and is not listed here, so count only what
+  // the list actually shows: the badge and the rows must agree.
+  const listedTasks = legacyTasks.filter((task) => workflowTypes.includes(workflowTypeForTask(task)));
+  elements.taskCount.textContent = String(state.discussionSessions.length + listedTasks.length);
   // Keep the reader's place: re-rendering the list must not jump the sidebar.
   const previousScrollTop = elements.taskList.scrollTop;
   elements.taskList.innerHTML = workflowTypes.map((workflowType) => {
