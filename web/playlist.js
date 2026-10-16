@@ -3,6 +3,10 @@
 // The request model is the album workflow's — candidates, include/exclude and
 // an MP3 export — but the planning input is a set of MoodMic conversations the
 // user picked, each contributing its intent and the MusicSpec of its music.
+//
+// Planning pauses for confirmation: the album author shows how it read the
+// references and the theme, the user can keep talking to revise the plan, and
+// only an explicit confirmation starts audio generation.
 
 const COPY = {
   "zh-CN": {
@@ -40,18 +44,71 @@ const COPY = {
     timestamps: "下载时间戳",
     exporting: "正在合并…",
     exportUnavailable: "有曲目尚未完成，暂时无法导出。",
-    planning: "正在规划整个歌单。",
-    progress: (done, total) => `已完成 ${done}/${total} 首`,
     failedTitle: "这次没有完成",
     retryTask: "重试",
     unadmitted: "候选",
     included: "已收录",
     excluded: "已排除",
     status: {
-      queued: "排队中", composing: "正在规划曲目", generating: "正在生成音频",
-      review: "待确认", assembling: "正在拼接", processing: "正在处理",
+      queued: "排队中", composing: "正在构思", generating: "正在生成音频",
+      review: "等待你确认构思", assembling: "正在拼接", processing: "正在处理",
       completed: "已完成", failed: "未完成",
     },
+    // progress
+    phase: {
+      plan: "通读参考，构思歌单", compose: "撰写每首曲目方案", generate: "生成音频",
+      assemble: "拼接导出", done: "已完成", review: "等待你确认构思", failed: "未完成",
+    },
+    progressWait: "正在进行，请稍候",
+    progressCurrent: (title) => `正在处理：${title}`,
+    progressCount: (done, total) => `${done} / ${total}`,
+    // plan panel
+    planTitle: "歌单构思",
+    planIntro: "下面是专辑作者对你参考对话与主题的理解，以及据此展开的构思。确认无误才会开始生成音频。",
+    planReviewBadge: "待确认构想",
+    planApprovedBadge: "已确认",
+    readingTitle: "系统如何理解你的参考",
+    intentLabel: "主题理解",
+    readingNoRefs: "这次没有选择参考对话，构思完全来自你的主题描述。",
+    readingUnderstoodLabel: "我听到的",
+    readingUsedLabel: "它如何进入歌单",
+    ideaTitle: "整体构想",
+    ideaMindLabel: "核心想法",
+    ideaCohesionLabel: "一致与变化",
+    ideaContractLabel: "共同声音",
+    outlineTitle: "曲目构思",
+    outlineInstrumentsLabel: "乐器",
+    outlineGrooveLabel: "律动",
+    outlineHarmonyLabel: "和声",
+    outlineDevelopmentLabel: "发展",
+    outlineTargetLabel: "目标时长",
+    chatTitle: "继续对话修改",
+    chatIntro: "哪里不对、想换掉哪首、想调整整体气质，直接说。专辑作者会据此修改构思，改到你满意再确认。",
+    chatPlaceholder: "例如：第 4 首去掉鼓，整体再安静一点。",
+    chatSend: "发送",
+    chatSending: "正在修改构思…",
+    chatOpening: "这是我读完你的参考和主题后的理解与构思。确认无误就点开始生成；想调整就直接告诉我。",
+    chatNeedMessage: "先写一句你想调整的地方。",
+    approve: "确认构思，开始生成音频",
+    approving: "正在开始…",
+    planCollapsed: "查看歌单构思与修改记录",
+    planCollapsedHint: "音频生成完成后仍可在这里回看当初的构思。",
+    // player and list
+    scopeCandidates: "候选",
+    scopeIncluded: "已收录",
+    scopeCount: (n) => `${n} 首`,
+    playAll: "播放全部",
+    nowPlaying: "正在播放",
+    previousTrack: "上一首",
+    nextTrack: "下一首",
+    seekLabel: "播放进度",
+    moveUp: "上移",
+    moveDown: "下移",
+    listCandidatesEmpty: "还没有候选曲目。",
+    listIncludedEmpty: "还没有收录曲目。在「候选」里把喜欢的收进来，就能排成一张歌单。",
+    playlistDuration: (d) => `共 ${d}`,
+    shelfReviewHint: "进入确认 →",
+    playbackError: "这段音频暂时无法播放。",
   },
   en: {
     tabMoodMic: "MoodMic", tabCalendar: "Mood calendar", tabWorkflow: "Workflow",
@@ -88,18 +145,69 @@ const COPY = {
     timestamps: "Download timestamps",
     exporting: "Merging…",
     exportUnavailable: "Export is available once every track has finished generating.",
-    planning: "Planning the whole album.",
-    progress: (done, total) => `${done}/${total} ready`,
     failedTitle: "This run didn't finish",
     retryTask: "Retry",
     unadmitted: "Candidate",
     included: "Included",
     excluded: "Excluded",
     status: {
-      queued: "Queued", composing: "Planning the tracks", generating: "Generating audio",
-      review: "Awaiting confirmation", assembling: "Assembling", processing: "Processing",
+      queued: "Queued", composing: "Thinking", generating: "Generating audio",
+      review: "Waiting for your confirmation", assembling: "Assembling", processing: "Processing",
       completed: "Completed", failed: "Not finished",
     },
+    phase: {
+      plan: "Reading the references and shaping the album", compose: "Writing each track's plan",
+      generate: "Generating audio", assemble: "Assembling", done: "Completed",
+      review: "Waiting for your confirmation", failed: "Not finished",
+    },
+    progressWait: "In progress, please wait",
+    progressCurrent: (title) => `Working on: ${title}`,
+    progressCount: (done, total) => `${done} / ${total}`,
+    planTitle: "Album plan",
+    planIntro: "Here is how the album author read your references and theme, and the plan it drew from them. Audio generation starts only after you confirm.",
+    planReviewBadge: "Awaiting review",
+    planApprovedBadge: "Confirmed",
+    readingTitle: "How the system understood your references",
+    intentLabel: "Your theme, read as",
+    readingNoRefs: "No reference conversations were chosen this time, so the plan comes entirely from your theme.",
+    readingUnderstoodLabel: "What I heard",
+    readingUsedLabel: "How it enters the album",
+    ideaTitle: "The idea",
+    ideaMindLabel: "Core idea",
+    ideaCohesionLabel: "Consistency and change",
+    ideaContractLabel: "Shared sound",
+    outlineTitle: "Track plans",
+    outlineInstrumentsLabel: "Instruments",
+    outlineGrooveLabel: "Groove",
+    outlineHarmonyLabel: "Harmony",
+    outlineDevelopmentLabel: "Development",
+    outlineTargetLabel: "Target length",
+    chatTitle: "Keep talking to revise",
+    chatIntro: "Say what is off, which track to swap, how the overall feel should shift. The album author revises the plan, and you confirm once you are happy.",
+    chatPlaceholder: "e.g. drop the drums on track 4, and make the whole thing calmer.",
+    chatSend: "Send",
+    chatSending: "Revising the plan…",
+    chatOpening: "Here is how I read your references and theme, and the plan I drew from them. Confirm if it looks right, or tell me what to adjust.",
+    chatNeedMessage: "Write what you want to adjust first.",
+    approve: "Confirm and start generating audio",
+    approving: "Starting…",
+    planCollapsed: "View the album plan and revision log",
+    planCollapsedHint: "You can still look back at this plan once the audio is done.",
+    scopeCandidates: "Candidates",
+    scopeIncluded: "Included",
+    scopeCount: (n) => `${n} ${n === 1 ? "track" : "tracks"}`,
+    playAll: "Play all",
+    nowPlaying: "Now playing",
+    previousTrack: "Previous track",
+    nextTrack: "Next track",
+    seekLabel: "Playback position",
+    moveUp: "Move up",
+    moveDown: "Move down",
+    listCandidatesEmpty: "No candidate tracks yet.",
+    listIncludedEmpty: "Nothing included yet. Add the ones you like from Candidates to build the playlist.",
+    playlistDuration: (d) => `${d} total`,
+    shelfReviewHint: "Open to confirm →",
+    playbackError: "This track's audio cannot play right now.",
   },
 };
 
@@ -118,9 +226,18 @@ const state = {
   count: 14,
   minutes: 35,
   currentId: null,
+  scope: "candidate",
+  queue: [],
+  queueScope: "candidate",
+  queueIndex: -1,
   playingTrackId: null,
+  playing: false,
+  previewId: null,
+  currentTime: 0,
+  duration: 0,
   pollTimer: null,
   busy: false,
+  chatDraft: "",
   message: "",
 };
 
@@ -157,8 +274,26 @@ function durationText(seconds) {
   return `${Math.floor(rounded / 60)}:${String(rounded % 60).padStart(2, "0")}`;
 }
 
+function clockText(seconds) {
+  const safe = Number.isFinite(seconds) && seconds > 0 ? Math.floor(seconds) : 0;
+  return `${Math.floor(safe / 60)}:${String(safe % 60).padStart(2, "0")}`;
+}
+
 function taskDuration(task) {
   return (task.albumTracks ?? []).reduce((total, track) => total + (track.audioFile ? track.durationSeconds || 0 : 0), 0);
+}
+
+function currentTask() {
+  return state.tasks.find((item) => item.id === state.currentId);
+}
+
+function replaceTask(task) {
+  const index = state.tasks.findIndex((item) => item.id === task.id);
+  if (index >= 0) state.tasks[index] = task; else state.tasks.push(task);
+}
+
+function orderedTracks(task) {
+  return [...(task.albumTracks ?? [])].sort((first, second) => first.order - second.order);
 }
 
 // ---------------------------------------------------------------------------
@@ -185,11 +320,12 @@ function viewShelf() {
     ${albums.length ? `<div class="pl-grid">${albums.map((task) => {
       const ready = (task.albumTracks ?? []).filter((track) => track.audioFile).length;
       const included = (task.albumTracks ?? []).filter((track) => track.admission === "included").length;
-      return `<button class="pl-card" type="button" data-open="${esc(task.id)}">
+      const reviewing = task.status === "review";
+      return `<button class="pl-card${reviewing ? " is-review" : ""}" type="button" data-open="${esc(task.id)}">
         <strong>${esc(task.albumPlan?.albumTitle || task.title || task.description)}</strong>
         <span class="pl-card-meta">${esc(t("tracksWord", ready || (task.albumTracks ?? []).length))} · ${esc(t("includedWord", included))}</span>
         <span class="pl-card-meta">${esc(durationText(taskDuration(task)))}</span>
-        <span class="pl-card-state">${esc(statusLabel(task))}</span>
+        <span class="pl-card-state${reviewing ? " is-review" : ""}">${reviewing ? `<span class="pl-state-dot" aria-hidden="true"></span>` : ""}${esc(statusLabel(task))}${reviewing ? `<span class="pl-card-cta">${esc(t("shelfReviewHint"))}</span>` : ""}</span>
       </button>`;
     }).join("")}</div>` : `<p class="pl-empty">${esc(t("emptyShelf"))}</p>`}
     ${state.message ? `<p class="pl-message">${esc(state.message)}</p>` : ""}
@@ -256,14 +392,229 @@ function viewCreate() {
   `;
 }
 
-function viewDetail() {
-  const task = state.tasks.find((item) => item.id === state.currentId);
-  if (!task) return `<p class="pl-empty">…</p>`;
-  const tracks = [...(task.albumTracks ?? [])].sort((first, second) => first.order - second.order);
-  const done = tracks.filter((track) => track.audioFile).length;
-  const rate = tracks.length ? Math.round((done / tracks.length) * 100) : 0;
+// ---- detail ----
+
+function progressModel(task) {
+  const tracks = orderedTracks(task);
+  const total = tracks.length || task.albumCandidateCount || 0;
+  const prompts = tracks.filter((track) => track.musicSpec).length;
+  const audio = tracks.filter((track) => track.audioFile).length;
+  const percent = (done) => (total ? Math.round((done / total) * 100) : 0);
+  const active = tracks.find((track) => track.status === "composing" || track.status === "generating");
+  const base = { total, active: active?.title || "" };
+  if (task.status === "completed") return { ...base, phase: "done", done: total, percent: 100 };
+  if (task.status === "failed") return { ...base, phase: "failed", done: audio, percent: percent(audio) };
+  if (task.status === "review") return { ...base, phase: "review", done: 0, percent: 0 };
+  if (task.status === "generating") return { ...base, phase: "generate", done: audio, percent: percent(audio) };
+  if (task.status === "assembling" || task.status === "processing") return { ...base, phase: "assemble", done: total, percent: 100 };
+  if (!tracks.length) return { ...base, phase: "plan", done: 0, percent: 0, indeterminate: true };
+  return { ...base, phase: "compose", done: prompts, percent: percent(prompts) };
+}
+
+function progressBar(model) {
+  if (model.indeterminate) {
+    return `<span class="pl-seg-bar is-indeterminate" role="progressbar" aria-label="${esc(t("phase").plan)}">${Array.from({ length: Math.min(model.total || 12, 28) }, () => "<i class=\"is-pending\"></i>").join("")}</span>`;
+  }
+  if (!model.total) return `<span class="pl-seg-bar is-indeterminate"><i class="is-pending"></i></span>`;
+  const cells = Array.from({ length: model.total }, (_, index) =>
+    `<i class="${index < model.done ? "is-on" : ""}"></i>`).join("");
+  return `<span class="pl-seg-bar" role="progressbar" aria-valuemin="0" aria-valuemax="${model.total}" aria-valuenow="${model.done}" aria-valuetext="${esc(t("progressCount", model.done, model.total))}">${cells}</span>`;
+}
+
+function progressPanel(task) {
+  const model = progressModel(task);
+  const note = model.indeterminate ? t("progressWait")
+    : model.active ? t("progressCurrent", model.active) : t("progressCount", model.done, model.total);
+  return `
+    <section class="pl-progress-card" aria-live="polite">
+      <div class="pl-progress-head">
+        <span class="pl-progress-phase">${esc(t("phase")[model.phase] ?? "")}</span>
+        <span class="pl-progress-gauge num" aria-hidden="true">${model.indeterminate ? "…" : `${model.percent}%`}</span>
+      </div>
+      ${progressBar(model)}
+      <p class="pl-progress-note">${esc(note)}</p>
+    </section>`;
+}
+
+function readingPanel(task) {
+  const briefing = task.playlistBriefing;
+  if (!briefing) return "";
+  const readings = briefing.referenceReadings ?? [];
+  return `
+    <section class="pl-plan-section">
+      <h3>${esc(t("readingTitle"))}</h3>
+      <p class="pl-intent"><span class="pl-label">${esc(t("intentLabel"))}</span>${esc(briefing.intentReading)}</p>
+      ${readings.length ? `<div class="pl-readings">${readings.map((reading) => `
+        <article class="pl-reading">
+          <strong>${esc(reading.title)}</strong>
+          <p><span class="pl-label">${esc(t("readingUnderstoodLabel"))}</span>${esc(reading.understood)}</p>
+          <p><span class="pl-label">${esc(t("readingUsedLabel"))}</span>${esc(reading.usedFor)}</p>
+        </article>`).join("")}</div>` : `<p class="pl-note">${esc(t("readingNoRefs"))}</p>`}
+    </section>`;
+}
+
+function ideaPanel(task) {
   const plan = task.albumPlan;
-  const running = !["completed", "failed"].includes(task.status);
+  if (!plan) return "";
+  return `
+    <section class="pl-plan-section">
+      <h3>${esc(t("ideaTitle"))}</h3>
+      <p class="pl-mind">${esc(plan.albumMind)}</p>
+      <dl class="pl-dl">
+        <div><dt>${esc(t("ideaCohesionLabel"))}</dt><dd>${esc(plan.cohesionStrategy)}</dd></div>
+        <div><dt>${esc(t("ideaContractLabel"))}</dt><dd>${esc(plan.sharedSoundContract)}</dd></div>
+      </dl>
+    </section>`;
+}
+
+function outlinePanel(task) {
+  const plan = task.albumPlan;
+  if (!plan?.tracks?.length) return "";
+  return `
+    <section class="pl-plan-section">
+      <h3>${esc(t("outlineTitle"))}</h3>
+      <ol class="pl-outlines">${plan.tracks.map((outline) => `
+        <li class="pl-outline">
+          <span class="pl-outline-num num">${String(outline.number).padStart(2, "0")}</span>
+          <div class="pl-outline-body">
+            <div class="pl-outline-top">
+              <strong>${esc(outline.title)}</strong>
+              <span class="pl-outline-dur num">${esc(durationText(outline.targetSeconds))}</span>
+            </div>
+            <p class="pl-outline-role">${esc(outline.musicalRole)}</p>
+            <dl class="pl-outline-meta">
+              <div><dt>${esc(t("outlineInstrumentsLabel"))}</dt><dd>${esc((outline.instruments ?? []).join(" · "))}</dd></div>
+              <div><dt>${esc(t("outlineGrooveLabel"))}</dt><dd>${esc(outline.groove)}</dd></div>
+              <div><dt>${esc(t("outlineHarmonyLabel"))}</dt><dd>${esc(outline.harmony)}</dd></div>
+              <div><dt>${esc(t("outlineDevelopmentLabel"))}</dt><dd>${esc(outline.development)}</dd></div>
+            </dl>
+          </div>
+        </li>`).join("")}</ol>
+    </section>`;
+}
+
+function chatPanel(task) {
+  const discussion = task.playlistDiscussion ?? [];
+  const messages = discussion.length
+    ? discussion
+    : [{ id: "opening", role: "assistant", content: t("chatOpening") }];
+  return `
+    <section class="pl-plan-section pl-chat">
+      <h3>${esc(t("chatTitle"))}</h3>
+      <p class="pl-chat-intro">${esc(t("chatIntro"))}</p>
+      <div class="pl-thread">
+        ${messages.map((message) => `
+          <div class="pl-bubble is-${esc(message.role)}">
+            <p>${esc(message.content)}</p>
+          </div>`).join("")}
+        ${state.busy ? `<div class="pl-bubble is-assistant is-pending"><p>${esc(t("chatSending"))}</p></div>` : ""}
+      </div>
+      <div class="pl-chat-form">
+        <textarea id="pl-chat-input" maxlength="2000" placeholder="${esc(t("chatPlaceholder"))}" ${state.busy ? "disabled" : ""}>${esc(state.chatDraft)}</textarea>
+        <button class="pl-btn pl-btn-primary" type="button" data-action="send-message" ${state.busy ? "disabled" : ""}>${esc(t("chatSend"))}</button>
+      </div>
+      ${state.message ? `<p class="pl-message">${esc(state.message)}</p>` : ""}
+    </section>`;
+}
+
+// ---- playlist queue and player ----
+
+function listTracks(task, scope) {
+  const tracks = task.albumTracks ?? [];
+  if (scope === "included") {
+    return (task.albumPlaylist ?? [])
+      .map((id) => tracks.find((track) => track.id === id && track.admission === "included"))
+      .filter(Boolean);
+  }
+  return orderedTracks(task);
+}
+
+function playableTracks(task, scope) {
+  return listTracks(task, scope).filter((track) => track.audioFile && track.admission !== "excluded");
+}
+
+function totalDuration(tracks) {
+  return tracks.reduce((total, track) => total + (track.audioFile ? track.durationSeconds || 0 : 0), 0);
+}
+
+function playerBar(task) {
+  // Before playback begins, show the first playable track as ready so the
+  // player is already there as soon as a playlist has audio.
+  const waiting = !state.queue.length;
+  const queue = waiting ? playableTracks(task, state.scope).map((track) => track.id) : state.queue;
+  if (!queue.length) return "";
+  const index = waiting ? 0 : state.queueIndex;
+  const track = (task.albumTracks ?? []).find((item) => item.id === queue[index]);
+  const duration = waiting ? track?.durationSeconds || 0 : (state.duration > 0 ? state.duration : 0);
+  const position = waiting ? 0 : Math.min(state.currentTime, duration);
+  return `
+    <div class="pl-player" role="region" aria-label="${esc(t("nowPlaying"))}">
+      <button class="pl-player-toggle" type="button" data-action="toggle-play" aria-label="${esc(state.playing ? t("pause") : t("listen"))}">
+        <span aria-hidden="true">${state.playing ? "❚❚" : "▶"}</span>
+      </button>
+      <div class="pl-player-now">
+        <span class="pl-player-label">${esc(t("nowPlaying"))}</span>
+        <strong>${esc(track?.title || "—")}</strong>
+        <small class="num">${esc(`${index + 1} / ${queue.length}`)}</small>
+      </div>
+      <input class="pl-player-seek" id="pl-player-seek" type="range" min="0" max="${duration}" step="0.1" value="${position}" aria-label="${esc(t("seekLabel"))}" />
+      <span class="pl-player-time num"><span id="pl-player-elapsed">${esc(clockText(position))}</span> / <span id="pl-player-total">${esc(durationText(duration))}</span></span>
+      <div class="pl-player-nav">
+        <button type="button" data-action="prev-track" aria-label="${esc(t("previousTrack"))}" ${index <= 0 ? "disabled" : ""}>⏮</button>
+        <button type="button" data-action="next-track" aria-label="${esc(t("nextTrack"))}" ${index >= queue.length - 1 ? "disabled" : ""}>⏭</button>
+      </div>
+    </div>`;
+}
+
+function trackRow(task, track, number, scope) {
+  const isCurrent = state.playingTrackId === track.id;
+  const isPlaying = isCurrent && state.playing;
+  const working = track.status === "composing" || track.status === "generating";
+  const stateWord = track.admission === "included" ? t("included")
+    : track.admission === "excluded" ? t("excluded") : t("unadmitted");
+  const percent = isCurrent && state.duration > 0 ? Math.min(100, (state.currentTime / state.duration) * 100) : 0;
+  const playlistLength = (task.albumPlaylist ?? []).length;
+  return `
+    <div class="pl-track is-${esc(track.admission)}${working ? " is-working" : ""}${isCurrent ? " is-current" : ""}">
+      <span class="pl-track-number num">${String(number).padStart(2, "0")}</span>
+      <button class="pl-play${isPlaying ? " is-playing" : ""}" type="button"
+        data-play="${esc(track.id)}" ${track.audioFile ? "" : "disabled"}
+        aria-label="${esc(isPlaying ? t("pause") : t("listen"))}">${isPlaying ? "❚❚" : "▶"}</button>
+      <div class="pl-track-body">
+        <strong>${esc(track.title)}</strong>
+        <span>${esc(statusLabel(track))} · ${esc(track.audioFile ? durationText(track.durationSeconds) : t("unadmitted"))} · ${esc(stateWord)}</span>
+        ${isCurrent ? `<span class="pl-track-progress" aria-hidden="true"><i style="width:${percent}%"></i></span>` : ""}
+      </div>
+      <div class="pl-track-actions">
+        ${track.status === "failed"
+          ? `<button class="pl-btn pl-btn-quiet" type="button" data-retry="${esc(track.id)}">${esc(t("retry"))}</button>`
+          : `<button class="pl-btn pl-btn-quiet${track.admission === "included" ? " is-on" : ""}" type="button"
+               data-admit="${esc(track.id)}" data-admission="included" ${track.audioFile ? "" : "disabled"}>${esc(t("include"))}</button>
+             <button class="pl-btn pl-btn-quiet${track.admission === "excluded" ? " is-on" : ""}" type="button"
+               data-admit="${esc(track.id)}" data-admission="excluded">${esc(t("exclude"))}</button>`}
+        ${scope === "included" ? `<span class="pl-track-order">
+          <button class="pl-btn pl-btn-quiet" type="button" data-move="${esc(track.id)}" data-direction="-1" aria-label="${esc(t("moveUp"))}" ${number === 1 ? "disabled" : ""}>↑</button>
+          <button class="pl-btn pl-btn-quiet" type="button" data-move="${esc(track.id)}" data-direction="1" aria-label="${esc(t("moveDown"))}" ${number === playlistLength ? "disabled" : ""}>↓</button>
+        </span>` : ""}
+      </div>
+    </div>`;
+}
+
+function viewDetail() {
+  const task = currentTask();
+  if (!task) return `<p class="pl-empty">…</p>`;
+  const plan = task.albumPlan;
+  const reviewing = task.status === "review" && Boolean(plan);
+  const running = ["queued", "composing", "generating", "assembling", "processing"].includes(task.status);
+  const scope = state.scope;
+  const tracks = listTracks(task, scope);
+  const candidateCount = orderedTracks(task).length;
+  const includedCount = listTracks(task, "included").length;
+  const playable = playableTracks(task, scope);
+  const anyPlayable = playableTracks(task, "candidate").length > 0;
+  const readyCount = orderedTracks(task).filter((track) => track.audioFile).length;
+  const planBody = `${readingPanel(task)}${ideaPanel(task)}${outlinePanel(task)}`;
+
   return `
     <button class="pl-back" type="button" data-action="shelf">${esc(t("back"))}</button>
     <header class="pl-detail-head">
@@ -271,52 +622,59 @@ function viewDetail() {
         <h1>${esc(plan?.albumTitle || task.title || task.description)}</h1>
         <p>${esc(plan?.albumMind || task.description)}</p>
       </div>
+      ${plan ? `<span class="pl-plan-state${task.playlistPlanApproved ? " is-approved" : ""}"><span class="pl-state-dot" aria-hidden="true"></span>${esc(task.playlistPlanApproved ? t("planApprovedBadge") : t("planReviewBadge"))}</span>` : ""}
     </header>
 
     ${task.status === "failed"
       ? `<div class="pl-note"><strong>${esc(t("failedTitle"))}</strong><p>${esc(task.error || "")}</p>
           <button class="pl-btn" type="button" data-action="retry-task">${esc(t("retryTask"))}</button></div>`
-      : running
-        ? `<div class="pl-progress"><span>${esc(task.status === "composing" ? t("planning") : statusLabel(task))}</span>
-            <span class="pl-bar"><i style="width:${rate}%"></i></span><span>${esc(t("progress", done, tracks.length))}</span></div>`
-        : ""}
+      : ""}
 
-    ${tracks.length ? `<div class="pl-toolbar">
-        <button class="pl-btn" type="button" data-action="export" data-scope="included" ${done ? "" : "disabled"}>${esc(t("exportIncluded"))}</button>
-        <button class="pl-btn" type="button" data-action="export" data-scope="candidate" ${done ? "" : "disabled"}>${esc(t("exportCandidates"))}</button>
-        <button class="pl-btn pl-btn-quiet" type="button" data-action="timestamps" ${done ? "" : "disabled"}>${esc(t("timestamps"))}</button>
+    ${reviewing ? `
+      <section class="pl-plan">
+        <div class="pl-plan-head">
+          <h2>${esc(t("planTitle"))}</h2>
+        </div>
+        <p class="pl-plan-intro">${esc(t("planIntro"))}</p>
+        ${planBody}
+        ${chatPanel(task)}
+        <div class="pl-approve">
+          <button class="pl-btn pl-btn-primary pl-approve-btn" type="button" data-action="approve" ${state.busy ? "disabled" : ""}>
+            ${esc(state.busy ? t("approving") : t("approve"))}
+          </button>
+        </div>
+      </section>`
+    : `
+      ${running ? progressPanel(task) : ""}
+      ${plan ? `<details class="pl-plan-fold">
+        <summary>${esc(t("planCollapsed"))}</summary>
+        <p class="pl-plan-intro">${esc(t("planCollapsedHint"))}</p>
+        ${planBody}
+        ${(task.playlistDiscussion ?? []).length ? `<section class="pl-plan-section pl-chat"><h3>${esc(t("chatTitle"))}</h3>
+          <div class="pl-thread">${(task.playlistDiscussion ?? []).map((message) => `<div class="pl-bubble is-${esc(message.role)}"><p>${esc(message.content)}</p></div>`).join("")}</div></section>` : ""}
+      </details>` : ""}
+
+      ${candidateCount ? `<div class="pl-toolbar">
+        <div class="pl-scope" role="group" aria-label="${esc(t("title"))}">
+          <button type="button" data-view-scope="candidate" aria-pressed="${scope === "candidate"}">${esc(t("scopeCandidates"))} <small class="num">${candidateCount}</small></button>
+          <button type="button" data-view-scope="included" aria-pressed="${scope === "included"}">${esc(t("scopeIncluded"))} <small class="num">${includedCount}</small></button>
+        </div>
+        <button class="pl-btn pl-btn-primary" type="button" data-action="play-all" ${playable.length ? "" : "disabled"}>▶ ${esc(t("playAll"))}</button>
+        <span class="pl-toolbar-duration num">${esc(t("playlistDuration", durationText(totalDuration(playable))))}</span>
+        <div class="pl-toolbar-actions">
+          <button class="pl-btn pl-btn-quiet" type="button" data-action="export" data-scope="included" ${readyCount ? "" : "disabled"}>${esc(t("exportIncluded"))}</button>
+          <button class="pl-btn pl-btn-quiet" type="button" data-action="export" data-scope="candidate" ${readyCount ? "" : "disabled"}>${esc(t("exportCandidates"))}</button>
+          <button class="pl-btn pl-btn-quiet" type="button" data-action="timestamps" ${readyCount ? "" : "disabled"}>${esc(t("timestamps"))}</button>
+        </div>
       </div>` : ""}
 
-    ${tracks.length
-      ? `<div class="pl-tracks">${tracks.map((track, index) => trackRow(task, track, index + 1)).join("")}</div>`
-      : `<p class="pl-empty">${esc(t("planning"))}</p>`}
-    ${state.message ? `<p class="pl-message">${esc(state.message)}</p>` : ""}
+      ${tracks.length
+        ? `<div class="pl-tracks">${tracks.map((track, index) => trackRow(task, track, index + 1, scope)).join("")}</div>`
+        : `<p class="pl-empty">${esc(t(scope === "included" ? "listIncludedEmpty" : "listCandidatesEmpty"))}</p>`}
+      ${state.message ? `<p class="pl-message">${esc(state.message)}</p>` : ""}
+    `}
+    ${!reviewing && anyPlayable ? playerBar(task) : ""}
   `;
-}
-
-function trackRow(task, track, number) {
-  const playing = state.playingTrackId === track.id;
-  const stateWord = track.admission === "included" ? t("included")
-    : track.admission === "excluded" ? t("excluded") : t("unadmitted");
-  return `
-    <div class="pl-track is-${esc(track.admission)}">
-      <span class="pl-track-number">${String(number).padStart(2, "0")}</span>
-      <button class="pl-play${playing ? " is-playing" : ""}" type="button"
-        data-play="${esc(track.id)}" ${track.audioFile ? "" : "disabled"}
-        aria-label="${esc(playing ? t("pause") : t("listen"))}">${playing ? "❚❚" : "▶"}</button>
-      <div class="pl-track-body">
-        <strong>${esc(track.title)}</strong>
-        <span>${esc(statusLabel(track))} · ${esc(track.audioFile ? durationText(track.durationSeconds) : t("unadmitted"))} · ${esc(stateWord)}</span>
-      </div>
-      <div class="pl-track-actions">
-        ${track.status === "failed"
-          ? `<button class="pl-btn pl-btn-quiet" type="button" data-retry="${esc(track.id)}">${esc(t("retry"))}</button>`
-          : `<button class="pl-btn pl-btn-quiet${track.admission === "included" ? " is-on" : ""}" type="button"
-               data-admit="${esc(track.id)}" data-admission="included">${esc(t("include"))}</button>
-             <button class="pl-btn pl-btn-quiet${track.admission === "excluded" ? " is-on" : ""}" type="button"
-               data-admit="${esc(track.id)}" data-admission="excluded">${esc(t("exclude"))}</button>`}
-      </div>
-    </div>`;
 }
 
 // ---------------------------------------------------------------------------
@@ -329,9 +687,25 @@ function bind() {
       else if (action === "shelf") { state.view = "shelf"; state.message = ""; render(); loadTasks(); }
       else if (action === "refresh") loadReferences(true);
       else if (action === "create") createPlaylist();
+      else if (action === "approve") approvePlan();
+      else if (action === "send-message") sendPlanMessage();
+      else if (action === "play-all") startPlayback(state.scope);
+      else if (action === "toggle-play") togglePlay();
+      else if (action === "prev-track") stepTrack(-1);
+      else if (action === "next-track") stepTrack(1);
       else if (action === "export") exportAlbum(button.dataset.scope, button);
       else if (action === "timestamps") exportTimestamps(button);
       else if (action === "retry-task") retryTask(button);
+    });
+  });
+
+  root.querySelectorAll("[data-open]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.currentId = button.dataset.open;
+      state.view = "detail";
+      state.message = "";
+      render();
+      if (currentTask()?.status === "review") loadTask(button.dataset.open); else pollTask();
     });
   });
 
@@ -341,6 +715,8 @@ function bind() {
   if (count) count.addEventListener("change", () => { state.count = Number(count.value); });
   const minutes = root.querySelector("#pl-minutes");
   if (minutes) minutes.addEventListener("change", () => { state.minutes = Number(minutes.value); });
+  const chatInput = root.querySelector("#pl-chat-input");
+  if (chatInput) chatInput.addEventListener("input", () => { state.chatDraft = chatInput.value; });
 
   root.querySelectorAll("[data-ref]").forEach((card) => {
     const toggle = () => {
@@ -366,43 +742,145 @@ function bind() {
   root.querySelectorAll("[data-retry]").forEach((button) => {
     button.addEventListener("click", () => retryTrack(button.dataset.retry, button));
   });
+  root.querySelectorAll("[data-view-scope]").forEach((button) => {
+    button.addEventListener("click", () => { state.scope = button.dataset.viewScope; render(); });
+  });
+  root.querySelectorAll("[data-move]").forEach((button) => {
+    button.addEventListener("click", () => moveTrack(button.dataset.move, Number(button.dataset.direction)));
+  });
+  const seek = root.querySelector("#pl-player-seek");
+  if (seek) seek.addEventListener("input", () => seekTo(Number(seek.value)));
 }
 
 // ---- playback ----
 
-function ensureAudio() {
+function audioEl() {
   if (audio) return audio;
   audio = new Audio();
-  audio.addEventListener("ended", () => setPlaying(null));
-  audio.addEventListener("error", () => setPlaying(null));
+  audio.preload = "metadata";
+  audio.addEventListener("timeupdate", () => { state.currentTime = audio.currentTime; updateSeek(); });
+  audio.addEventListener("loadedmetadata", () => {
+    if (Number.isFinite(audio.duration) && audio.duration > 0) state.duration = audio.duration;
+    updateSeek();
+  });
+  audio.addEventListener("play", () => { state.playing = true; if (state.view === "detail") render(); });
+  audio.addEventListener("pause", () => { state.playing = false; if (state.view === "detail") render(); });
+  audio.addEventListener("ended", () => stepTrack(1));
+  audio.addEventListener("error", () => {
+    state.playing = false;
+    state.previewId = null;
+    if (state.playingTrackId) { state.playingTrackId = null; state.message = t("playbackError"); }
+    if (state.view === "detail") render();
+  });
   return audio;
 }
 
-function setPlaying(trackId) {
-  state.playingTrackId = trackId;
-  if (state.view === "detail") render();
+function updateSeek() {
+  const max = state.duration > 0 ? state.duration : 0;
+  const seek = root.querySelector("#pl-player-seek");
+  if (seek) {
+    if (Number(seek.max) !== max) seek.max = String(max);
+    seek.value = String(Math.min(state.currentTime, max));
+  }
+  const elapsed = root.querySelector("#pl-player-elapsed");
+  if (elapsed) elapsed.textContent = clockText(state.currentTime);
+  const total = root.querySelector("#pl-player-total");
+  if (total) total.textContent = durationText(state.duration);
+  const bar = root.querySelector(".pl-track.is-current .pl-track-progress i");
+  if (bar && state.duration > 0) {
+    bar.style.width = `${Math.min(100, (state.currentTime / state.duration) * 100)}%`;
+  }
+}
+
+function playQueueTrack(index, autoplay = true) {
+  const task = currentTask();
+  const id = state.queue[index];
+  const track = task?.albumTracks?.find((item) => item.id === id);
+  if (!task || !track?.audioFile) return;
+  state.queueIndex = index;
+  state.playingTrackId = id;
+  state.previewId = null;
+  state.currentTime = 0;
+  state.duration = track.durationSeconds || 0;
+  const el = audioEl();
+  el.src = `/api/tasks/${encodeURIComponent(task.id)}/album/tracks/${encodeURIComponent(id)}/audio`;
+  el.currentTime = 0;
+  render();
+  if (autoplay) {
+    el.play().catch(() => { state.playing = false; state.message = t("playbackError"); render(); });
+  }
+}
+
+function startPlayback(scope) {
+  const task = currentTask();
+  if (!task) return;
+  const queue = playableTracks(task, scope).map((track) => track.id);
+  if (!queue.length) {
+    state.message = t(scope === "included" ? "listIncludedEmpty" : "listCandidatesEmpty");
+    render();
+    return;
+  }
+  state.scope = scope;
+  state.queue = queue;
+  state.queueScope = scope;
+  playQueueTrack(0, true);
+}
+
+function togglePlay() {
+  if (!state.playingTrackId) { startPlayback(state.scope); return; }
+  const el = audioEl();
+  if (el.paused) el.play().catch(() => {});
+  else el.pause();
 }
 
 function playTrack(trackId) {
-  const task = state.tasks.find((item) => item.id === state.currentId);
-  const track = task?.albumTracks?.find((item) => item.id === trackId);
+  const task = currentTask();
+  if (!task) return;
+  const track = task.albumTracks?.find((item) => item.id === trackId);
   if (!track?.audioFile) return;
-  const player = ensureAudio();
-  if (state.playingTrackId === trackId) { player.pause(); setPlaying(null); return; }
-  player.src = `/api/tasks/${encodeURIComponent(task.id)}/album/tracks/${encodeURIComponent(trackId)}/audio`;
-  player.currentTime = 0;
-  state.playingTrackId = trackId;
-  render();
-  player.play().catch(() => setPlaying(null));
+  if (state.playingTrackId === trackId) { togglePlay(); return; }
+  let queue = playableTracks(task, state.scope).map((item) => item.id);
+  if (!queue.includes(trackId)) {
+    const other = state.scope === "candidate" ? "included" : "candidate";
+    const otherQueue = playableTracks(task, other).map((item) => item.id);
+    if (!otherQueue.includes(trackId)) return;
+    state.scope = other;
+    queue = otherQueue;
+  }
+  state.queue = queue;
+  state.queueScope = state.scope;
+  playQueueTrack(queue.indexOf(trackId), true);
+}
+
+function stepTrack(direction) {
+  const next = state.queueIndex + direction;
+  if (next < 0 || next >= state.queue.length) {
+    if (direction > 0) pausePlayback();
+    return;
+  }
+  playQueueTrack(next, true);
+}
+
+function pausePlayback() {
+  state.playing = false;
+  audioEl().pause();
+}
+
+function seekTo(value) {
+  if (!(state.duration > 0)) return;
+  const el = audioEl();
+  el.currentTime = Math.max(0, Math.min(value, state.duration));
+  state.currentTime = el.currentTime;
+  updateSeek();
 }
 
 function togglePreview(url, id) {
-  const player = ensureAudio();
-  if (state.playingTrackId === id) { player.pause(); state.playingTrackId = null; return; }
-  player.src = url;
-  player.currentTime = 0;
-  state.playingTrackId = id;
-  player.play().catch(() => { state.playingTrackId = null; });
+  const el = audioEl();
+  if (state.previewId === id && !el.paused) { el.pause(); state.previewId = null; return; }
+  el.src = url;
+  el.currentTime = 0;
+  state.previewId = id;
+  el.play().catch(() => { state.previewId = null; });
 }
 
 // ---- data ----
@@ -415,6 +893,13 @@ async function loadTasks() {
     state.message = error instanceof Error ? error.message : String(error);
   }
   if (state.view === "shelf") render();
+}
+
+async function loadTask(id) {
+  try {
+    replaceTask(await api(`/api/tasks/${encodeURIComponent(id)}`));
+    if (state.view === "detail" && state.currentId === id) render();
+  } catch { /* keep the last known state */ }
 }
 
 async function loadReferences(force = false) {
@@ -467,22 +952,61 @@ function pollTask() {
   const tick = async () => {
     try {
       const task = await api(`/api/tasks/${encodeURIComponent(id)}`);
-      const index = state.tasks.findIndex((item) => item.id === id);
-      if (index >= 0) state.tasks[index] = task; else state.tasks.push(task);
+      replaceTask(task);
       if (state.view === "detail" && state.currentId === id) render();
-      if (task.status === "completed" || task.status === "failed") return;
+      if (["completed", "failed", "review"].includes(task.status)) return;
     } catch { /* transient; keep polling */ }
     state.pollTimer = setTimeout(tick, 2500);
   };
   state.pollTimer = setTimeout(tick, 1500);
 }
 
+async function approvePlan() {
+  if (state.busy) return;
+  state.busy = true;
+  state.message = "";
+  render();
+  try {
+    const task = await api(`/api/tasks/${encodeURIComponent(state.currentId)}/plan/approve`, { method: "POST" });
+    state.busy = false;
+    replaceTask(task);
+    render();
+    pollTask();
+  } catch (error) {
+    state.busy = false;
+    state.message = error instanceof Error ? error.message : String(error);
+    render();
+  }
+}
+
+async function sendPlanMessage() {
+  if (state.busy) return;
+  const message = state.chatDraft.trim();
+  if (!message) { state.message = t("chatNeedMessage"); render(); return; }
+  state.busy = true;
+  state.message = "";
+  render();
+  try {
+    const task = await api(`/api/tasks/${encodeURIComponent(state.currentId)}/plan/messages`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message }),
+    });
+    state.busy = false;
+    state.chatDraft = "";
+    replaceTask(task);
+    render();
+  } catch (error) {
+    state.busy = false;
+    state.message = error instanceof Error ? error.message : String(error);
+    render();
+  }
+}
+
 async function albumUpdate(taskId, route, method, payload) {
   const updated = await api(`/api/tasks/${encodeURIComponent(taskId)}/album/${route}`, {
     method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
   });
-  const index = state.tasks.findIndex((item) => item.id === updated.id);
-  if (index >= 0) state.tasks[index] = updated;
+  replaceTask(updated);
   render();
   return updated;
 }
@@ -491,6 +1015,26 @@ async function setAdmission(trackId, admission, button) {
   button.disabled = true;
   try {
     await albumUpdate(state.currentId, `tracks/${encodeURIComponent(trackId)}`, "PATCH", { admission });
+  } catch (error) {
+    state.message = error instanceof Error ? error.message : String(error);
+    render();
+  }
+}
+
+async function moveTrack(trackId, direction) {
+  const task = currentTask();
+  if (!task) return;
+  const ids = [...(task.albumPlaylist ?? [])];
+  const index = ids.indexOf(trackId);
+  const target = index + direction;
+  if (index < 0 || target < 0 || target >= ids.length) return;
+  [ids[index], ids[target]] = [ids[target], ids[index]];
+  try {
+    const updated = await api(`/api/tasks/${encodeURIComponent(task.id)}/album/playlist`, {
+      method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ trackIds: ids }),
+    });
+    replaceTask(updated);
+    render();
   } catch (error) {
     state.message = error instanceof Error ? error.message : String(error);
     render();
@@ -512,8 +1056,7 @@ async function retryTask(button) {
   button.disabled = true;
   try {
     const task = await api(`/api/tasks/${encodeURIComponent(state.currentId)}/retry`, { method: "POST" });
-    const index = state.tasks.findIndex((item) => item.id === task.id);
-    if (index >= 0) state.tasks[index] = task;
+    replaceTask(task);
     render();
     pollTask();
   } catch (error) {
@@ -532,7 +1075,7 @@ function downloadFile(url, fileName) {
 }
 
 async function exportAlbum(scope, button) {
-  const task = state.tasks.find((item) => item.id === state.currentId);
+  const task = currentTask();
   if (!task) return;
   button.disabled = true;
   const original = button.textContent;
@@ -552,7 +1095,7 @@ async function exportAlbum(scope, button) {
 }
 
 async function exportTimestamps(button) {
-  const task = state.tasks.find((item) => item.id === state.currentId);
+  const task = currentTask();
   if (!task) return;
   button.disabled = true;
   try {

@@ -5,7 +5,7 @@ import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 
 import { measureAudioDuration } from "../audio/stitch.js";
-import { planAlbum, composeAlbumTrack, reviewAlbumCandidates, reviseAlbumTrack } from "../composer/album-agent.js";
+import { planAlbum, planPlaylist, refinePlaylistPlan, composeAlbumTrack, reviewAlbumCandidates, reviseAlbumTrack } from "../composer/album-agent.js";
 import { composeMusic } from "../composer/composer-agent.js";
 import { composeOrchestralMovement, planOrchestralWork } from "../composer/orchestral-agent.js";
 import { loadConfig, type AriosoConfig } from "../config/env.js";
@@ -22,7 +22,9 @@ import {
 import { LyriaClient } from "../lyria/lyria-client.js";
 import { runMoodMicGeneration } from "../moodmic/moodmic-graph.js";
 import { MAX_PLAYLIST_REFERENCES, type PlaylistReference } from "../playlist/reference.js";
+import { MAX_PLAYLIST_DISCUSSION_MESSAGES, MAX_PLAYLIST_FEEDBACK_LENGTH, type PlaylistDiscussionMessage } from "../playlist/briefing.js";
 import { listOrchestralKnowledgeCards } from "../retrieval/orchestral-cards.js";
+import { type AlbumPlan } from "../schema/album-plan.js";
 import { TaskStore, parseTaskInput, type AlbumAdmission, type AlbumAudioExport, type MusicTask } from "./task-store.js";
 import { MoodEntryStore, isCalendarDate, isMoodGroup, type MoodEntryInput } from "./mood-store.js";
 import { LangChainMoodClassifier, type MoodClassifier } from "./mood-classifier.js";
@@ -288,23 +290,46 @@ export async function runAlbumTask(
   };
   if (!current.albumPlan) {
     await store.update(task.id, { status: "composing", error: undefined });
+    const references = current.playlistReferences ?? [];
+    const now = new Date().toISOString();
+    const outlineTracks = (plan: AlbumPlan) => plan.tracks.map((outline) => ({
+      id: crypto.randomUUID(), order: outline.number, title: outline.title,
+      targetDurationSeconds: outline.targetSeconds,
+      admission: "candidate" as const, status: "queued" as const, createdAt: now, updatedAt: now,
+    }));
+    if (current.workflowType === "05-playlist") {
+      const { plan, briefing } = await planPlaylist(current.description, {
+        ...options,
+        candidateCount: current.albumCandidateCount ?? 14,
+        targetTotalMinutes: current.albumTargetTotalMinutes ?? 35,
+        ...(references.length ? { references } : {}),
+      });
+      current = await store.update(task.id, {
+        title: plan.albumTitle, albumPlan: plan, albumPlaylist: [],
+        playlistBriefing: briefing, playlistDiscussion: [], playlistPlanApproved: false,
+        albumTracks: outlineTracks(plan),
+      });
+      // Pause for the user to confirm the author's reading before paying for generation.
+      await store.update(task.id, { status: "review", error: undefined });
+      return;
+    }
     const plan = await planAlbum(current.description, {
       ...options,
       candidateCount: current.albumCandidateCount ?? 14,
       targetTotalMinutes: current.albumTargetTotalMinutes ?? 35,
-      ...(current.playlistReferences?.length ? { references: current.playlistReferences } : {}),
+      ...(references.length ? { references } : {}),
     });
-    const now = new Date().toISOString();
     current = await store.update(task.id, {
       title: plan.albumTitle, albumPlan: plan, albumPlaylist: [],
-      albumTracks: plan.tracks.map((outline) => ({
-        id: crypto.randomUUID(), order: outline.number, title: outline.title,
-        targetDurationSeconds: outline.targetSeconds,
-        admission: "candidate", status: "queued", createdAt: now, updatedAt: now,
-      })),
+      albumTracks: outlineTracks(plan),
     });
   }
   const plan = current.albumPlan!;
+  if (current.workflowType === "05-playlist" && !current.playlistPlanApproved) {
+    // A playlist that resumes before the user confirms stays paused.
+    await store.update(task.id, { status: "review", error: undefined });
+    return;
+  }
   if (!current.albumPromptsReady) {
     await store.update(task.id, { status: "composing", error: undefined });
     for (const track of current.albumTracks ?? []) {
@@ -526,6 +551,10 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
   await moodStore.initialize();
   await moodChatStore.initialize();
   const activeTaskIds = new Set<string>();
+  // Serialises confirmation-chat revisions on their own: pausing at "review"
+  // leaves the planning run nominally active for a moment, so it must not gate
+  // whether the user can confirm or revise.
+  const planRevisions = new Set<string>();
   const activeDiscussionSubmissions = new Set<string>();
   const activeMoodSubmissions = new Set<string>();
   const discussionView = async (session: CreativeSession) => {
@@ -604,6 +633,8 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
       const albumExportAudioMatch = /^\/api\/tasks\/([^/]+)\/album\/exports\/([a-f0-9]{64})\/(audio|timestamps)$/.exec(url.pathname);
       const albumExportMatch = /^\/api\/tasks\/([^/]+)\/album\/export$/.exec(url.pathname);
       const albumPlaylistMatch = /^\/api\/tasks\/([^/]+)\/album\/playlist$/.exec(url.pathname);
+      const playlistPlanApproveMatch = /^\/api\/tasks\/([^/]+)\/plan\/approve$/.exec(url.pathname);
+      const playlistPlanMessagesMatch = /^\/api\/tasks\/([^/]+)\/plan\/messages$/.exec(url.pathname);
       const productionArtifactMatch = /^\/api\/tasks\/([^/]+)\/production\/(audio|video|tracklist|manifest)$/.exec(url.pathname);
       const retryMatch = /^\/api\/tasks\/([^/]+)\/retry$/.exec(url.pathname);
       const reviewDecisionMatch = /^\/api\/tasks\/([^/]+)\/review$/.exec(url.pathname);
@@ -623,8 +654,8 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
       const moodEntryMatch = /^\/api\/mood-entries\/([^/]+)$/.exec(url.pathname);
       const moodEntryTaskMatch = /^\/api\/mood-entries\/([^/]+)\/tasks$/.exec(url.pathname);
       if (request.method === "GET" && url.pathname === "/api/capabilities") {
-        sendJson(response, 200, {
-          apiVersion: 9,
+        const capabilities = {
+          apiVersion: 10,
           version: APPLICATION_VERSION,
           workflows: ["01-general", "02-jazz", "03-orchestral", "04-album", "05-playlist"],
           discussionSessions: true,
@@ -638,6 +669,7 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
           albumCandidates: { minimum: 12, maximum: 28, default: 14 },
           jazzCorpusToggle: true,
           playlistReferences: true,
+          playlistPlanConfirmation: true,
           orchestralAssembly: true,
           orchestralPromptFormat: "orchestral-v1",
           orchestralKnowledgeCards: true,
@@ -646,7 +678,8 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
             maximumTotalMinutes: 12,
             maximumMovementMinutes: 3,
           },
-        });
+        };
+        sendJson(response, 200, capabilities);
         return;
       }
 
@@ -1223,6 +1256,86 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
           throw new HttpError(400, "A playlist track ID array is required.");
         }
         sendJson(response, 200, await store.setAlbumPlaylist(task.id, value.trackIds as string[]));
+        return;
+      }
+
+      if (request.method === "POST" && playlistPlanApproveMatch?.[1]) {
+        const task = store.get(playlistPlanApproveMatch[1]);
+        if (!task || task.workflowType !== "05-playlist" || task.compositionMode !== "album") {
+          throw new HttpError(404, "Playlist task not found.");
+        }
+        if (!task.albumPlan || !task.playlistBriefing) {
+          throw new HttpError(409, "This playlist has no plan to confirm yet.");
+        }
+        if (task.playlistPlanApproved || task.status !== "review" || planRevisions.has(task.id)) {
+          throw new HttpError(409, "This playlist plan is not awaiting confirmation.");
+        }
+        const config = loadConfig(true, await settings.runtimeEnvironment());
+        const queued = await store.update(task.id, { status: "queued", playlistPlanApproved: true, error: undefined });
+        startTask(queued, config);
+        sendJson(response, 202, queued);
+        return;
+      }
+
+      if (request.method === "POST" && playlistPlanMessagesMatch?.[1]) {
+        const task = store.get(playlistPlanMessagesMatch[1]);
+        if (!task || task.workflowType !== "05-playlist" || task.compositionMode !== "album") {
+          throw new HttpError(404, "Playlist task not found.");
+        }
+        if (!task.albumPlan || !task.playlistBriefing) {
+          throw new HttpError(409, "This playlist has no plan to revise yet.");
+        }
+        if (task.playlistPlanApproved || task.status !== "review" || planRevisions.has(task.id)) {
+          throw new HttpError(409, "This playlist plan is no longer open for changes.");
+        }
+        const value = await readJsonBody(request);
+        const message = isRecord(value) && typeof value.message === "string" ? value.message.trim() : "";
+        if (!message) throw new HttpError(400, "A revision message is required.");
+        if (message.length > MAX_PLAYLIST_FEEDBACK_LENGTH) {
+          throw new HttpError(400, "The revision message is too long.");
+        }
+        const discussion = task.playlistDiscussion ?? [];
+        if (discussion.filter((entry) => entry.role === "user").length >= MAX_PLAYLIST_DISCUSSION_MESSAGES) {
+          throw new HttpError(409, "This plan has reached its revision limit.");
+        }
+        const config = loadConfig(true, await settings.runtimeEnvironment());
+        const userMessage: PlaylistDiscussionMessage = {
+          id: crypto.randomUUID(), role: "user", content: message, createdAt: new Date().toISOString(),
+        };
+        planRevisions.add(task.id);
+        try {
+          const refined = await refinePlaylistPlan({
+            description: task.description,
+            plan: task.albumPlan,
+            briefing: task.playlistBriefing,
+            references: task.playlistReferences ?? [],
+            history: [...discussion, userMessage],
+            feedback: message,
+          }, { apiKey: config.openAiApiKey, model: task.composerModel, lyriaModel: task.lyriaModel });
+          const now = new Date().toISOString();
+          // The user may have confirmed while this revision was running.
+          const latest = store.get(task.id);
+          if (!latest || latest.playlistPlanApproved || latest.status !== "review") {
+            throw new HttpError(409, "This playlist plan is no longer open for changes.");
+          }
+          const assistantMessage: PlaylistDiscussionMessage = {
+            id: crypto.randomUUID(), role: "assistant", content: refined.reply, createdAt: now,
+          };
+          const updated = await store.update(task.id, {
+            title: refined.plan.albumTitle,
+            albumPlan: refined.plan,
+            playlistBriefing: refined.briefing,
+            playlistDiscussion: [...discussion, userMessage, assistantMessage],
+            albumTracks: refined.plan.tracks.map((outline) => ({
+              id: crypto.randomUUID(), order: outline.number, title: outline.title,
+              targetDurationSeconds: outline.targetSeconds,
+              admission: "candidate", status: "queued", createdAt: now, updatedAt: now,
+            })),
+          });
+          sendJson(response, 200, updated);
+        } finally {
+          planRevisions.delete(task.id);
+        }
         return;
       }
 

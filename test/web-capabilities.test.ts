@@ -8,7 +8,7 @@ describe("web capabilities API", () => {
       const response = await fetch(`${baseUrl}/api/capabilities`);
       expect(response.ok).toBe(true);
       expect(await response.json()).toEqual({
-        apiVersion: 9,
+        apiVersion: 10,
         version: expect.any(String),
         workflows: ["01-general", "02-jazz", "03-orchestral", "04-album", "05-playlist"],
         discussionSessions: true,
@@ -25,6 +25,7 @@ describe("web capabilities API", () => {
         albumCandidates: { minimum: 12, maximum: 28, default: 14 },
         jazzCorpusToggle: true,
         playlistReferences: true,
+        playlistPlanConfirmation: true,
         orchestralAssembly: true,
         orchestralPromptFormat: "orchestral-v1",
         orchestralKnowledgeCards: true,

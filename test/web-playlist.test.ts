@@ -36,6 +36,38 @@ vi.mock("../src/composer/album-agent.js", () => ({
       development: "Begins, develops, ends.", targetSeconds: 90 + (index % 3) * 20,
     })),
   })),
+  planPlaylist: vi.fn(async () => ({
+    plan: {
+      schemaVersion: "1.0", albumTitle: "Night Set", albumMind: "Quiet variations.",
+      cohesionStrategy: "Keep the room constant; vary density.",
+      sharedSoundContract: "Warm felt piano in a small room.",
+      tracks: Array.from({ length: 14 }, (_, index) => ({
+        number: index + 1, title: `Track ${index + 1}`, musicalRole: "Interlude",
+        instruments: ["Piano"], groove: "Slow", harmony: "Diatonic",
+        development: "Begins, develops, ends.", targetSeconds: 90 + (index % 3) * 20,
+      })),
+    },
+    briefing: {
+      intentReading: "Late-night instrumental focus rooted in the reference's warm night piano.",
+      referenceReadings: [{
+        title: "雨夜", understood: "Slow minor piano with generous silence.",
+        usedFor: "The album's shared warm, low-light tone.",
+      }],
+    },
+  })),
+  refinePlaylistPlan: vi.fn(async () => ({
+    plan: {
+      schemaVersion: "1.0", albumTitle: "Night Set (revised)", albumMind: "Calmer still.",
+      cohesionStrategy: "Softer dynamics throughout.", sharedSoundContract: "Warm felt piano.",
+      tracks: Array.from({ length: 14 }, (_, index) => ({
+        number: index + 1, title: `Track ${index + 1}`, musicalRole: "Interlude",
+        instruments: ["Piano"], groove: "Slow", harmony: "Diatonic",
+        development: "Begins, develops, ends.", targetSeconds: 90 + (index % 3) * 20,
+      })),
+    },
+    briefing: { intentReading: "Calmer late-night focus.", referenceReadings: [] },
+    reply: "I softened the dynamics and removed the drums from track 4.",
+  })),
   composeAlbumTrack: vi.fn(async () => musicSpec("Track")),
   reviewAlbumCandidates: vi.fn(async (plan: AlbumPlan) => ({
     verdict: "ready", albumFindings: [], similarities: [],
@@ -96,7 +128,7 @@ describe("Playlist references and creation", () => {
     }, { prepare: prepareMoodMic, environment });
   });
 
-  it("creates a 05-playlist album task from selected references", async () => {
+  it("plans a 05-playlist album, pauses for confirmation, then generates on approval", async () => {
     await withWebServer(async ({ baseUrl }) => {
       const response = await fetch(`${baseUrl}/api/playlists`, {
         method: "POST", headers: { "Content-Type": "application/json" },
@@ -116,8 +148,63 @@ describe("Playlist references and creation", () => {
       expect(task.playlistReferences).toHaveLength(1);
       expect(task.playlistReferences[0]?.chatId).toBe(chatId);
 
+      // Planning stops at "review": the author's reading is shown before any audio.
+      const paused = await waitForTask(baseUrl, task.id, (candidate) => candidate.status === "review") as {
+        status: string; playlistPlanApproved: boolean; albumTracks: unknown[];
+        albumPlan: { albumTitle: string };
+        playlistBriefing: { intentReading: string; referenceReadings: Array<{ title: string }> };
+      };
+      expect(paused.playlistPlanApproved).toBe(false);
+      expect(paused.albumPlan.albumTitle).toBe("Night Set");
+      expect(paused.albumTracks).toHaveLength(14);
+      expect(paused.playlistBriefing.intentReading).toContain("Late-night");
+      expect(paused.playlistBriefing.referenceReadings).toHaveLength(1);
+
+      const approve = await fetch(`${baseUrl}/api/tasks/${task.id}/plan/approve`, { method: "POST" });
+      expect(approve.status).toBe(202);
+      expect((await approve.json() as { playlistPlanApproved: boolean }).playlistPlanApproved).toBe(true);
+
       const finished = await waitForTask(baseUrl, task.id, (candidate) => candidate.status === "completed");
       expect(finished.status).toBe("completed");
+    }, { prepare: prepareMoodMic, environment });
+  });
+
+  it("revises a paused playlist plan from a follow-up message", async () => {
+    await withWebServer(async ({ baseUrl }) => {
+      const created = await fetch(`${baseUrl}/api/playlists`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ description: "深夜专注", candidateCount: 14, targetTotalMinutes: 35, referenceChatIds: [chatId] }),
+      }).then((response) => response.json()) as { id: string };
+      await waitForTask(baseUrl, created.id, (candidate) => candidate.status === "review");
+
+      const response = await fetch(`${baseUrl}/api/tasks/${created.id}/plan/messages`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: "整体再安静一点" }),
+      });
+      expect(response.status).toBe(200);
+      const updated = await response.json() as {
+        status: string; playlistPlanApproved: boolean;
+        albumPlan: { albumTitle: string };
+        playlistDiscussion: Array<{ role: string; content: string }>;
+      };
+      expect(updated.status).toBe("review");
+      expect(updated.playlistPlanApproved).toBe(false);
+      expect(updated.albumPlan.albumTitle).toBe("Night Set (revised)");
+      expect(updated.playlistDiscussion).toHaveLength(2);
+      expect(updated.playlistDiscussion[0]?.role).toBe("user");
+      expect(updated.playlistDiscussion[1]?.content).toContain("softened");
+
+      // The plan can no longer be revised once confirmed.
+      await fetch(`${baseUrl}/api/tasks/${created.id}/plan/approve`, { method: "POST" });
+      const afterApprove = await fetch(`${baseUrl}/api/tasks/${created.id}/plan/messages`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: "再改一次" }),
+      });
+      expect(afterApprove.status).toBe(409);
+      // Confirming starts generation in the background; let it settle so the
+      // server and its output directory are not torn down mid-write.
+      await waitForTask(baseUrl, created.id, (candidate) => candidate.status === "completed" || candidate.status === "failed");
+      await new Promise((resolve) => setTimeout(resolve, 150));
     }, { prepare: prepareMoodMic, environment });
   });
 

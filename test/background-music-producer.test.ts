@@ -15,6 +15,7 @@ const mocks = vi.hoisted(() => ({ plan: vi.fn(), compose: vi.fn(), review: vi.fn
 vi.mock("../src/composer/album-agent.js", () => ({
   planAlbum: mocks.plan, composeAlbumTrack: mocks.compose,
   reviewAlbumCandidates: mocks.review, reviseAlbumTrack: vi.fn(),
+  planPlaylist: vi.fn(), refinePlaylistPlan: vi.fn(),
 }));
 vi.mock("../src/lyria/lyria-client.js", () => ({ LyriaClient: class { generate = mocks.generate; } }));
 

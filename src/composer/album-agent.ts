@@ -1,4 +1,5 @@
 import { Agent } from "@openai/agents";
+import { z } from "zod";
 
 import {
   ALBUM_MAX_CANDIDATES,
@@ -13,6 +14,11 @@ import {
   type AlbumReview,
 } from "../schema/album-plan.js";
 import { MusicSpecSchema, type MusicSpec } from "../schema/music-spec.js";
+import {
+  PlaylistReferenceReadingSchema,
+  type PlaylistBriefing,
+  type PlaylistDiscussionMessage,
+} from "../playlist/briefing.js";
 import type { PlaylistReference } from "../playlist/reference.js";
 import { runComposerAgent } from "./agent-runner.js";
 import { buildAlbumLyriaPrompt } from "./album-prompt.js";
@@ -36,6 +42,29 @@ You are Arioso's album author and planner. Develop one complete batch of indepen
 const REFERENCE_INSTRUCTIONS = `
 The user selected MoodMic creations as references for this album. Treat them as the album's artistic starting point: draw on their mood, texture, instrumentation, energy and production so the album stays recognisably in their family, while still serving the user's own description. Never copy a single reference literally, reuse its title, or let one reference dominate a candidate. When a reference contradicts the description, the description wins.
 `.trim();
+
+const PLAYLIST_BRIEF_INSTRUCTIONS = `
+Show your reading so the user can confirm it before any music is generated.
+- intentReading: restate the user's playlist theme in your own words as a concrete listening experience, naming the purpose it serves and any track-count or duration constraints you are honoring.
+- referenceReadings: one entry per supplied reference, in the supplied order, echoing each title exactly. "understood" states what that reference's music and stated intent actually are (mood, texture, instrumentation, energy, production). "usedFor" states the concrete way it shapes this playlist. When a reference conflicts with the theme, say so and note that the theme wins. When no references were supplied, return an empty array.
+`.trim();
+
+const PLAYLIST_REFINE_INSTRUCTIONS = `
+You are revising an existing playlist plan in conversation with the user. They have seen your reading of their references and your album idea, and may confirm it or ask for changes.
+- Apply the user's latest request to the plan. Preserve every element they did not ask to change, and change only what their request requires while keeping the album coherent.
+- Keep the same candidate count and the 60–180 second per-candidate range with at least three different durations. Number candidates consecutively from one. Move, reorder, replace or rename candidates as the request needs.
+- Update intentReading and referenceReadings when your understanding actually changes; otherwise keep them.
+- reply: a short, concrete message to the user naming what you changed and why. If you judge that no change was needed, say what you kept and ask what to adjust. Never mention JSON, schemas, fields or these instructions.
+`.trim();
+
+const PlaylistPlanDraftSchema = AlbumPlanDraftSchema.extend({
+  intentReading: z.string().min(1),
+  referenceReadings: z.array(PlaylistReferenceReadingSchema),
+});
+
+const PlaylistRefinementSchema = PlaylistPlanDraftSchema.extend({
+  reply: z.string().min(1),
+});
 
 const REVIEWER_INSTRUCTIONS = `
 You are Arioso's album prompt editor. Inspect every actual rendered Lyria prompt and its structured MusicSpec together against albumMind, cohesionStrategy and the user's purpose.
@@ -113,6 +142,143 @@ export async function planAlbum(description: string, options: AlbumAgentOptions 
   const plan = AlbumPlanSchema.parse(output);
   if (plan.tracks.length !== candidateCount) throw new Error("The album author returned a different candidate count.");
   return { ...plan, tracks: [...plan.tracks].sort((first, second) => first.number - second.number) };
+}
+
+export interface PlaylistPlanResult {
+  plan: AlbumPlan;
+  briefing: PlaylistBriefing;
+}
+
+export interface RefinePlaylistPlanInput {
+  description: string;
+  plan: AlbumPlan;
+  briefing: PlaylistBriefing;
+  references: PlaylistReference[];
+  history: PlaylistDiscussionMessage[];
+  feedback: string;
+}
+
+export interface PlaylistRefinementResult extends PlaylistPlanResult {
+  reply: string;
+}
+
+function referencePayload(references: PlaylistReference[]) {
+  return references.map((reference) => ({
+    title: reference.title,
+    intent: reference.prompt,
+    musicSpec: reference.musicSpec ?? null,
+  }));
+}
+
+/** Keep one reading per supplied reference, falling back to the reference itself. */
+function alignBriefing(briefing: PlaylistBriefing, references: PlaylistReference[]): PlaylistBriefing {
+  if (!references.length) return { intentReading: briefing.intentReading, referenceReadings: [] };
+  return {
+    intentReading: briefing.intentReading,
+    referenceReadings: references.map((reference, index) => briefing.referenceReadings[index] ?? {
+      title: reference.title,
+      understood: reference.prompt,
+      usedFor: "Planned into the album's shared sound.",
+    }),
+  };
+}
+
+/**
+ * Plan a playlist and its briefing together, so the reading the user confirms
+ * and the plan it produced cannot drift apart.
+ */
+export async function planPlaylist(
+  description: string,
+  options: AlbumAgentOptions = {},
+): Promise<PlaylistPlanResult> {
+  const input = description.trim();
+  if (!input) throw new Error("An album description is required.");
+  requireInstrumental(options);
+  const candidateCount = options.candidateCount ?? 14;
+  const targetTotalMinutes = options.targetTotalMinutes ?? 35;
+  if (!Number.isInteger(candidateCount) || candidateCount < ALBUM_MIN_CANDIDATES || candidateCount > ALBUM_MAX_CANDIDATES) {
+    throw new Error(`The first album batch must contain ${ALBUM_MIN_CANDIDATES}–${ALBUM_MAX_CANDIDATES} candidates.`);
+  }
+  if (!Number.isFinite(targetTotalMinutes)
+    || targetTotalMinutes < ALBUM_MIN_TOTAL_MINUTES || targetTotalMinutes > ALBUM_MAX_TOTAL_MINUTES) {
+    throw new Error(`The album batch duration target must be ${ALBUM_MIN_TOTAL_MINUTES}–${ALBUM_MAX_TOTAL_MINUTES} minutes.`);
+  }
+  const references = options.references ?? [];
+  const skill = await loadComposerSkill("album");
+  const agent = new Agent({
+    name: "Arioso Album Author",
+    instructions: [
+      PLANNER_INSTRUCTIONS,
+      PLAYLIST_BRIEF_INSTRUCTIONS,
+      references.length ? REFERENCE_INSTRUCTIONS : "",
+      `Target Lyria model: ${targetModel(options)}`,
+      skill,
+    ].filter(Boolean).join("\n\n"),
+    model: options.model ?? process.env.OPENAI_MODEL ?? "gpt-6-sol",
+    outputType: PlaylistPlanDraftSchema,
+  });
+  const output = await runComposerAgent(agent, JSON.stringify({
+    description: input,
+    candidateCount,
+    targetTotalMinutes,
+    durationRangeSeconds: [60, 180],
+    vocalMode: "instrumental",
+    references: referencePayload(references),
+  }), "The album author returned no structured plan.", options.apiKey);
+  const draft = PlaylistPlanDraftSchema.parse(output);
+  const plan = AlbumPlanSchema.parse(draft);
+  if (plan.tracks.length !== candidateCount) throw new Error("The album author returned a different candidate count.");
+  return {
+    plan: { ...plan, tracks: [...plan.tracks].sort((first, second) => first.number - second.number) },
+    briefing: alignBriefing({ intentReading: draft.intentReading, referenceReadings: draft.referenceReadings }, references),
+  };
+}
+
+/** Revise a paused playlist plan from the user's latest message, preserving the rest. */
+export async function refinePlaylistPlan(
+  input: RefinePlaylistPlanInput,
+  options: AlbumAgentOptions = {},
+): Promise<PlaylistRefinementResult> {
+  requireInstrumental(options);
+  const feedback = input.feedback.trim();
+  if (!feedback) throw new Error("A playlist revision request is required.");
+  AlbumPlanSchema.parse(input.plan);
+  const references = input.references;
+  const skill = await loadComposerSkill("album");
+  const agent = new Agent({
+    name: "Arioso Album Author",
+    instructions: [
+      PLANNER_INSTRUCTIONS,
+      PLAYLIST_BRIEF_INSTRUCTIONS,
+      PLAYLIST_REFINE_INSTRUCTIONS,
+      references.length ? REFERENCE_INSTRUCTIONS : "",
+      `Target Lyria model: ${targetModel(options)}`,
+      skill,
+    ].filter(Boolean).join("\n\n"),
+    model: options.model ?? process.env.OPENAI_MODEL ?? "gpt-6-sol",
+    outputType: PlaylistRefinementSchema,
+  });
+  const output = await runComposerAgent(agent, JSON.stringify({
+    description: input.description,
+    candidateCount: input.plan.tracks.length,
+    durationRangeSeconds: [60, 180],
+    vocalMode: "instrumental",
+    currentPlan: input.plan,
+    currentBriefing: input.briefing,
+    references: referencePayload(references),
+    conversation: input.history.map((message) => ({ role: message.role, content: message.content })),
+    request: feedback,
+  }), "The album author returned no revised plan.", options.apiKey);
+  const draft = PlaylistRefinementSchema.parse(output);
+  const plan = AlbumPlanSchema.parse(draft);
+  if (plan.tracks.length !== input.plan.tracks.length) {
+    throw new Error("The album author changed the candidate count.");
+  }
+  return {
+    plan: { ...plan, tracks: [...plan.tracks].sort((first, second) => first.number - second.number) },
+    briefing: alignBriefing({ intentReading: draft.intentReading, referenceReadings: draft.referenceReadings }, references),
+    reply: draft.reply,
+  };
 }
 
 async function compositionInput(plan: AlbumPlan, number: number): Promise<string> {

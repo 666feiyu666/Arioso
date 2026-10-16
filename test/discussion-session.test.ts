@@ -22,6 +22,8 @@ vi.mock("../src/composer/album-agent.js", () => ({
   composeAlbumTrack: vi.fn(),
   reviewAlbumCandidates: vi.fn(),
   reviseAlbumTrack: vi.fn(),
+  planPlaylist: vi.fn(),
+  refinePlaylistPlan: vi.fn(),
 }));
 vi.mock("../src/lyria/lyria-client.js", () => ({
   LyriaClient: class { generate = vi.fn(); },

@@ -15,6 +15,7 @@ const { generateMock, planMock, composeMock, reviewMock, reviseMock } = vi.hoist
 vi.mock("../src/composer/album-agent.js", () => ({
   planAlbum: planMock, composeAlbumTrack: composeMock,
   reviewAlbumCandidates: reviewMock, reviseAlbumTrack: reviseMock,
+  planPlaylist: vi.fn(), refinePlaylistPlan: vi.fn(),
 }));
 vi.mock("../src/lyria/lyria-client.js", () => ({
   LyriaClient: class { generate = generateMock; },

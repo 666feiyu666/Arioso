@@ -20,6 +20,7 @@ import { writeTextFileAtomic } from "../utils/files.js";
 import { isRecord } from "../utils/validation.js";
 import { isProductionRunId, type AlbumProduction } from "../producer/types.js";
 import type { MusicReviewRecord } from "../moodmic/music-review.js";
+import { isPlaylistDiscussionMessage, PlaylistBriefingSchema, type PlaylistBriefing, type PlaylistDiscussionMessage } from "../playlist/briefing.js";
 import { isPlaylistReference, type PlaylistReference } from "../playlist/reference.js";
 
 export type TaskMode = "compose" | "generate";
@@ -154,6 +155,12 @@ export interface MusicTask {
   reviewAttempt?: number;
   /** MoodMic creations reused as references when planning a Playlist album. */
   playlistReferences?: PlaylistReference[];
+  /** How the album author read the references and the user's theme, shown for confirmation. */
+  playlistBriefing?: PlaylistBriefing;
+  /** The confirmation conversation about the playlist plan, before audio generation. */
+  playlistDiscussion?: PlaylistDiscussionMessage[];
+  /** Set once the user confirms the playlist plan and generation may proceed. */
+  playlistPlanApproved?: boolean;
 }
 
 export interface CreateTaskInput {
@@ -250,8 +257,13 @@ function isTaskRecord(value: unknown): value is MusicTask {
     || (Number.isInteger(value.reviewAttempt) && Number(value.reviewAttempt) >= 0);
   const referencesValid = value.playlistReferences === undefined
     || (Array.isArray(value.playlistReferences) && value.playlistReferences.every(isPlaylistReference));
+  const briefingValid = value.playlistBriefing === undefined || PlaylistBriefingSchema.safeParse(value.playlistBriefing).success;
+  const discussionValid = value.playlistDiscussion === undefined
+    || (Array.isArray(value.playlistDiscussion) && value.playlistDiscussion.every(isPlaylistDiscussionMessage));
+  const approvedValid = value.playlistPlanApproved === undefined || typeof value.playlistPlanApproved === "boolean";
   return movementsValid && tracksValid && playlistValid && albumPlanValid && productionValid
-    && musicReviewValid && moodChatValid && reviewAttemptValid && referencesValid;
+    && musicReviewValid && moodChatValid && reviewAttemptValid && referencesValid
+    && briefingValid && discussionValid && approvedValid;
 }
 
 function safeAudioName(value: string | undefined, fallback: string): string {
@@ -475,7 +487,10 @@ export class TaskStore {
           });
         }
       }
-      if (options.markInterrupted !== false && task.albumTracks) {
+      // A playlist paused for confirmation is idle by design: its track outlines
+      // are still "queued" but no work is in flight, so a restart must not kill it.
+      const pausedPlaylist = task.workflowType === "05-playlist" && task.status === "review";
+      if (options.markInterrupted !== false && task.albumTracks && !pausedPlaylist) {
         task.albumTracks = task.albumTracks.map((track) => {
           if (!ACTIVE_TASK_STATUSES.includes(track.status)) return track;
           interrupted = true;
