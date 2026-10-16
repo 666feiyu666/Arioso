@@ -22,8 +22,8 @@ produced.
 ## Interface
 
 Arioso runs as a bilingual web studio (简体中文 / English) alongside the
-command line. The browser interface has four tabs: **MoodMic**, **Mood
-calendar**, **Workflows**, and **Help**.
+command line. The browser interface has five tabs: **MoodMic**, **Mood
+calendar**, **Playlist**, **Workflows**, and **Help**.
 
 ### Workflows
 
@@ -38,7 +38,15 @@ The album workflow walks an idea through creative discussion before composition,
 then lines up the generated candidates as a playlist you can audition and
 export.
 
-![Arioso album and playlist workflow](Assets/figure/arioso-playlist.png)
+![Arioso album workflow discussion](Assets/figure/arioso-playlist-workflow.png)
+
+### Playlist
+
+Every finished candidate appears in the Playlist tab, where you audition it and
+mark tracks for inclusion. The included set plays continuously in a persistent
+player, and exports as a single MP3 with timestamps.
+
+![Arioso playlist](Assets/figure/arioso-playlist-moodmic.png)
 
 ### MoodMic
 
@@ -56,6 +64,8 @@ mood calendar.
 Every check-in from MoodMic is marked on a month grid with the colour of that
 day's feeling, in the order the entries were made. Pick a day to read it back
 and reopen the conversation behind it.
+
+![Mood calendar](Assets/figure/arioso-calender.png)
 
 ## Workflow
 

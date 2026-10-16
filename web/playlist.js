@@ -237,6 +237,7 @@ const state = {
   previewId: null,
   currentTime: 0,
   duration: 0,
+  planOpen: false,
   pollTimer: null,
   busy: false,
   chatDraft: "",
@@ -602,10 +603,16 @@ function trackRow(task, track, number, scope) {
     </div>`;
 }
 
-// The header badge reflects the task's real state, not just the approval flag,
-// so a playlist generated before confirmation existed still reads correctly.
+// The header badge reflects how far the work actually got, so a playlist whose
+// tracks are all generated reads "Completed" even if the task record stalled in
+// another state (for example after the server restarted).
 function planStateBadge(task) {
-  const phase = task.status === "review" ? "review" : task.status === "completed" ? "done" : "approved";
+  const tracks = task.albumTracks ?? [];
+  const allReady = tracks.length > 0
+    && tracks.every((track) => Boolean(track.audioFile) || track.status === "completed");
+  const phase = task.status === "review" ? "review"
+    : task.status === "completed" || allReady ? "done"
+      : "approved";
   const label = phase === "review" ? t("planReviewBadge")
     : phase === "done" ? t("planDoneBadge") : t("planApprovedBadge");
   return `<span class="pl-plan-state${phase === "review" ? "" : " is-approved"}"><span class="pl-state-dot" aria-hidden="true"></span>${esc(label)}</span>`;
@@ -657,7 +664,7 @@ function viewDetail() {
       </section>`
     : `
       ${running ? progressPanel(task) : ""}
-      ${plan ? `<details class="pl-plan-fold">
+      ${plan ? `<details class="pl-plan-fold"${state.planOpen ? " open" : ""}>
         <summary>${esc(t("planCollapsed"))}</summary>
         <p class="pl-plan-intro">${esc(t("planCollapsedHint"))}</p>
         ${planBody}
@@ -715,10 +722,17 @@ function bind() {
       state.currentId = button.dataset.open;
       state.view = "detail";
       state.message = "";
+      state.planOpen = false;
       render();
-      if (currentTask()?.status === "review") loadTask(button.dataset.open); else pollTask();
+      const status = currentTask()?.status;
+      if (status === "review") loadTask(button.dataset.open);
+      else if (!["completed", "failed"].includes(status)) pollTask();
     });
   });
+
+  // Keep the plan fold open across the re-renders that polling causes.
+  const planFold = root.querySelector(".pl-plan-fold");
+  if (planFold) planFold.addEventListener("toggle", () => { state.planOpen = planFold.open; });
 
   const description = root.querySelector("#pl-description");
   if (description) description.addEventListener("input", () => { state.description = description.value; });
