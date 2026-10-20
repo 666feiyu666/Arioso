@@ -50,16 +50,30 @@ proposal to approve — before any audio is generated.
 
 ![Arioso album workflow discussion](Assets/figure/arioso-playlist-workflow.png)
 
-## Under the hood
+All four modes share one pipeline — brief, an optional creative discussion, a
+router that picks the mode, the composition agents, Lyria, and a saved result:
 
 ![Arioso agentic workflow](Assets/figure/arioso-agentic-workflow.png)
 
-A conversation settles a direction and produces a `MusicSpec` — a structured
-specification fixing instrumentation, structure, tempo, and one production-ready
-Lyria prompt. Nothing is rendered before the plan is approved. Audio comes from
-Lyria; in MoodMic, Gemini then listens to the take and returns a match-or-mismatch
-verdict before you keep or regenerate it. An album plans its candidates, generates
-them in the background, and keeps the included tracks as an ordered playlist.
+## Under the hood
+
+![The MoodMic journey: from a feeling to a playlist](Assets/figure/arioso-moodmic-journey.png)
+
+Three stages, with the dashed boxes showing who does the work — the
+application, the agent, and the cloud services:
+
+1. **A feeling in.** A check-in — colour, word, one sentence — opens a
+   conversation, and the direction settles inside it.
+2. **Plan, confirm, render.** The agent writes a `MusicSpec`: a structured
+   specification fixing instrumentation, structure, tempo, and one
+   production-ready Lyria prompt. Nothing is rendered before you approve the
+   plan, and an approval is bound to the revision you saw. Lyria renders one
+   take.
+3. **Review and keep.** Gemini listens to the take and returns a
+   match-or-mismatch verdict against the approved request. A match is kept and
+   joins the playlist, where it can be ordered and exported as one MP3; a
+   mismatch asks you to regenerate. A kept song can also seed an album, which
+   re-enters the same plan-and-approve loop before any candidate is generated.
 
 ## Requirements
 
