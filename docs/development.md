@@ -53,6 +53,18 @@ The server listens on `127.0.0.1:4173` by default. The interface can compose a
 prompt without Lyria or generate audio, so only configure the providers needed
 for the selected operation.
 
+The pages are:
+
+- `/` for MoodMic, including the album continuation after a piece is kept;
+- `/calendar.html` for the mood calendar;
+- `/playlist.html` for the album library built from MoodMic references;
+- `/workflow.html` for the studio's four workflows; and
+- `/help.html` for the short usage guide.
+
+For a manual check, open a page, run one small operation, and reload it. MoodMic,
+the calendar, the playlist page, and a journey all restore their state from the
+server, so a reload is a meaningful test of persistence.
+
 ## Produce an album
 
 The optional background-music producer generates and denoises an instrumental
@@ -82,9 +94,19 @@ The test suite uses Vitest. Add or update focused tests when changing the
 `MusicSpec` contract, retrieval ranking, settings behavior, task input, task
 persistence, or web API behavior.
 
+Web and journey tests live in `test/` and run against a real local server with
+fake providers: Lyria and the Gemini reviewer are mocked, and the album, orchestral
+and composer agents are replaced where a test needs them. Follow that pattern
+instead of calling live providers. A focused run for the newer features:
+
+```powershell
+npx vitest run test/web-journey.test.ts test/web-playlist.test.ts test/web-moodmic-review.test.ts test/web-mood-chats.test.ts
+```
+
 Live provider calls are not part of the default verification set. Use them only
 when the change requires new external evidence, and do not mistake a technically
-successful generation for proof of musical quality.
+successful generation for proof of musical quality. The journey has only been
+verified with fake providers so far; its first live run is still outstanding.
 
 ## Rebuild corpus material
 
@@ -124,6 +146,10 @@ The following are runtime state or evidence rather than hand-authored source:
 
 - generated MP3 and metadata files under `outputs/`;
 - browser task JSON and audio under `outputs/tasks/` by default;
+- workflow discussion sessions under `outputs/discussions/`;
+- MoodMic conversations under `outputs/moodmic/chats/` and mood entries in
+  `outputs/moodmic/entries.json`;
+- journey records under `outputs/journeys/`;
 - local interface settings; and
 - credentials in `.env`.
 

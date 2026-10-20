@@ -1,21 +1,34 @@
-Goal: Mood BGM
+# Next phase plan
 
-An instrumental-oriented(maybe?) BGM Generator that responds to YOUR MOOD.
+## Goal
 
-What needs to add:
+A background-music generator that responds to the listener's mood: describe how the day feels, and get instrumental music that fits it, then a longer set built from what worked.
 
-- general agent responsible for coordinating different tasks (image generation <--> music style <--> user requirement) - LangGraph
-- Mood Direction Prompting (Listening to Your Words)
-- RAG refinement (Mood Focus)
-- multi-thread (maybe?)
-- ...
+## Already in place
 
-Also,Emotion Language and Imagery Corpus
-This layer helps the model find appropriate language for reflecting and carrying the user’s emotional state.
-Examples include:
-- Color: deep blue, grey-white, faded gold
-- Weather: overcast skies, rain after a storm, mist, a windless night
-- Space: an empty room, a train station, a window, a late-night street
-- Bodily sensation: heaviness in the chest, slowed breathing, sinking shoulders
-- Temporal experience: stagnation, lateness, gradual brightening
-- Dynamics: pressing down, floating, echoing, loosening, cracking open, unfolding again
+- Mood direction prompting. MoodMic holds a conversation, turns the agreement into an editable prompt, and records the chosen mood colour and word. A classifier reads a feeling from free text.
+- A listening review. Gemini compares each generated piece with the request before the listener keeps it.
+- A continuous journey. A kept piece becomes the first reference for an album, with plan confirmation, background generation, curation, and export.
+- Retrieval. The jazz corpus is searchable and feeds composition as evidence, with the query and reference ids kept on the task.
+- LangGraph coordination. Separate bounded graphs cover the discussion phases, the MoodMic generation check, and the journey stages.
+- Two pages beyond MoodMic. The mood calendar reads back recorded colours and playable pieces, and the playlist page plans albums from released pieces.
+
+## Next
+
+- One coordinating agent across inputs. Today the user describes the mood in words and can attach reference images; nothing coordinates an image, a style, and a requirement in one pass, and image generation is not planned.
+- A mood language and imagery corpus. The current vocabulary is four colour groups with four words each, plus a classifier lexicon. The larger vocabulary of places, weather, bodily sensation, and movement has not been built.
+- Standalone audio defect assessment. The current review judges whether the music matches the request; finding clicks, dropouts, and damaged audio is separate work, described in `DH6012-Documentation/DH6012-Audio-Quality-Workflow.md`.
+- A real-provider end-to-end run of the journey. All journey verification so far uses fake audio and model responses.
+- Section-and-take structure for long-form music, so a long track can be generated in planned sections and assembled rather than requested as one opaque generation.
+- Concurrent candidate generation, if waiting time becomes the limiting factor for curation.
+
+## Open questions
+
+- Whether the review should block delivery or only inform the listener.
+- How much of the album plan the listener should be asked to confirm before paying for generation.
+- Whether the mood vocabulary should stay four colours or grow into the larger imagery corpus above.
+
+## Not planned
+
+- A general multi-agent platform. The existing graphs are bounded on purpose.
+- Automatic mastering or noise cancellation inside the generation flow; that remains a separate production step.

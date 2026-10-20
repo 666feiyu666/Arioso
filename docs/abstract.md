@@ -28,7 +28,21 @@ before any plan is written. Direction is a distinct, revisable stage, and the
 user remains the decision-maker.
 
 Arioso supports three scopes: a standalone piece, one multi-movement orchestral
-work, and a themed album of related pieces.
+work, and a themed album of related pieces. The standalone piece is the entry
+point: once a listener keeps one, it can continue into an album without a new
+project or a second setup step.
+
+### From one kept piece to an album
+
+A piece is not only a file. It is evidence of an agreed direction, and it can
+become the first reference for an album. The listener keeps the piece, states a
+theme, and confirms how that theme was read before any track is generated. Tracks
+arrive as they finish. The listener then curates: include, exclude, reorder, and
+export.
+
+The album is a set of candidates narrowed by the listener rather than a fixed
+track list. Automated review may report resemblance to the brief, but selection
+and sequencing stay with the listener.
 
 ### Composition without a corpus
 
@@ -59,20 +73,23 @@ explicitly needs them there.
 
 ## First complete product outcome
 
-The first complete outcome is a small, coherent album rather than an isolated
-generation. A user should be able to:
+The first complete product outcome is a small, coherent album rather than an
+isolated generation, reached from one piece the listener kept. A user should be
+able to:
 
-- define an album concept, musical identity, and intended listening arc;
-- plan a track list containing both short pieces and a long-form work;
-- compose each track from internal model knowledge or a selected corpus;
-- generate and compare multiple candidate takes;
-- assemble a work longer than one model response from planned musical sections;
-- preserve provenance from brief through plan, retrieval, generation, and
-  selection; and
-- export an ordered album with consistent metadata and technical presentation.
+- describe a feeling and settle a musical direction in conversation;
+- listen to the piece that comes back and read how it was checked against the
+  request;
+- keep the piece or ask for another attempt;
+- continue from a kept piece into an album, with its material as the first
+  reference;
+- confirm how the album author read the theme before any track is generated;
+- hear tracks as they finish and keep listening while the rest are made; and
+- curate the result by including, excluding, ordering, and exporting tracks.
 
-A practical first milestone is a three-track concept EP in which one track is
-an eight- to ten-minute sectional composition.
+The same journey serves the older studio workflows: a standalone piece, a
+jazz-grounded piece, a multi-movement orchestral work, and a themed album planned
+from several MoodMic references.
 
 ## Project hierarchy
 
@@ -173,6 +190,12 @@ Short-track generation  Long-form section planning
                v
             Album export
 ```
+
+Two stages sit between a plan and the library in the current product model. A
+single piece is generated and checked against its brief before the listener keeps
+it, and a kept piece can seed the planner as the first reference of an album. The
+diagram above describes the full target; the review and continuation stages are
+what make the first two scopes usable one after the other.
 
 ## Boundaries
 

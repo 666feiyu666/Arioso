@@ -5,10 +5,14 @@ planning, composition, prompt review and revision, Lyria generation, historical
 denoising, album assembly, and verified delivery. Audacity integration is deferred.
 The existing album author, composer, and reviewer retain their musical roles.
 
-In the browser, open **Albums**, create an album, and select **Background Music
-Producer · generate and denoise** under **Production workflow**. The existing
-candidate-only workflow remains available. The producer checks the installed
-audio runtime before making composition or generation requests.
+In the browser, open the Workflow tab, go to Albums & playlists, create an album,
+and select "Background Music Producer · generate and denoise" under Production
+workflow. The candidate-only workflow remains available. The producer checks the
+installed audio runtime before making composition or generation requests.
+
+The producer applies to an album created in the studio (`04-album`). Albums built
+on the playlist page or continued from a kept MoodMic piece keep their candidate
+MP3s and merged export, and do not run the producer.
 
 ```powershell
 pnpm dev produce-album "Instrumental background music for quiet nighttime reading"
@@ -16,8 +20,9 @@ pnpm dev produce-album --resume "<failed-task-id>"
 ```
 
 The same mode is available through `POST /api/tasks` with
-`workflowType: "04-album"` and `produceAlbum: true`. Existing album duration and
-candidate-count settings apply (12–15 candidates; 30–40 target minutes).
+`workflowType: "04-album"` and `produceAlbum: true`. The studio offers 12 to 15
+candidates with a 30, 35, or 40 minute target, or a long album of 24 to 28
+candidates at 65 minutes. The album task stores whichever values were chosen.
 
 ## Existing audio pipeline
 
@@ -28,7 +33,7 @@ Configure and check the installed pipeline using `pipeline/setup.ps1` and
 producer uses `python` and the pipeline's existing default runtime configuration.
 Commands use an argument array without shell interpolation.
 
-The current denoiser averages stereo to **mono**, runs at 44.1 kHz on CPU,
+The current denoiser averages stereo to mono, runs at 44.1 kHz on CPU,
 and exports 24-bit WAV. It processes all non-excluded generated candidates in
 their original numbered order. It preserves their relative levels using one
 constant attenuation for peak headroom; this is not loudness normalization.
