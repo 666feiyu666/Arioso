@@ -31,10 +31,90 @@
   border-right: 1px solid var(--line);
   overflow-y: auto;
   overflow-x: hidden;
+  transition: width 0.22s var(--ease), padding 0.22s var(--ease);
+}
+
+/* The rail header holds the collapse control. Collapsing keeps a narrow column
+   with only that control, so the conversation list stays one click away. */
+.mm-side-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex: none;
+}
+
+.mm-side-label {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.mm-side-toggle {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.16s var(--ease), border-color 0.16s var(--ease);
+}
+
+.mm-side-toggle:hover,
+.mm-side-toggle:focus-visible {
+  color: var(--ink);
+  border-color: var(--ink-soft);
+}
+
+.mm-layout.is-side-collapsed .mm-side {
+  width: 56px;
+  padding: 24px 8px 24px 0;
+  overflow: hidden;
+}
+
+.mm-layout.is-side-collapsed .mm-side-head {
+  justify-content: center;
+}
+
+.mm-layout.is-side-collapsed .mm-side-label,
+.mm-layout.is-side-collapsed .mm-new-text {
+  display: none;
+}
+
+.mm-layout.is-side-collapsed .mm-side > :not(.mm-side-head):not(.mm-new) {
+  display: none;
+}
+
+.mm-layout.is-side-collapsed .mm-new {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  align-self: center;
+  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+}
+
+.mm-layout.is-side-collapsed .mm-new-icon {
+  display: inline;
 }
 
 .mm-new {
   width: 100%;
+}
+
+.mm-new-icon {
+  display: none;
 }
 
 .mm-side-list {
@@ -99,13 +179,22 @@
   gap: 16px;
   padding: 24px 0 20px clamp(20px, 3vw, 36px);
   overflow: hidden;
+  /* The reading column changes width when the rail opens or closes, so the
+     example grid follows the column, not the viewport. */
+  container-type: inline-size;
 }
 
 .mm-chat > * {
   width: 100%;
-  max-width: 860px;
+  max-width: 960px;
   margin-left: auto;
   margin-right: auto;
+}
+
+/* Wide screens: the rail is capped, so let the reading column grow a little
+   instead of leaving a large empty gap beside the rail. */
+@media (min-width: 1600px) {
+  .mm-chat > * { max-width: 1040px; }
 }
 
 .mm-chat-head .mm-title {
@@ -232,6 +321,21 @@
     border-right: none;
     border-bottom: 1px solid var(--line);
     padding: 16px 0;
+  }
+
+  /* A collapsed rail on a narrow screen is one row with the expand control. */
+  .mm-layout.is-side-collapsed .mm-side {
+    width: 100%;
+    max-height: none;
+    padding: 10px 0;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .mm-layout.is-side-collapsed .mm-side-head {
+    justify-content: center;
   }
 
   .mm-chat {
@@ -1300,8 +1404,19 @@ body.mm-home {
 
 .mm-examples-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  /* Two columns by default; four once the reading column is wide enough. The
+     count follows the column so a narrow window with the rail open does not
+     squeeze the cards into strips or leave a lone card on its own row. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
+}
+
+@container (min-width: 800px) {
+  .mm-examples-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+@container (max-width: 420px) {
+  .mm-examples-grid { grid-template-columns: 1fr; }
 }
 
 .mm-example {
@@ -1491,16 +1606,18 @@ body.mm-home {
 
 @media (max-width: 720px) {
   .mm-melody { display: none; }
-  .mm-examples-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Small laptop screens at full height cannot fit the curve and a two-row card
+   grid above the composer, so the decorative curve gives way to the cards. */
+@media (max-width: 1100px) and (max-height: 820px) {
+  .mm-melody { display: none; }
+  .mm-chat-head .mm-title { font-size: clamp(1.35rem, 2.4vw, 1.8rem); }
 }
 
 @media (max-width: 640px) {
   .mm-msg { max-width: 100%; }
   .mm-marker { width: 18px; height: 18px; }
-}
-
-@media (max-width: 420px) {
-  .mm-examples-grid { grid-template-columns: 1fr; }
 }
 
 /* ---- album continuation --------------------------------------------------

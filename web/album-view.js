@@ -382,10 +382,18 @@ export function createAlbumStage(options) {
   }
 
   function planReview(task) {
+    // The confirmation lives both at the top and the bottom of the plan: the
+    // plan itself is long, and starting the generation should never depend on
+    // scrolling past every track.
+    const startButton = (extraClass) => `
+          <button class="pl-btn pl-btn-primary pl-approve-btn${extraClass ? ` ${extraClass}` : ""}" type="button" data-album-action="approve" ${state.busy ? "disabled" : ""}>
+            ${esc(state.busy ? t("approving") : t("approve"))}
+          </button>`;
     return `
       <section class="pl-plan">
         <div class="pl-plan-head">
           <h2>${esc(t("planTitle"))}</h2>
+          <div class="pl-plan-start">${startButton("pl-start-btn")}</div>
         </div>
         <p class="pl-plan-intro">${esc(t("planIntro"))}</p>
         ${readingPanel(task)}
@@ -393,9 +401,7 @@ export function createAlbumStage(options) {
         ${outlinePanel(task)}
         ${chatPanel(task)}
         <div class="pl-approve">
-          <button class="pl-btn pl-btn-primary pl-approve-btn" type="button" data-album-action="approve" ${state.busy ? "disabled" : ""}>
-            ${esc(state.busy ? t("approving") : t("approve"))}
-          </button>
+          ${startButton("")}
         </div>
       </section>`;
   }
@@ -516,12 +522,11 @@ export function createAlbumStage(options) {
     const activeTask = task();
     if (!activeTask) return "";
     const reviewing = activeTask.status === "review" && Boolean(activeTask.albumPlan);
-    const running = ["queued", "composing", "generating", "assembling", "processing"].includes(activeTask.status);
     return `
       ${failure(activeTask)}
       ${reviewing
         ? planReview(activeTask)
-        : `${running ? progressPanel(activeTask) : ""}${curation(activeTask)}`}`;
+        : curation(activeTask)}`;
   }
 
   // ---- playback -----------------------------------------------------------

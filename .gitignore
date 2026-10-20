@@ -20,6 +20,7 @@ outputs/
 *.wav
 *.mp4
 *.log
+_bugs/*
 
 # Local audio-pipeline dependencies and evidence
 pipeline/runtime/

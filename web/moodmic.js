@@ -49,6 +49,8 @@ const COPY = {
     tabMoodMic: "MoodMic", tabCalendar: "心情日历", tabWorkflow: "工作流", tabPlaylist: "播放列表（测试）", tabHelp: "帮助",
     tabBarLabel: "主导航", switchLanguage: "切换界面语言",
     historyLabel: "对话记录",
+    collapseSide: "收起对话记录",
+    expandSide: "展开对话记录",
     newChat: "新对话",
     historyEmpty: "还没有对话。",
     untitled: "新对话",
@@ -136,6 +138,8 @@ const COPY = {
     tabMoodMic: "MoodMic", tabCalendar: "Mood calendar", tabWorkflow: "Workflow", tabPlaylist: "Playlist (test)", tabHelp: "Help",
     tabBarLabel: "Tab navigation", switchLanguage: "Switch interface language",
     historyLabel: "Conversations",
+    collapseSide: "Collapse conversations",
+    expandSide: "Expand conversations",
     newChat: "New chat",
     historyEmpty: "No conversations yet.",
     untitled: "New chat",
@@ -228,7 +232,38 @@ const STATUS_KEYS = {
 
 const side = document.querySelector("#mm-side");
 const stage = document.querySelector("#mm-stage");
+const layout = document.querySelector(".mm-layout");
 const langToggle = document.querySelector("#lang-toggle");
+
+// Collapsing the rail is a preference, so it survives a reload.
+const SIDE_STORAGE_KEY = "arioso.moodmic.side";
+
+function readSidePreference() {
+  try {
+    return localStorage.getItem(SIDE_STORAGE_KEY) === "collapsed";
+  } catch {
+    return false;
+  }
+}
+
+function persistSidePreference(collapsed) {
+  try {
+    localStorage.setItem(SIDE_STORAGE_KEY, collapsed ? "collapsed" : "expanded");
+  } catch {
+    /* Storage may be unavailable; the layout still toggles for this visit. */
+  }
+}
+
+function applySideState() {
+  if (layout) layout.classList.toggle("is-side-collapsed", state.sideCollapsed);
+}
+
+function toggleSidebar() {
+  state.sideCollapsed = !state.sideCollapsed;
+  applySideState();
+  persistSidePreference(state.sideCollapsed);
+  renderSidebar();
+}
 
 function todayISO() {
   const now = new Date();
@@ -256,6 +291,8 @@ const state = {
   entries: [],
   activeEntryId: null,
   task: null,
+  // The conversation rail can collapse so the chat column gets the width.
+  sideCollapsed: false,
   // The journey links this conversation's song to the album planned from it.
   journey: null,
   albumTask: null,
@@ -353,6 +390,7 @@ const albumStage = createAlbumStage({
 function render() {
   applyI18n(COPY, state.language);
   langToggle.textContent = state.language === "zh-CN" ? "EN" : "中文";
+  applySideState();
   renderSidebar();
   renderChat();
 }
@@ -360,8 +398,21 @@ function render() {
 function renderSidebar() {
   // Keep the reader's place: re-rendering the list must not jump the sidebar.
   const previousScrollTop = side.scrollTop;
+  const collapsed = state.sideCollapsed;
+  const toggleLabel = collapsed ? t("expandSide") : t("collapseSide");
   side.innerHTML = `
-    <button class="e-btn e-btn-secondary mm-new" type="button" id="mm-new">＋ ${esc(t("newChat"))}</button>
+    <div class="mm-side-head">
+      <span class="mm-side-label">${esc(t("historyLabel"))}</span>
+      <button class="mm-side-toggle" type="button" id="mm-side-toggle"
+        aria-controls="mm-side" aria-expanded="${collapsed ? "false" : "true"}"
+        aria-label="${esc(toggleLabel)}" title="${esc(toggleLabel)}">
+        <span aria-hidden="true">${collapsed ? "›" : "‹"}</span>
+      </button>
+    </div>
+    <button class="e-btn e-btn-secondary mm-new" type="button" id="mm-new" aria-label="${esc(t("newChat"))}">
+      <span class="mm-new-text">＋ ${esc(t("newChat"))}</span>
+      <span class="mm-new-icon" aria-hidden="true">＋</span>
+    </button>
     ${state.discussions.length ? `<ul class="mm-side-list">${state.discussions.map((discussion) => {
       const meta = sideMeta(discussion);
       return `
@@ -374,6 +425,7 @@ function renderSidebar() {
       </li>`;
     }).join("")}</ul>` : `<p class="e-hint mm-side-empty">${esc(t("historyEmpty"))}</p>`}
   `;
+  side.querySelector("#mm-side-toggle").addEventListener("click", toggleSidebar);
   side.querySelector("#mm-new").addEventListener("click", newChat);
   for (const button of side.querySelectorAll("[data-open]")) {
     button.addEventListener("click", () => openDiscussion(button.dataset.open));
@@ -1487,6 +1539,7 @@ langToggle.addEventListener("click", async () => {
 
 async function boot() {
   state.language = await readLanguage();
+  state.sideCollapsed = readSidePreference();
   await Promise.all([loadDiscussions(), loadEntries()]);
   const params = new URLSearchParams(window.location.search);
   const chatId = params.get("chat");
