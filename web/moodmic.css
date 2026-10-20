@@ -1502,3 +1502,73 @@ body.mm-home {
 @media (max-width: 420px) {
   .mm-examples-grid { grid-template-columns: 1fr; }
 }
+
+/* ---- album continuation --------------------------------------------------
+   The album stage is shared with the Playlist page, so its own layout lives in
+   playlist.css. Here it only needs to sit inside the conversation column: the
+   player becomes sticky instead of fixed, and the setup form matches .mm-block. */
+
+.mm-album {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.mm-album-eyebrow {
+  margin: 0;
+  color: var(--muted);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.mm-album .pl-player {
+  position: sticky;
+  bottom: 0;
+  padding: 10px 12px;
+  gap: 10px;
+  border-radius: var(--radius-lg);
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+}
+
+.mm-album .pl-player-seek { grid-column: 1 / -1; }
+
+.mm-album .pl-plan,
+.mm-album .pl-progress-card { margin-bottom: 0; }
+
+.mm-album-setup {
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.mm-album-head h3 { margin: 0 0 6px; font-size: 1.05rem; }
+.mm-album-head p { margin: 0; color: var(--muted); line-height: 1.6; }
+
+.mm-album-source {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+
+.mm-album-source-label {
+  color: var(--brand);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.mm-album-source strong { font-size: 0.98rem; }
+.mm-album-source span:last-child { color: var(--muted); font-size: 0.85rem; line-height: 1.55; }
+
+.mm-album-field { display: grid; gap: 6px; font-size: 0.85rem; color: var(--muted); }
+.mm-album-fields { display: flex; flex-wrap: wrap; gap: 14px; }
+.mm-album-actions { display: flex; justify-content: flex-end; }
+.mm-album .pl-plan-fold { margin-bottom: 0; }

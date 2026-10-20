@@ -10,6 +10,7 @@ import {
   GROUPS, api, applyI18n, emotionLabel, esc, groupById, groupName,
   persistLanguage, readLanguage,
 } from "./mood-common.js";
+import { createAlbumStage } from "./album-view.js";
 
 // Four starting prompts, one per feeling colour. They fill the otherwise
 // empty MoodMic screen and reuse the four mood signals already defined in
@@ -116,6 +117,19 @@ const COPY = {
     errorGeneric: "出了点问题，请再试一次。",
     loading: "正在准备…",
     sessionGone: "这个对话已经不在了。",
+    albumContinueTitle: "把这支曲子变成一张专辑",
+    albumContinueLead: "这张专辑会从你刚刚保留的这首音乐出发：它的想法和音乐方案会成为第一份参考。",
+    albumSourceLabel: "源曲目",
+    albumThemeLabel: "专辑主题",
+    albumThemePlaceholder: "例如：把这些雨夜的质感延展成一组深夜专注的器乐。",
+    albumCountLabel: "曲目数",
+    albumMinutesLabel: "目标总时长",
+    albumPlanAction: "规划这张专辑 →",
+    albumPlanning: "正在规划…",
+    albumNeedTheme: "先写一句这张专辑想要的样子。",
+    albumFailedLead: "这张专辑没有继续下去。可以从原来的位置接着来。",
+    albumRetryAction: "继续这张专辑",
+    albumEyebrow: "专辑",
   },
   en: {
     pageTitle: "MoodMic · Music from your mood",
@@ -190,6 +204,19 @@ const COPY = {
     errorGeneric: "Something went wrong. Please try again.",
     loading: "Getting ready…",
     sessionGone: "That conversation is no longer available.",
+    albumContinueTitle: "Turn this piece into an album",
+    albumContinueLead: "The album starts from the song you just kept: its idea and music spec become the first reference.",
+    albumSourceLabel: "Source song",
+    albumThemeLabel: "Album theme",
+    albumThemePlaceholder: "e.g. grow this rain-night texture into a set of late-night focus instrumentals.",
+    albumCountLabel: "Tracks",
+    albumMinutesLabel: "Target duration",
+    albumPlanAction: "Plan the album →",
+    albumPlanning: "Planning…",
+    albumNeedTheme: "Write one line about the album you want first.",
+    albumFailedLead: "This album did not continue. You can pick it up from the stage that stopped.",
+    albumRetryAction: "Continue the album",
+    albumEyebrow: "Album",
   },
 };
 
@@ -229,6 +256,14 @@ const state = {
   entries: [],
   activeEntryId: null,
   task: null,
+  // The journey links this conversation's song to the album planned from it.
+  journey: null,
+  albumTask: null,
+  albumTheme: "",
+  albumCount: 14,
+  albumMinutes: 35,
+  albumBusy: false,
+  journeyTimer: null,
   pollTimer: null,
   playing: null,
   moodAudio: null,
@@ -281,6 +316,37 @@ function activeTask() {
   const tasks = sessionTasks(state.session);
   return state.task ?? tasks.at(-1) ?? null;
 }
+
+// The album stage is shared with the Playlist page. Here it reads and writes
+// the album task of this journey, and approval goes through the journey route
+// so a revision number binds the confirmation to the plan on screen.
+const albumStage = createAlbumStage({
+  language: () => state.language,
+  api,
+  getTask: () => state.albumTask,
+  setTask: (task) => { state.albumTask = task; },
+  rerender: () => render(),
+  approve: async (task) => {
+    const body = await api(`/api/journeys/${encodeURIComponent(state.currentId)}/album-plan/approve`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ revision: task.albumPlanRevision }),
+    });
+    state.journey = body.journey;
+    state.albumTask = body.albumTask;
+    pollJourney();
+  },
+  revise: async (task, message) => {
+    const body = await api(`/api/journeys/${encodeURIComponent(state.currentId)}/album-plan/messages`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message }),
+    });
+    state.journey = body.journey;
+    state.albumTask = body.albumTask;
+  },
+  onRunning: () => pollJourney(),
+});
 
 // ---------------------------------------------------------------------------
 
@@ -652,7 +718,66 @@ function renderResult() {
         <button class="e-btn e-btn-primary" type="button" id="mm-new-2">${esc(t("createAnother"))}</button>
       </div>
     </div>
+    ${renderJourney(task)}
   `;
+}
+
+// After the song is kept, the same conversation carries on into an album: the
+// theme is set here, the plan is confirmed here, and background progress,
+// playback and curation are the shared album stage.
+function renderJourney(task) {
+  const journey = state.journey;
+  if (!journey) return "";
+  if (state.albumTask) {
+    return `<div class="mm-album">
+      <p class="mm-album-eyebrow">${esc(t("albumEyebrow"))}</p>
+      ${albumStage.render()}
+    </div>`;
+  }
+  if (journey.phase === "failed") {
+    return `<div class="mm-album mm-album-setup">
+      <div class="mm-album-head">
+        <h3>${esc(t("albumContinueTitle"))}</h3>
+        <p>${esc(t("albumFailedLead"))}</p>
+      </div>
+      ${journey.error ? `<p class="e-hint">${esc(journey.error)}</p>` : ""}
+      <div class="mm-album-actions">
+        <button class="e-btn e-btn-primary" type="button" id="mm-journey-retry">${esc(t("albumRetryAction"))}</button>
+      </div>
+    </div>`;
+  }
+  if (journey.phase !== "song-ready") return "";
+  return `<div class="mm-album mm-album-setup">
+    <div class="mm-album-head">
+      <h3>${esc(t("albumContinueTitle"))}</h3>
+      <p>${esc(t("albumContinueLead"))}</p>
+    </div>
+    <div class="mm-album-source">
+      <span class="mm-album-source-label">${esc(t("albumSourceLabel"))}</span>
+      <strong>${esc(task.title || t("listenTitle"))}</strong>
+      <span>${esc((task.description || "").slice(0, 160))}</span>
+    </div>
+    <label class="mm-album-field" for="mm-album-theme">
+      <span>${esc(t("albumThemeLabel"))}</span>
+      <textarea class="e-textarea" id="mm-album-theme" maxlength="4000"
+        placeholder="${esc(t("albumThemePlaceholder"))}">${esc(state.albumTheme)}</textarea>
+    </label>
+    <div class="mm-album-fields">
+      <label class="mm-inline-field"><span>${esc(t("albumCountLabel"))}</span>
+        <select id="mm-album-count">${[12, 13, 14, 15, 24, 25, 26, 27, 28].map((value) =>
+          `<option value="${value}"${value === state.albumCount ? " selected" : ""}>${value}</option>`).join("")}</select>
+      </label>
+      <label class="mm-inline-field"><span>${esc(t("albumMinutesLabel"))}</span>
+        <select id="mm-album-minutes">${[30, 35, 40, 65].map((value) =>
+          `<option value="${value}"${value === state.albumMinutes ? " selected" : ""}>${value} min</option>`).join("")}</select>
+      </label>
+    </div>
+    <div class="mm-album-actions">
+      <button class="e-btn e-btn-primary" type="button" id="mm-album-plan" ${state.albumBusy ? "disabled" : ""}>
+        ${esc(state.albumBusy ? t("albumPlanning") : t("albumPlanAction"))}
+      </button>
+    </div>
+  </div>`;
 }
 
 function progressPhase(task) {
@@ -746,6 +871,19 @@ function bindChat() {
   stage.querySelector("#mm-new-2")?.addEventListener("click", newChat);
   stage.querySelector("#mm-review-regenerate")?.addEventListener("click", () => decideReview("regenerate"));
   stage.querySelector("#mm-review-keep")?.addEventListener("click", () => decideReview("keep"));
+  // The album continuation: theme, size, and the shared album stage.
+  stage.querySelector("#mm-album-theme")?.addEventListener("input", (event) => {
+    state.albumTheme = event.target.value;
+  });
+  stage.querySelector("#mm-album-count")?.addEventListener("change", (event) => {
+    state.albumCount = Number(event.target.value);
+  });
+  stage.querySelector("#mm-album-minutes")?.addEventListener("change", (event) => {
+    state.albumMinutes = Number(event.target.value);
+  });
+  stage.querySelector("#mm-album-plan")?.addEventListener("click", continueAlbum);
+  stage.querySelector("#mm-journey-retry")?.addEventListener("click", retryJourney);
+  if (state.albumTask) albumStage.bind(stage);
   for (const button of stage.querySelectorAll("[data-example]")) {
     button.addEventListener("click", () => {
       // Fill the composer in place — no re-render, so the melody curve and its
@@ -1137,6 +1275,8 @@ function pollTask() {
         await loadEntries();
         await loadDiscussions();
         render();
+        // The journey follows the song: a kept song offers the album step.
+        await loadJourney();
         return;
       }
       render();
@@ -1148,17 +1288,120 @@ function pollTask() {
   state.pollTimer = setTimeout(tick, 1500);
 }
 
+// ---- journey ------------------------------------------------------------
+
+const ACTIVE_JOURNEY_PHASES = ["song-running", "album-planning", "album-running"];
+
+async function loadJourney() {
+  const chatId = state.currentId;
+  if (!chatId) return;
+  try {
+    const body = await api(`/api/journeys/${encodeURIComponent(chatId)}`);
+    if (state.currentId !== chatId) return;
+    state.journey = body.journey;
+    state.albumTask = body.albumTask ?? null;
+    if (body.songTask) state.task = body.songTask;
+    render();
+    if (ACTIVE_JOURNEY_PHASES.includes(body.journey.phase)) pollJourney(1200);
+  } catch {
+    // A conversation without a journey simply has nothing more to show.
+    state.journey = null;
+    state.albumTask = null;
+  }
+}
+
+function pollJourney(delay = 1500, attempt = 0) {
+  clearTimeout(state.journeyTimer);
+  const chatId = state.currentId;
+  if (!chatId) return;
+  const tick = async () => {
+    if (state.currentId !== chatId) return;
+    try {
+      const body = await api(`/api/journeys/${encodeURIComponent(chatId)}`);
+      state.journey = body.journey;
+      state.albumTask = body.albumTask ?? null;
+      if (body.songTask) state.task = body.songTask;
+      render();
+      if (ACTIVE_JOURNEY_PHASES.includes(body.journey.phase)) {
+        state.journeyTimer = setTimeout(tick, 2500);
+      }
+    } catch {
+      if (attempt < 5) state.journeyTimer = setTimeout(() => pollJourney(2500, attempt + 1), 2500);
+    }
+  };
+  state.journeyTimer = setTimeout(tick, delay);
+}
+
+async function continueAlbum() {
+  const chatId = state.currentId;
+  const theme = state.albumTheme.trim();
+  if (!chatId || state.albumBusy) return;
+  if (!theme) {
+    state.message = t("albumNeedTheme");
+    state.messageError = true;
+    render();
+    return;
+  }
+  state.albumBusy = true;
+  state.message = "";
+  render();
+  try {
+    const body = await api(`/api/journeys/${encodeURIComponent(chatId)}/continue-album`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        theme,
+        candidateCount: state.albumCount,
+        targetTotalMinutes: state.albumMinutes,
+      }),
+    });
+    state.journey = body.journey;
+    state.albumTask = body.albumTask ?? null;
+    state.albumBusy = false;
+    state.albumTheme = "";
+    render();
+    pollJourney(1000);
+  } catch (error) {
+    state.albumBusy = false;
+    state.message = error instanceof Error ? error.message : String(error);
+    state.messageError = true;
+    render();
+  }
+}
+
+async function retryJourney() {
+  const chatId = state.currentId;
+  if (!chatId) return;
+  try {
+    const body = await api(`/api/journeys/${encodeURIComponent(chatId)}/retry`, { method: "POST" });
+    state.journey = body.journey;
+    state.albumTask = body.albumTask ?? null;
+    render();
+    pollJourney(1200);
+  } catch (error) {
+    state.message = error instanceof Error ? error.message : String(error);
+    state.messageError = true;
+    render();
+  }
+}
+
 // ---------------------------------------------------------------------------
 
 function newChat() {
   clearTimeout(state.pollTimer);
+  clearTimeout(state.journeyTimer);
   stopMoodAudio();
+  albumStage.stop();
+  albumStage.reset();
   state.currentId = null;
   state.session = null;
   state.input = "";
   state.pending = null;
   state.thinking = false;
   state.message = "";
+  state.journey = null;
+  state.albumTask = null;
+  state.albumTheme = "";
   resetForNewSession();
   history.replaceState(null, "", "/");
   render();
@@ -1187,6 +1430,12 @@ async function openDiscussion(id) {
   state.message = "";
   state.task = sessionTasks(session).at(-1) ?? null;
   state.proposal = session.proposal ?? "";
+  // Reset the journey view before restoring it for this conversation.
+  clearTimeout(state.journeyTimer);
+  state.journey = null;
+  state.albumTask = null;
+  state.albumTheme = "";
+  albumStage.reset();
   const entry = entryForSession(id);
   state.activeEntryId = entry?.id ?? null;
   if (entry) {
@@ -1201,6 +1450,8 @@ async function openDiscussion(id) {
   history.replaceState(null, "", `/?chat=${encodeURIComponent(id)}`);
   render();
   if (state.task && state.task.status !== "completed" && state.task.status !== "failed") pollTask();
+  // Restore the journey stage this conversation had reached, if any.
+  if (session.status === "submitted") void loadJourney();
   // A conversation that has a prompt but is not submitted yet: read its feeling again.
   if (!entry && session.proposal && session.status !== "submitted") {
     await readFeelingFromPrompt(session.proposal);

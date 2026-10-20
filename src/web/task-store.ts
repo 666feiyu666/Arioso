@@ -161,6 +161,12 @@ export interface MusicTask {
   playlistDiscussion?: PlaylistDiscussionMessage[];
   /** Set once the user confirms the playlist plan and generation may proceed. */
   playlistPlanApproved?: boolean;
+  /** The plan revision the user is looking at; revisions invalidate an approval. */
+  albumPlanRevision?: number;
+  /** The journey this task belongs to, when it was started from one. */
+  journeyId?: string;
+  /** The task this one was derived from (for example, an album's source song). */
+  parentTaskId?: string;
 }
 
 export interface CreateTaskInput {
@@ -178,6 +184,8 @@ export interface CreateTaskInput {
   sourceDiscussionId?: string;
   moodChatId?: string;
   playlistReferences?: PlaylistReference[];
+  journeyId?: string;
+  parentTaskId?: string;
 }
 
 function isSafeFileName(value: unknown): value is string {
@@ -261,9 +269,13 @@ function isTaskRecord(value: unknown): value is MusicTask {
   const discussionValid = value.playlistDiscussion === undefined
     || (Array.isArray(value.playlistDiscussion) && value.playlistDiscussion.every(isPlaylistDiscussionMessage));
   const approvedValid = value.playlistPlanApproved === undefined || typeof value.playlistPlanApproved === "boolean";
+  const planRevisionValid = value.albumPlanRevision === undefined
+    || (Number.isInteger(value.albumPlanRevision) && Number(value.albumPlanRevision) > 0);
+  const lineageValid = (value.journeyId === undefined || isSafeFileName(value.journeyId))
+    && (value.parentTaskId === undefined || isSafeFileName(value.parentTaskId));
   return movementsValid && tracksValid && playlistValid && albumPlanValid && productionValid
     && musicReviewValid && moodChatValid && reviewAttemptValid && referencesValid
-    && briefingValid && discussionValid && approvedValid;
+    && briefingValid && discussionValid && approvedValid && planRevisionValid && lineageValid;
 }
 
 function safeAudioName(value: string | undefined, fallback: string): string {
@@ -554,6 +566,8 @@ export class TaskStore {
       ...(input.sourceDiscussionId ? { sourceDiscussionId: input.sourceDiscussionId } : {}),
       ...(input.moodChatId ? { moodChatId: input.moodChatId } : {}),
       ...(input.playlistReferences?.length ? { playlistReferences: input.playlistReferences } : {}),
+      ...(input.journeyId ? { journeyId: input.journeyId } : {}),
+      ...(input.parentTaskId ? { parentTaskId: input.parentTaskId } : {}),
     };
     this.#tasks.set(task.id, task);
     this.#taskDirectories.set(task.id, this.taskDirectory(task));
