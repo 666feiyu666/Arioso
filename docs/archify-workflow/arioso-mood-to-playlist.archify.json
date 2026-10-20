@@ -1,0 +1,198 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "From a Mood to a Playlist",
+    "locale": "en",
+    "quality_profile": "showcase",
+    "animation": "trace",
+    "output": "docs/archify-workflow/arioso-mood-to-playlist.html"
+  },
+  "lanes": [
+    {
+      "id": "listener",
+      "label": "Listener and application"
+    },
+    {
+      "id": "arioso",
+      "label": "Arioso agent"
+    },
+    {
+      "id": "audio",
+      "label": "Audio generation"
+    }
+  ],
+  "phases": [
+    {
+      "id": "feeling",
+      "label": "A feeling in",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "loop",
+      "label": "Plan, confirm, render",
+      "fromCol": 2,
+      "toCol": 4,
+      "variant": "emphasis"
+    },
+    {
+      "id": "playlist",
+      "label": "Review and keep",
+      "fromCol": 5,
+      "toCol": 5,
+      "variant": "dashed"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "mood_checkin",
+      "lane": "listener",
+      "col": 0,
+      "type": "frontend",
+      "label": "Mood check-in",
+      "sublabel": "colour, word, one sentence",
+      "width": 158
+    },
+    {
+      "id": "conversation",
+      "lane": "listener",
+      "col": 1,
+      "type": "frontend",
+      "label": "Conversation",
+      "sublabel": "the direction settles",
+      "width": 150
+    },
+    {
+      "id": "song_plan",
+      "lane": "arioso",
+      "col": 2,
+      "type": "backend",
+      "label": "Plan",
+      "sublabel": "MusicSpec 1.0, then track plans",
+      "tag": "before any audio",
+      "width": 168
+    },
+    {
+      "id": "confirm_plan",
+      "lane": "listener",
+      "col": 3,
+      "type": "security",
+      "label": "Confirm the plan",
+      "sublabel": "approval bound to a revision",
+      "width": 158
+    },
+    {
+      "id": "lyria_render",
+      "lane": "audio",
+      "col": 4,
+      "type": "cloud",
+      "label": "Lyria render",
+      "sublabel": "one take, or one album pass",
+      "width": 158
+    },
+    {
+      "id": "adherence_review",
+      "lane": "arioso",
+      "col": 5,
+      "type": "security",
+      "label": "Adherence review",
+      "sublabel": "Gemini: match or mismatch",
+      "width": 164
+    },
+    {
+      "id": "playlist",
+      "lane": "listener",
+      "col": 5,
+      "type": "frontend",
+      "label": "Playlist",
+      "sublabel": "keep, include, order, export",
+      "width": 158
+    }
+  ],
+  "edges": [
+    {
+      "id": "sentence",
+      "from": "mood_checkin",
+      "to": "conversation",
+      "label": "one sentence",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "brief",
+      "from": "conversation",
+      "to": "song_plan",
+      "label": "brief",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "plan_ready",
+      "from": "song_plan",
+      "to": "confirm_plan",
+      "label": "plan ready",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "approved",
+      "from": "confirm_plan",
+      "to": "lyria_render",
+      "label": "approved",
+      "variant": "emphasis",
+      "role": "main",
+      "toSide": "top"
+    },
+    {
+      "id": "take",
+      "from": "lyria_render",
+      "to": "adherence_review",
+      "label": "take",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "match",
+      "from": "adherence_review",
+      "to": "playlist",
+      "label": "match: keep the take",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "album_from_song",
+      "from": "adherence_review",
+      "to": "song_plan",
+      "label": "plan an album from this song",
+      "variant": "dashed",
+      "role": "branch"
+    },
+    {
+      "id": "mismatch",
+      "from": "adherence_review",
+      "to": "lyria_render",
+      "label": "mismatch: listener decides",
+      "variant": "dashed",
+      "role": "error"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Plan before audio",
+      "items": [
+        "The song plan and the album plan are written before any take",
+        "A listener confirms each plan, and a revision clears the old approval"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "One review loop",
+      "items": [
+        "Gemini compares the audio with the approved plan, not with taste",
+        "A mismatch goes back to the listener; nothing regenerates on its own"
+      ]
+    }
+  ]
+}

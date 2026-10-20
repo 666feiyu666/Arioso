@@ -4,94 +4,73 @@ Arioso turns a musical idea into finished music. Describe what you want in
 plain words, refine it in conversation, and Arioso plans the piece and
 generates the audio — from a single track to a full album.
 
-Arioso ships as a bilingual browser studio and a command-line interface, and
-supports four ways to create music:
+It ships as a bilingual browser studio (简体中文 / English) and a command-line
+interface, with two ways in: **MoodMic**, which starts from how you feel and
+ends with a playlist, and the **Workflows** studio, which starts from a brief
+and offers four ways to work.
 
-- general composition from a free-form brief;
-- Jazz composition in the style of the standards;
-- coherent multi-movement orchestral works; and
-- multi-track albums with candidate review, playlist ordering, playback, and
-  MP3 export.
+## MoodMic: From Emotions to Playlist
 
-MoodMic is a mood-aware starting point for these workflows: develop an idea
-through creative discussion, optional image references, and mood cues, then
-approve the resulting proposal before composition. Every check-in is recorded
-on a mood calendar, so you can look back at a feeling and reopen the music it
-produced.
+MoodMic is the everyday path. Say how you feel in everyday words and the
+direction settles in conversation; the agreed mood is then read out as a colour
+and a word, which you can change before creating. On an empty conversation you
+can start from four example feelings, one per mood colour.
 
-## Interface
+![MoodMic: turning how you feel into music](Assets/figure/arioso-moodmic-entry.png)
 
-Arioso runs as a bilingual web studio (简体中文 / English) alongside the
-command line. The browser interface has five tabs: **MoodMic**, **Mood
-calendar**, **Playlist**, **Workflows**, and **Help**.
+A piece you keep can continue into an album without leaving the conversation,
+so feeling, discussion, plan, audio, and review stay one thread.
 
-### Workflows
+![Keeping a take and turning it into an album](Assets/figure/arioso-moodmic-take-to-album.png)
 
-The Workflows tab opens on four ways to create music — one piece from the
-model's own knowledge, a Jazz piece grounded in the standards, a multi-movement
-orchestral work, and a multi-track album. Each is a card marked with its own
-colour; entering one opens that workflow's composer.
+Every finished candidate lands in the playlist, where you audition it and mark
+tracks for inclusion. The included set plays continuously in a persistent
+player and exports as a single MP3 with timestamps.
+
+![Playlist with included tracks and export](Assets/figure/arioso-playlist-album.png)
+
+Each check-in also records its colour on a month calendar, so you can look back
+at a feeling and reopen the conversation behind it.
+
+## Workflows: Four Working Modes
+
+The Workflows tab opens on four ways to create music, each one a card marked
+with its own colour:
+
+- **General composition** — one piece from the model's own musical knowledge;
+- **Jazz** — a piece grounded in a local corpus of the standards;
+- **Orchestral** — a coherent multi-movement work;
+- **Album** — a multi-track set with candidate review, ordering, and export.
 
 ![Arioso workflow studio](Assets/figure/arioso-workflow.png)
 
-The album workflow walks an idea through creative discussion before composition,
-then lines up the generated candidates as a playlist you can audition and
-export.
+Entering a card opens that workflow's composer. An album can also be planned
+through a creative discussion — messages, optional image references, and a
+proposal to approve — before any audio is generated.
 
 ![Arioso album workflow discussion](Assets/figure/arioso-playlist-workflow.png)
 
-### Playlist
-
-Every finished candidate appears in the Playlist tab, where you audition it and
-mark tracks for inclusion. The included set plays continuously in a persistent
-player, and exports as a single MP3 with timestamps.
-
-![Arioso playlist](Assets/figure/arioso-playlist-moodmic.png)
-
-### MoodMic
-
-MoodMic turns how you feel right now into a single piece. Describe the feeling
-in everyday words; once a direction is agreed, a mood is read out — a colour
-and a word — which you can change before creating. On an empty conversation you
-can start from four example feelings, one per mood colour; picking one fills
-the composer, and the same four colours carry through the interface and the
-mood calendar.
-
-![MoodMic](Assets/figure/arioso-moodmic.png)
-
-### Mood calendar
-
-Every check-in from MoodMic is marked on a month grid with the colour of that
-day's feeling, in the order the entries were made. Pick a day to read it back
-and reopen the conversation behind it.
-
-![Mood calendar](Assets/figure/arioso-calender.png)
-
-## Workflow
+## Under the hood
 
 ![Arioso agentic workflow](Assets/figure/arioso-agentic-workflow.png)
 
-## Example output
-
-Listen to these Arioso outputs:
-
-- [Afternoon Study](https://www.bilibili.com/video/BV1p5pc6AEX2/?share_source=copy_web&vd_source=db5fe656aa211faf8e79db42720c8bda) v0.3.0: Full Playlist Supported
-- [雨泊山影 | When Blue Meets Calm | 学习、阅读、桌游背景音](https://www.bilibili.com/video/BV1jcpR66Ea/?share_source=copy_web&vd_source=db5fe656aa211faf8e79db42720c8bda) v0.6.0: Mood + Music Direction kickoff
-- [大提琴的寂寞｜城市夜色中的低频旋律](https://www.bilibili.com/video/BV1DwJt65EKc/?share_source=copy_web&vd_source=db5fe656aa211faf8e79db42720c8bda) v0.9.0: MoodMic Playlist
-
+A conversation settles a direction and produces a `MusicSpec` — a structured
+specification fixing instrumentation, structure, tempo, and one production-ready
+Lyria prompt. Nothing is rendered before the plan is approved. Audio comes from
+Lyria; in MoodMic, Gemini then listens to the take and returns a match-or-mismatch
+verdict before you keep or regenerate it. An album plans its candidates, generates
+them in the background, and keeps the included tracks as an ordered playlist.
 
 ## Requirements
 
 - Windows or macOS;
-- Node.js 22 or newer;
-- pnpm 11.19.0, as declared in `package.json`;
+- Node.js 22 or newer and pnpm 11.19.0, as declared in `package.json`;
 - an OpenAI API key for composition; and
 - a Gemini API key with Lyria access for audio generation.
 
-The core web and CLI workflows support Windows and macOS. The optional
-historical-denoising production workflow currently supports Windows only.
-macOS users can still compose and generate album candidates, manage playlists,
-and export their selected tracks without denoising.
+Every core web and CLI workflow runs on Windows and macOS. Only the optional
+historical-denoising production stage is Windows-only; on macOS you can still
+compose, generate album candidates, manage playlists, and export tracks.
 
 ## Quick start
 
@@ -105,24 +84,18 @@ pnpm web
 
 Open <http://127.0.0.1:4173> and configure the required API keys in Settings.
 
-If Corepack is unavailable, install pnpm 11.19.0 separately before running
-`pnpm install`.
+If Corepack is unavailable, install pnpm 11.19.0 first.
+
+## Example output
+
+- [Afternoon Study](https://www.bilibili.com/video/BV1p5pc6AEX2/?share_source=copy_web&vd_source=db5fe656aa211faf8e79db42720c8bda) — v0.3.0, full playlist
+- [雨泊山影 | When Blue Meets Calm | 学习、阅读、桌游背景音](https://www.bilibili.com/video/BV1jcpR66Ea/?share_source=copy_web&vd_source=db5fe656aa211faf8e79db42720c8bda) — v0.6.0, mood and music direction
+- [大提琴的寂寞｜城市夜色中的低频旋律](https://www.bilibili.com/video/BV1DwJt65EKc/?share_source=copy_web&vd_source=db5fe656aa211faf8e79db42720c8bda) — v0.9.0, MoodMic playlist
 
 ## Command line
 
-For CLI use, copy `.env.example` to `.env` and replace the placeholders:
-
-```powershell
-# Windows PowerShell
-Copy-Item .env.example .env
-```
-
-```shell
-# macOS
-cp .env.example .env
-```
-
-Then run one of the supported commands:
+For CLI use, copy `.env.example` to `.env` and replace the placeholders, then
+run one of the supported commands:
 
 ```shell
 pnpm dev compose "A quiet nocturne for piano and muted trumpet."
@@ -131,10 +104,10 @@ pnpm dev produce-album "A calm instrumental album for late-night reading."
 pnpm dev stitch "album.mp3" "part-1.mp3" "part-2.mp3"
 ```
 
-`produce-album` includes the Windows-only denoising production stage. Use the
-browser's standard album workflow on macOS.
+`produce-album` includes the Windows-only denoising stage; on macOS use the
+browser's album workflow instead.
 
-## Verification
+## Development
 
 ```shell
 pnpm typecheck
