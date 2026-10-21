@@ -937,6 +937,7 @@
 
 .prompt-proposal textarea {
   width: 100%;
+  min-height: 220px;
   resize: vertical;
   padding: 11px 12px;
   border: 1px solid var(--line-strong);

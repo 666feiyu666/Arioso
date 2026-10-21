@@ -709,6 +709,16 @@ function detectedLabel() {
   return state.detected ? emotionLabel(state.detected.group, state.detected.emotion, state.language) : "";
 }
 
+// Keep both paragraphs of the creative brief readable without an inner scrollbar.
+function autoGrowProposalText(textarea) {
+  if (!textarea) return;
+  const maxHeight = Math.round(window.innerHeight * 0.6);
+  textarea.style.height = "auto";
+  const needed = textarea.scrollHeight;
+  textarea.style.height = `${Math.min(needed, maxHeight)}px`;
+  textarea.style.overflowY = needed > maxHeight ? "auto" : "hidden";
+}
+
 function renderProposal() {
   const moodReady = Boolean(state.mood.group && state.mood.emotion);
   return `
@@ -970,7 +980,13 @@ function bindChat() {
     render();
   });
   const proposalText = stage.querySelector("#mm-proposal-text");
-  proposalText?.addEventListener("input", () => { state.proposal = proposalText.value; });
+  if (proposalText) {
+    autoGrowProposalText(proposalText);
+    proposalText.addEventListener("input", () => {
+      state.proposal = proposalText.value;
+      autoGrowProposalText(proposalText);
+    });
+  }
   stage.querySelector("#mm-mode")?.addEventListener("change", (event) => { state.advanced.mode = event.target.value; });
   stage.querySelector("#mm-lyria")?.addEventListener("change", (event) => { state.advanced.lyriaModel = event.target.value; });
   stage.querySelector("#mm-vocal")?.addEventListener("change", (event) => { state.advanced.vocalMode = event.target.value; });

@@ -1897,6 +1897,17 @@ function discussionTypingHtml() {
   return `<article class="discussion-message assistant typing" role="status" aria-label="${escapeHtml(t("thinking"))}"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></article>`;
 }
 
+// The creative brief is two developed paragraphs, so show all of it at once
+// instead of hiding the second half behind a short scroll box.
+function autoGrowProposalText() {
+  const textarea = elements.proposalText;
+  const maxHeight = Math.round(window.innerHeight * 0.6);
+  textarea.style.height = "auto";
+  const needed = textarea.scrollHeight;
+  textarea.style.height = `${Math.min(needed, maxHeight)}px`;
+  textarea.style.overflowY = needed > maxHeight ? "auto" : "hidden";
+}
+
 function renderDiscussion() {
   const session = state.discussionSession;
   elements.discussionPanel.hidden = !state.supportsDiscussionSessions || (!session && !state.discussionPending);
@@ -1920,6 +1931,7 @@ function renderDiscussion() {
   elements.discussionNext.hidden = session?.status === "submitted"
     || !session?.messages?.some((message) => message.role === "assistant") || Boolean(proposal);
   if (proposal && elements.proposalText.value !== proposal) elements.proposalText.value = proposal;
+  autoGrowProposalText();
   elements.generateProposal.disabled = !session?.messages?.some((message) => message.role === "user") || state.submitting;
   if (session) elements.form.hidden = session.status === "submitted";
   const signature = [
@@ -2313,6 +2325,8 @@ elements.input.addEventListener("keydown", (event) => {
   event.preventDefault();
   elements.form.requestSubmit();
 });
+elements.proposalText.addEventListener("input", autoGrowProposalText);
+window.addEventListener("resize", autoGrowProposalText);
 elements.proposalText.addEventListener("keydown", (event) => {
   if (event.key !== "Enter" || !(event.metaKey || event.ctrlKey) || event.isComposing) return;
   event.preventDefault();
