@@ -6,6 +6,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 
 import type { DiscussionAgent } from "../../src/discussion/types.js";
+import type { PoemRetriever } from "../../src/retrieval/poem-retriever.js";
 import type { MoodClassifier } from "../../src/web/mood-classifier.js";
 import { createAriosoServer } from "../../src/web/server.js";
 
@@ -22,6 +23,7 @@ export async function withWebServer(
     environment?: NodeJS.ProcessEnv;
     discussionAgent?: DiscussionAgent;
     moodClassifier?: MoodClassifier;
+    poemRetriever?: PoemRetriever;
   } = {},
 ): Promise<void> {
   const root = await mkdtemp(path.join(tmpdir(), "arioso-web-test-"));
@@ -34,6 +36,7 @@ export async function withWebServer(
       environment: { ...options.environment, ARIOSO_OUTPUT_DIR: path.join(root, "outputs") },
       ...(options.discussionAgent ? { discussionAgent: options.discussionAgent } : {}),
       ...(options.moodClassifier ? { moodClassifier: options.moodClassifier } : {}),
+      ...(options.poemRetriever ? { poemRetriever: options.poemRetriever } : {}),
     });
     server.listen(0, "127.0.0.1");
     await once(server, "listening");

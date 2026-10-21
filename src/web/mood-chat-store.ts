@@ -44,13 +44,71 @@ export interface MoodChat {
   messages: MoodChatMessage[];
   attachments: MoodChatAttachment[];
   proposal?: string;
+  /** Advisory trace of the poetry references used for the current proposal. */
+  poem_retrieval?: PoemRetrievalTrace;
   taskIds: string[];
   createdAt: string;
   updatedAt: string;
 }
 
+export interface PoemRetrievalTraceReference {
+  id: string;
+  title: string;
+  author: string;
+  score: number;
+  matched_terms: string[];
+}
+
+/**
+ * Kept in the spec's snake_case shape so a saved session reads the same as the
+ * documented trace. Full poem text is not duplicated here: the stable ID and the
+ * corpus version are enough to reconstruct it.
+ */
+export interface PoemRetrievalTrace {
+  query: string;
+  corpus_version: string;
+  references: PoemRetrievalTraceReference[];
+  retrieved_at: string;
+  unavailable_reason?: string;
+}
+
 function isSafeId(value: unknown): value is string {
   return typeof value === "string" && /^[a-f0-9-]{36}$/u.test(value);
+}
+
+function isTraceReference(value: unknown): value is PoemRetrievalTraceReference {
+  return isRecord(value)
+    && typeof value.id === "string"
+    && typeof value.title === "string"
+    && typeof value.author === "string"
+    && typeof value.score === "number"
+    && Array.isArray(value.matched_terms)
+    && value.matched_terms.every((term: unknown) => typeof term === "string");
+}
+
+/** Invalid traces are dropped rather than failing the whole session. */
+export function parsePoemRetrievalTrace(value: unknown): PoemRetrievalTrace | undefined {
+  if (!isRecord(value)) return undefined;
+  if (typeof value.query !== "string"
+    || typeof value.corpus_version !== "string"
+    || typeof value.retrieved_at !== "string"
+    || !Array.isArray(value.references)
+    || !value.references.every(isTraceReference)) {
+    return undefined;
+  }
+  if (value.unavailable_reason !== undefined && typeof value.unavailable_reason !== "string") {
+    return undefined;
+  }
+  const trace: PoemRetrievalTrace = {
+    query: value.query,
+    corpus_version: value.corpus_version,
+    references: value.references,
+    retrieved_at: value.retrieved_at,
+  };
+  if (typeof value.unavailable_reason === "string") {
+    trace.unavailable_reason = value.unavailable_reason;
+  }
+  return trace;
 }
 
 function isMoodChat(value: unknown): value is MoodChat {
@@ -88,7 +146,15 @@ export class MoodChatStore {
       if (!entry.isDirectory() || !isSafeId(entry.name)) continue;
       try {
         const value: unknown = JSON.parse(await readFile(path.join(this.#directory, entry.name, "session.json"), "utf8"));
-        if (isMoodChat(value)) this.#chats.set(value.id, value);
+        if (!isMoodChat(value)) continue;
+        // Sessions written before the poetry experiment simply have no trace.
+        const trace = value.poem_retrieval === undefined
+          ? undefined
+          : parsePoemRetrievalTrace(value.poem_retrieval);
+        const chat: MoodChat = { ...value };
+        delete chat.poem_retrieval;
+        if (trace) chat.poem_retrieval = trace;
+        this.#chats.set(chat.id, chat);
       } catch {
         // Preserve malformed chat data on disk without exposing it at runtime.
       }
@@ -168,7 +234,7 @@ export class MoodChatStore {
       throw new Error("An attachment is unavailable.");
     }
     const now = new Date().toISOString();
-    const { proposal: _proposal, ...withoutProposal } = chat;
+    const { proposal: _proposal, poem_retrieval: _poemRetrieval, ...withoutProposal } = chat;
     const updated: MoodChat = {
       ...withoutProposal,
       status: "discussing",
@@ -183,7 +249,11 @@ export class MoodChatStore {
     return updated;
   }
 
-  async setProposal(id: string, proposal: string): Promise<MoodChat> {
+  async setProposal(
+    id: string,
+    proposal: string,
+    poemRetrieval?: PoemRetrievalTrace,
+  ): Promise<MoodChat> {
     const chat = this.require(id);
     if (chat.status === "submitted") throw new Error("This conversation has already been submitted.");
     if (!chat.messages.some((message) => message.role === "user")) {
@@ -192,8 +262,14 @@ export class MoodChatStore {
     const text = proposal.trim();
     if (!text) throw new Error("The generated prompt is empty.");
     if (text.length > 8_000) throw new Error("The generated prompt must be 8,000 characters or fewer.");
+    // A regenerated proposal always replaces the trace it was produced with.
+    const { poem_retrieval: _previousTrace, ...withoutTrace } = chat;
     const updated: MoodChat = {
-      ...chat, status: "proposal-ready", proposal: text, updatedAt: new Date().toISOString(),
+      ...withoutTrace,
+      status: "proposal-ready",
+      proposal: text,
+      ...(poemRetrieval ? { poem_retrieval: poemRetrieval } : {}),
+      updatedAt: new Date().toISOString(),
     };
     this.#chats.set(id, updated);
     await this.save(updated);

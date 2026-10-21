@@ -27,6 +27,7 @@ import { runMoodMicGeneration } from "../moodmic/moodmic-graph.js";
 import { MAX_PLAYLIST_REFERENCES, type PlaylistReference } from "../playlist/reference.js";
 import { MAX_PLAYLIST_DISCUSSION_MESSAGES, MAX_PLAYLIST_FEEDBACK_LENGTH, type PlaylistDiscussionMessage } from "../playlist/briefing.js";
 import { listOrchestralKnowledgeCards } from "../retrieval/orchestral-cards.js";
+import type { PoemRetriever } from "../retrieval/poem-retriever.js";
 import {
   ALBUM_MAX_CANDIDATES,
   ALBUM_MAX_TOTAL_MINUTES,
@@ -38,6 +39,7 @@ import { TaskStore, parseTaskInput, type AlbumAdmission, type AlbumAudioExport, 
 import { MoodEntryStore, isCalendarDate, isMoodGroup, type MoodEntryInput } from "./mood-store.js";
 import { LangChainMoodClassifier, type MoodClassifier } from "./mood-classifier.js";
 import { MoodChatStore, type MoodChat } from "./mood-chat-store.js";
+import { poemReferencesForProposal } from "./poem-proposal.js";
 import { HttpError, readBinaryBody, readJsonBody, sendAudio, sendFile, sendJson, serveAsset, serveStatic } from "./http.js";
 import { isRecord } from "../utils/validation.js";
 import { runBackgroundMusicProducer } from "../producer/background-music-producer.js";
@@ -467,6 +469,8 @@ export interface AriosoServerOptions {
   preferencesPath?: string;
   discussionAgent?: DiscussionAgent;
   moodClassifier?: MoodClassifier;
+  /** Injected poetry retriever; the on-disk corpus is loaded lazily otherwise. */
+  poemRetriever?: PoemRetriever;
 }
 
 function discussionTaskOptions(value: unknown): DiscussionTaskOptions {
@@ -557,6 +561,7 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
   const moodChatStore = new MoodChatStore(path.resolve(outputDirectory, "moodmic", "chats"));
   const journeyStore = new JourneyStore(path.resolve(outputDirectory, "journeys"));
   const discussionAgent = options.discussionAgent ?? new LangChainDiscussionAgent();
+  const poemRetriever = options.poemRetriever;
   const moodClassifier = options.moodClassifier ?? new LangChainMoodClassifier();
   await store.initialize();
   await discussionStore.initialize();
@@ -962,14 +967,28 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
         const chat = moodChatStore.get(chatId);
         if (!chat) throw new HttpError(404, "Conversation not found.");
         const config = loadConfig(false, await settings.runtimeEnvironment());
-        const proposal = await discussionAgent.propose(await moodChatStore.agentMessages(chatId), {
-          apiKey: config.openAiApiKey,
-          model: config.openAiModel,
-          language: await settings.language(),
-          compositionMode: "single",
-          workflowType: chat.jazz ? "02-jazz" : "01-general",
-        });
-        sendJson(response, 200, await moodChatView(await moodChatStore.setProposal(chatId, proposal)));
+        // Poetry retrieval runs only here, from the most complete expression of
+        // intent, and stays advisory even when the corpus is unavailable.
+        const poetry = await poemReferencesForProposal(
+          chat,
+          poemRetriever
+            ? { loadRetriever: async () => poemRetriever }
+            : {},
+        );
+        const proposal = await discussionAgent.propose(
+          await moodChatStore.agentMessages(chatId),
+          {
+            apiKey: config.openAiApiKey,
+            model: config.openAiModel,
+            language: await settings.language(),
+            compositionMode: "single",
+            workflowType: chat.jazz ? "02-jazz" : "01-general",
+          },
+          poetry.references,
+        );
+        sendJson(response, 200, await moodChatView(
+          await moodChatStore.setProposal(chatId, proposal, poetry.trace),
+        ));
         return;
       }
 

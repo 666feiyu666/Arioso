@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "version": "1.0.0",
+  "description": "Bilingual mood vocabulary shared by the poetry importer and the poem retriever. The lists are retrieval hints, not emotion assignments for a poem.",
+  "categories": {
+    "anxious": ["anxious", "uneasy", "tense", "restless", "焦虑", "不安", "紧张", "彷徨", "压迫", "慌乱"],
+    "angry": ["angry", "furious", "rage", "hostile", "愤怒", "怒火", "咆哮", "憎恨", "仇恨"],
+    "frustrated": ["frustrated", "annoyed", "stuck", "pointless", "烦闷", "烦躁", "挫败", "徒劳", "无奈"],
+    "overwhelmed": ["overwhelmed", "swamped", "suffocating", "崩溃", "淹没", "窒息", "压垮", "混乱"],
+    "excited": ["excited", "thrilled", "anticipation", "兴奋", "激动", "雀跃", "期待", "心跳"],
+    "joyful": ["joyful", "bright", "playful", "喜悦", "明亮", "欢欣", "轻盈", "晴朗", "绽放"],
+    "energised": ["energised", "energized", "energetic", "vibrant", "alive", "活力", "奔涌", "蓬勃", "奔跑"],
+    "enthusiastic": ["enthusiastic", "eager", "ardent", "热情", "燃烧", "呼喊", "渴望"],
+    "sad": ["sad", "sorrow", "grief", "melancholy", "悲伤", "哀愁", "落泪", "惆怅", "凄凉"],
+    "lonely": ["lonely", "solitude", "isolated", "孤独", "孤单", "寂寞", "独自", "寂寥", "冷清"],
+    "drained": ["drained", "tired", "exhausted", "weary", "疲惫", "疲倦", "沉重", "倦怠"],
+    "discouraged": ["discouraged", "hopeless", "defeated", "disheartened", "失望", "灰心", "气馁", "虚无"],
+    "calm": ["calm", "still", "gentle", "平静", "安宁", "静谧", "舒缓", "清澈", "微风"],
+    "content": ["content", "satisfied", "fulfilled", "满足", "安稳", "温暖", "知足"],
+    "relaxed": ["relaxed", "at ease", "unwound", "放松", "轻松", "慵懒", "摊开"],
+    "peaceful": ["peaceful", "tranquil", "harmonious", "祥和", "静默", "月光", "安详"]
+  },
+  "single_character_tokens": ["雨", "夜", "梦", "光", "海", "风", "月", "船", "灯"],
+  "stop_terms": [
+    "a", "an", "and", "are", "as", "at", "be", "but", "by", "for", "from", "had",
+    "has", "have", "her", "his", "i", "in", "is", "it", "its", "me", "my", "not",
+    "of", "on", "or", "our", "she", "so", "that", "the", "their", "them", "there",
+    "they", "this", "to", "was", "we", "were", "what", "when", "with", "you", "your",
+    "一个", "一些", "一样", "什么", "这样", "那样", "我们", "你们", "他们", "自己",
+    "没有", "就是", "可以", "因为", "所以", "但是", "如果", "已经", "还是"
+  ]
+}

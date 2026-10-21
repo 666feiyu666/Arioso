@@ -60,6 +60,19 @@ export interface DiscussionAgentReply {
   mood?: DiscussionMood;
 }
 
+/**
+ * One retrieved modern poem offered to the Director at proposal time. It is
+ * reference material, never part of the user's request.
+ */
+export interface PoemReference {
+  id: string;
+  title: string;
+  author: string;
+  text: string;
+  score: number;
+  matchedTerms: string[];
+}
+
 export interface DiscussionAgentOptions {
   apiKey: string;
   model: string;
@@ -72,5 +85,9 @@ export interface DiscussionAgentOptions {
 
 export interface DiscussionAgent {
   respond(messages: DiscussionAgentMessage[], options: DiscussionAgentOptions): Promise<DiscussionAgentReply>;
-  propose(messages: DiscussionAgentMessage[], options: DiscussionAgentOptions): Promise<string>;
+  propose(
+    messages: DiscussionAgentMessage[],
+    options: DiscussionAgentOptions,
+    poems?: PoemReference[],
+  ): Promise<string>;
 }
