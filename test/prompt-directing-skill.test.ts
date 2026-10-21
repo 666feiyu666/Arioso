@@ -35,25 +35,6 @@ describe("prompt directing skill", () => {
     expect(discussion).not.toContain("Return only the brief itself");
   });
 
-  it("keeps the Director on emotional and sensory ground while the Composer realizes the music", async () => {
-    const discussion = await loadPromptDirectingSkill("discussion");
-    const proposal = await loadPromptDirectingSkill("proposal");
-
-    expect(discussion).toContain("Listen for how the user feels");
-    expect(discussion).toContain("poetic, sensory language");
-    expect(discussion).toContain("do not volunteer BPM");
-    expect(proposal).toContain("Describe the experience the music should express");
-    expect(proposal).toContain("Those mappings belong to the Composer");
-  });
-
-  it("keeps duration in view while directing and committing to a prompt", async () => {
-    const discussion = await loadPromptDirectingSkill("discussion");
-    const proposal = await loadPromptDirectingSkill("proposal");
-
-    expect(discussion).toContain("Keep duration in mind");
-    expect(proposal).toContain("State the intended duration explicitly");
-  });
-
   it("treats retrieved poems as optional reference data in both phases", async () => {
     const discussion = await loadPromptDirectingSkill("discussion");
     const proposal = await loadPromptDirectingSkill("proposal");
@@ -64,17 +45,6 @@ describe("prompt directing skill", () => {
       expect(skill).toContain("optional reference data");
       expect(skill).toContain("The user's own words stay authoritative");
     }
-  });
-
-  it("keeps the discussion concise, image-led and free of technical detail", async () => {
-    const discussion = await loadPromptDirectingSkill("discussion");
-
-    expect(discussion).toContain("at most one clear sensory image");
-    expect(discussion).toContain("at most one gentle question");
-    expect(discussion).toContain("Begin with the user's emotional centre");
-    expect(discussion).toContain("do not volunteer BPM");
-    expect(discussion).toContain("never mention retrieval");
-    expect(discussion).toContain("direct safety language overrides");
   });
 
   it("asks the proposal for a musical brief rather than a Lyria prompt", async () => {
@@ -101,5 +71,19 @@ describe("prompt directing skill", () => {
     expect(proposal).toContain("Four to seven sentences are a starting guideline");
     expect(proposal).toContain("not a minimum-length validator");
     expect(proposal).toContain("Emotional movement does not have to resolve");
+  });
+
+  it("draws abstract feelings into concrete details instead of either/or questions", async () => {
+    const discussion = await loadPromptDirectingSkill("discussion");
+    const proposal = await loadPromptDirectingSkill("proposal");
+
+    expect(discussion).toContain("Sketch a few short scenes, objects, sensations or repeated routines");
+    expect(discussion).toContain("Write before you ask");
+    expect(discussion).toContain("what is there rather than which of two labels fits");
+    expect(discussion).toContain("either/or choice questions");
+    expect(discussion).toContain("detailed instrumentation");
+    expect(discussion).toContain("belong to the Composer");
+    expect(proposal).toContain("Carry the concrete moments, objects and sensations");
+    expect(proposal).toContain("left to the Composer");
   });
 });

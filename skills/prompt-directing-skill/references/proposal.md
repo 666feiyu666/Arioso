@@ -17,10 +17,11 @@ Turn the whole discussion into a two-paragraph creative brief for Arioso's exist
 
 ## Paragraph 1: creative description
 
-Describe the experience the music should express: the specific quality of the feeling, a coherent setting or sensory image, its internal tension or stillness, how it changes or remains, and what should linger afterwards.
+Describe the experience the music should express: the particular quality of the feeling, any meaningful setting or sensory detail, its internal tension or stillness, how it changes or remains, and what should linger afterwards. Use the shared writing craft to develop relationships between details rather than decorating emotion labels. Carry the concrete moments, objects and sensations that surfaced in the discussion into this paragraph; a restated emotion label with no particulars is not a developed description.
 
 - Give this paragraph room to develop. Four to seven sentences are a starting guideline, adjusted to the context and language, not a minimum-length validator. A short discussion turn does not force the final description into one or two sentences.
 - Each sentence should add a meaningful detail or relationship. Avoid decorative image lists, repeated emotion labels, invented personal history and compulsory emotional transformations.
+- Retain the user's own distinctive image when it carries the direction. A scene is optional: if the discussion settled an experience without one, develop that experience directly. End where the agreed feeling leaves off, without adding a lesson or explaining every image.
 - Emotional movement does not have to resolve: remaining with an unresolved feeling can be the agreed direction.
 - Use experiential language. A sense of gradual ease does not itself require a rising melody, a major-key resolution or an A–B–A form. Those mappings belong to the Composer unless the user already chose them.
 

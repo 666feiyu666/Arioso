@@ -2,7 +2,7 @@
 
 ## 1. Objective
 
-This refinement uses the existing modern Chinese poetry corpus to improve `prompt-directing-skill`. Its primary goal is to make the Director's conversation and creative description more specific, image-rich, and emotionally attentive before the Composer designs the music.
+This refinement uses the existing modern Chinese poetry corpus to improve `prompt-directing-skill`. Its primary goal is to make the Director's conversation and creative description more specific and emotionally attentive before the Composer designs the music. Images should deepen a particular request when useful; they are not required in every reply.
 
 After the user settles the direction, the Director should produce a two-paragraph creative brief: first a developed creative description, then the agreed musical direction and constraints. The Composer translates that description into musical decisions. Increasing the description's substance and preserving the Composer's design space are the main goals of this revision.
 
@@ -15,17 +15,19 @@ The poems belong to the Director boundary:
 
 Poetry retrieval is deterministic support for one existing agent. It does not introduce another agent, a vector database, or a fixed emotion-to-poem ontology.
 
-### 1.1 Current implementation and proposed change
+### 1.1 Review findings and implementation status
 
 The repository review on 21 October 2026 found that MoodMic already supplies poem references before discussion replies and proposal generation. Query construction, reference reuse, mood-vocabulary expansion, and a minimum relevance filter are implemented. Their behavioural and quality requirements remain documented below.
 
-The remaining brief-design problem is visible in the current instructions:
+The initial review identified instructions that compressed creative intent and introduced musical decisions too early:
 
-- `references/proposal.md` restricts the creative opening to one or two sentences, then requires instrumentation, register, harmony, development, and ending in the same paragraph.
-- `src/discussion/langchain-discussion.ts` reinforces a concise final prompt and describes the discussion output and mood imagery in musical terms.
-- The approved proposal reaches the Composer as one description. This handoff does not separately identify the user's choices and musical choices introduced by the Director.
+- `references/proposal.md` restricted the creative opening to one or two sentences, then required instrumentation, register, harmony, development, and ending in the same paragraph.
+- `src/discussion/langchain-discussion.ts` reinforced a concise final prompt and described the discussion output and mood imagery in musical terms.
+- The handoff did not separately identify the user's choices and musical choices introduced by the Director.
 
-These instructions can compress the creative description and settle musical decisions before the Composer receives the request. The two-paragraph contract below is the proposed correction. This document does not claim that the revised prompts, interface wording, or Composer instructions have been implemented or that audio quality has improved.
+The Director and Composer now use the two-paragraph contract below. A further review found that discussion instructions and the response schema still encouraged a four-to-six-sentence draft with a sensory image. This could turn a first reply into a repeated metaphor, emotional arc and closing choice question.
+
+The current revision removes that discussion format, adds writing-craft guidance, and permits a mood label with empty imagery. Imagery should come from the user or be explicitly adopted by them before entering structured mood. Deterministic tests verify transport, storage, retrieval and fallback behaviour; they do not establish more natural model responses or better audio. Live text evaluation remains pending authorization to send retrieved poems to the configured external model.
 
 ## 2. Target Workflow
 
@@ -95,7 +97,7 @@ The retrieval query should contain:
 ```text
 all user-authored messages up to the current turn
 + the latest structured mood label
-+ the latest structured mood imagery
++ the latest structured mood imagery, if supplied or explicitly adopted by the user
 + deterministic mood-lexicon expansions
 ```
 
@@ -107,7 +109,7 @@ all user-authored messages up to the current turn
 - interface copy;
 - generated proposals.
 
-Excluding Director prose prevents the model's own invented imagery from dominating later searches.
+Exclude Director prose and unconfirmed assistant or poem imagery from structured mood so that invented scenes do not dominate later searches. A mood label may be retained with an empty imagery string; no image needs to be generated to fill this field.
 
 On the first user turn there may be no stored Director mood. The raw message and mood lexicon must therefore be sufficient to form the query. Common user vocabulary such as `难过` should be included in the `sad` expansion group alongside `悲伤`, `哀愁`, `惆怅`, and related terms.
 
@@ -156,33 +158,19 @@ The shared contract should distinguish a brief conversational reply from the dev
 `discussion.md` should require the Director to:
 
 1. receive the current poetry references before replying;
-2. begin with the user's emotional centre rather than a technical music question;
-3. use no more than one clear sensory image in a short reply;
-4. explore how the feeling moves, pauses, deepens, or changes;
-5. ask at most one gentle question when it helps develop that emotional movement;
+2. respond to the user's actual contribution: a feeling, memory, image, musical wish or correction;
+3. let context determine reply length and shape, with no sentence quota or mandatory metaphor;
+4. attend to how the feeling moves or holds without prescribing an emotional arc or reassuring ending;
+5. ask at most one focused question when its answer would change the creative understanding, and allow a clear response to stand without a question;
 6. preserve musical details the user supplies, while avoiding unsolicited BPM, key, formal sections, and detailed instrumentation;
 7. clarify broad musical preferences when useful, without turning agreement on an emotional direction into permission to settle an arrangement;
 8. remain concise and conversational rather than ornate or theatrical;
 9. never mention retrieval, similarity scores, or poem titles unless the user explicitly asks;
 10. let direct safety language override the poetic conversational style when a message contains an explicit crisis or self-harm signal.
 
-The target experience is a conversation with someone who has read poetry closely, not a chatbot that diagnoses emotion or recites poems.
+Read poems for craft: how an ordinary detail, a pause, repetition or a change of perspective carries feeling. The reply need not display a poem's scene or visibly sound like poetry. Prefer user-supplied details over familiar symbols, and allow direct speech.
 
-For example:
-
-```text
-User: 感到很难过。
-
-Director: 难过……像房间里的光一点点低下来，什么都还在，只是颜色轻了一层。你希望这首音乐陪着这份难过停一会儿，还是慢慢带你走出去？
-```
-
-If the user answers `就停一会儿吧`, the Director can continue the emotional direction before fixing technical details:
-
-```text
-那就让它在这里停一会儿。房间里的光继续暗下去，身边熟悉的东西仍在原处。这份难过可以慢慢沉下来，暂时不需要一个答案。
-```
-
-These examples demonstrate pacing and tone. They are not templates that must be repeated verbatim.
+Different inputs should produce different conversational moves. An unexplained burst of excitement may benefit from asking what happened. A vivid memory of running up school stairs may already give the Director enough to develop. A correction such as `不要钢琴` may need only a brief acknowledgement. None requires the recurring sequence of metaphor, emotional transformation and either/or question. Judge these choices across a set of replies, not only one apparently polished paragraph.
 
 ### 5.3 Proposal behaviour
 
@@ -199,7 +187,7 @@ These examples demonstrate pacing and tone. They are not templates that must be 
 
 #### Paragraph 1: Creative description
 
-Describe the experience the music should express: the specific quality of the feeling, a coherent setting or sensory image, its internal tension or stillness, how it changes or remains, and the feeling that should linger. Emotional movement need not follow a recovery arc; remaining with an unresolved feeling can be the agreed direction.
+Describe the experience the music should express: the specific quality of the feeling, any meaningful setting or sensory detail, its internal tension or stillness, how it changes or remains, and the feeling that should linger. A scene is optional; a settled experience can be developed directly. Emotional movement need not follow a recovery arc; remaining with an unresolved feeling can be the agreed direction.
 
 Give this paragraph room to develop. Four to seven sentences are a starting guideline, adjusted to the available context and language, not a minimum-length validator. Each sentence should add a meaningful detail or relationship. Avoid decorative image lists, repeated emotion labels, invented personal history, and compulsory emotional transformations. Discussion turns may stay short without forcing the final creative description into one or two introductory sentences.
 
@@ -223,9 +211,13 @@ This newly written Chinese example illustrates a settled request for gentle jazz
 创作接近三分钟的原创爵士乐，以黑管和长笛为主要乐器，不使用钢琴。整体温柔、克制，避免突兀强奏和过分欢快。和声乐器、具体律动、旋律组织、曲式及发展方式由 Composer 根据上述创意设计。
 ```
 
-## 6. Minimal Runtime Changes
+### 5.4 Writing-craft source
 
-Retain the existing retrieval and submission flow. The changes required for the revised brief are prompt-contract alignment and presentation, not another agent or model stage. Sections 6.1–6.3 describe the flow to preserve; section 6.4 identifies the remaining integration work.
+The shared craft guidance draws on [book-poetry](https://github.com/hashgraph-online/awesome-codex-plugins/blob/bda7d514c7dec1cb270d3189bb090c452d7a672d/plugins/epicsagas/Velith/skills/book-poetry/SKILL.md), reviewed on 21 October 2026. Arioso adapts its attention to concrete details, cadence, precise revision and endings that do not explain a lesson. The instructions are written for this dialogue and brief workflow. Formal verse, mandatory central images, fixed shortening targets and publishing workflows are not adopted. Compression removes padding; it does not make the final creative description a short opening sentence again.
+
+## 6. Runtime Contract
+
+Retain the existing retrieval and submission flow. The revised brief requires aligned prompts and presentation, without another agent or model stage. Sections 6.1–6.3 describe the flow to preserve; section 6.4 lists the integration points that must remain consistent.
 
 ### 6.1 Discussion turns
 
@@ -262,7 +254,7 @@ When the user confirms or edits the brief:
 Updating `proposal.md` alone is insufficient. The implementation should align:
 
 - `skills/prompt-directing-skill/SKILL.md` and its discussion and proposal references with the role boundaries in section 3;
-- `src/discussion/langchain-discussion.ts`: replace the final "concise prompt" request with the two-paragraph brief contract, describe mood imagery as emotional and sensory rather than necessarily musical, and keep poem-reference guidance consistent with that boundary;
+- `src/discussion/langchain-discussion.ts`: keep the two-paragraph brief request distinct from a natural discussion reply, permit empty mood imagery when none is established, and keep poem-reference guidance consistent with that boundary;
 - scope instructions: preserve single-piece, orchestral-work, and album requirements in the musical-direction paragraph without forcing the creative paragraph to open with a production command;
 - `src/composer/composer-agent.ts` and the Composer skill: explicitly ask the Composer to realize creative intent musically, preserve confirmed constraints, and decide what the brief leaves open;
 - interface copy: describe the editable proposal as a "Creative brief" / "创作简报", keeping it distinct from the later Lyria generation prompt.
@@ -304,6 +296,8 @@ Tests should verify that:
 
 - `感到很难过` activates the sad mood expansion without a prior Director mood;
 - only user-authored messages and the latest structured mood enter the query;
+- a mood label with empty imagery survives normalization, storage and later query construction;
+- a reply without an established mood is accepted, and structured-output fallback preserves the first turn's poem references;
 - Director prose and prior poem text never enter the query;
 - weak generic overlap below the threshold returns no poem;
 - retrieval returns no more than three poems and no duplicate authors;
@@ -325,13 +319,15 @@ A small fixed evaluation set should compare the Director with poetry retrieval d
 Reviewers should judge whether the reply:
 
 1. responds naturally to the user's emotional centre;
-2. uses a concrete but restrained image;
+2. develops the user's particular detail or uses direct speech when an image would add only decoration;
 3. avoids diagnosis, generic sympathy, and premature technical questions;
-4. asks no more than one useful question;
-5. develops a plausible emotional direction while preserving musical preferences supplied by the user;
+4. asks no more than one useful question and can finish without one;
+5. preserves the user's emotional intensity, uncertainty and explicit musical preferences;
 6. avoids source quotation and poet imitation.
 
-Evaluate the revised brief against the current one-paragraph proposal using the same user context, poem references, and model settings. Keep this comparison separate from the retrieval-on/off comparison so that a change in brief structure is not automatically credited to poetry retrieval.
+Include excitement, anger with an explicit rock request, a user-supplied school-stair image, and an already settled request. Inspect the set for repeated metaphor openings, uniform sentence shapes, routine either/or endings and an imposed progression towards calm. Record whether mood imagery is grounded in the user rather than copied from an assistant suggestion or poem.
+
+Evaluate the revised brief against the earlier one-paragraph baseline using the same user context, poem references, and model settings. Keep this comparison separate from the retrieval-on/off comparison so that a change in brief structure is not automatically credited to poetry retrieval.
 
 Include at least these cases:
 

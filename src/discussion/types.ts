@@ -19,6 +19,7 @@ export interface DiscussionAttachment {
 
 export interface DiscussionMood {
   label: string;
+  /** User-supplied or adopted imagery; empty when no image has been established. */
   imagery: string;
 }
 
