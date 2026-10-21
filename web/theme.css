@@ -84,6 +84,22 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* A slow wash of the feeling colours sits behind every page. It is fixed so
+   it never scrolls, and drawn on a pseudo-element so each page keeps its own
+   background rules (melody on, melody off) on top. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(1200px 820px at 12% -8%, rgba(85, 70, 224, 0.10), transparent 60%),
+    radial-gradient(980px 680px at 90% 2%, rgba(232, 117, 117, 0.07), transparent 58%),
+    radial-gradient(1100px 780px at 84% 102%, rgba(119, 157, 214, 0.09), transparent 60%),
+    radial-gradient(900px 640px at 4% 96%, rgba(131, 181, 154, 0.06), transparent 58%);
+}
+
 h1,
 h2,
 h3,

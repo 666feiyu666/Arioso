@@ -1421,6 +1421,7 @@ body.mm-home {
   stroke: #c6c0f0;
   stroke-dasharray: 1500;
   stroke-dashoffset: 1500;
+  transition: stroke 0.8s var(--ease);
   animation: mm-draw 1.1s var(--ease) forwards;
 }
 
@@ -1467,6 +1468,31 @@ body.mm-home {
 
 .mm-melody-point.is-playing .mm-melody-dot {
   transform: scale(1.35);
+}
+
+/* Only the note being played moves — it breathes like a string being held,
+   while the contour drifts a hair with it and warms under the note. The other
+   three notes stay still, so there is one clear source of sound. */
+.mm-melody.is-playing {
+  animation: mm-line-drift 4s ease-in-out infinite;
+}
+
+@keyframes mm-line-drift {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+.mm-melody.is-playing .mm-melody-path {
+  stroke: #b0a2e8;
+}
+
+.mm-melody-point.is-playing {
+  animation: mm-note-breathe 2.6s ease-in-out infinite;
+}
+
+@keyframes mm-note-breathe {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
 }
 
 .mm-melody-point.is-playing .mm-melody-ring {

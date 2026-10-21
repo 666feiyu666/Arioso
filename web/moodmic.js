@@ -58,7 +58,7 @@ const COPY = {
     untitled: "新对话",
     greeting: "把此刻的心情变成音乐。",
     greetingLead: "用你自己的话写下此刻的心情和想要的音乐。",
-    examplesLead: "先听听看：点彩色小圆点，或卡片上的「试听」。想写时，点卡片的文字直接起头。",
+    examplesLead: "先听听看：点彩色小圆点，或卡片上的「试听」。想写了，点卡片上的文字就能开始。",
     playMood: (name) => `试听${name}情绪的音乐`,
     stopMood: (name) => `暂停${name}情绪的音乐`,
     listen: "试听",
@@ -110,7 +110,7 @@ const COPY = {
     vocalInstrumental: "纯器乐",
     vocalVocals: "带人声",
     creatingTitle: "正在创作你的音乐。",
-    creatingLead: "在声音成形的时候，可以稍等一会儿。",
+    creatingLead: "声音成形要一点时间，稍等。",
     statusQueued: "排队中", statusComposing: "正在构思编曲", statusGenerating: "正在生成音频",
     statusAssembling: "正在拼接乐章", statusProcessing: "正在后期处理",
     statusCompleted: "已完成", statusFailed: "未完成",
@@ -137,7 +137,7 @@ const COPY = {
     loading: "正在准备…",
     sessionGone: "这个对话已经不在了。",
     albumContinueTitle: "把这支曲子变成一张专辑",
-    albumContinueLead: "这张专辑会从你刚刚保留的这首音乐出发：它的想法和音乐方案会成为第一份参考。",
+    albumContinueLead: "这张专辑从你刚保留的这首开始：它的想法和音乐方案是第一份参考。",
     albumSourceLabel: "源曲目",
     albumThemeLabel: "专辑主题",
     albumThemePlaceholder: "例如：把这些雨夜的质感延展成一组深夜专注的器乐。",
@@ -216,7 +216,7 @@ const COPY = {
     vocalInstrumental: "Instrumental",
     vocalVocals: "With vocals",
     creatingTitle: "Creating your music.",
-    creatingLead: "Stay for a moment while the sound takes shape.",
+    creatingLead: "Give it a moment while the sound takes shape.",
     statusQueued: "Queued", statusComposing: "Shaping the arrangement", statusGenerating: "Generating audio",
     statusAssembling: "Assembling movements", statusProcessing: "Post-processing",
     statusCompleted: "Completed", statusFailed: "Not finished",
@@ -517,7 +517,7 @@ function renderExamples() {
   }).join("");
   return `
     <div class="mm-examples">
-      <svg class="mm-melody" viewBox="0 0 1000 220" preserveAspectRatio="xMidYMid meet" focusable="false">
+      <svg class="mm-melody${state.playing ? " is-playing" : ""}" viewBox="0 0 1000 220" preserveAspectRatio="xMidYMid meet" focusable="false">
         <path class="mm-melody-path" aria-hidden="true"
           d="M0,110 C41.7,110 83.3,70 125,70 C208.3,70 291.7,150 375,150 C458.3,150 541.7,80 625,80 C708.3,80 791.7,150 875,150 C916.7,150 958.3,110 1000,110"
           fill="none" stroke-width="2.5" stroke-linecap="round" vector-effect="non-scaling-stroke" />${dots}
@@ -1152,6 +1152,8 @@ function updateMoodPlayback() {
 // Reflect the playing mood on the melody points and cards without re-rendering,
 // so the curve keeps its entrance instead of replaying it on every toggle.
 function pushMoodPlayingToDom(groupId) {
+  const melody = stage.querySelector(".mm-melody");
+  if (melody) melody.classList.toggle("is-playing", Boolean(groupId));
   for (const point of stage.querySelectorAll(".mm-melody-point")) {
     const on = point.dataset.point === groupId;
     point.classList.toggle("is-playing", on);
