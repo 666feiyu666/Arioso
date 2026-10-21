@@ -569,6 +569,34 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
   await journeyStore.initialize();
   const journeys = new JourneyRuntime({ tasks: store, journeys: journeyStore });
   const activeTaskIds = new Set<string>();
+  const RUNNING_TASK_STATUSES = new Set(["queued", "composing", "generating", "assembling", "processing"]);
+
+  /**
+   * Deletes the tasks a conversation produced, together with their audio,
+   * any journey that pointed at them, and mood-entry references. Running tasks
+   * block the whole deletion so nothing is removed half-way.
+   */
+  const deleteConversationTasks = async (taskIds: string[]): Promise<string[]> => {
+    const unique = [...new Set(taskIds)];
+    const running = unique
+      .map((id) => store.get(id))
+      .filter((task): task is MusicTask => Boolean(task
+        && (RUNNING_TASK_STATUSES.has(task.status) || activeTaskIds.has(task.id))));
+    if (running.length) {
+      throw new HttpError(409, "A task created from this conversation is still running.");
+    }
+    for (const id of unique) {
+      await store.delete(id);
+      await moodStore.unlinkTask(id);
+    }
+    const removed = new Set(unique);
+    for (const journey of journeyStore.list()) {
+      const linked = [journey.songTaskId, journey.albumTaskId]
+        .some((id) => Boolean(id && removed.has(id)));
+      if (linked) await journeyStore.remove(journey.id);
+    }
+    return unique;
+  };
   // Serialises confirmation-chat revisions on their own: pausing at "review"
   // leaves the planning run nominally active for a moment, so it must not gate
   // whether the user can confirm or revise.
@@ -772,6 +800,25 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
         return;
       }
 
+      if (request.method === "DELETE" && discussionMatch?.[1]) {
+        const sessionId = discussionMatch[1];
+        const session = discussionStore.get(sessionId);
+        if (!session) throw new HttpError(404, "Discussion session not found.");
+        if (activeDiscussionSubmissions.has(sessionId)) {
+          throw new HttpError(409, "This discussion is still being submitted.");
+        }
+        const taskIds = [...new Set([
+          ...(session.taskIds ?? []),
+          ...store.list()
+            .filter((task) => task.sourceDiscussionId === sessionId)
+            .map((task) => task.id),
+        ])];
+        const deletedTaskIds = await deleteConversationTasks(taskIds);
+        await discussionStore.delete(sessionId);
+        sendJson(response, 200, { deleted: { sessionId, taskIds: deletedTaskIds } });
+        return;
+      }
+
       if (request.method === "POST" && discussionAttachmentsMatch?.[1]) {
         const sessionId = discussionAttachmentsMatch[1];
         if (!discussionStore.get(sessionId)) throw new HttpError(404, "Discussion session not found.");
@@ -912,6 +959,29 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
         const chat = moodChatStore.get(moodChatMatch[1]);
         if (!chat) throw new HttpError(404, "Conversation not found.");
         sendJson(response, 200, await moodChatView(chat));
+        return;
+      }
+
+      if (request.method === "DELETE" && moodChatMatch?.[1]) {
+        const chatId = moodChatMatch[1];
+        const chat = moodChatStore.get(chatId);
+        if (!chat) throw new HttpError(404, "Conversation not found.");
+        if (activeMoodSubmissions.has(chatId)) {
+          throw new HttpError(409, "This conversation is still being submitted.");
+        }
+        const journey = journeyStore.findByChatId(chatId);
+        const taskIds = [...new Set([
+          ...chat.taskIds,
+          ...store.list()
+            .filter((task) => task.moodChatId === chatId || task.sourceDiscussionId === chatId)
+            .map((task) => task.id),
+          ...(journey?.songTaskId ? [journey.songTaskId] : []),
+          ...(journey?.albumTaskId ? [journey.albumTaskId] : []),
+        ])];
+        const deletedTaskIds = await deleteConversationTasks(taskIds);
+        await journeyStore.removeForChat(chatId);
+        await moodChatStore.delete(chatId);
+        sendJson(response, 200, { deleted: { conversationId: chatId, taskIds: deletedTaskIds } });
         return;
       }
 

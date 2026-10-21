@@ -52,6 +52,8 @@ const COPY = {
     collapseSide: "收起对话记录",
     expandSide: "展开对话记录",
     newChat: "新对话",
+    deleteChat: "删除对话",
+    deleteChatConfirm: (title) => `删除「${title}」？由它生成的任务与音频也会一并删除，且无法恢复。`,
     historyEmpty: "还没有对话。",
     untitled: "新对话",
     greeting: "把此刻的心情变成音乐。",
@@ -150,6 +152,8 @@ const COPY = {
     collapseSide: "Collapse conversations",
     expandSide: "Expand conversations",
     newChat: "New chat",
+    deleteChat: "Delete conversation",
+    deleteChatConfirm: (title) => `Delete “${title}”? Tasks and audio created from it are deleted too. This cannot be undone.`,
     historyEmpty: "No conversations yet.",
     untitled: "New chat",
     greeting: "Turn how you feel into music.",
@@ -441,6 +445,8 @@ function renderSidebar() {
           <span class="mm-side-title">${esc(sessionTitle(discussion))}</span>
           ${meta ? `<span class="mm-side-meta">${esc(meta)}</span>` : ""}
         </button>
+        <button class="mm-side-delete" type="button" data-delete-chat="${esc(discussion.id)}"
+          aria-label="${esc(t("deleteChat"))}" title="${esc(t("deleteChat"))}">×</button>
       </li>`;
     }).join("")}</ul>` : `<p class="e-hint mm-side-empty">${esc(t("historyEmpty"))}</p>`}
   `;
@@ -448,6 +454,12 @@ function renderSidebar() {
   side.querySelector("#mm-new").addEventListener("click", newChat);
   for (const button of side.querySelectorAll("[data-open]")) {
     button.addEventListener("click", () => openDiscussion(button.dataset.open));
+  }
+  for (const button of side.querySelectorAll("[data-delete-chat]")) {
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      void deleteChat(button.dataset.deleteChat);
+    });
   }
   side.scrollTop = previousScrollTop;
 }
@@ -1510,6 +1522,23 @@ function newChat() {
   resetForNewSession();
   history.replaceState(null, "", "/");
   render();
+}
+
+async function deleteChat(id) {
+  const discussion = state.discussions.find((item) => item.id === id)
+    ?? (state.session?.id === id ? state.session : null);
+  const title = discussion ? sessionTitle(discussion) : "";
+  if (!window.confirm(t("deleteChatConfirm", title))) return;
+  try {
+    await api(`/api/mood-chats/${encodeURIComponent(id)}`, { method: "DELETE" });
+    if (state.currentId === id) newChat();
+    await loadDiscussions();
+    render();
+  } catch (error) {
+    state.message = error instanceof Error ? error.message : String(error);
+    state.messageError = true;
+    render();
+  }
 }
 
 async function openDiscussion(id) {

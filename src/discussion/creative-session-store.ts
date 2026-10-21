@@ -1,4 +1,4 @@
-import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { writeTextFileAtomic } from "../utils/files.js";
@@ -65,6 +65,13 @@ export class CreativeSessionStore {
 
   list(): CreativeSession[] {
     return [...this.#sessions.values()].sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
+  }
+
+  /** Removes the discussion record together with its uploaded images. */
+  async delete(id: string): Promise<boolean> {
+    if (!this.#sessions.delete(id)) return false;
+    await rm(this.sessionDirectory(id), { recursive: true, force: true });
+    return true;
   }
 
   async create(taskOptions: DiscussionTaskOptions): Promise<CreativeSession> {

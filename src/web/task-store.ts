@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { copyFile, mkdir, readFile, readdir, rename, stat, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readFile, readdir, rename, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { measureAudioDuration, stitchAudioFiles } from "../audio/stitch.js";
@@ -797,6 +797,28 @@ export class TaskStore {
     await mkdir(directory, { recursive: true });
     await writeFile(path.join(directory, audioFile), audio);
     return audioFile;
+  }
+
+  /**
+   * Removes a finished task together with its directory: audio, movements,
+   * album tracks, and exported files. Running tasks must not be deleted.
+   */
+  async delete(id: string): Promise<MusicTask | undefined> {
+    const task = this.#tasks.get(id);
+    if (!task) return undefined;
+    if (ACTIVE_TASK_STATUSES.includes(task.status)) {
+      throw new Error("A task that is still running cannot be deleted.");
+    }
+    if (task.albumProduction && ["pending", "running"].includes(task.albumProduction.status)) {
+      throw new Error("A task that is still running cannot be deleted.");
+    }
+    const directory = this.#taskDirectories.get(id) ?? this.taskDirectory(task);
+    this.#tasks.delete(id);
+    this.#taskDirectories.delete(id);
+    // Cached exports may point at the directory that is about to disappear.
+    this.#albumExports.clear();
+    await rm(directory, { recursive: true, force: true });
+    return task;
   }
 
   async update(id: string, changes: Partial<MusicTask>): Promise<MusicTask> {

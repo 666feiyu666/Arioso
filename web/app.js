@@ -82,6 +82,9 @@ const translations = {
     noMusicSelected: "未选择音乐", promptPlaceholder: "让 Arioso 听听你的想法",
     promptLabel: "讨论想生成的音乐", startGeneration: "开始生成", vocalRule: "人声规则",
     creativeDiscussion: "创作讨论", promptDirector: "PROMPT DIRECTOR", sendMessage: "发送消息",
+    deleteConversation: "删除对话",
+    deleteConversationConfirm: "删除「{title}」？由它生成的任务与音频也会一并删除，且无法恢复。",
+    deleteConversationFailed: "删除对话失败，请重试。",
     attachImage: "添加参考图片", generatePrompt: "生成提示词", generatedPrompt: "作曲提示词",
     directionReady: "这个方向合适吗？", directionReadyHint: "你可以继续补充，或把当前共识整理成最终提示词。",
     useDirection: "使用当前方向", proposalEditHint: "可编辑；以下内容将直接交给 Composer Agent",
@@ -229,6 +232,9 @@ const translations = {
     noMusicSelected: "No music selected", promptPlaceholder: "Let Arioso hear what's on your mind",
     promptLabel: "Discuss the music to create", startGeneration: "Start generation", vocalRule: "Vocal rule",
     creativeDiscussion: "Creative discussion", promptDirector: "PROMPT DIRECTOR", sendMessage: "Send message",
+    deleteConversation: "Delete conversation",
+    deleteConversationConfirm: "Delete “{title}”? Tasks and audio created from it are deleted too. This cannot be undone.",
+    deleteConversationFailed: "Unable to delete the conversation. Try again.",
     attachImage: "Attach reference image", generatePrompt: "Generate prompt", generatedPrompt: "Composition prompt",
     directionReady: "Does this direction feel right?", directionReadyHint: "Keep discussing, or turn the current agreement into the final prompt.",
     useDirection: "Use this direction", proposalEditHint: "Editable; this exact text will be sent to the Composer Agent",
@@ -1312,6 +1318,8 @@ function renderTaskList() {
             </span>
           </button>
           ${task?.audioFile ? `<button class="task-play" type="button" data-play-task="${escapeHtml(task.id)}"></button>` : ""}
+          <button class="task-delete" type="button" data-delete-session="${escapeHtml(session.id)}"
+            aria-label="${escapeHtml(t("deleteConversation"))}" title="${escapeHtml(t("deleteConversation"))}">×</button>
         </div>`;
     }).join("");
     const taskItems = tasks.map((task) => {
@@ -1372,6 +1380,9 @@ function renderTaskList() {
   });
   elements.taskList.querySelectorAll("[data-play-task]").forEach((button) => {
     button.addEventListener("click", () => playTask(button.dataset.playTask));
+  });
+  elements.taskList.querySelectorAll("[data-delete-session]").forEach((button) => {
+    button.addEventListener("click", () => void deleteDiscussionSession(button.dataset.deleteSession));
   });
   elements.taskList.scrollTop = previousScrollTop;
   syncPlaybackControls();
@@ -1677,6 +1688,33 @@ function selectTask(id) {
   window.scrollTo({ top: 0, behavior: "smooth" });
   elements.taskDetail.setAttribute("tabindex", "-1");
   elements.taskDetail.focus({ preventScroll: true });
+}
+
+async function deleteDiscussionSession(id) {
+  const session = state.discussionSessions.find((item) => item.id === id);
+  if (!session) return;
+  const task = latestSessionTask(session);
+  const title = task?.title
+    || session.messages?.find((message) => message.role === "user")?.content
+    || session.proposal
+    || t("creativeDiscussion");
+  if (!window.confirm(t("deleteConversationConfirm", { title }))) return;
+  try {
+    const response = await fetch(`/api/discussions/${encodeURIComponent(id)}`, { method: "DELETE" });
+    const body = await response.json().catch(() => null);
+    if (!response.ok) throw new Error(body?.error || t("deleteConversationFailed"));
+    const deletedTaskIds = new Set(body?.deleted?.taskIds ?? []);
+    state.discussionSessions = state.discussionSessions.filter((item) => item.id !== id);
+    state.tasks = state.tasks.filter((candidate) => !deletedTaskIds.has(candidate.id));
+    if (state.discussionSession?.id === id) {
+      state.discussionSession = null;
+      state.selectedTaskId = null;
+      showEntry();
+    }
+    renderTaskList();
+  } catch (error) {
+    elements.message.textContent = error instanceof Error ? error.message : t("deleteConversationFailed");
+  }
 }
 
 async function openDiscussionSession(id) {

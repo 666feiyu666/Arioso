@@ -143,6 +143,41 @@
   transition: background 0.16s ease, border-color 0.16s ease;
 }
 
+.mm-side-list li {
+  position: relative;
+}
+
+.mm-side-delete {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  /* Kept faintly visible so the control is discoverable without hovering. */
+  opacity: 0.45;
+  transition: opacity 0.14s ease, color 0.14s ease, background 0.14s ease;
+}
+
+.mm-side-list li:hover .mm-side-delete,
+.mm-side-delete:focus-visible {
+  opacity: 1;
+}
+
+.mm-side-delete:hover {
+  color: #b1412a;
+  background: var(--surface-2);
+}
+
 .mm-side-item:hover {
   background: var(--surface-2);
 }

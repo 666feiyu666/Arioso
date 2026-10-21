@@ -1,4 +1,4 @@
-import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import {
@@ -182,6 +182,13 @@ export class MoodChatStore {
 
   list(): MoodChat[] {
     return [...this.#chats.values()].sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
+  }
+
+  /** Removes the conversation record together with its uploaded images. */
+  async delete(id: string): Promise<boolean> {
+    if (!this.#chats.delete(id)) return false;
+    await rm(this.chatDirectory(id), { recursive: true, force: true });
+    return true;
   }
 
   async create(musicReference: MusicReference = "auto"): Promise<MoodChat> {

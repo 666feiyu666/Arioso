@@ -192,7 +192,7 @@
 
 .task-list-item {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 4px;
 }
@@ -245,6 +245,33 @@
   color: var(--surface);
   border-color: var(--ink);
   background: var(--ink);
+}
+
+.task-delete {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  /* Kept faintly visible so the control is discoverable without hovering. */
+  opacity: 0.45;
+  transition: 150ms ease;
+}
+
+.task-list-item:hover .task-delete,
+.task-delete:focus-visible {
+  opacity: 1;
+}
+
+.task-delete:hover {
+  color: #b1412a;
+  border-color: var(--line-strong);
+  background: var(--surface);
 }
 
 .task-meta {

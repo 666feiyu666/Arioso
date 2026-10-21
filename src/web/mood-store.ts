@@ -181,6 +181,21 @@ export class MoodEntryStore {
     return next;
   }
 
+  /** Drops a deleted task from every check-in that referenced it. */
+  async unlinkTask(taskId: string): Promise<void> {
+    let changed = false;
+    for (const [id, entry] of this.#entries) {
+      if (!entry.taskIds.includes(taskId)) continue;
+      this.#entries.set(id, {
+        ...entry,
+        taskIds: entry.taskIds.filter((candidate) => candidate !== taskId),
+        updatedAt: new Date().toISOString(),
+      });
+      changed = true;
+    }
+    if (changed) await this.save();
+  }
+
   save(): Promise<void> {
     const serialized = `${JSON.stringify(this.list(), null, 2)}\n`;
     return writeTextFileAtomic(this.#filePath, serialized);

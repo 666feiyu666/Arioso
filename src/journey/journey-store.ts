@@ -1,4 +1,4 @@
-import { mkdir, readFile, readdir } from "node:fs/promises";
+import { mkdir, readFile, readdir, rm } from "node:fs/promises";
 import path from "node:path";
 
 import { writeTextFileAtomic } from "../utils/files.js";
@@ -73,6 +73,22 @@ export class JourneyStore {
     this.#journeys.set(journey.id, journey);
     await this.save(journey);
     return journey;
+  }
+
+  async remove(id: string): Promise<boolean> {
+    if (!this.#journeys.delete(id)) return false;
+    await rm(path.join(this.#directory, `${id}.json`), { force: true });
+    return true;
+  }
+
+  /** Deletes the journey that belongs to a MoodMic conversation, if one exists. */
+  async removeForChat(moodChatId: string): Promise<string[]> {
+    const removed: string[] = [];
+    for (const journey of this.list()) {
+      if (journey.moodChatId !== moodChatId) continue;
+      if (await this.remove(journey.id)) removed.push(journey.id);
+    }
+    return removed;
   }
 
   async update(id: string, changes: Partial<MusicJourney>): Promise<MusicJourney> {
