@@ -61,8 +61,8 @@ export interface DiscussionAgentReply {
 }
 
 /**
- * One retrieved modern poem offered to the Director at proposal time. It is
- * reference material, never part of the user's request.
+ * One retrieved modern poem offered to the Director as optional reference data,
+ * during discussion and at proposal time. It is never part of the user's request.
  */
 export interface PoemReference {
   id: string;
@@ -84,7 +84,11 @@ export interface DiscussionAgentOptions {
 }
 
 export interface DiscussionAgent {
-  respond(messages: DiscussionAgentMessage[], options: DiscussionAgentOptions): Promise<DiscussionAgentReply>;
+  respond(
+    messages: DiscussionAgentMessage[],
+    options: DiscussionAgentOptions,
+    poems?: PoemReference[],
+  ): Promise<DiscussionAgentReply>;
   propose(
     messages: DiscussionAgentMessage[],
     options: DiscussionAgentOptions,

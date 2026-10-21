@@ -52,6 +52,8 @@ export interface PoemQueryInput {
 export interface PoemRetriever {
   readonly corpusVersion: string;
   retrieve(query: string, limit?: number): RetrievedPoemReference[];
+  /** Re-read the complete poems behind stored reference IDs, in that order. */
+  findByIds(ids: string[]): RetrievedPoemReference[];
 }
 
 const MAX_REFERENCES = 3;
@@ -59,6 +61,13 @@ const MAX_MATCHED_TERMS = 8;
 const CUE_WEIGHT = 3;
 const TITLE_WEIGHT = 2;
 const TEXT_WEIGHT = 1;
+/**
+ * Calibrated against the fixed Director evaluation set in
+ * `test/poem-retriever.test.ts`: ordinary emotional turns score well above this
+ * while a generic phrase such as `感到` or `帮我做一首歌` stays below it. A weak
+ * overlap on filler vocabulary must not be enough to supply a poem.
+ */
+export const MIN_POEM_RELEVANCE = 0.045;
 
 const CJK_RUN = /[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]+/gu;
 const LATIN_WORD = /[a-z0-9]+(?:'[a-z0-9]+)?/gu;
@@ -193,10 +202,20 @@ export function buildPoemQuery(input: PoemQueryInput, lexicon: MoodLexicon): str
   return [base, ...moodExpansions(base, lexicon)].join(" ");
 }
 
+/**
+ * Deterministic identity of a retrieval query. A stored trace may be reused only
+ * while both this hash and the corpus version are unchanged.
+ */
+export function hashPoemQuery(query: string): string {
+  return sha256(query.trim());
+}
+
 export interface CreatePoemRetrieverOptions {
   /** Corpus checksum or manifest version recorded with each retrieval trace. */
   corpusVersion?: string | undefined;
   lexicon: MoodLexicon;
+  /** Minimum cosine similarity for a reference to count; defaults to the calibrated floor. */
+  minRelevance?: number | undefined;
 }
 
 export function createPoemRetriever(
@@ -235,10 +254,12 @@ export function createPoemRetriever(
     const weights = weightsFor(documentTokens[index] ?? new Map(), inverseDocumentFrequency);
     return { record, weights, magnitude: magnitude(weights) };
   });
+  const documentsById = new Map(documents.map((document) => [document.record.id, document]));
 
   const corpusVersion = options.corpusVersion ?? sha256(
     records.map((record) => `${record.id}:${record.source.commit}`).join("\n"),
   );
+  const minRelevance = options.minRelevance ?? MIN_POEM_RELEVANCE;
 
   return {
     corpusVersion,
@@ -269,7 +290,7 @@ export function createPoemRetriever(
             matchedTerms: matchedTerms.map((entry) => entry.term).slice(0, MAX_MATCHED_TERMS),
           };
         })
-        .filter((entry) => entry.score > 0)
+        .filter((entry) => entry.score >= minRelevance)
         // Ties fall back to stable record IDs, never to enumeration order.
         .sort((left, right) =>
           right.score - left.score || left.record.id.localeCompare(right.record.id));
@@ -288,6 +309,23 @@ export function createPoemRetriever(
           text: entry.record.text,
           score: Number(entry.score.toFixed(6)),
           matchedTerms: entry.matchedTerms,
+        });
+      }
+      return references;
+    },
+
+    findByIds(ids: string[]): RetrievedPoemReference[] {
+      const references: RetrievedPoemReference[] = [];
+      for (const id of ids) {
+        const document = documentsById.get(id);
+        if (!document) continue;
+        references.push({
+          id: document.record.id,
+          title: document.record.title,
+          author: document.record.author,
+          text: document.record.text,
+          score: 0,
+          matchedTerms: [],
         });
       }
       return references;

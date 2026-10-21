@@ -49,4 +49,36 @@ describe("prompt directing skill", () => {
     expect(discussion).toContain("Keep duration in mind");
     expect(proposal).toContain("State the intended duration explicitly");
   });
+
+  it("treats retrieved poems as optional reference data in both phases", async () => {
+    const discussion = await loadPromptDirectingSkill("discussion");
+    const proposal = await loadPromptDirectingSkill("proposal");
+
+    for (const skill of [discussion, proposal]) {
+      expect(skill).toContain("Arioso Prompt Director");
+      expect(skill).toContain("<poem-reference>");
+      expect(skill).toContain("optional reference data");
+      expect(skill).toContain("The user's own words stay authoritative");
+    }
+  });
+
+  it("keeps the discussion concise, image-led and free of technical detail", async () => {
+    const discussion = await loadPromptDirectingSkill("discussion");
+
+    expect(discussion).toContain("at most one clear sensory image");
+    expect(discussion).toContain("at most one gentle question");
+    expect(discussion).toContain("Begin with the user's emotional centre");
+    expect(discussion).toContain("do not yet fix instrumentation");
+    expect(discussion).toContain("never mention retrieval");
+    expect(discussion).toContain("direct safety language overrides");
+  });
+
+  it("asks the proposal for a musical brief rather than a Lyria prompt", async () => {
+    const proposal = await loadPromptDirectingSkill("proposal");
+
+    expect(proposal).toContain("not a final Lyria prompt");
+    expect(proposal).toContain("important exclusions");
+    expect(proposal).toContain("never name a poet");
+    expect(proposal).toContain("Drop a poem whose implications conflict with the user");
+  });
 });

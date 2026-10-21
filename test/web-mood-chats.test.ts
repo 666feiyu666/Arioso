@@ -47,6 +47,7 @@ const stubPoem: PoemReference = {
 const stubRetriever: PoemRetriever = {
   corpusVersion: "checksum-under-test",
   retrieve: () => [stubPoem],
+  findByIds: (ids) => (ids.includes(stubPoem.id) ? [stubPoem] : []),
 };
 
 async function addUserMessage(baseUrl: string, chatId: string, content: string) {
@@ -178,10 +179,13 @@ describe("web mood chats API", () => {
     const brokenRetriever: PoemRetriever = {
       corpusVersion: "",
       retrieve: () => { throw new Error("corpus unreadable"); },
+      findByIds: () => { throw new Error("corpus unreadable"); },
     };
     await withWebServer(async ({ baseUrl }) => {
       const { chat } = await createChat(baseUrl);
-      await addUserMessage(baseUrl, chat.id, "Something for the evening");
+      const discussed = await addUserMessage(baseUrl, chat.id, "Something for the evening");
+      // Missing reference data never blocks the Director's reply.
+      expect(discussed.messages.at(-1).content).toBe("A quiet piano direction.");
       const response = await propose(baseUrl, chat.id);
       expect(response.status).toBe(200);
       const body = await response.json() as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -199,8 +203,11 @@ describe("web mood chats API", () => {
       expect(first.poem_retrieval.references).toHaveLength(1);
 
       const afterMessage = await addUserMessage(baseUrl, chat.id, "Make it warmer");
-      expect(afterMessage.poem_retrieval).toBeUndefined();
+      // A new user message drops the approved prompt and re-runs retrieval for
+      // the changed context, so the earlier trace is never reused.
       expect(afterMessage.proposal).toBeUndefined();
+      expect(afterMessage.poem_retrieval.query).toContain("warmer");
+      expect(afterMessage.poem_retrieval.query_hash).not.toBe(first.poem_retrieval.query_hash);
 
       const second = await propose(baseUrl, chat.id).then((r) => r.json()) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
       expect(second.poem_retrieval.query).toContain("warmer");
@@ -208,9 +215,79 @@ describe("web mood chats API", () => {
     }, { discussionAgent: stubAgent, poemRetriever: stubRetriever, environment: { OPENAI_API_KEY: "test-key" } });
   });
 
+  it("hands poems to the Director while discussing as well", async () => {
+    const captured: PoemReference[][] = [];
+    const agent: DiscussionAgent = {
+      respond: async (_messages, _options, poems = []) => {
+        captured.push(poems);
+        return stubAgent.respond();
+      },
+      propose: stubAgent.propose,
+    };
+    await withWebServer(async ({ baseUrl }) => {
+      const { chat } = await createChat(baseUrl);
+      const replied = await addUserMessage(baseUrl, chat.id, "Something for a rainy walk home");
+      // Only the user's own words reach the query: no Director prose, no poems.
+      expect(replied.poem_retrieval.query).toContain("rainy walk home");
+      expect(replied.poem_retrieval.query).not.toContain("quiet piano direction");
+      expect(replied.poem_retrieval.query).not.toContain(stubPoem.text);
+      expect(captured).toHaveLength(1);
+      expect(captured[0]).toHaveLength(1);
+      expect(captured[0]?.[0]?.text).toBe(stubPoem.text);
+      expect(replied.poem_retrieval.references).toHaveLength(1);
+      expect(typeof replied.poem_retrieval.query_hash).toBe("string");
+      expect(JSON.stringify(replied.poem_retrieval)).not.toContain(stubPoem.text);
+    }, { discussionAgent: agent, poemRetriever: stubRetriever, environment: { OPENAI_API_KEY: "test-key" } });
+  });
+
+  it("reuses the stored references while the effective context is unchanged", async () => {
+    let retrievals = 0;
+    const counting: PoemRetriever = {
+      corpusVersion: "checksum-under-test",
+      retrieve: () => { retrievals += 1; return [stubPoem]; },
+      findByIds: (ids) => (ids.includes(stubPoem.id) ? [stubPoem] : []),
+    };
+    await withWebServer(async ({ baseUrl }) => {
+      const { chat } = await createChat(baseUrl);
+      await addUserMessage(baseUrl, chat.id, "A rainy street");
+      expect(retrievals).toBe(1);
+
+      // The Director's mood joins the proposal query, so this retrieves again.
+      const first = await propose(baseUrl, chat.id).then((r) => r.json()) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+      expect(retrievals).toBe(2);
+
+      const second = await propose(baseUrl, chat.id).then((r) => r.json()) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+      expect(retrievals).toBe(2);
+      expect(second.poem_retrieval.query_hash).toBe(first.poem_retrieval.query_hash);
+      expect(second.poem_retrieval.references).toEqual(first.poem_retrieval.references);
+    }, { discussionAgent: stubAgent, poemRetriever: counting, environment: { OPENAI_API_KEY: "test-key" } });
+  });
+
+  it("submits the approved brief without forwarding poem text to the task", async () => {
+    await withWebServer(async ({ baseUrl }) => {
+      const { chat } = await createChat(baseUrl);
+      await addUserMessage(baseUrl, chat.id, "A rainy street");
+      await propose(baseUrl, chat.id);
+      const response = await fetch(`${baseUrl}/api/mood-chats/${chat.id}/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: "A quiet piano piece.", mode: "compose" }),
+      });
+      expect(response.status).toBe(202);
+      const body = await response.json() as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+      expect(body.task.description).toBe("A quiet piano piece.");
+      // The approved brief keeps the trace it was produced with.
+      expect(body.chat.poem_retrieval.references).toHaveLength(1);
+      expect(JSON.stringify(body.task)).not.toContain(stubPoem.text);
+      await vi.waitFor(async () => {
+        const task = await fetch(`${baseUrl}/api/tasks/${body.task.id}`).then((r) => r.json()) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+        expect(["completed", "failed"]).toContain(task.status);
+      });
+    }, { discussionAgent: stubAgent, poemRetriever: stubRetriever, environment: { OPENAI_API_KEY: "test-key" } });
+  });
+
   it.each([
-    ["jazz", "02-music", "music", "jazz"],
-    ["auto", "02-music", "music", undefined],
+    ["jazz", "02-music", "music", "jazz"],    ["auto", "02-music", "music", undefined],
     ["none", "01-general", "none", undefined],
   ])("maps the %s music reference onto the created task", async (reference, workflowType, corpusMode, musicType) => {
     await withWebServer(async ({ baseUrl }) => {

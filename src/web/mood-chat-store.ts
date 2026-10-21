@@ -75,6 +75,8 @@ export interface PoemRetrievalTraceReference {
  */
 export interface PoemRetrievalTrace {
   query: string;
+  /** Identity of `query`; a trace with a different hash is never reused. */
+  query_hash?: string;
   corpus_version: string;
   references: PoemRetrievalTraceReference[];
   retrieved_at: string;
@@ -108,12 +110,14 @@ export function parsePoemRetrievalTrace(value: unknown): PoemRetrievalTrace | un
   if (value.unavailable_reason !== undefined && typeof value.unavailable_reason !== "string") {
     return undefined;
   }
+  if (value.query_hash !== undefined && typeof value.query_hash !== "string") return undefined;
   const trace: PoemRetrievalTrace = {
     query: value.query,
     corpus_version: value.corpus_version,
     references: value.references,
     retrieved_at: value.retrieved_at,
   };
+  if (typeof value.query_hash === "string") trace.query_hash = value.query_hash;
   if (typeof value.unavailable_reason === "string") {
     trace.unavailable_reason = value.unavailable_reason;
   }
@@ -265,6 +269,23 @@ export class MoodChatStore {
         ...(role === "assistant" && mood ? { mood } : {}),
       }],
       updatedAt: now,
+    };
+    this.#chats.set(id, updated);
+    await this.save(updated);
+    return updated;
+  }
+
+  /**
+   * Records the trace of the retrieval that informed the latest Director reply.
+   * The proposal keeps its own trace; either is reuse-only while query hash and
+   * corpus version still match.
+   */
+  async setPoemRetrieval(id: string, trace: PoemRetrievalTrace): Promise<MoodChat> {
+    const chat = this.require(id);
+    const updated: MoodChat = {
+      ...chat,
+      poem_retrieval: trace,
+      updatedAt: new Date().toISOString(),
     };
     this.#chats.set(id, updated);
     await this.save(updated);

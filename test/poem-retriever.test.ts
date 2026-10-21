@@ -8,8 +8,10 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   buildPoemQuery,
   createPoemRetriever,
+  hashPoemQuery,
   loadMoodLexicon,
   loadPoemRetriever,
+  MIN_POEM_RELEVANCE,
   moodExpansions,
   parsePoemRecords,
   tokenizePoemText,
@@ -173,6 +175,34 @@ describe("poem retrieval", () => {
     const [result] = retriever.retrieve("寂寥的雨巷");
     expect(result?.matchedTerms).toEqual(expect.arrayContaining(["寂寥", "雨巷"]));
   });
+
+  it("drops matches below the relevance floor instead of padding the list", () => {
+    const strict = createPoemRetriever(corpus, { lexicon: LEXICON, minRelevance: 0.9 });
+    expect(strict.retrieve("寂寥的雨巷")).toEqual([]);
+    const relaxed = createPoemRetriever(corpus, { lexicon: LEXICON, minRelevance: 0 });
+    expect(relaxed.retrieve("寂寥的雨巷").length).toBeGreaterThan(0);
+    expect(MIN_POEM_RELEVANCE).toBeGreaterThan(0);
+  });
+
+  it("re-reads complete poems for stored reference ids, in order", () => {
+    const retriever = createPoemRetriever(corpus, { lexicon: LEXICON });
+    const records = retriever.findByIds(["modern-poem-c", "modern-poem-missing", "modern-poem-a"]);
+    expect(records.map((record) => record.id)).toEqual(["modern-poem-c", "modern-poem-a"]);
+    expect(records[1]?.text).toBe(corpus[0]?.text);
+  });
+});
+
+describe("poem query identity", () => {
+  it("hashes the trimmed query deterministically", () => {
+    expect(hashPoemQuery("  孤独的雨  ")).toBe(hashPoemQuery("孤独的雨"));
+    expect(hashPoemQuery("孤独的雨")).not.toBe(hashPoemQuery("孤独的 雨"));
+  });
+
+  it("changes as soon as the user context changes", () => {
+    const first = hashPoemQuery(buildPoemQuery({ userMessages: ["A rainy street"] }, LEXICON));
+    const second = hashPoemQuery(buildPoemQuery({ userMessages: ["A rainy street", "Warmer"] }, LEXICON));
+    expect(first).not.toBe(second);
+  });
 });
 
 describe("poem corpus loading", () => {
@@ -267,6 +297,51 @@ describe("poem corpus loading", () => {
       expect(results.length).toBeGreaterThan(0);
       expect(results.length).toBeLessThanOrEqual(3);
       expect(new Set(results.map((result) => result.author)).size).toBe(results.length);
+    }
+  });
+});
+
+// A fixed evaluation set for the Director: ordinary emotional turns must reach a
+// poem, generic filler must not. The floor in `poem-retriever.ts` is calibrated
+// against these two lists, so changing either one requires re-calibration.
+describe("fixed Director evaluation set", () => {
+  const emotional = [
+    "感到很难过",
+    "今晚有点孤独",
+    "焦虑得睡不着",
+    "想要平静、干净的声音",
+    "今天很开心，想庆祝",
+    "有点愤怒，想爆发",
+    "又平静又难过",
+    "想起小时候的故乡",
+  ];
+  const generic = ["感到", "帮我做一首歌，越快越好", "今天", "我很"];
+
+  it("expands 难过 into the sad group without a prior Director mood", async () => {
+    const lexicon = await loadMoodLexicon();
+    const query = buildPoemQuery({ userMessages: ["感到很难过"] }, lexicon);
+    expect(moodExpansions("感到很难过", lexicon)).toEqual(
+      expect.arrayContaining(["难过", "伤心", "悲伤", "惆怅", "melancholy"]),
+    );
+    expect(query).toContain("难过");
+    expect(query).toContain("悲伤");
+  });
+
+  it("reaches a poem for every emotional case", async () => {
+    const lexicon = await loadMoodLexicon();
+    const { retriever } = await loadPoemRetriever();
+    for (const text of emotional) {
+      const results = retriever.retrieve(buildPoemQuery({ userMessages: [text] }, lexicon));
+      expect(results.length, text).toBeGreaterThan(0);
+      expect(results.length).toBeLessThanOrEqual(3);
+    }
+  });
+
+  it("returns nothing when the overlap is only filler vocabulary", async () => {
+    const lexicon = await loadMoodLexicon();
+    const { retriever } = await loadPoemRetriever();
+    for (const text of generic) {
+      expect(retriever.retrieve(buildPoemQuery({ userMessages: [text] }, lexicon)), text).toEqual([]);
     }
   });
 });

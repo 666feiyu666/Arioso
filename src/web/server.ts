@@ -43,7 +43,7 @@ import { TaskStore, parseTaskInput, type AlbumAdmission, type AlbumAudioExport, 
 import { MoodEntryStore, isCalendarDate, isMoodGroup, type MoodEntryInput } from "./mood-store.js";
 import { LangChainMoodClassifier, type MoodClassifier } from "./mood-classifier.js";
 import { MoodChatStore, isMusicReference, type MoodChat } from "./mood-chat-store.js";
-import { poemReferencesForProposal } from "./poem-proposal.js";
+import { poemReferencesForChat } from "./poem-references.js";
 import { HttpError, readBinaryBody, readJsonBody, sendAudio, sendFile, sendJson, serveAsset, serveStatic } from "./http.js";
 import { isRecord } from "../utils/validation.js";
 import { runBackgroundMusicProducer } from "../producer/background-music-producer.js";
@@ -1023,15 +1023,24 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
           (value.attachmentIds as string[] | undefined) ?? [],
         );
         const config = loadConfig(false, await settings.runtimeEnvironment());
+        // Retrieval runs before the reply so the discussion itself can draw on
+        // the reference material it selects for this turn.
+        const poetry = await poemReferencesForChat(
+          moodChatStore.get(chatId) ?? chat,
+          poemRetriever
+            ? { loadRetriever: async () => poemRetriever }
+            : {},
+        );
         const reply = await discussionAgent.respond(await moodChatStore.agentMessages(chatId), {
           apiKey: config.openAiApiKey,
           model: config.openAiModel,
           language: await settings.language(),
           compositionMode: "single",
           workflowType: chat.musicReference === "none" ? "01-general" : "02-music",
-        });
+        }, poetry.references);
+        await moodChatStore.addMessage(chatId, "assistant", reply.content, [], reply.mood);
         sendJson(response, 200, await moodChatView(
-          await moodChatStore.addMessage(chatId, "assistant", reply.content, [], reply.mood),
+          await moodChatStore.setPoemRetrieval(chatId, poetry.trace),
         ));
         return;
       }
@@ -1041,9 +1050,10 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
         const chat = moodChatStore.get(chatId);
         if (!chat) throw new HttpError(404, "Conversation not found.");
         const config = loadConfig(false, await settings.runtimeEnvironment());
-        // Poetry retrieval runs only here, from the most complete expression of
-        // intent, and stays advisory even when the corpus is unavailable.
-        const poetry = await poemReferencesForProposal(
+        // The proposal reuses the discussion's references when the effective
+        // context is unchanged, and retrieves again when it is not. Retrieval
+        // stays advisory even when the corpus is unavailable.
+        const poetry = await poemReferencesForChat(
           chat,
           poemRetriever
             ? { loadRetriever: async () => poemRetriever }
@@ -1084,7 +1094,8 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
         const usesMusicCorpus = musicReference !== "none";
         activeMoodSubmissions.add(chatId);
         try {
-          await moodChatStore.setProposal(chatId, prompt);
+          // Submitting an approved brief keeps the trace it was retrieved with.
+          await moodChatStore.setProposal(chatId, prompt, chat.poem_retrieval);
           const input = parseTaskInput({
             description: prompt,
             compositionMode: "single",
