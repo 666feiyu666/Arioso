@@ -43,6 +43,7 @@ import { TaskStore, parseTaskInput, type AlbumAdmission, type AlbumAudioExport, 
 import { MoodEntryStore, isCalendarDate, isMoodGroup, type MoodEntryInput } from "./mood-store.js";
 import { LangChainMoodClassifier, type MoodClassifier } from "./mood-classifier.js";
 import { MoodChatStore, isMusicReference, type MoodChat } from "./mood-chat-store.js";
+import { musicReferencesForTask } from "./music-references.js";
 import { poemReferencesForChat } from "./poem-references.js";
 import { HttpError, readBinaryBody, readJsonBody, sendAudio, sendFile, sendJson, serveAsset, serveStatic } from "./http.js";
 import { isRecord } from "../utils/validation.js";
@@ -617,11 +618,17 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
       tasks,
     };
   };
+  // A stored trace keeps IDs only; the interface needs titles, so resolve them
+  // against the same local corpus that produced them.
+  const taskWithMusicReferences = async (task: MusicTask) => {
+    const musicReferences = await musicReferencesForTask(task, loadMusicRetriever);
+    return musicReferences ? { ...task, musicReferences } : task;
+  };
   const moodChatView = async (chat: MoodChat) => {
-    const tasks = chat.taskIds.flatMap((id) => {
+    const tasks = await Promise.all(chat.taskIds.flatMap((id) => {
       const task = store.get(id);
       return task ? [task] : [];
-    });
+    }).map(taskWithMusicReferences));
     const latestTask = tasks.at(-1);
     return {
       ...chat,
@@ -1804,7 +1811,7 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
           sendJson(response, 404, { error: "Task not found." });
           return;
         }
-        sendJson(response, 200, task);
+        sendJson(response, 200, await taskWithMusicReferences(task));
         return;
       }
 

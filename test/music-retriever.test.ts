@@ -155,6 +155,20 @@ describe("music corpus loading", () => {
     return root;
   }
 
+  it("resolves recorded reference IDs back into readable summaries", () => {
+    const local = createMusicRetriever({
+      jazz: {
+        styles: [record("modal", "Modal jazz", "Spacious modal harmony.")],
+        standards: [record("so-what", "So What", "A slow modal tune.")],
+      },
+    });
+    expect(local.findByIds(["so-what", "modal", "missing", "modal"])).toEqual([
+      { id: "so-what", kind: "standard", musicType: "jazz", title: "So What", period: "1930s" },
+      { id: "modal", kind: "style", musicType: "jazz", title: "Modal jazz", period: "1930s" },
+    ]);
+    expect(local.findByIds([])).toEqual([]);
+  });
+
   it("exposes only music types whose collections exist", async () => {
     const root = await writeCorpus("jazz", { styles, standards });
     const { retriever, availability } = await loadMusicCorpus({ root, jazzFallback: undefined });

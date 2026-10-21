@@ -74,6 +74,12 @@ const COPY = {
     makePrompt: "整理成创作简报",
     promptLabel: "创作简报",
     promptHint: "可编辑；第一段是创意描述，第二段是音乐方向。确认后开始创作。",
+    refsTitle: "参与本次生成",
+    refsPoems: "诗歌",
+    refsMusic: "音乐参考",
+    refsStyle: "风格",
+    refsStandard: "曲目",
+    refsEmpty: "本次生成没有使用参考数据。",
     poemRefs: (list) => `参考诗作：${list}`,
     moodTitle: "你的心情",
     moodColorLabel: "颜色",
@@ -174,6 +180,12 @@ const COPY = {
     makePrompt: "Draft the brief",
     promptLabel: "Creative brief",
     promptHint: "Editable — paragraph 1 is the creative description, paragraph 2 the musical direction. Confirm to begin.",
+    refsTitle: "What shaped this piece",
+    refsPoems: "Poetry",
+    refsMusic: "Music references",
+    refsStyle: "Style",
+    refsStandard: "Standard",
+    refsEmpty: "No reference material was used for this piece.",
     poemRefs: (list) => `Poetry references: ${list}`,
     moodTitle: "Your feeling",
     moodColorLabel: "Colour",
@@ -779,6 +791,36 @@ function renderProposal() {
   `;
 }
 
+// Poetry comes from the Director's own trace; music references are resolved by
+// the server from the IDs the Composer recorded.
+function renderReferences(task) {
+  const poems = state.session?.poem_retrieval?.references ?? [];
+  // A journey response carries the raw task, so fall back to the conversation's
+  // resolved copy of the same task before concluding there were no references.
+  const music = Array.isArray(task.musicReferences)
+    ? task.musicReferences
+    : (state.session?.tasks ?? []).find((candidate) => candidate.id === task.id)?.musicReferences ?? [];
+  const rows = [];
+  if (poems.length) {
+    const titles = poems.map((reference) => `《${esc(reference.title)}》${esc(reference.author)}`).join(" · ");
+    rows.push(`<p class="mm-ref-row"><span>${esc(t("refsPoems"))}</span><span>${titles}</span></p>`);
+  }
+  if (music.length) {
+    const types = [...new Set(music.map((reference) => reference.musicType))]
+      .map((type) => esc(t(MUSIC_TYPE_LABELS[type] ?? type))).join(" · ");
+    const styles = music.filter((reference) => reference.kind === "style")
+      .map((reference) => `《${esc(reference.title)}》`);
+    const standards = music.filter((reference) => reference.kind === "standard")
+      .map((reference) => `《${esc(reference.title)}》`);
+    const parts = [types];
+    if (styles.length) parts.push(`${esc(t("refsStyle"))} ${styles.join(" ")}`);
+    if (standards.length) parts.push(`${esc(t("refsStandard"))} ${standards.join(" ")}`);
+    rows.push(`<p class="mm-ref-row"><span>${esc(t("refsMusic"))}</span><span>${parts.join(" · ")}</span></p>`);
+  }
+  if (!rows.length) rows.push(`<p class="mm-ref-row"><span>${esc(t("refsEmpty"))}</span></p>`);
+  return `<div class="mm-refs"><p class="mm-refs-title">${esc(t("refsTitle"))}</p>${rows.join("")}</div>`;
+}
+
 function renderResult() {
   const task = activeTask();
   const entry = entryForSession(state.session?.id);
@@ -833,6 +875,7 @@ function renderResult() {
       <h3 class="mm-result-title">${esc(task.title || t("listenTitle"))}</h3>
       ${task.description ? `<p class="mm-result-desc">${esc(task.description)}</p>` : ""}
       <audio class="mm-player" controls preload="metadata" src="/api/tasks/${encodeURIComponent(task.id)}/audio"></audio>
+      ${renderReferences(task)}
       ${task.musicSpec?.lyriaPrompt ? `
       <details class="mm-prompt">
         <summary>${esc(t("lyriaPrompt"))}</summary>

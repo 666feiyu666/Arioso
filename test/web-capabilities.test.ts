@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
 
+import { MUSIC_TYPES, loadMusicRetriever } from "../src/retrieval/music-retriever.js";
 import { withWebServer } from "./helpers/web-server.js";
 
 describe("web capabilities API", () => {
   it("advertises music routing and the complete-work duration limit", async () => {
+    // Which corpora are installed varies by checkout, so the expected
+    // availability comes from the retriever rather than from the disk state.
+    const { retriever } = await loadMusicRetriever();
     await withWebServer(async ({ baseUrl }) => {
       const response = await fetch(`${baseUrl}/api/capabilities`);
       expect(response.ok).toBe(true);
@@ -24,11 +28,11 @@ describe("web capabilities API", () => {
         backgroundMusicProducer: { denoiser: "denoising-historical-recordings", outputChannels: 1, listeningReview: "required" },
         albumCandidates: { minimum: 12, maximum: 28, default: 14 },
         musicCorpus: {
-          types: ["jazz", "blues", "electronic", "instrumental-rock", "instrumental-hip-hop"],
-          available: ["jazz"],
+          types: [...MUSIC_TYPES],
+          available: retriever.availableTypes(),
           availability: expect.objectContaining({
+            // The shipped Jazz corpus is the one this repository guarantees.
             jazz: { available: true, styles: true, standards: true },
-            blues: expect.objectContaining({ available: false }),
           }),
         },
         playlistReferences: true,

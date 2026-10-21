@@ -3,27 +3,49 @@ import path from "node:path";
 
 import { describe, expect, it, vi } from "vitest";
 
-const composeMock = vi.hoisted(() => vi.fn(async () => ({
-  schemaVersion: "1.0",
-  title: "Quiet Evening",
-  intent: "A quiet evening.",
-  genres: ["jazz"],
-  moods: ["quiet"],
-  tempo: { bpm: null, feel: "relaxed" },
-  tonality: { tonic: null, mode: null },
-  meter: null,
-  instrumentation: [],
-  structure: [],
-  vocals: { enabled: false, language: null, style: null, lyricalTheme: null },
-  production: "Natural dynamics.",
-  avoid: ["vocals"],
-  assumptions: [],
-  lyriaPrompt: "Quiet music, instrumental only, no vocals.",
-})));
+// `traceStyleId` lets one test replay a real corpus reference through the
+// Composer's retrieval callback, so the task stores a trace with a known ID.
+const harness = vi.hoisted(() => {
+  const traceStyleId = { value: "" };
+  const composeMock = vi.fn(async (
+    _description?: string,
+    options?: { onMusicRetrieval?: (trace: unknown) => Promise<void> | void },
+  ) => {
+    if (traceStyleId.value) {
+      await options?.onMusicRetrieval?.({
+        musicType: "jazz",
+        selectionSource: "composer",
+        query: "quiet modal piano",
+        mode: "description",
+        styleReferenceIds: [traceStyleId.value],
+        standardReferenceIds: [],
+      });
+    }
+    return {
+      schemaVersion: "1.0",
+      title: "Quiet Evening",
+      intent: "A quiet evening.",
+      genres: ["jazz"],
+      moods: ["quiet"],
+      tempo: { bpm: null, feel: "relaxed" },
+      tonality: { tonic: null, mode: null },
+      meter: null,
+      instrumentation: [],
+      structure: [],
+      vocals: { enabled: false, language: null, style: null, lyricalTheme: null },
+      production: "Natural dynamics.",
+      avoid: ["vocals"],
+      assumptions: [],
+      lyriaPrompt: "Quiet music, instrumental only, no vocals.",
+    };
+  });
+  return { traceStyleId, composeMock };
+});
 
-vi.mock("../src/composer/composer-agent.js", () => ({ composeMusic: composeMock }));
+vi.mock("../src/composer/composer-agent.js", () => ({ composeMusic: harness.composeMock }));
 
 import type { DiscussionAgent, PoemReference } from "../src/discussion/types.js";
+import { loadMusicRetriever } from "../src/retrieval/music-retriever.js";
 import type { PoemRetriever } from "../src/retrieval/poem-retriever.js";
 import { withWebServer } from "./helpers/web-server.js";
 
@@ -309,6 +331,42 @@ describe("web mood chats API", () => {
         expect(["completed", "failed"]).toContain(task.status);
       });
     }, { discussionAgent: stubAgent, environment: { OPENAI_API_KEY: "test-key" } });
+  });
+
+  it("returns the resolved music references with the finished task", async () => {
+    const { retriever } = await loadMusicRetriever();
+    const [reference] = retriever.search({
+      musicType: "jazz", mode: "description", query: "slow modal ballad sparse piano", limit: 1,
+    }).references;
+    if (!reference) throw new Error("The Jazz corpus should return a reference.");
+    harness.traceStyleId.value = reference.id;
+    try {
+      await withWebServer(async ({ baseUrl }) => {
+        const { chat } = await createChat(baseUrl, { musicReference: "jazz" });
+        await addUserMessage(baseUrl, chat.id, "Late-night modal listening");
+        const response = await fetch(`${baseUrl}/api/mood-chats/${chat.id}/submit`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: "A quiet piano piece.", mode: "compose" }),
+        });
+        expect(response.status).toBe(202);
+        const body = await response.json() as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+        await vi.waitFor(async () => {
+          const task = await fetch(`${baseUrl}/api/tasks/${body.task.id}`)
+            .then((r) => r.json()) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+          expect(task.status).toBe("completed");
+          expect(task.musicReferences).toEqual([{
+            id: reference.id,
+            kind: "style",
+            musicType: "jazz",
+            title: reference.title,
+            period: reference.period,
+          }]);
+        });
+      }, { discussionAgent: stubAgent, environment: { OPENAI_API_KEY: "test-key" } });
+    } finally {
+      harness.traceStyleId.value = "";
+    }
   });
 
   it("loads a session saved before the poetry experiment", async () => {

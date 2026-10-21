@@ -1299,6 +1299,39 @@
   margin: 8px 0 4px;
 }
 
+/* What shaped the piece --------------------------------------------------- */
+
+.mm-refs {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+}
+
+.mm-refs-title {
+  margin: 0 0 2px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+
+.mm-ref-row {
+  display: grid;
+  grid-template-columns: 5.5em 1fr;
+  gap: 10px;
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.6;
+}
+
+.mm-ref-row > span:first-child {
+  color: var(--muted);
+}
+
 .mm-prompt {
   margin: 12px 0 0;
 }

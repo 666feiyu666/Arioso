@@ -82,6 +82,20 @@ export interface MusicRetrievalResult {
 export interface MusicRetriever {
   search(input: MusicSearchInput): MusicRetrievalResult;
   availableTypes(): MusicType[];
+  /**
+   * Resolve reference IDs recorded by the Composer back into readable titles.
+   * Unknown IDs are dropped so a stale trace cannot break a response.
+   */
+  findByIds(ids: string[]): MusicReferenceSummary[];
+}
+
+/** The part of a stored reference that is safe to show in the interface. */
+export interface MusicReferenceSummary {
+  id: string;
+  kind: MusicReferenceKind;
+  musicType: MusicType;
+  title: string;
+  period: string | null;
 }
 
 export interface MusicTypeCollections {
@@ -272,8 +286,37 @@ export function createMusicRetriever(collections: MusicCollections): MusicRetrie
     );
   });
 
+  const recordsById = new Map<
+    string,
+    { record: NormalizedMusicRecord; musicType: MusicType; kind: MusicReferenceKind }
+  >();
+  for (const musicType of MUSIC_TYPES) {
+    const collection = collections[musicType];
+    if (!collection) continue;
+    for (const record of collection.styles) recordsById.set(record.id, { record, musicType, kind: "style" });
+    for (const record of collection.standards) recordsById.set(record.id, { record, musicType, kind: "standard" });
+  }
+
   return {
     availableTypes,
+    findByIds(ids: string[]): MusicReferenceSummary[] {
+      const summaries: MusicReferenceSummary[] = [];
+      const seen = new Set<string>();
+      for (const id of ids) {
+        if (seen.has(id)) continue;
+        seen.add(id);
+        const entry = recordsById.get(id);
+        if (!entry) continue;
+        summaries.push({
+          id: entry.record.id,
+          kind: entry.kind,
+          musicType: entry.musicType,
+          title: entry.record.title,
+          period: entry.record.period,
+        });
+      }
+      return summaries;
+    },
     search(input: MusicSearchInput): MusicRetrievalResult {
       const { musicType } = input;
       const collection = collections[musicType];

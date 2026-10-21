@@ -13,6 +13,10 @@ class Element {
   children = new Map<string, Element>();
   listeners = new Map<string, Array<(event?: unknown) => unknown>>();
   classList = { contains: () => false, toggle: () => {} };
+  style: Record<string, string> = { height: "", overflowY: "" };
+  offsetHeight = 0;
+  scrollHeight = 0;
+  clientHeight = 0;
   setAttribute(key: string, value: string) { this.attributes.set(key, value); }
   getAttribute(key: string) { return this.attributes.get(key) || null; }
   removeAttribute(key: string) { this.attributes.delete(key); }
@@ -124,7 +128,13 @@ async function interfaceHarness(initial = album()) {
   };
   const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
   const run = new AsyncFunction("document", "window", "ResizeObserver", "fetch", "setInterval", `${source}\nreturn {state, elements, openAlbum, startAlbum, playAlbumTrack, playTask, stepAlbumTrack, changeAdmission, showComposer, submitTask, sendDiscussionMessage, generateDiscussionProposal, renderAlbumDetail, expandedTaskDetailKeys, restoreTaskDetailKeys};`);
-  const api = await run(document, { scrollTo() {} }, class { observe() {} }, fetch, () => 0);
+  const api = await run(
+    document,
+    { scrollTo() {}, innerHeight: 900, addEventListener() {} },
+    class { observe() {} },
+    fetch,
+    () => 0,
+  );
   await Promise.resolve();
   await Promise.resolve();
   api.state.tasks = [structuredClone(initial)];
