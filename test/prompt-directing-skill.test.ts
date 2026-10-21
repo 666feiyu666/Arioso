@@ -77,7 +77,7 @@ describe("prompt directing skill", () => {
     const discussion = await loadPromptDirectingSkill("discussion");
     const proposal = await loadPromptDirectingSkill("proposal");
 
-    expect(discussion).toContain("Sketch a few short scenes, objects, sensations or repeated routines");
+    expect(discussion).toContain("Imagine one short film-like scene");
     expect(discussion).toContain("Write before you ask");
     expect(discussion).toContain("what is there rather than which of two labels fits");
     expect(discussion).toContain("either/or choice questions");
