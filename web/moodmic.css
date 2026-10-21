@@ -1097,6 +1097,13 @@
   color: var(--muted);
 }
 
+.mm-poem-refs {
+  margin: 0 0 10px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
 .mm-advanced {
   margin-top: 14px;
 }

@@ -31,12 +31,14 @@ describe("prompt directing skill", () => {
     expect(discussion).not.toContain("Return only the prompt itself");
   });
 
-  it("listens for the user's feeling and carries it into the proposal", async () => {
+  it("listens for the user's feeling and unfolds it in poetic language first", async () => {
     const discussion = await loadPromptDirectingSkill("discussion");
     const proposal = await loadPromptDirectingSkill("proposal");
 
     expect(discussion).toContain("Listen for how the user feels");
-    expect(discussion).toContain("musical imagery or synesthesia");
+    expect(discussion).toContain("poetic, sensory language");
+    expect(discussion).toContain("do not yet fix instrumentation");
+    expect(proposal).toContain("poetic, sensory sentences");
     expect(proposal).toContain("emotional tone settled in the discussion");
   });
 

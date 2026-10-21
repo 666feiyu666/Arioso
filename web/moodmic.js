@@ -72,6 +72,7 @@ const COPY = {
     makePrompt: "使用当前方向",
     promptLabel: "作曲提示词",
     promptHint: "可编辑；确认后开始创作。",
+    poemRefs: (list) => `参考诗作：${list}`,
     moodTitle: "你的心情",
     moodColorLabel: "颜色",
     moodWordLabel: "情绪词",
@@ -161,6 +162,7 @@ const COPY = {
     makePrompt: "Use this direction",
     promptLabel: "Composition prompt",
     promptHint: "Editable — confirm to begin.",
+    poemRefs: (list) => `Poetry references: ${list}`,
     moodTitle: "Your feeling",
     moodColorLabel: "Colour",
     moodWordLabel: "Emotion word",
@@ -601,6 +603,15 @@ function renderThread() {
   return parts.join("");
 }
 
+function renderPoemReferences() {
+  const references = state.session?.poem_retrieval?.references ?? [];
+  if (!references.length) return "";
+  const titles = references
+    .map((reference) => `《${reference.title}》${reference.author}`)
+    .join(" · ");
+  return `<p class="mm-poem-refs">${esc(t("poemRefs", titles))}</p>`;
+}
+
 function renderColorPicker() {
   return `
     <div class="mm-colors" role="group" aria-label="${esc(t("moodColorLabel"))}">
@@ -662,6 +673,7 @@ function renderProposal() {
         ${renderColorPicker()}
         ${renderWordPicker()}
       </div>
+      ${renderPoemReferences()}
       <div class="mm-proposal-head">
         <label for="mm-proposal-text"><strong>${esc(t("promptLabel"))}</strong></label>
         <span>${esc(t("promptHint"))}</span>
