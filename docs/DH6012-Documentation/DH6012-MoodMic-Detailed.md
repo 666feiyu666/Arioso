@@ -39,11 +39,13 @@ Every MoodMic creation that generates audio runs a listening review. After Lyria
 
 The result card shows the title, the prompt as written, a player, a collapsible Lyria prompt, a download link, and the starting point for a new conversation. Earlier conversations stay in the left rail, titled by time and song title, and reopen with their audio after a refresh.
 
-## The "why not jazz" invitation
+## The music reference setting
 
-A secondary control labelled exactly "why not jazz" sits in the prompt card, off by default. Turning it on adds the project's jazz reference corpus to composition for this piece: the composer retrieves jazz standards as evidence before writing the specification. The interface says what it does ("Use our jazz reference collection to inspire your music.") and can be turned off again before creation starts.
+The prompt card carries one compact setting, "Music reference", with these choices: Auto, None, and every music type whose local corpus is available (Jazz today, plus Blues, Electronic, Instrumental Rock and Instrumental Hip-Hop once collected). Auto is the default: the Composer chooses exactly one supported type from the conversation's mood, imagery, instrumentation, energy, tempo or production language and records that choice in the retrieval trace. Choosing a specific type binds retrieval to it; None keeps the no-corpus path.
 
-The option applies to the piece being made. An album inherits the jazz evidence through the music specification of the piece it grew from, and does not carry a second switch of its own.
+Natural-language requests remain authoritative. A clearly named type or child style (ambient, lo-fi hip-hop, post-rock, modal jazz, Chicago blues) selects that parent type; a genre outside the five supported types keeps the request as written and composes without corpus evidence. The interface names the retrieved poems, never the retrieved corpus text, and the setting can be changed before creation starts.
+
+The option applies to the piece being made. An album inherits the music evidence through the music specification of the piece it grew from, and does not carry a second switch of its own.
 
 ## The album continuation
 

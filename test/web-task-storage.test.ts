@@ -39,7 +39,7 @@ describe("task storage organization", () => {
       description: "A nocturnal jazz piece",
       mode: "generate",
       vocalMode: "instrumental",
-      corpusMode: "jazz",
+      corpusMode: "music",
       compositionMode: "single",
       status: "completed",
       composerModel: "test",
@@ -52,13 +52,13 @@ describe("task storage organization", () => {
     await writeFile(path.join(directory, `${id}.mp3`), new Uint8Array([1, 2, 3]));
 
     const result = await organizeTaskStorage(directory);
-    const taskDirectory = path.join(directory, "02-jazz", id);
+    const taskDirectory = path.join(directory, "02-music", id);
     const migrated = JSON.parse(
       await readFile(path.join(taskDirectory, "task.json"), "utf8"),
     ) as { workflowType: string; audioFile: string };
 
     expect(result).toEqual({ migratedTasks: 1, migratedAudioFiles: 1 });
-    expect(migrated.workflowType).toBe("02-jazz");
+    expect(migrated.workflowType).toBe("02-music");
     expect(migrated.audioFile).toBe("Night Journey.mp3");
     expect((await stat(path.join(taskDirectory, migrated.audioFile))).size).toBe(3);
     await expect(stat(path.join(directory, `${id}.json`))).rejects.toThrow();
@@ -75,21 +75,23 @@ describe("task storage organization", () => {
     const directory = await temporaryTaskDirectory();
     await organizeTaskStorage(directory);
 
-    for (const workflow of ["01-general", "02-jazz", "03-orchestral", "04-album"]) {
+    for (const workflow of ["01-general", "02-music", "03-orchestral", "04-album"]) {
       expect((await stat(path.join(directory, workflow))).isDirectory()).toBe(true);
     }
   });
 
-  it("preserves a no-corpus Jazz task through migration and server reload", async () => {
+  it("keeps a historical 02-jazz task readable while it stays in its old directory", async () => {
     const id = "22222222-2222-4222-8222-222222222222";
     await withWebServer(async ({ baseUrl }) => {
       const tasks = await fetch(`${baseUrl}/api/tasks`).then((response) => response.json());
-      expect(tasks).toEqual([expect.objectContaining({ id, workflowType: "02-jazz", corpusMode: "none" })]);
+      // Legacy records are read as 02-music; the on-disk directory is unchanged.
+      expect(tasks).toEqual([expect.objectContaining({ id, workflowType: "02-music", corpusMode: "none" })]);
     }, {
       prepare: async (root) => {
-        const directory = path.join(root, "outputs", "tasks");
-        await mkdir(directory, { recursive: true });
-        await writeFile(path.join(directory, `${id}.json`), JSON.stringify({
+        // A historical record already lives in the old 02-jazz directory.
+        const legacyDirectory = path.join(root, "outputs", "tasks", "02-jazz", id);
+        await mkdir(legacyDirectory, { recursive: true });
+        await writeFile(path.join(legacyDirectory, "task.json"), JSON.stringify({
           id,
           workflowType: "02-jazz",
           compositionMode: "single",
@@ -98,9 +100,6 @@ describe("task storage organization", () => {
           description: 'Create instrumental jazz inspired by "So What".',
           updatedAt: "2026-01-01T00:00:00.000Z",
         }));
-        await organizeTaskStorage(directory);
-        const stored = JSON.parse(await readFile(path.join(directory, "02-jazz", id, "task.json"), "utf8"));
-        expect(stored).toMatchObject({ workflowType: "02-jazz", corpusMode: "none" });
       },
     });
   });

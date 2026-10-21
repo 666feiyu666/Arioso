@@ -80,7 +80,15 @@ const COPY = {
     moodEdited: (from, to) => `原本读出的心情是「${from}」，现在是「${to}」。`,
     moodManual: "选一个颜色和词。",
     moodNeedPick: "选一个心情颜色和词，再开始创作。",
-    jazzExplain: "用我们的爵士参考合集来启发这段音乐。",
+    musicRefLabel: "音乐参考",
+    musicRefHelp: "Auto 让 Composer 自行选择；选具体类型则用该类型的语料。",
+    musicRefAuto: "Auto（自动选择）",
+    musicRefNone: "不使用语料",
+    musicRefJazz: "Jazz",
+    musicRefBlues: "Blues",
+    musicRefElectronic: "Electronic",
+    musicRefInstrumentalRock: "Instrumental Rock",
+    musicRefInstrumentalHipHop: "Instrumental Hip-Hop",
     startCreating: "开始创作",
     advanced: "更多设置",
     generationMode: "生成方式",
@@ -170,7 +178,15 @@ const COPY = {
     moodEdited: (from, to) => `It read “${from}”; it is now “${to}”.`,
     moodManual: "Pick a colour and a word.",
     moodNeedPick: "Pick a feeling colour and word before creating.",
-    jazzExplain: "Use our jazz reference collection to inspire your music.",
+    musicRefLabel: "Music reference",
+    musicRefHelp: "Auto lets the Composer choose; a specific type binds the local corpus.",
+    musicRefAuto: "Auto",
+    musicRefNone: "No reference corpus",
+    musicRefJazz: "Jazz",
+    musicRefBlues: "Blues",
+    musicRefElectronic: "Electronic",
+    musicRefInstrumentalRock: "Instrumental Rock",
+    musicRefInstrumentalHipHop: "Instrumental Hip-Hop",
     startCreating: "Start creating",
     advanced: "More settings",
     generationMode: "Mode",
@@ -288,7 +304,8 @@ const state = {
   judged: false,
   detected: null,
   mood: { group: null, emotion: null },
-  jazz: false,
+  musicReference: "auto",
+  musicTypes: [],
   advanced: { mode: "generate", lyriaModel: "lyria-3.5", vocalMode: "instrumental" },
   entries: [],
   activeEntryId: null,
@@ -603,6 +620,25 @@ function renderThread() {
   return parts.join("");
 }
 
+const MUSIC_TYPE_LABELS = {
+  jazz: "musicRefJazz",
+  blues: "musicRefBlues",
+  electronic: "musicRefElectronic",
+  "instrumental-rock": "musicRefInstrumentalRock",
+  "instrumental-hip-hop": "musicRefInstrumentalHipHop",
+};
+
+function musicReferenceOptions() {
+  const choices = [
+    ["auto", t("musicRefAuto")],
+    ["none", t("musicRefNone")],
+    ...state.musicTypes.map((type) => [type, t(MUSIC_TYPE_LABELS[type] ?? type)]),
+  ];
+  return choices.map(([value, label]) =>
+    `<option value="${esc(value)}"${state.musicReference === value ? " selected" : ""}>${esc(label)}</option>`
+  ).join("");
+}
+
 function renderPoemReferences() {
   const references = state.session?.poem_retrieval?.references ?? [];
   if (!references.length) return "";
@@ -679,9 +715,12 @@ function renderProposal() {
         <span>${esc(t("promptHint"))}</span>
       </div>
       <textarea class="e-textarea" id="mm-proposal-text" maxlength="8000">${esc(state.proposal)}</textarea>
-      <div class="mm-jazz${state.jazz ? " is-on" : ""}">
-        <button class="mm-jazz-btn" type="button" id="mm-jazz" aria-pressed="${state.jazz}">why not jazz</button>
-        <span class="mm-jazz-note">${esc(t("jazzExplain"))}</span>
+      <div class="mm-music-ref">
+        <label class="mm-inline-field" for="mm-music-ref">
+          <span>${esc(t("musicRefLabel"))}</span>
+          <select id="mm-music-ref">${musicReferenceOptions()}</select>
+        </label>
+        <span class="mm-music-ref-note">${esc(t("musicRefHelp"))}</span>
       </div>
       <details class="mm-advanced">
         <summary>${esc(t("advanced"))}</summary>
@@ -914,7 +953,10 @@ function bindChat() {
   }
   stage.querySelector("#mm-make-prompt")?.addEventListener("click", generateProposal);
   stage.querySelector("#mm-approve")?.addEventListener("click", approveAndCreate);
-  stage.querySelector("#mm-jazz")?.addEventListener("click", () => { state.jazz = !state.jazz; render(); });
+  stage.querySelector("#mm-music-ref")?.addEventListener("change", (event) => {
+    state.musicReference = event.target.value;
+    render();
+  });
   const proposalText = stage.querySelector("#mm-proposal-text");
   proposalText?.addEventListener("input", () => { state.proposal = proposalText.value; });
   stage.querySelector("#mm-mode")?.addEventListener("change", (event) => { state.advanced.mode = event.target.value; });
@@ -1092,7 +1134,7 @@ function stopMoodAudio() {
 }
 
 function chatOptions() {
-  return { jazz: state.jazz };
+  return { musicReference: state.musicReference };
 }
 
 function resetForNewSession() {
@@ -1100,7 +1142,7 @@ function resetForNewSession() {
   state.judged = false;
   state.detected = null;
   state.mood = { group: null, emotion: null };
-  state.jazz = false;
+  state.musicReference = "auto";
   state.task = null;
   state.activeEntryId = null;
 }
@@ -1216,8 +1258,7 @@ async function approveAndCreate() {
         mode: state.advanced.mode,
         lyriaModel: state.advanced.lyriaModel,
         vocalMode: state.advanced.vocalMode,
-        corpusMode: state.jazz ? "jazz" : "none",
-        workflowType: state.jazz ? "02-jazz" : "01-general",
+        musicReference: state.musicReference,
       }),
     });
     state.session = result.chat;
@@ -1494,6 +1535,7 @@ async function openDiscussion(id) {
   state.message = "";
   state.task = sessionTasks(session).at(-1) ?? null;
   state.proposal = session.proposal ?? "";
+  state.musicReference = session.musicReference ?? "auto";
   // Reset the journey view before restoring it for this conversation.
   clearTimeout(state.journeyTimer);
   state.journey = null;
@@ -1532,6 +1574,17 @@ async function loadDiscussions() {
   }
 }
 
+async function loadMusicTypes() {
+  try {
+    const capabilities = await api("/api/capabilities");
+    const available = capabilities?.musicCorpus?.available;
+    // Only types with validated collections are offered.
+    state.musicTypes = Array.isArray(available) ? available : [];
+  } catch {
+    /* Keep the previous list. */
+  }
+}
+
 async function loadEntries() {
   try {
     const data = await api("/api/mood-entries");
@@ -1552,7 +1605,7 @@ langToggle.addEventListener("click", async () => {
 async function boot() {
   state.language = await readLanguage();
   state.sideCollapsed = readSidePreference();
-  await Promise.all([loadDiscussions(), loadEntries()]);
+  await Promise.all([loadDiscussions(), loadEntries(), loadMusicTypes()]);
   const params = new URLSearchParams(window.location.search);
   const chatId = params.get("chat");
   if (chatId) {

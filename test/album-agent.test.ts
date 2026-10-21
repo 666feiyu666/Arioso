@@ -50,12 +50,12 @@ describe("album composition agents", () => {
 
   it("composes through the existing Composer with instrumental and no-corpus settings", async () => {
     const plan = albumPlanFixture();
-    const spec = await composeAlbumTrack(plan, 1, { model: "configured-model", genre: "jazz" });
+    const spec = await composeAlbumTrack(plan, 1, { model: "configured-model" });
     const brief = mocks.compose.mock.calls[0]?.[0] as string;
     expect(brief).toContain(plan.albumMind);
     expect(brief).toContain(plan.cohesionStrategy);
     expect(brief).toContain("120 seconds");
-    expect(mocks.compose.mock.calls[0]?.[1]).toMatchObject({ model: "configured-model", vocalMode: "instrumental", corpusMode: "none", genre: "jazz", lyriaModel: "lyria-3.5" });
+    expect(mocks.compose.mock.calls[0]?.[1]).toMatchObject({ model: "configured-model", vocalMode: "instrumental", corpusMode: "none", lyriaModel: "lyria-3.5" });
     expect(spec.lyriaPrompt).toContain("piano: States a low motif");
     expect(spec.lyriaPrompt).not.toContain("Do not copy this prose");
   });

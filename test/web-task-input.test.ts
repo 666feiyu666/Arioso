@@ -26,24 +26,32 @@ describe("web task input", () => {
     });
   });
 
-  it("accepts the Jazz corpus workflow", () => {
+  it("accepts the music corpus workflow with a bound music type", () => {
     expect(parseTaskInput({
       description: "late-night trumpet quartet",
       mode: "generate",
       vocalMode: "instrumental",
-      corpusMode: "jazz",
+      corpusMode: "music",
       compositionMode: "single",
-      workflowType: "02-jazz",
+      workflowType: "02-music",
+      musicType: "jazz",
       lyriaModel: "lyria-3-clip-preview",
     })).toEqual({
       description: "late-night trumpet quartet",
       mode: "generate",
       vocalMode: "instrumental",
-      corpusMode: "jazz",
+      corpusMode: "music",
       compositionMode: "single",
-      workflowType: "02-jazz",
+      workflowType: "02-music",
+      musicType: "jazz",
       lyriaModel: "lyria-3-clip-preview",
     });
+  });
+
+  it("rejects an unknown music type", () => {
+    expect(() => parseTaskInput({
+      description: "late-night trumpet quartet", workflowType: "02-music", musicType: "classical",
+    })).toThrow("Unsupported music type.");
   });
 
   it("rejects unknown corpus workflows", () => {
@@ -53,17 +61,22 @@ describe("web task input", () => {
     })).toThrow("Unsupported corpus mode.");
   });
 
-  it("accepts Jazz without corpus while preserving the workflow", () => {
+  it("accepts the music workflow without corpus while preserving the workflow", () => {
     expect(parseTaskInput({
       description: 'Create instrumental jazz inspired by "So What".',
-      workflowType: "02-jazz",
+      workflowType: "02-music",
       corpusMode: "none",
-    })).toMatchObject({ workflowType: "02-jazz", corpusMode: "none", compositionMode: "single" });
+    })).toMatchObject({ workflowType: "02-music", corpusMode: "none", compositionMode: "single" });
   });
 
-  it("defaults Jazz requests without an explicit corpus choice to corpus retrieval", () => {
-    expect(parseTaskInput({ description: "quiet evening", workflowType: "02-jazz" }))
-      .toMatchObject({ corpusMode: "jazz" });
+  it("defaults music requests without an explicit corpus choice to retrieval", () => {
+    expect(parseTaskInput({ description: "quiet evening", workflowType: "02-music" }))
+      .toMatchObject({ corpusMode: "music" });
+  });
+
+  it("reads the historical 02-jazz workflow as 02-music", () => {
+    expect(parseTaskInput({ description: "quiet evening", workflowType: "02-jazz", corpusMode: "jazz" }))
+      .toMatchObject({ workflowType: "02-music", corpusMode: "music" });
   });
 
   it("accepts the orchestral composition workflow", () => {
@@ -115,36 +128,21 @@ describe("web task input", () => {
       .toThrow("Album generation requires lyria-3.5.");
   });
 
-  it("accepts an explicitly selected orchestral knowledge card", () => {
-    expect(parseTaskInput({
+  it("ignores legacy orchestral reference input instead of injecting it", () => {
+    const parsed = parseTaskInput({
       description: "a five-minute orchestral journey",
       workflowType: "03-orchestral",
       orchestralReferenceId: "dvorak-symphony-no-9",
-    })).toMatchObject({
-      compositionMode: "orchestral",
-      corpusMode: "none",
-      orchestralReferenceId: "dvorak-symphony-no-9",
     });
-  });
-
-  it("rejects card selection outside the orchestral workflow", () => {
-    expect(() => parseTaskInput({
-      description: "warm piano",
-      orchestralReferenceId: "dvorak-symphony-no-9",
-    })).toThrow("Knowledge cards are supported only for orchestral composition.");
-  });
-
-  it.each(["../outside", "", null, 42])("rejects invalid card IDs: %s", (id) => {
-    expect(() => parseTaskInput({
-      description: "an orchestral journey",
-      workflowType: "03-orchestral",
-      orchestralReferenceId: id,
-    })).toThrow("Invalid orchestral knowledge card ID.");
+    expect(parsed).toMatchObject({ compositionMode: "orchestral", corpusMode: "none" });
+    expect(parsed).not.toHaveProperty("orchestralReferenceId");
   });
 
   it("classifies legacy task records without workflow metadata", () => {
     expect(inferWorkflowType({ corpusMode: "none" })).toBe("01-general");
-    expect(inferWorkflowType({ retrievalQuery: "modal jazz" })).toBe("02-jazz");
+    expect(inferWorkflowType({ retrievalQuery: "modal jazz" })).toBe("02-music");
+    expect(inferWorkflowType({ workflowType: "02-jazz" })).toBe("02-music");
+    expect(inferWorkflowType({ corpusMode: "music" })).toBe("02-music");
     expect(inferWorkflowType({ compositionMode: "orchestral" })).toBe("03-orchestral");
   });
 });

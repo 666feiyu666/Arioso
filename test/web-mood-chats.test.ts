@@ -1,7 +1,27 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+const composeMock = vi.hoisted(() => vi.fn(async () => ({
+  schemaVersion: "1.0",
+  title: "Quiet Evening",
+  intent: "A quiet evening.",
+  genres: ["jazz"],
+  moods: ["quiet"],
+  tempo: { bpm: null, feel: "relaxed" },
+  tonality: { tonic: null, mode: null },
+  meter: null,
+  instrumentation: [],
+  structure: [],
+  vocals: { enabled: false, language: null, style: null, lyricalTheme: null },
+  production: "Natural dynamics.",
+  avoid: ["vocals"],
+  assumptions: [],
+  lyriaPrompt: "Quiet music, instrumental only, no vocals.",
+})));
+
+vi.mock("../src/composer/composer-agent.js", () => ({ composeMusic: composeMock }));
 
 import type { DiscussionAgent, PoemReference } from "../src/discussion/types.js";
 import type { PoemRetriever } from "../src/retrieval/poem-retriever.js";
@@ -53,9 +73,9 @@ async function createChat(baseUrl: string, body: Record<string, unknown> = {}) {
 describe("web mood chats API", () => {
   it("keeps its own conversations separate from workflow discussions", async () => {
     await withWebServer(async ({ baseUrl }) => {
-      const { response, chat } = await createChat(baseUrl, { jazz: true });
+      const { response, chat } = await createChat(baseUrl, { musicReference: "jazz" });
       expect(response.status).toBe(201);
-      expect(chat).toMatchObject({ status: "discussing", jazz: true, messages: [], taskIds: [] });
+      expect(chat).toMatchObject({ status: "discussing", musicReference: "jazz", messages: [], taskIds: [] });
 
       const chats = await fetch(`${baseUrl}/api/mood-chats`).then((r) => r.json()) as any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
       expect(chats).toHaveLength(1);
@@ -186,6 +206,32 @@ describe("web mood chats API", () => {
       expect(second.poem_retrieval.query).toContain("warmer");
       expect(second.poem_retrieval.references).toHaveLength(1);
     }, { discussionAgent: stubAgent, poemRetriever: stubRetriever, environment: { OPENAI_API_KEY: "test-key" } });
+  });
+
+  it.each([
+    ["jazz", "02-music", "music", "jazz"],
+    ["auto", "02-music", "music", undefined],
+    ["none", "01-general", "none", undefined],
+  ])("maps the %s music reference onto the created task", async (reference, workflowType, corpusMode, musicType) => {
+    await withWebServer(async ({ baseUrl }) => {
+      const { chat } = await createChat(baseUrl, { musicReference: reference });
+      await addUserMessage(baseUrl, chat.id, "Late-night listening");
+      const response = await fetch(`${baseUrl}/api/mood-chats/${chat.id}/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: "A quiet piano piece.", mode: "compose" }),
+      });
+      expect(response.status).toBe(202);
+      const body = await response.json() as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+      expect(body.task).toMatchObject({ workflowType, corpusMode });
+      if (musicType) expect(body.task.musicType).toBe(musicType);
+      else expect(body.task.musicType).toBeUndefined();
+      // Wait for the background compose step so the temp output directory is idle.
+      await vi.waitFor(async () => {
+        const task = await fetch(`${baseUrl}/api/tasks/${body.task.id}`).then((r) => r.json()) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+        expect(["completed", "failed"]).toContain(task.status);
+      });
+    }, { discussionAgent: stubAgent, environment: { OPENAI_API_KEY: "test-key" } });
   });
 
   it("loads a session saved before the poetry experiment", async () => {

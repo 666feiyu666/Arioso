@@ -4,7 +4,11 @@ import path from "node:path";
 
 import { measureAudioDuration, stitchAudioFiles } from "../audio/stitch.js";
 import type { AriosoConfig } from "../config/env.js";
-import { isOrchestralCardId, loadOrchestralKnowledgeCard, type OrchestralKnowledgeCard } from "../retrieval/orchestral-cards.js";
+import {
+  MUSIC_TYPES,
+  type MusicRetrievalTrace,
+  type MusicType,
+} from "../retrieval/music-retriever.js";
 import { MusicSpecSchema, type MusicSpec } from "../schema/music-spec.js";
 import {
   ALBUM_MAX_CANDIDATES,
@@ -26,24 +30,39 @@ import { isPlaylistReference, type PlaylistReference } from "../playlist/referen
 export type TaskMode = "compose" | "generate";
 export type TaskStatus = "queued" | "composing" | "generating" | "review" | "assembling" | "processing" | "completed" | "failed";
 export type VocalMode = "auto" | "instrumental" | "vocals";
-export type CorpusMode = "none" | "jazz";
+export type CorpusMode = "none" | "music";
 export type CompositionMode = "single" | "orchestral" | "album";
-export type WorkflowType = "01-general" | "02-jazz" | "03-orchestral" | "04-album" | "05-playlist";
+export type WorkflowType = "01-general" | "02-music" | "03-orchestral" | "04-album" | "05-playlist";
 
 const WORKFLOW_TYPES: readonly WorkflowType[] = [
   "01-general",
-  "02-jazz",
+  "02-music",
   "03-orchestral",
   "04-album",
   "05-playlist",
 ];
 
+/** Historical records keep "02-jazz"; the runtime concept is now "02-music". */
+export function normalizeWorkflowType(value: unknown): WorkflowType | undefined {
+  if (value === "02-jazz") return "02-music";
+  return WORKFLOW_TYPES.includes(value as WorkflowType) ? value as WorkflowType : undefined;
+}
+
 function isWorkflowType(value: unknown): value is WorkflowType {
-  return WORKFLOW_TYPES.includes(value as WorkflowType);
+  return normalizeWorkflowType(value) !== undefined;
+}
+
+/** Stored "jazz" corpus selections are the legacy form of "music". */
+export function normalizeCorpusMode(value: unknown): CorpusMode {
+  return value === "music" || value === "jazz" ? "music" : "none";
+}
+
+export function isMusicType(value: unknown): value is MusicType {
+  return MUSIC_TYPES.includes(value as MusicType);
 }
 
 function corpusModeForWorkflow(workflowType: WorkflowType, selection: unknown): CorpusMode {
-  return workflowType === "02-jazz" && selection !== "none" ? "jazz" : "none";
+  return workflowType === "02-music" && selection !== "none" ? "music" : "none";
 }
 
 export function inferWorkflowType(task: {
@@ -51,9 +70,11 @@ export function inferWorkflowType(task: {
   compositionMode?: unknown;
   corpusMode?: unknown;
   retrievalQuery?: unknown;
+  musicRetrieval?: unknown;
   description?: unknown;
 }): WorkflowType {
-  if (isWorkflowType(task.workflowType)) return task.workflowType;
+  const workflowType = normalizeWorkflowType(task.workflowType);
+  if (workflowType) return workflowType;
   if (task.compositionMode === "orchestral") return "03-orchestral";
   if (task.compositionMode === "album") return "04-album";
   if (
@@ -63,7 +84,9 @@ export function inferWorkflowType(task: {
   ) {
     return "03-orchestral";
   }
-  if (task.corpusMode === "jazz" || task.retrievalQuery) return "02-jazz";
+  if (normalizeCorpusMode(task.corpusMode) === "music" || task.retrievalQuery || task.musicRetrieval) {
+    return "02-music";
+  }
   return "01-general";
 }
 
@@ -128,6 +151,11 @@ export interface MusicTask {
   createdAt: string;
   updatedAt: string;
   title?: string;
+  /** Set by the Composer's bounded music retrieval for this task. */
+  musicRetrieval?: MusicRetrievalTrace;
+  /** The music type bound by the interface, when the user chose one. */
+  musicType?: MusicType;
+  /** Legacy Jazz pilot fields, read but no longer written. */
   retrievalQuery?: string;
   retrievedReferenceIds?: string[];
   musicSpec?: MusicSpec;
@@ -142,7 +170,6 @@ export interface MusicTask {
   albumTargetTotalMinutes?: number;
   albumProduction?: AlbumProduction;
   orchestralPlan?: OrchestralWorkPlan;
-  orchestralReference?: OrchestralKnowledgeCard;
   movements?: OrchestralMovementTask[];
   orchestralAssembly?: OrchestralAssembly;
   generatedText?: string | null;
@@ -177,7 +204,7 @@ export interface CreateTaskInput {
   compositionMode: CompositionMode;
   workflowType: WorkflowType;
   lyriaModel?: string;
-  orchestralReferenceId?: string;
+  musicType?: MusicType;
   candidateCount?: number;
   targetTotalMinutes?: number;
   produceAlbum?: boolean;
@@ -536,9 +563,6 @@ export class TaskStore {
   }
 
   async create(input: CreateTaskInput, config: AriosoConfig): Promise<MusicTask> {
-    const orchestralReference = input.orchestralReferenceId
-      ? await loadOrchestralKnowledgeCard(input.orchestralReferenceId)
-      : undefined;
     const now = new Date().toISOString();
     const task: MusicTask = {
       id: crypto.randomUUID(),
@@ -553,7 +577,7 @@ export class TaskStore {
         albumTargetTotalMinutes: input.targetTotalMinutes ?? 35,
         albumPlaylist: [],
       } : {}),
-      ...(orchestralReference ? { orchestralReference } : {}),
+      ...(input.musicType ? { musicType: input.musicType } : {}),
       ...(input.produceAlbum ? { albumProduction: {
         role: "background_music_producer" as const, status: "pending" as const,
         stage: "runtime" as const, listeningReview: "pending" as const,
@@ -972,8 +996,12 @@ export function parseTaskInput(value: unknown): CreateTaskInput {
   }
   if (candidate.corpusMode !== undefined
     && candidate.corpusMode !== "none"
+    && candidate.corpusMode !== "music"
     && candidate.corpusMode !== "jazz") {
     throw new Error("Unsupported corpus mode.");
+  }
+  if (candidate.musicType !== undefined && !isMusicType(candidate.musicType)) {
+    throw new Error("Unsupported music type.");
   }
   if (candidate.compositionMode !== undefined
     && candidate.compositionMode !== "single"
@@ -1007,15 +1035,6 @@ export function parseTaskInput(value: unknown): CreateTaskInput {
       throw new Error("Album generation requires lyria-3.5.");
     }
   }
-  const orchestralReferenceId = candidate.orchestralReferenceId;
-  if (orchestralReferenceId !== undefined) {
-    if (compositionMode !== "orchestral") {
-      throw new Error("Knowledge cards are supported only for orchestral composition.");
-    }
-    if (!isOrchestralCardId(orchestralReferenceId)) {
-      throw new Error("Invalid orchestral knowledge card ID.");
-    }
-  }
   const lyriaModel =
     candidate.lyriaModel === "lyria-3.5" || candidate.lyriaModel === "lyria-3-clip-preview"
       ? candidate.lyriaModel
@@ -1037,6 +1056,7 @@ export function parseTaskInput(value: unknown): CreateTaskInput {
       candidateCount: Number(candidateCount), targetTotalMinutes: Number(targetTotalMinutes),
       lyriaModel: "lyria-3.5",
     } : lyriaModel ? { lyriaModel } : {}),
-    ...(orchestralReferenceId ? { orchestralReferenceId } : {}),
+    ...(candidate.musicType !== undefined && corpusMode === "music"
+      ? { musicType: candidate.musicType as MusicType } : {}),
   };
 }

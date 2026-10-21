@@ -16,11 +16,11 @@ const translations = {
     newTask: "新建任务", tasks: "任务", musicTasks: "音乐任务", settings: "设置",
     tabMoodMic: "MoodMic", tabCalendar: "心情日历", tabWorkflow: "工作流", tabPlaylist: "播放列表（测试）", tabHelp: "帮助", tabBarLabel: "主导航",
     entryEyebrow: "CHOOSE A WORKFLOW", entryTitle: "选择音乐的<br />创作方式。",
-    entryCopy: "从单曲、Jazz 语料到多乐章作品，选择适合当前构想的创作方式。",
-    workflowChoices: "生成方式", allStyles: "不限风格", jazzOnly: "仅限 Jazz",
+    entryCopy: "从单曲、音乐参考到多乐章作品，选择适合当前构想的创作方式。",
+    workflowChoices: "生成方式", allStyles: "不限风格", musicOnly: "含音乐参考",
     noCorpusTitle: "无语料生成", noCorpusDescription: "直接使用模型已有的音乐知识，将你的想法整理成完整编曲。",
-    jazzCorpusTitle: "Jazz 作曲", jazzCorpusDescription: "以 Jazz 为创作方向，可选择使用本地语料或仅使用模型知识。",
-    enterStudio: "进入创作台 →", enterJazzStudio: "进入 Jazz 创作台 →", backEntry: "← 返回生成方式选择",
+    musicCorpusTitle: "音乐参考作曲", musicCorpusDescription: "可选择 Jazz、Blues、Electronic 等本地语料，或仅使用模型知识。",
+    enterStudio: "进入创作台 →", enterMusicStudio: "进入音乐创作台 →", backEntry: "← 返回生成方式选择",
     multiMovement: "多乐章", orchestralTitle: "管弦乐作曲",
     orchestralDescription: "由 Agent 规划统一主题与完整乐章，再依次生成一部连贯的管弦乐作品。",
     enterOrchestralStudio: "进入管弦乐创作台 →", sameThemeTracks: "同一主题 · 多曲目",
@@ -52,25 +52,29 @@ const translations = {
     viewAlbumDevelopment: "查看开发进度 →", inDevelopment: "正在开发中",
     albumDevelopmentTitle: "让一组作品，拥有同一种声音。",
     albumDevelopmentCopy: "专辑作曲将复用管弦乐工作流中的共享音乐契约与多曲目任务模型。在 03 成熟后开放。",
-    noCorpusBadge: "无语料 · 不限风格", jazzCorpusBadge: "Jazz 语料增强", jazzNoCorpusBadge: "Jazz · 无语料",
+    noCorpusBadge: "无语料 · 不限风格", musicCorpusBadge: "音乐语料参考", musicNoCorpusBadge: "音乐 · 无语料",
+    musicReference: "音乐参考",
+    musicRefAuto: "Auto（自动选择）",
+    musicRefNone: "不使用语料",
+    musicReferenceHelp: "Auto 让 Composer 从可用类型中选择；选具体类型则只检索该类型语料。",
+    musicType: "音乐类型",
+    retrievalMode: "检索方式",
+    retrievedStyles: "风格参考",
+    retrievedStandards: "作品参考",
     corpusSetting: "语料", withCorpus: "使用语料", withoutCorpus: "不使用语料",
-    jazzCorpusRestartRequired: "请重启 Arioso 服务并刷新页面，以启用 Jazz 有无语料对比。",
+    musicCorpusRestartRequired: "请重启 Arioso 服务并刷新页面，以启用音乐语料参考。",
     localWorkspace: "本地创作空间", heroEyebrow: "COMPOSE WITH INTENT",
     heroTitle: "把一个念头，<br />写成一段音乐。",
     heroCopy: "描述场景、情绪或声音。Arioso 会先整理成完整乐曲规格，再交给 Lyria 生成。",
-    jazzHeroEyebrow: "COMPOSE WITH JAZZ MEMORY",
-    jazzHeroTitle: "从爵士记忆里，<br />找到新的声音。",
-    jazzHeroCopy: "描述年代、编制、节奏或氛围。Arioso 会检索本地 Jazz 语料，再整理成完整乐曲规格。",
-    jazzNoCorpusHeroCopy: "描述年代、编制、节奏或氛围。Arioso 会使用模型已有的音乐知识，整理成完整 Jazz 乐曲规格。",
+    musicHeroEyebrow: "COMPOSE WITH MUSIC MEMORY",
+    musicHeroTitle: "从音乐记忆里，<br />找到新的声音。",
+    musicHeroCopy: "描述年代、编制、节奏或氛围。Arioso 会检索所选音乐类型的语料，再整理成完整乐曲规格。",
+    musicNoCorpusHeroCopy: "描述年代、编制、节奏或氛围。Arioso 会使用模型已有的音乐知识，整理成完整乐曲规格。",
     orchestralBadge: "管弦乐 · 多乐章", orchestralHeroEyebrow: "COMPOSE ACROSS MOVEMENTS",
     orchestralHeroTitle: "让同一个主题，<br />走过完整的旅程。",
     orchestralHeroCopy: "描述作品的世界、情绪与戏剧走向。Agent 会建立共享音乐契约，构思完整乐章并自动依次生成。",
-    knowledgeCard: "知识卡片", noKnowledgeCard: "无参考",
-    knowledgeCardHelp: "可选：参考卡片中的音乐与想象描述，构思整体作品和各乐章。",
-    knowledgeCardLoadFailed: "知识卡片加载失败，请刷新页面重试。",
     noKnowledgeCardsAvailable: "暂无已审阅的知识卡片。",
-    knowledgeCardSnapshot: "查看本次使用的卡片",
-    generalExamplesTitle: "从一个声音画面开始", jazzExamplesTitle: "从一种爵士气质开始",
+    generalExamplesTitle: "从一个声音画面开始", musicExamplesTitle: "从一种爵士气质开始",
     generationSettings: "生成设置", generationMode: "生成模式", modeGenerate: "编曲并生成音乐",
     modeCompose: "仅生成编曲提示", lyriaModel: "Lyria 模型", lyriaClip: "Lyria 3 Clip · 30 秒",
     lyriaFull: "Lyria 3.5 · 完整歌曲", examplesTitle: "从一个声音画面开始",
@@ -105,7 +109,7 @@ const translations = {
     connectionOk: "连接成功。", connectionFailed: "连接失败，请检查 API Key 和网络连接。",
     keyCleared: "已移除保存的 API Key。", keyFallback: "已移除本地保存的 Key；当前仍检测到环境变量中的可用 Key。",
     emptyTasks: "还没有任务。<br />从一个声音画面开始吧。",
-    workflow01: "01 无语料单曲", workflow02: "02 Jazz 单曲",
+    workflow01: "01 无语料单曲", workflow02: "02 音乐参考单曲",
     workflow03: "03 管弦乐作品", workflow04: "04 主题专辑",
     noTasksInWorkflow: "暂无任务", albumComingSoon: "正在开发",
     movementProgress: "{completed}/{total} 乐章", totalDuration: "作品总时长", movementDuration: "乐章时长",
@@ -120,7 +124,7 @@ const translations = {
     audioPlaybackFailed: "音频播放失败。", audioLoadFailed: "音频加载失败，请重启本地服务后重试。",
     unnamedWork: "未命名作品", thinking: "正在构思…", lyriaPrompt: "Lyria 生成提示", musicalDirection: "音乐方向",
     genre: "风格", mood: "情绪", tempo: "速度", tonality: "调性", instrumentation: "编制", vocals: "人声",
-    noCorpusSource: "模型知识 · 无语料", jazzCorpusSource: "Jazz 本地语料",
+    noCorpusSource: "模型知识 · 无语料", musicCorpusSource: "本地音乐语料",
     orchestralSource: "管弦乐多乐章", workContract: "作品音乐契约", movements: "乐章",
     identityMotif: "主题动机", tonalWorld: "调性世界", orchestra: "统一编制", acousticSpace: "声学空间",
     movementPlanning: "正在构思完整乐章", movementGenerating: "正在生成乐章音频", movementAssembling: "正在按顺序组合全部乐章",
@@ -160,11 +164,11 @@ const translations = {
     newTask: "New task", tasks: "Tasks", musicTasks: "Music tasks", settings: "Settings",
     tabMoodMic: "MoodMic", tabCalendar: "Mood calendar", tabWorkflow: "Workflow", tabPlaylist: "Playlist (test)", tabHelp: "Help", tabBarLabel: "Tab navigation",
     entryEyebrow: "CHOOSE A WORKFLOW", entryTitle: "Choose how to<br />create your music.",
-    entryCopy: "Choose the workflow that fits your idea, from a single piece or Jazz corpus to a multi-movement work.",
-    workflowChoices: "Generation workflows", allStyles: "All styles", jazzOnly: "Jazz only",
+    entryCopy: "Choose the workflow that fits your idea, from a single piece or a music corpus to a multi-movement work.",
+    workflowChoices: "Generation workflows", allStyles: "All styles", musicOnly: "With music references",
     noCorpusTitle: "Without corpus", noCorpusDescription: "Use the model's existing musical knowledge to shape your idea into a complete arrangement.",
-    jazzCorpusTitle: "Jazz composition", jazzCorpusDescription: "Compose Jazz with local corpus references or the model's existing musical knowledge.",
-    enterStudio: "Enter studio →", enterJazzStudio: "Enter Jazz studio →", backEntry: "← Back to workflow selection",
+    musicCorpusTitle: "Composition with references", musicCorpusDescription: "Use a local Jazz, Blues, Electronic or other music corpus, or the model's existing musical knowledge.",
+    enterStudio: "Enter studio →", enterMusicStudio: "Enter music studio →", backEntry: "← Back to workflow selection",
     multiMovement: "Multi-movement", orchestralTitle: "Orchestral composition",
     orchestralDescription: "Let an agent plan a shared identity and complete movements, then generate a coherent orchestral work in sequence.",
     enterOrchestralStudio: "Enter orchestral studio →", sameThemeTracks: "One identity · Multiple tracks",
@@ -196,25 +200,28 @@ const translations = {
     viewAlbumDevelopment: "View development status →", inDevelopment: "In development",
     albumDevelopmentTitle: "Give a collection of pieces one recognizable voice.",
     albumDevelopmentCopy: "Album composition will reuse the shared musical contract and multi-track task model proven by the orchestral workflow. It will open after workflow 03 matures.",
-    noCorpusBadge: "No corpus · All styles", jazzCorpusBadge: "Jazz corpus enhanced", jazzNoCorpusBadge: "Jazz · No corpus",
+    noCorpusBadge: "No corpus · All styles", musicCorpusBadge: "Music corpus references", musicNoCorpusBadge: "Music · No corpus",
+    musicReference: "Music reference",
+    musicRefAuto: "Auto",
+    musicRefNone: "No reference corpus",
+    musicReferenceHelp: "Auto lets the Composer choose among available types; a specific type searches only that corpus.",
+    musicType: "Music type",
+    retrievalMode: "Retrieval mode",
+    retrievedStyles: "Style references",
+    retrievedStandards: "Work references",
     corpusSetting: "Corpus", withCorpus: "With corpus", withoutCorpus: "Without corpus",
-    jazzCorpusRestartRequired: "Restart Arioso and refresh this page to enable Jazz corpus comparison.",
+    musicCorpusRestartRequired: "Restart Arioso and refresh this page to enable music corpus references.",
     localWorkspace: "Local creative space", heroEyebrow: "COMPOSE WITH INTENT",
     heroTitle: "Turn an idea<br />into a piece of music.",
     heroCopy: "Describe a scene, feeling, or sound. Arioso shapes it into a complete music specification before sending it to Lyria.",
-    jazzHeroEyebrow: "COMPOSE WITH JAZZ MEMORY",
-    jazzHeroTitle: "Find a new sound<br />in Jazz memory.",
-    jazzHeroCopy: "Describe an era, ensemble, rhythm, or mood. Arioso searches the local Jazz corpus before shaping a complete music specification.",
-    jazzNoCorpusHeroCopy: "Describe an era, ensemble, rhythm, or mood. Arioso uses the model's existing musical knowledge to shape a complete Jazz music specification.",
+    musicHeroEyebrow: "COMPOSE WITH MUSIC MEMORY",
+    musicHeroTitle: "Find a new sound<br />in music memory.",
+    musicHeroCopy: "Describe an era, ensemble, rhythm, or mood. Arioso searches the selected music type's local corpus before shaping a complete music specification.",
+    musicNoCorpusHeroCopy: "Describe an era, ensemble, rhythm, or mood. Arioso uses the model's existing musical knowledge to shape a complete music specification.",
     orchestralBadge: "Orchestral · Multi-movement", orchestralHeroEyebrow: "COMPOSE ACROSS MOVEMENTS",
     orchestralHeroTitle: "Let one theme travel<br />through a complete work.",
     orchestralHeroCopy: "Describe the work's world, emotion, and dramatic direction. The agent establishes a shared musical contract, composes complete movements, and generates them automatically in sequence.",
-    knowledgeCard: "Knowledge card", noKnowledgeCard: "No reference",
-    knowledgeCardHelp: "Optional: use the card's musical and imaginative descriptions to shape the whole work and its movements.",
-    knowledgeCardLoadFailed: "Knowledge cards could not be loaded. Refresh the page to try again.",
-    noKnowledgeCardsAvailable: "No reviewed knowledge cards are available.",
-    knowledgeCardSnapshot: "View the card used for this work",
-    generalExamplesTitle: "Start with a sonic scene", jazzExamplesTitle: "Start with a Jazz character",
+    generalExamplesTitle: "Start with a sonic scene", musicExamplesTitle: "Start with a Jazz character",
     generationSettings: "Generation settings", generationMode: "Mode", modeGenerate: "Compose and generate music",
     modeCompose: "Compose prompt only", lyriaModel: "Lyria model", lyriaClip: "Lyria 3 Clip · 30 seconds",
     lyriaFull: "Lyria 3.5 · Full song", examplesTitle: "Start with a sonic scene",
@@ -249,7 +256,7 @@ const translations = {
     connectionOk: "Connection successful.", connectionFailed: "Connection failed. Check the API key and network connection.",
     keyCleared: "The saved API key was removed.", keyFallback: "The locally saved key was removed; a key is still available from the environment.",
     emptyTasks: "No tasks yet.<br />Start with a sonic scene.",
-    workflow01: "01 Single · No corpus", workflow02: "02 Single · Jazz",
+    workflow01: "01 Single · No corpus", workflow02: "02 Single · Music references",
     workflow03: "03 Orchestral work", workflow04: "04 Themed album",
     noTasksInWorkflow: "No tasks", albumComingSoon: "In development",
     movementProgress: "{completed}/{total} movements", totalDuration: "Total work duration", movementDuration: "Movement duration",
@@ -264,7 +271,7 @@ const translations = {
     audioPlaybackFailed: "Audio playback failed.", audioLoadFailed: "Audio failed to load. Restart the local server and try again.",
     unnamedWork: "Untitled work", thinking: "Thinking…", lyriaPrompt: "Lyria generation prompt", musicalDirection: "Musical direction",
     genre: "Genre", mood: "Mood", tempo: "Tempo", tonality: "Tonality", instrumentation: "Instrumentation", vocals: "Vocals",
-    noCorpusSource: "Model knowledge · No corpus", jazzCorpusSource: "Local Jazz corpus",
+    noCorpusSource: "Model knowledge · No corpus", musicCorpusSource: "Local music corpus",
     orchestralSource: "Multi-movement orchestral work", workContract: "Shared musical contract", movements: "Movements",
     identityMotif: "Identity motif", tonalWorld: "Tonal world", orchestra: "Orchestra", acousticSpace: "Acoustic space",
     movementPlanning: "Composing the complete movement", movementGenerating: "Generating movement audio", movementAssembling: "Assembling all movements in order",
@@ -437,19 +444,15 @@ const state = {
   albumLastExport: null,
   playbackStatus: "ready",
   playbackRequest: 0,
-  corpusMode: "none",
+  musicReference: "auto",
+  musicTypes: [],
   compositionMode: "single",
   workflowType: "01-general",
   expandedTaskGroup: null,
-  supportedWorkflows: new Set(["01-general", "02-jazz"]),
-  supportsOrchestralCards: false,
-  supportsJazzCorpusToggle: false,
+  supportedWorkflows: new Set(["01-general", "02-music"]),
   supportsBackgroundMusicProducer: false,
   supportsDiscussionSessions: false,
   supportsCreativeSessionTimeline: false,
-  orchestralCards: [],
-  orchestralCardsError: false,
-  orchestralReferenceId: "",
   submitting: false,
   language: "zh-CN",
   settings: null,
@@ -508,14 +511,11 @@ const elements = {
   albumProduction: document.querySelector("#album-production-select"),
   albumProductionHelp: document.querySelector("#album-production-help"),
   albumGenerationHelp: document.querySelector("#album-generation-help"),
-  corpusMode: document.querySelector("#corpus-mode-select"),
-  jazzCorpusSetting: document.querySelector("#jazz-corpus-setting"),
-  jazzCorpusHelp: document.querySelector("#jazz-corpus-help"),
+  musicReference: document.querySelector("#music-reference-select"),
+  musicReferenceSetting: document.querySelector("#music-reference-setting"),
+  musicReferenceHelp: document.querySelector("#music-reference-help"),
   vocalModes: document.querySelectorAll('input[name="vocal-mode"]'),
   vocalSetting: document.querySelector("#vocal-setting"),
-  orchestralReferenceSetting: document.querySelector("#orchestral-reference-setting"),
-  orchestralReference: document.querySelector("#orchestral-reference-select"),
-  orchestralReferenceHelp: document.querySelector("#orchestral-reference-help"),
   globalPlayer: document.querySelector("#global-player"),
   audio: document.querySelector("#audio-player"),
   playerTitle: document.querySelector("#player-title"),
@@ -604,24 +604,53 @@ function localizedExample(example) {
   return state.language === "en" ? { ...example, ...example.en } : example;
 }
 
-function normalizeCorpusMode(value) {
-  return value === "jazz" ? "jazz" : "none";
+const MUSIC_TYPE_IDS = ["blues", "electronic", "instrumental-rock", "instrumental-hip-hop"];
+
+function normalizeMusicReference(value) {
+  if (value === "none") return "none";
+  if (typeof value === "string" && MUSIC_TYPE_IDS.includes(value)) return value;
+  return "auto";
+}
+
+function normalizeWorkflowType(value) {
+  return value === "02-jazz" ? "02-music" : value;
+}
+
+/** Resolves the reference setting for a task, including historical Jazz records. */
+function musicReferenceForTask(task) {
+  if (typeof task.musicReference === "string") return normalizeMusicReference(task.musicReference);
+  if (typeof task.musicType === "string") return normalizeMusicReference(task.musicType);
+  if (task.corpusMode === "jazz") return "jazz";
+  if (task.corpusMode === "music") return "auto";
+  return "none";
+}
+
+function musicReferenceLabel(value) {
+  return value === "auto" ? t("musicRefAuto")
+    : value === "none" ? t("musicRefNone")
+      : value === "jazz" ? "Jazz"
+        : value === "blues" ? "Blues"
+          : value === "electronic" ? "Electronic"
+            : value === "instrumental-rock" ? "Instrumental Rock"
+              : value === "instrumental-hip-hop" ? "Instrumental Hip-Hop" : value;
 }
 
 function workflowTypeForTask(task) {
-  if (["01-general", "02-jazz", "03-orchestral", "04-album", "05-playlist"].includes(task.workflowType)) {
-    return task.workflowType;
+  const workflowType = normalizeWorkflowType(task.workflowType);
+  if (["01-general", "02-music", "03-orchestral", "04-album", "05-playlist"].includes(workflowType)) {
+    return workflowType;
   }
   if (task.compositionMode === "orchestral") return "03-orchestral";
   if (task.compositionMode === "album") return "04-album";
-  if (normalizeCorpusMode(task.corpusMode) === "jazz" || task.retrievalQuery) return "02-jazz";
+  if (task.corpusMode === "jazz" || task.corpusMode === "music"
+    || task.retrievalQuery || task.musicRetrieval) return "02-music";
   return "01-general";
 }
 
 function workflowLabel(workflowType) {
   return t({
     "01-general": "workflow01",
-    "02-jazz": "workflow02",
+    "02-music": "workflow02",
     "03-orchestral": "workflow03",
     "04-album": "workflow04",
   }[workflowType]);
@@ -639,26 +668,26 @@ function syncAlbumCandidateOptions() {
 }
 
 function renderComposerContext() {
-  const isJazz = state.workflowType === "02-jazz";
-  const usesJazzCorpus = state.corpusMode === "jazz";
+  const isMusic = state.workflowType === "02-music";
+  const usesMusicCorpus = state.musicReference !== "none";
   const isOrchestral = state.compositionMode === "orchestral";
   const isAlbum = state.compositionMode === "album";
   elements.heroEyebrow.textContent = t(
-    isAlbum ? "albumHeroEyebrow" : isOrchestral ? "orchestralHeroEyebrow" : isJazz ? "jazzHeroEyebrow" : "heroEyebrow",
+    isAlbum ? "albumHeroEyebrow" : isOrchestral ? "orchestralHeroEyebrow" : isMusic ? "musicHeroEyebrow" : "heroEyebrow",
   );
   elements.heroTitle.innerHTML = t(
-    isAlbum ? "albumHeroTitle" : isOrchestral ? "orchestralHeroTitle" : isJazz ? "jazzHeroTitle" : "heroTitle",
+    isAlbum ? "albumHeroTitle" : isOrchestral ? "orchestralHeroTitle" : isMusic ? "musicHeroTitle" : "heroTitle",
   );
   elements.heroCopy.textContent = t(
     isAlbum ? "albumHeroCopy" : isOrchestral ? "orchestralHeroCopy"
-      : isJazz ? (usesJazzCorpus ? "jazzHeroCopy" : "jazzNoCorpusHeroCopy") : "heroCopy",
+      : isMusic ? (usesMusicCorpus ? "musicHeroCopy" : "musicNoCorpusHeroCopy") : "heroCopy",
   );
   elements.creationModeBadge.textContent = t(
     isAlbum ? "albumBadge" : isOrchestral ? "orchestralBadge"
-      : isJazz ? (usesJazzCorpus ? "jazzCorpusBadge" : "jazzNoCorpusBadge") : "noCorpusBadge",
+      : isMusic ? (usesMusicCorpus ? "musicCorpusBadge" : "musicNoCorpusBadge") : "noCorpusBadge",
   );
   document.querySelector("#examples-title").textContent = t(
-    isAlbum ? "albumExamplesTitle" : isOrchestral ? "orchestralTitle" : isJazz ? "jazzExamplesTitle" : "generalExamplesTitle",
+    isAlbum ? "albumExamplesTitle" : isOrchestral ? "orchestralTitle" : isMusic ? "musicExamplesTitle" : "generalExamplesTitle",
   );
   elements.albumCountSetting.hidden = !isAlbum;
   elements.albumDurationSetting.hidden = !isAlbum;
@@ -666,28 +695,15 @@ function renderComposerContext() {
   elements.albumProductionSetting.hidden = !isAlbum;
   elements.albumProductionHelp.hidden = !isAlbum || elements.albumProduction.value !== "producer";
   elements.albumGenerationHelp.hidden = !isAlbum;
-  elements.jazzCorpusSetting.hidden = !isJazz;
-  elements.corpusMode.value = state.corpusMode;
-  elements.corpusMode.disabled = !state.supportsJazzCorpusToggle;
-  elements.jazzCorpusHelp.hidden = !isJazz || state.supportsJazzCorpusToggle;
-  elements.jazzCorpusHelp.textContent = t("jazzCorpusRestartRequired");
-  elements.orchestralReferenceSetting.hidden = !isOrchestral;
-  elements.orchestralReferenceHelp.hidden = !isOrchestral;
-  elements.orchestralReference.disabled = !state.supportsOrchestralCards || state.orchestralCardsError;
-  const cards = [...state.orchestralCards];
-  const savedReference = state.tasks.find((task) => task.id === state.selectedTaskId)?.orchestralReference;
-  if (savedReference && !cards.some((card) => card.id === savedReference.id)) {
-    cards.push(savedReference);
-  }
-  elements.orchestralReference.innerHTML = `<option value="">${escapeHtml(t("noKnowledgeCard"))}</option>`
-    + cards.map((card) => `<option value="${escapeHtml(card.id)}">${escapeHtml(card.title)}</option>`).join("");
-  elements.orchestralReference.value = state.orchestralReferenceId;
-  if (!state.selectedTaskId) state.orchestralReferenceId = elements.orchestralReference.value;
-  elements.orchestralReferenceHelp.textContent = t(
-    !state.supportsOrchestralCards ? "serverRestartRequired"
-      : state.orchestralCardsError ? "knowledgeCardLoadFailed"
-        : !cards.length ? "noKnowledgeCardsAvailable" : "knowledgeCardHelp",
-  );
+  elements.musicReferenceSetting.hidden = !isMusic;
+  // Only types with validated collections are offered in the selector.
+  const choices = ["auto", "none", ...state.musicTypes];
+  if (!choices.includes(state.musicReference)) state.musicReference = "auto";
+  elements.musicReference.innerHTML = choices
+    .map((value) => `<option value="${escapeHtml(value)}"${state.musicReference === value ? " selected" : ""}>${escapeHtml(musicReferenceLabel(value))}</option>`)
+    .join("");
+  elements.musicReference.disabled = !state.supportedWorkflows.has("02-music");
+  elements.musicReferenceHelp.hidden = !isMusic;
   elements.modelSettings.hidden = [...elements.modelSettings.children].every((child) => child.hidden);
 }
 
@@ -1238,7 +1254,7 @@ function renderAlbumDetail(task) {
 function renderExamples() {
   const activeExamples = state.compositionMode === "album" ? albumExamples : state.compositionMode === "orchestral"
     ? orchestralExamples
-    : state.workflowType === "02-jazz" ? jazzExamples : generalExamples;
+    : state.workflowType === "02-music" ? jazzExamples : generalExamples;
   document.querySelector("#example-grid").innerHTML = activeExamples.map((source, index) => {
     const example = localizedExample(source);
     return `
@@ -1269,7 +1285,7 @@ function renderExamples() {
 function renderTaskList() {
   const sessionTaskIds = new Set(state.discussionSessions.flatMap((session) => session.taskIds || []));
   const legacyTasks = state.tasks.filter((task) => !sessionTaskIds.has(task.id));
-  const workflowTypes = ["01-general", "02-jazz", "03-orchestral", "04-album"];
+  const workflowTypes = ["01-general", "02-music", "03-orchestral", "04-album"];
   // Playlist (05) has its own tab and is not listed here, so count only what
   // the list actually shows: the badge and the rows must agree.
   const listedTasks = legacyTasks.filter((task) => workflowTypes.includes(workflowTypeForTask(task)));
@@ -1312,7 +1328,7 @@ function renderTaskList() {
               <span class="task-state-dot ${statusClass(task.status)}"></span>
               ${escapeHtml(statusLabel(task.status))}${escapeHtml(progress)} · ${formatTime(task.updatedAt)}
             </span>
-            ${workflowType === "02-jazz" ? `<span class="task-corpus-mode">${escapeHtml(t(normalizeCorpusMode(task.corpusMode) === "jazz" ? "withCorpus" : "withoutCorpus"))}</span>` : ""}
+            ${workflowType === "02-music" ? `<span class="task-corpus-mode">${escapeHtml(musicReferenceLabel(musicReferenceForTask(task)))}</span>` : ""}
           </button>
           ${task.audioFile ? `<button class="task-play" type="button" data-play-task="${task.id}"></button>` : ""}
         </div>
@@ -1365,13 +1381,6 @@ function renderOrchestralTaskDetail(task) {
   const running = ["queued", "composing", "generating", "assembling", "processing"].includes(task.status);
   const plan = task.orchestralPlan;
   const movements = task.movements || [];
-  const referencePanel = `
-    <div class="panel orchestral-reference">
-      <h3>${t("knowledgeCard")}</h3>
-      <p>${escapeHtml(task.orchestralReference?.title || t("noKnowledgeCard"))}</p>
-      ${task.orchestralReference ? `<details data-task-detail="orchestral-reference"><summary>${t("knowledgeCardSnapshot")}</summary><div class="prompt-output">${escapeHtml(task.orchestralReference.content)}</div></details>` : ""}
-    </div>
-  `;
   const activeMovement = movements.find((movement) =>
     ["queued", "composing", "generating"].includes(movement.status),
   );
@@ -1510,7 +1519,19 @@ function renderTaskDetail(task) {
       </div>
     </div>
   ` : "";
-  const retrievalPanel = task.retrievalQuery ? `
+  const trace = task.musicRetrieval;
+  const retrievalPanel = trace ? `
+    <div class="panel">
+      <h3>${t("retrievalContext")}</h3>
+      <div class="spec-list">
+        <div class="spec-row"><span>${t("musicType")}</span><strong>${escapeHtml(trace.musicType)}</strong></div>
+        <div class="spec-row"><span>${t("retrievalMode")}</span><strong>${escapeHtml(trace.mode)}</strong></div>
+        <div class="spec-row"><span>${t("retrievalQuery")}</span><strong>${escapeHtml(trace.query)}</strong></div>
+        <div class="spec-row"><span>${t("retrievedStyles")}</span><strong>${escapeHtml((trace.styleReferenceIds || []).join(" · ") || "—")}</strong></div>
+        <div class="spec-row"><span>${t("retrievedStandards")}</span><strong>${escapeHtml((trace.standardReferenceIds || []).join(" · ") || "—")}</strong></div>
+      </div>
+    </div>
+  ` : task.retrievalQuery ? `
     <div class="panel">
       <h3>${t("retrievalContext")}</h3>
       <div class="spec-list">
@@ -1541,7 +1562,7 @@ function renderTaskDetail(task) {
   elements.taskDetail.innerHTML = `
     <header class="task-header">
       <div>
-        <p class="eyebrow">${escapeHtml(task.lyriaModel.toUpperCase())} · ${escapeHtml(t(normalizeCorpusMode(task.corpusMode) === "jazz" ? "jazzCorpusSource" : "noCorpusSource"))}</p>
+        <p class="eyebrow">${escapeHtml(task.lyriaModel.toUpperCase())} · ${escapeHtml(t(musicReferenceForTask(task) === "none" ? "noCorpusSource" : "musicCorpusSource"))}</p>
         <h2>${escapeHtml(title)}</h2>
         <p>${escapeHtml(task.description)}</p>
       </div>
@@ -1577,13 +1598,13 @@ function showEntry() {
 }
 
 function showComposer(
-  corpusMode = "none",
+  musicReference = "auto",
   compositionMode = "single",
   workflowType = "01-general",
 ) {
   const workflowChanged = state.workflowType !== workflowType;
   state.selectedTaskId = null;
-  state.corpusMode = normalizeCorpusMode(corpusMode);
+  state.musicReference = normalizeMusicReference(musicReference);
   state.compositionMode = ["orchestral", "album"].includes(compositionMode) ? compositionMode : "single";
   state.workflowType = workflowType;
   if (workflowChanged || state.discussionSession?.status === "submitted") {
@@ -1640,9 +1661,8 @@ function selectTask(id) {
   if (!task) return;
   state.workflowType = workflowTypeForTask(task);
   state.expandedTaskGroup = state.workflowType;
-  state.corpusMode = normalizeCorpusMode(task.corpusMode);
+  state.musicReference = musicReferenceForTask(task);
   state.compositionMode = ["orchestral", "album"].includes(task.compositionMode) ? task.compositionMode : "single";
-  state.orchestralReferenceId = task.orchestralReference?.id ?? "";
   renderComposerContext();
   elements.entryView.hidden = true;
   elements.albumView.hidden = true;
@@ -1750,7 +1770,9 @@ function currentTaskRequest(description) {
     mode: state.compositionMode === "album" ? "generate" : elements.mode.value,
     lyriaModel: state.compositionMode === "album" ? "lyria-3.5" : elements.lyriaModel.value,
     vocalMode: state.compositionMode === "album" ? "instrumental" : selectedVocalMode(),
-    corpusMode: state.corpusMode,
+    corpusMode: state.workflowType === "02-music" && state.musicReference !== "none" ? "music" : "none",
+    ...(state.workflowType === "02-music" && !["auto", "none"].includes(state.musicReference)
+      ? { musicType: state.musicReference } : {}),
     compositionMode: state.compositionMode,
     workflowType: state.workflowType,
     ...(state.compositionMode === "album" ? {
@@ -1758,8 +1780,6 @@ function currentTaskRequest(description) {
       targetTotalMinutes: Number(elements.albumDuration.value),
       ...(elements.albumProduction.value === "producer" ? { produceAlbum: true } : {}),
     } : {}),
-    ...(state.compositionMode === "orchestral" && state.orchestralReferenceId
-      ? { orchestralReferenceId: state.orchestralReferenceId } : {}),
   };
 }
 
@@ -1794,7 +1814,7 @@ function enterDiscussionWorkspace(session) {
   const task = latestSessionTask(session);
   state.selectedTaskId = task?.id ?? null;
   const options = session.taskOptions || {};
-  state.corpusMode = normalizeCorpusMode(options.corpusMode);
+  state.musicReference = normalizeMusicReference(options.musicReference ?? options.corpusMode);
   state.compositionMode = ["orchestral", "album"].includes(options.compositionMode) ? options.compositionMode : "single";
   state.workflowType = options.workflowType || "01-general";
   state.expandedTaskGroup = state.workflowType;
@@ -2005,7 +2025,7 @@ async function sendDiscussionMessage(event) {
     clearSelectedDiscussionImage();
   } catch (error) {
     elements.message.textContent = error instanceof Error ? error.message : String(error);
-    if (!state.discussionSession) showComposer(state.corpusMode, state.compositionMode, state.workflowType);
+    if (!state.discussionSession) showComposer(state.musicReference, state.compositionMode, state.workflowType);
     if (image) renderSelectedImagePreview();
     if (!elements.input.value) elements.input.value = content;
   } finally {
@@ -2056,14 +2076,14 @@ async function submitTask(event, approvedPrompt) {
     elements.message.textContent = t("serverRestartRequired");
     return;
   }
-  if (state.workflowType === "02-jazz" && state.corpusMode === "none"
-    && !state.supportsJazzCorpusToggle) {
-    elements.message.textContent = t("jazzCorpusRestartRequired");
+  if (state.workflowType === "02-music" && state.musicReference !== "none"
+    && !state.supportedWorkflows.has("02-music")) {
+    elements.message.textContent = t("musicCorpusRestartRequired");
     return;
   }
-  if (state.compositionMode === "orchestral" && state.orchestralReferenceId
-    && (!state.supportsOrchestralCards || state.orchestralCardsError)) {
-    elements.message.textContent = t(state.orchestralCardsError ? "knowledgeCardLoadFailed" : "serverRestartRequired");
+  if (!["auto", "none"].includes(state.musicReference)
+    && !state.musicTypes.includes(state.musicReference)) {
+    elements.message.textContent = t("serverRestartRequired");
     return;
   }
   state.submitting = true;
@@ -2147,20 +2167,10 @@ async function loadCapabilities() {
     }
     if (result.apiVersion < 2 || !Array.isArray(result.workflows)) return;
     state.supportedWorkflows = new Set(result.workflows);
-    state.supportsJazzCorpusToggle = result.jazzCorpusToggle === true;
+    state.musicTypes = Array.isArray(result.musicCorpus?.available) ? result.musicCorpus.available : [];
     state.supportsBackgroundMusicProducer = result.backgroundMusicProducer?.denoiser === "denoising-historical-recordings";
     state.supportsDiscussionSessions = result.discussionSessions === true;
     state.supportsCreativeSessionTimeline = result.creativeSessionTimeline === true;
-    state.supportsOrchestralCards = result.orchestralKnowledgeCards === true;
-    if (state.supportsOrchestralCards) {
-      try {
-        const cardsResponse = await fetch("/api/orchestral-cards", { cache: "no-store" });
-        if (!cardsResponse.ok) throw new Error("Knowledge cards unavailable.");
-        state.orchestralCards = await cardsResponse.json();
-      } catch {
-        state.orchestralCardsError = true;
-      }
-    }
     renderComposerContext();
     renderDiscussion();
   } catch {
@@ -2302,12 +2312,9 @@ new ResizeObserver(() => {
     `${Math.max(230, height + 50)}px`,
   );
 }).observe(elements.composerDock);
-elements.corpusMode.addEventListener("change", () => {
-  state.corpusMode = normalizeCorpusMode(elements.corpusMode.value);
+elements.musicReference.addEventListener("change", () => {
+  state.musicReference = normalizeMusicReference(elements.musicReference.value);
   renderComposerContext();
-});
-elements.orchestralReference.addEventListener("change", () => {
-  state.orchestralReferenceId = elements.orchestralReference.value;
 });
 elements.settingsForm.addEventListener("submit", saveSettings);
 elements.playerToggle.addEventListener("click", () => {
@@ -2340,7 +2347,7 @@ document.querySelector("#create-album").addEventListener("click", () => {
 });
 document.querySelector("#back-home").addEventListener("click", () => {
   if (state.compositionMode === "album") showAlbums();
-  else showComposer(state.corpusMode, state.compositionMode, state.workflowType);
+  else showComposer(state.musicReference, state.compositionMode, state.workflowType);
 });
 document.querySelectorAll("[data-workflow-type]").forEach((button) => {
   button.addEventListener("click", () => {

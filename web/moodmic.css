@@ -1005,6 +1005,25 @@
   min-height: 60px;
 }
 
+.mm-music-ref {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 14px 16px;
+  margin-top: 12px;
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--line-strong);
+  background: var(--surface-2);
+}
+
+.mm-music-ref-note {
+  font-size: 0.86rem;
+  color: var(--ink-soft);
+  flex: 1;
+  min-width: 200px;
+}
+
 .mm-jazz {
   display: flex;
   align-items: center;

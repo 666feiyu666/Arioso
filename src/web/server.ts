@@ -26,8 +26,12 @@ import { JourneyTransitionError } from "../journey/journey-graph.js";
 import { runMoodMicGeneration } from "../moodmic/moodmic-graph.js";
 import { MAX_PLAYLIST_REFERENCES, type PlaylistReference } from "../playlist/reference.js";
 import { MAX_PLAYLIST_DISCUSSION_MESSAGES, MAX_PLAYLIST_FEEDBACK_LENGTH, type PlaylistDiscussionMessage } from "../playlist/briefing.js";
-import { listOrchestralKnowledgeCards } from "../retrieval/orchestral-cards.js";
 import type { PoemRetriever } from "../retrieval/poem-retriever.js";
+import {
+  MUSIC_TYPES,
+  loadMusicRetriever,
+  type MusicRetrievalTrace,
+} from "../retrieval/music-retriever.js";
 import {
   ALBUM_MAX_CANDIDATES,
   ALBUM_MAX_TOTAL_MINUTES,
@@ -38,7 +42,7 @@ import {
 import { TaskStore, parseTaskInput, type AlbumAdmission, type AlbumAudioExport, type MusicTask } from "./task-store.js";
 import { MoodEntryStore, isCalendarDate, isMoodGroup, type MoodEntryInput } from "./mood-store.js";
 import { LangChainMoodClassifier, type MoodClassifier } from "./mood-classifier.js";
-import { MoodChatStore, type MoodChat } from "./mood-chat-store.js";
+import { MoodChatStore, isMusicReference, type MoodChat } from "./mood-chat-store.js";
 import { poemReferencesForProposal } from "./poem-proposal.js";
 import { HttpError, readBinaryBody, readJsonBody, sendAudio, sendFile, sendJson, serveAsset, serveStatic } from "./http.js";
 import { isRecord } from "../utils/validation.js";
@@ -132,12 +136,9 @@ async function runTask(
         lyriaModel: task.lyriaModel,
         vocalMode: task.vocalMode ?? "auto",
         corpusMode: task.corpusMode ?? "none",
-        ...(task.workflowType === "02-jazz" ? { genre: "jazz" as const } : {}),
-        onJazzRetrieval: async ({ query, referenceIds }) => {
-          await store.update(task.id, {
-            retrievalQuery: query,
-            retrievedReferenceIds: referenceIds,
-          });
+        ...(task.musicType ? { musicType: task.musicType } : {}),
+        onMusicRetrieval: async (trace: MusicRetrievalTrace) => {
+          await store.update(task.id, { musicRetrieval: trace });
         },
       });
       await store.update(task.id, { musicSpec: spec, title: spec.title });
@@ -190,7 +191,6 @@ async function runOrchestralTask(
       apiKey: config.openAiApiKey,
       model: currentTask.composerModel,
       lyriaModel: currentTask.lyriaModel,
-      ...(currentTask.orchestralReference ? { referenceCard: currentTask.orchestralReference } : {}),
     });
     const now = new Date().toISOString();
     currentTask = await store.update(currentTask.id, {
@@ -222,7 +222,6 @@ async function runOrchestralTask(
           apiKey: config.openAiApiKey,
           model: currentTask.composerModel,
           lyriaModel: currentTask.lyriaModel,
-          ...(currentTask.orchestralReference ? { referenceCard: currentTask.orchestralReference } : {}),
         });
         currentTask = await store.updateMovement(currentTask.id, movement.id, {
           title: movementPlan.title,
@@ -720,10 +719,13 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
       const journeyPlanApproveMatch = /^\/api\/journeys\/([^/]+)\/album-plan\/approve$/.exec(url.pathname);
       const journeyRetryMatch = /^\/api\/journeys\/([^/]+)\/retry$/.exec(url.pathname);
       if (request.method === "GET" && url.pathname === "/api/capabilities") {
+        // Available music types follow the corpus on disk, so an unpopulated
+        // type is never offered as if it had validated references.
+        const music = await loadMusicRetriever();
         const capabilities = {
-          apiVersion: 10,
+          apiVersion: 11,
           version: APPLICATION_VERSION,
-          workflows: ["01-general", "02-jazz", "03-orchestral", "04-album", "05-playlist"],
+          workflows: ["01-general", "02-music", "03-orchestral", "04-album", "05-playlist"],
           discussionSessions: true,
           creativeSessionTimeline: true,
           discussionImages: { types: ["image/jpeg", "image/png", "image/webp"], maximumBytes: MAX_DISCUSSION_IMAGE_BYTES },
@@ -733,12 +735,15 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
           albumExport: true,
           backgroundMusicProducer: { denoiser: "denoising-historical-recordings", outputChannels: 1, listeningReview: "required" },
           albumCandidates: { minimum: 12, maximum: 28, default: 14 },
-          jazzCorpusToggle: true,
+          musicCorpus: {
+            types: MUSIC_TYPES,
+            available: music.retriever.availableTypes(),
+            availability: music.availability,
+          },
           playlistReferences: true,
           playlistPlanConfirmation: true,
           orchestralAssembly: true,
           orchestralPromptFormat: "orchestral-v1",
-          orchestralKnowledgeCards: true,
           orchestralDuration: {
             minimumTotalMinutes: 5,
             maximumTotalMinutes: 12,
@@ -746,11 +751,6 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
           },
         };
         sendJson(response, 200, capabilities);
-        return;
-      }
-
-      if (request.method === "GET" && url.pathname === "/api/orchestral-cards") {
-        sendJson(response, 200, await listOrchestralKnowledgeCards());
         return;
       }
 
@@ -865,9 +865,10 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
               ...(typeof value.mode === "string" ? { mode: value.mode } : {}),
               ...(typeof value.lyriaModel === "string" ? { lyriaModel: value.lyriaModel } : {}),
               ...(typeof value.vocalMode === "string" ? { vocalMode: value.vocalMode } : {}),
-              // The "why not jazz" invitation can change before creation, so the
-              // chosen reference corpus is authoritative at submit time.
+              // The music reference setting can change before creation, so the
+              // chosen value is authoritative at submit time.
               ...(typeof value.corpusMode === "string" ? { corpusMode: value.corpusMode } : {}),
+              ...(isMusicReference(value.musicReference) ? { musicReference: value.musicReference } : {}),
               ...(typeof value.workflowType === "string" ? { workflowType: value.workflowType } : {}),
             };
         activeDiscussionSubmissions.add(sessionId);
@@ -894,8 +895,11 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
 
       if (request.method === "POST" && url.pathname === "/api/mood-chats") {
         const body = await readJsonBody(request);
-        const jazz = isRecord(body) && body.jazz === true;
-        sendJson(response, 201, await moodChatView(await moodChatStore.create(jazz)));
+        // "jazz: true" is the legacy form of an explicit Jazz selection.
+        const musicReference = isRecord(body) && isMusicReference(body.musicReference)
+          ? body.musicReference
+          : isRecord(body) && body.jazz === true ? "jazz" : "auto";
+        sendJson(response, 201, await moodChatView(await moodChatStore.create(musicReference)));
         return;
       }
 
@@ -954,7 +958,7 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
           model: config.openAiModel,
           language: await settings.language(),
           compositionMode: "single",
-          workflowType: chat.jazz ? "02-jazz" : "01-general",
+          workflowType: chat.musicReference === "none" ? "01-general" : "02-music",
         });
         sendJson(response, 200, await moodChatView(
           await moodChatStore.addMessage(chatId, "assistant", reply.content, [], reply.mood),
@@ -982,7 +986,7 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
             model: config.openAiModel,
             language: await settings.language(),
             compositionMode: "single",
-            workflowType: chat.jazz ? "02-jazz" : "01-general",
+            workflowType: chat.musicReference === "none" ? "01-general" : "02-music",
           },
           poetry.references,
         );
@@ -1004,15 +1008,19 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
           throw new HttpError(400, "An approved prompt is required.");
         }
         const prompt = value.prompt.trim();
-        const jazz = typeof value.corpusMode === "string" ? value.corpusMode === "jazz" : chat.jazz;
+        const musicReference = isMusicReference(value.musicReference)
+          ? value.musicReference
+          : chat.musicReference;
+        const usesMusicCorpus = musicReference !== "none";
         activeMoodSubmissions.add(chatId);
         try {
           await moodChatStore.setProposal(chatId, prompt);
           const input = parseTaskInput({
             description: prompt,
             compositionMode: "single",
-            workflowType: jazz ? "02-jazz" : "01-general",
-            corpusMode: jazz ? "jazz" : "none",
+            workflowType: usesMusicCorpus ? "02-music" : "01-general",
+            corpusMode: usesMusicCorpus ? "music" : "none",
+            ...(usesMusicCorpus && musicReference !== "auto" ? { musicType: musicReference } : {}),
             mode: typeof value.mode === "string" ? value.mode : "generate",
             lyriaModel: typeof value.lyriaModel === "string" ? value.lyriaModel : "lyria-3.5",
             vocalMode: typeof value.vocalMode === "string" ? value.vocalMode : "instrumental",

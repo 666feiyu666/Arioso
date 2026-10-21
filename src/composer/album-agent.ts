@@ -87,7 +87,6 @@ export interface AlbumAgentOptions {
   targetTotalMinutes?: number;
   /** MoodMic creations to plan from. */
   references?: PlaylistReference[];
-  genre?: NonNullable<ComposeMusicOptions["genre"]>;
   vocalMode?: NonNullable<ComposeMusicOptions["vocalMode"]>;
 }
 

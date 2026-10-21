@@ -17,7 +17,7 @@ describe("workflow entry page", () => {
 
       expect(workflows).toEqual([
         { "data-workflow-type": "01-general", "data-composition-mode": "single", "data-corpus-mode": "none" },
-        { "data-workflow-type": "02-jazz", "data-composition-mode": "single", "data-corpus-mode": "jazz" },
+        { "data-workflow-type": "02-music", "data-composition-mode": "single", "data-corpus-mode": "music" },
         { "data-workflow-type": "03-orchestral", "data-composition-mode": "orchestral", "data-corpus-mode": "none" },
         { "data-workflow-type": "04-album", "data-composition-mode": "album", "data-corpus-mode": "none" },
       ]);

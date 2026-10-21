@@ -9,6 +9,7 @@ import {
   type DiscussionImageType,
   type DiscussionMood,
 } from "../discussion/types.js";
+import { MUSIC_TYPES, type MusicType } from "../retrieval/music-retriever.js";
 import { writeTextFileAtomic } from "../utils/files.js";
 import { isRecord } from "../utils/validation.js";
 
@@ -36,11 +37,19 @@ export interface MoodChatMessage {
   createdAt: string;
 }
 
+/** Auto lets the Composer choose; a type binds retrieval; none keeps the no-corpus path. */
+export type MusicReference = "auto" | "none" | MusicType;
+
+export function isMusicReference(value: unknown): value is MusicReference {
+  return value === "auto" || value === "none"
+    || MUSIC_TYPES.includes(value as MusicType);
+}
+
 export interface MoodChat {
   id: string;
   status: MoodChatStatus;
-  /** Whether the "why not jazz" reference corpus is on for this chat. */
-  jazz: boolean;
+  /** The music reference setting for this chat; "auto" is the default. */
+  musicReference: MusicReference;
   messages: MoodChatMessage[];
   attachments: MoodChatAttachment[];
   proposal?: string;
@@ -115,7 +124,6 @@ function isMoodChat(value: unknown): value is MoodChat {
   return isRecord(value)
     && isSafeId(value.id)
     && ["discussing", "proposal-ready", "submitted"].includes(String(value.status))
-    && typeof value.jazz === "boolean"
     && Array.isArray(value.messages)
     && Array.isArray(value.attachments)
     && Array.isArray(value.taskIds)
@@ -147,12 +155,19 @@ export class MoodChatStore {
       try {
         const value: unknown = JSON.parse(await readFile(path.join(this.#directory, entry.name, "session.json"), "utf8"));
         if (!isMoodChat(value)) continue;
+        // Older sessions stored the Jazz pilot as a boolean toggle.
+        const legacy = value as MoodChat & { jazz?: unknown; musicReference?: unknown };
+        const musicReference: MusicReference = isMusicReference(legacy.musicReference)
+          ? legacy.musicReference
+          : legacy.jazz === true ? "jazz" : "auto";
         // Sessions written before the poetry experiment simply have no trace.
         const trace = value.poem_retrieval === undefined
           ? undefined
           : parsePoemRetrievalTrace(value.poem_retrieval);
         const chat: MoodChat = { ...value };
         delete chat.poem_retrieval;
+        delete (chat as MoodChat & { jazz?: unknown }).jazz;
+        chat.musicReference = musicReference;
         if (trace) chat.poem_retrieval = trace;
         this.#chats.set(chat.id, chat);
       } catch {
@@ -169,10 +184,10 @@ export class MoodChatStore {
     return [...this.#chats.values()].sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
   }
 
-  async create(jazz = false): Promise<MoodChat> {
+  async create(musicReference: MusicReference = "auto"): Promise<MoodChat> {
     const now = new Date().toISOString();
     const chat: MoodChat = {
-      id: crypto.randomUUID(), status: "discussing", jazz,
+      id: crypto.randomUUID(), status: "discussing", musicReference,
       messages: [], attachments: [], taskIds: [], createdAt: now, updatedAt: now,
     };
     this.#chats.set(chat.id, chat);

@@ -60,7 +60,7 @@
         <section id="entry-view" class="view entry-view">
           <div class="entry-hero">
             <h2 data-i18n-html="entryTitle">选择音乐的<br />创作方式。</h2>
-            <p data-i18n="entryCopy">从模型自身知识开始，或让 Jazz 语料为编曲提供参考。</p>
+            <p data-i18n="entryCopy">从模型自身知识开始，或让本地音乐语料为编曲提供参考。</p>
           </div>
           <div class="workflow-grid" aria-label="生成方式" data-i18n-aria-label="workflowChoices">
             <button class="workflow-card" type="button" data-workflow-type="01-general" data-composition-mode="single" data-corpus-mode="none">
@@ -72,14 +72,14 @@
               </span>
               <span class="workflow-action" data-i18n="enterStudio">进入创作台 →</span>
             </button>
-            <button class="workflow-card corpus" type="button" data-workflow-type="02-jazz" data-composition-mode="single" data-corpus-mode="jazz">
+            <button class="workflow-card corpus" type="button" data-workflow-type="02-music" data-composition-mode="single" data-corpus-mode="music">
               <span class="workflow-index">02</span>
               <span class="workflow-copy">
-                <span class="workflow-tag" data-i18n="jazzOnly">仅限 Jazz</span>
-                <strong data-i18n="jazzCorpusTitle">含语料生成</strong>
-                <span data-i18n="jazzCorpusDescription">先检索本地 Jazz 语料，再结合参考信息完成编曲。</span>
+                <span class="workflow-tag" data-i18n="musicOnly">含音乐参考</span>
+                <strong data-i18n="musicCorpusTitle">含语料生成</strong>
+                <span data-i18n="musicCorpusDescription">先检索本地音乐语料（风格与代表作品），再结合参考信息完成编曲。</span>
               </span>
-              <span class="workflow-action" data-i18n="enterJazzStudio">进入 Jazz 创作台 →</span>
+              <span class="workflow-action" data-i18n="enterMusicStudio">进入音乐创作台 →</span>
             </button>
             <button class="workflow-card orchestral" type="button" data-workflow-type="03-orchestral" data-composition-mode="orchestral" data-corpus-mode="none">
               <span class="workflow-index">03</span>
@@ -125,24 +125,17 @@
               <label id="album-count-setting" hidden><span data-i18n="candidateCount">候选曲数</span><select id="album-count-select"><option value="12">12</option><option value="13">13</option><option value="14" selected>14</option><option value="15">15</option></select></label>
               <label id="album-duration-setting" hidden><span data-i18n="albumTargetDuration">目标总时长</span><select id="album-duration-select"><option value="30">30 min</option><option value="35" selected>35 min</option><option value="40">40 min</option><option value="65">65 min</option></select></label>
               <label id="album-production-setting" hidden><span data-i18n="albumProductionMode">制作流程</span><select id="album-production-select"><option value="off" data-i18n="albumGenerationOnly">生成候选曲</option><option value="producer" data-i18n="backgroundMusicProducer">Background Music Producer · 生成并降噪</option></select></label>
-              <label id="jazz-corpus-setting" hidden>
-                <span data-i18n="corpusSetting">语料</span>
-                <select id="corpus-mode-select" aria-describedby="jazz-corpus-help">
-                  <option value="jazz" data-i18n="withCorpus">使用语料</option>
-                  <option value="none" data-i18n="withoutCorpus">不使用语料</option>
-                </select>
-              </label>
-              <label id="orchestral-reference-setting" hidden>
-                <span data-i18n="knowledgeCard">知识卡片</span>
-                <select id="orchestral-reference-select" aria-describedby="orchestral-reference-help">
-                  <option value="" data-i18n="noKnowledgeCard">无参考</option>
+              <label id="music-reference-setting" hidden>
+                <span data-i18n="musicReference">音乐参考</span>
+                <select id="music-reference-select" aria-describedby="music-reference-help">
+                  <option value="auto" data-i18n="musicRefAuto">Auto（自动选择）</option>
+                  <option value="none" data-i18n="musicRefNone">不使用语料</option>
                 </select>
               </label>
             </div>
             <p id="album-generation-help" class="reference-help" data-i18n="albumGenerationHelp" hidden>纯器乐 · 每首约 1–3 分钟。整批构思、回看并生成，之后由你选择收录。</p>
             <p id="album-production-help" class="reference-help" data-i18n="albumProductionHelp" hidden>制作人流程会保留原始音频，将未排除的候选曲降噪并导出单声道 WAV 与 MP4。完成后仍需试听确认。</p>
-            <p id="jazz-corpus-help" class="reference-help" hidden></p>
-            <p id="orchestral-reference-help" class="reference-help" hidden></p>
+            <p id="music-reference-help" class="reference-help" data-i18n="musicReferenceHelp" hidden>Auto 让 Composer 从可用类型中选择；选具体类型则只检索该类型语料。</p>
           </div>
 
           <section class="examples-section" aria-labelledby="examples-title">

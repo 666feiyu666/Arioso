@@ -110,9 +110,21 @@ verified with fake providers so far; its first live run is still outstanding.
 
 ## Rebuild corpus material
 
-The repository contains scripts for collecting Jazz genre and standards data,
-plus a normalization command for the standards corpus. Corpus updates should
-preserve source URLs and manifests so normalized records remain traceable.
+The runtime reads one canonical layout, `corpus/music/<type>/`, with two
+normalized collections per music type: `styles.normalized.jsonl` and
+`standards.normalized.jsonl`. Jazz is populated; Blues, Electronic, Instrumental
+Rock and Instrumental Hip-Hop stay unavailable until their collections exist.
+The migration step rewrites the canonical files from the existing Jazz
+artifacts without collecting new data:
+
+```powershell
+node src/corpus/build-music-corpus.mjs
+```
+
+The repository also contains scripts for collecting Jazz genre and standards
+data, plus a normalization command for the standards corpus. Corpus updates
+should preserve source URLs and manifests so normalized records remain
+traceable.
 
 ```powershell
 node scripts/build-jazz-genres.mjs

@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 import { combineRecords, titleKey } from "../src/corpus/combine-jazz-standards.mjs";
 import { normalizeBookRecord } from "../src/corpus/normalize-gioia-jazz-standards.mjs";
-import { createJazzRetriever, loadJazzRetriever } from "../src/retrieval/jazz-retriever.ts";
+import { createMusicRetriever, loadMusicRetriever } from "../src/retrieval/music-retriever.ts";
 
 describe("book source normalization", () => {
   it("keeps a sentence spanning PDF pages and excludes the recording list", () => {
@@ -50,7 +50,7 @@ describe("multi-source corpus", () => {
     const parse = (text) => text.trim().split(/\r?\n/).map((line) => JSON.parse(line));
     const [raw, book, combined] = await Promise.all([
       "gioia_2012.raw.jsonl", "gioia_2012.normalized.jsonl", "jazz_standards.combined.normalized.jsonl",
-    ].map(async (file) => parse(await readFile(new URL(`../corpus/jazz/${file}`, import.meta.url), "utf8"))));
+    ].map(async (file) => parse(await readFile(new URL(`../corpus/music/jazz/${file}`, import.meta.url), "utf8"))));
     expect(raw).toHaveLength(252);
     expect(book).toHaveLength(252);
     expect(combined).toHaveLength(606);
@@ -67,14 +67,19 @@ describe("multi-source corpus", () => {
         expect(excerpt.pdf_page_end).toBeLessThanOrEqual(record.source.pages.pdf_end);
       }
     }
-    const result = createJazzRetriever(book).search("distinctive piano vamp turnaround", 5).find((reference) => reference.title === "All Blues");
+    const result = createMusicRetriever({ jazz: { styles: [], standards: book } })
+      .search({ musicType: "jazz", mode: "description", query: "distinctive piano vamp turnaround", limit: 5 })
+      .references.find((reference) => reference.title === "All Blues");
     expect(result?.articleUrl).toBeNull();
     expect(result?.source.citation).toContain("2012");
     expect(result?.source.pages.printed_start).toBe("11");
   });
 
   it("loads the combined corpus by default with book provenance", async () => {
-    const references = (await loadJazzRetriever()).search("hoary vamp underplay", 3);
+    const { retriever } = await loadMusicRetriever();
+    const { references } = retriever.search({
+      musicType: "jazz", mode: "description", query: "hoary vamp underplay", limit: 5,
+    });
     expect(references.some((reference) => reference.id === "gioia-2012-all-blues" && reference.source.author === "Ted Gioia")).toBe(true);
   });
 });
