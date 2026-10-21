@@ -1,0 +1,22 @@
+{
+  "corpus_id": "arioso-jazz-collection",
+  "music_type": "jazz",
+  "generated_at": "2026-10-21T08:24:09.000Z",
+  "styles": {
+    "record_count": 56,
+    "complete_count": 55
+  },
+  "standards": {
+    "record_count": 606,
+    "complete_count": 520
+  },
+  "runtime_files": [
+    "styles.normalized.jsonl",
+    "standards.normalized.jsonl"
+  ],
+  "derived_from": [
+    "jazz_genres.normalized.manifest.json",
+    "jazz_standards.combined.normalized.manifest.json"
+  ],
+  "note": "Jazz is the migrated pilot: the runtime files were copied from the existing normalized artifacts by src/corpus/build-music-corpus.mjs, not recollected. Counts are summarized from the source manifests listed in derived_from."
+}

@@ -1,0 +1,17 @@
+{
+  "corpus_id": "arioso-electronic-collection",
+  "music_type": "electronic",
+  "generated_at": "2026-10-21T08:15:11.557Z",
+  "styles": {
+    "record_count": 90,
+    "complete_count": 83
+  },
+  "standards": {
+    "record_count": 101,
+    "complete_count": 71
+  },
+  "runtime_files": [
+    "styles.normalized.jsonl",
+    "standards.normalized.jsonl"
+  ]
+}

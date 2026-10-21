@@ -1,0 +1,40 @@
+{
+  "corpus_id": "arioso-instrumental-hip-hop-styles",
+  "schema_version": "0.1.0",
+  "music_type": "instrumental-hip-hop",
+  "reference_kind": "style",
+  "generated_at": "2026-10-21T08:16:07.791Z",
+  "source_kind": "pages",
+  "source_pages": [
+    "Instrumental hip-hop",
+    "Lo-fi hip hop",
+    "Trip hop",
+    "Jazz rap",
+    "Chopped and screwed",
+    "Abstract hip hop"
+  ],
+  "record_count": 6,
+  "complete_count": 6,
+  "insufficient_evidence_count": 0,
+  "article_body_count": 6,
+  "article_body_failed_count": 0,
+  "feature_coverage": {
+    "harmony": 3,
+    "rhythm": 6,
+    "melody": 3,
+    "form": 1,
+    "instrumentation": 6,
+    "arrangement": 5,
+    "style": 4,
+    "mood": 1
+  },
+  "seed_only": false,
+  "license": {
+    "name": "Creative Commons Attribution-ShareAlike 4.0 International",
+    "spdx": "CC-BY-SA-4.0",
+    "url": "https://creativecommons.org/licenses/by-sa/4.0/"
+  },
+  "attribution": "English Wikipedia contributors; see the pinned revision histories.",
+  "extraction_method": "Revision-pinned seed records, five-sentence intro snapshots, prose paragraphs from pinned article revisions, and sentence-level musical evidence filtering. Tables, block quotations, lyrics and reference sections are excluded.",
+  "normalization_method": "Musical sentences only: rhythm, harmony, melody, instrumentation, texture, form and production. Biography, chart and sales narrative is excluded unless the sentence also carries audible or compositional detail."
+}

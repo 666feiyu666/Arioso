@@ -1,0 +1,17 @@
+{
+  "corpus_id": "arioso-instrumental-hip-hop-collection",
+  "music_type": "instrumental-hip-hop",
+  "generated_at": "2026-10-21T08:16:18.272Z",
+  "styles": {
+    "record_count": 6,
+    "complete_count": 6
+  },
+  "standards": {
+    "record_count": 67,
+    "complete_count": 33
+  },
+  "runtime_files": [
+    "styles.normalized.jsonl",
+    "standards.normalized.jsonl"
+  ]
+}

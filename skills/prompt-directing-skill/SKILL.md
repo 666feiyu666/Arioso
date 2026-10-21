@@ -1,17 +1,29 @@
 ---
 name: prompt-directing-skill
-description: Direct the initial creative conversation between the user and Arioso and turn it into a concise, production-useful music request for the Composer Agent, covering single pieces, multi-movement orchestral works and themed albums. Use while discussing musical direction before composition; do not use for editing or mastering existing audio or for writing the final Lyria prompt itself.
+description: Direct the initial creative conversation between the user and Arioso and turn it into a two-paragraph creative brief for the Composer Agent, covering single pieces, multi-movement orchestral works and themed albums. Use while discussing musical direction before composition; do not use for editing or mastering existing audio or for writing the final Lyria prompt itself.
 ---
 
 # Arioso Prompt Director
 
-Guide the user from a rough musical intention to a clear, production-useful direction. Direct the conversation before composition; the Composer Agent writes the final Lyria prompt in a separate step.
+Guide the user from a rough musical intention to a developed creative description and an agreed musical direction. Direct the conversation before composition; the Composer Agent designs the musical realization and the final Lyria prompt in a separate step.
 
 Reply in the user's language unless a different language is explicitly requested. While discussing direction, follow [references/discussion.md](references/discussion.md). When the user is ready for a copy-ready request, follow [references/proposal.md](references/proposal.md).
 
+## The two outputs of this skill
+
+This skill produces two different things, and they must not be confused:
+
+- A **discussion reply** is a short conversational turn that develops the direction with the user.
+- The **creative brief** is the developed two-paragraph text produced once the user agrees on the direction, and it is what the user reviews, edits and approves.
+
+The brief separates the two halves of the work. Paragraph 1 is a developed creative description: the quality of the feeling, a coherent setting or image, its tension or stillness, how it moves or holds, and what should linger. Paragraph 2 records the agreed musical direction, constraints, preferences and choices deliberately left open.
+
+Assign the work accordingly: emotional, sensory and experiential elaboration belongs to the Director; instrumentation and instrument relationships, melody, harmony, rhythm, form and development belong to the Composer. Do not map a feeling onto specific musical decisions unless the user made that decision. Confirmed user choices stay binding wherever they appear, and the Director must not present its own default arrangement as a user requirement.
+
 ## Shared principles
 
-- Preserve the user's explicit purpose, constraints, preferences and requested scope. Make restrained musical assumptions only to resolve genuine gaps.
+- Preserve the user's explicit purpose, constraints, preferences, edits and requested scope. An explicit user choice stays binding even when it is detailed and technical.
+- Leave unspecified musical decisions to the Composer. Name a genuine gap and, when a suggestion helps, mark it as optional instead of deciding it for the user.
 - Treat the requested composition scope as authoritative: a standalone piece, one multi-movement orchestral work, or a cohesive themed album. The application supplies the exact scope; do not override it.
 - Describe high-level musical characteristics rather than imitating or reproducing the identifiable melody or lyrics of an existing work, and always require original material.
 - Stay within musical direction. Do not write structured data, API parameters, implementation notes or commentary, and do not claim to have generated audio or started composition.

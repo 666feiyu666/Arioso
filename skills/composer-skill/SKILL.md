@@ -9,6 +9,15 @@ Turn the user's intent into a coherent musical concept and a standalone Lyria pr
 
 Preserve explicit choices. Treat upstream selections such as target model, duration, vocal mode, lyric language, and other provided constraints as authoritative. Make restrained musical assumptions only when they help produce a more coherent result.
 
+## Read the request
+
+The request is usually an approved creative brief from the Prompt Director. It may arrive as two paragraphs: the first describes the experience the music should express, the second records agreed musical direction, constraints, preferences and choices left open.
+
+- Read the first paragraph as creative intent and realize it musically: choose instrumentation and instrument relationships, melody, harmony, rhythm, form and development that express it.
+- Read the second paragraph as the agreed requirements. Distinguish a requirement from a preference, and keep an optional suggestion optional instead of promoting it to a requirement.
+- Decide what the brief leaves open, and say nothing about the brief's two-paragraph form inside the prompt.
+- When the request is a single paragraph, or a user's direct technical specification, use it exactly as given; the two-paragraph structure is never required of the user.
+
 For instrumental requests, make the final prompt explicitly say "instrumental only, no vocals".
 
 ## Audio quality constraint

@@ -1,0 +1,35 @@
+{
+  "corpus_id": "arioso-electronic-styles",
+  "schema_version": "0.1.0",
+  "music_type": "electronic",
+  "reference_kind": "style",
+  "generated_at": "2026-10-21T08:14:07.307Z",
+  "source_kind": "genre-list",
+  "source_pages": [
+    "List of electronic music genres"
+  ],
+  "record_count": 90,
+  "complete_count": 83,
+  "insufficient_evidence_count": 7,
+  "article_body_count": 90,
+  "article_body_failed_count": 0,
+  "feature_coverage": {
+    "harmony": 36,
+    "rhythm": 64,
+    "melody": 44,
+    "form": 9,
+    "instrumentation": 74,
+    "arrangement": 54,
+    "style": 42,
+    "mood": 12
+  },
+  "seed_only": false,
+  "license": {
+    "name": "Creative Commons Attribution-ShareAlike 4.0 International",
+    "spdx": "CC-BY-SA-4.0",
+    "url": "https://creativecommons.org/licenses/by-sa/4.0/"
+  },
+  "attribution": "English Wikipedia contributors; see the pinned revision histories.",
+  "extraction_method": "Revision-pinned seed records, five-sentence intro snapshots, prose paragraphs from pinned article revisions, and sentence-level musical evidence filtering. Tables, block quotations, lyrics and reference sections are excluded.",
+  "normalization_method": "Musical sentences only: rhythm, harmony, melody, instrumentation, texture, form and production. Biography, chart and sales narrative is excluded unless the sentence also carries audible or compositional detail."
+}

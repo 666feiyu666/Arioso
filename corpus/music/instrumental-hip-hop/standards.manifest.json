@@ -1,0 +1,35 @@
+{
+  "corpus_id": "arioso-instrumental-hip-hop-standards",
+  "schema_version": "0.1.0",
+  "music_type": "instrumental-hip-hop",
+  "reference_kind": "standard",
+  "generated_at": "2026-10-21T08:16:18.272Z",
+  "source_kind": "categories",
+  "source_pages": [
+    "Category:Instrumental hip-hop albums"
+  ],
+  "record_count": 67,
+  "complete_count": 33,
+  "insufficient_evidence_count": 34,
+  "article_body_count": 65,
+  "article_body_failed_count": 0,
+  "feature_coverage": {
+    "harmony": 2,
+    "rhythm": 7,
+    "melody": 8,
+    "form": 1,
+    "instrumentation": 17,
+    "arrangement": 19,
+    "style": 11,
+    "mood": 1
+  },
+  "seed_only": false,
+  "license": {
+    "name": "Creative Commons Attribution-ShareAlike 4.0 International",
+    "spdx": "CC-BY-SA-4.0",
+    "url": "https://creativecommons.org/licenses/by-sa/4.0/"
+  },
+  "attribution": "English Wikipedia contributors; see the pinned revision histories.",
+  "extraction_method": "Revision-pinned seed records, five-sentence intro snapshots, prose paragraphs from pinned article revisions, and sentence-level musical evidence filtering. Tables, block quotations, lyrics and reference sections are excluded.",
+  "normalization_method": "Musical sentences only: rhythm, harmony, melody, instrumentation, texture, form and production. Biography, chart and sales narrative is excluded unless the sentence also carries audible or compositional detail."
+}

@@ -1,0 +1,17 @@
+{
+  "corpus_id": "arioso-instrumental-rock-collection",
+  "music_type": "instrumental-rock",
+  "generated_at": "2026-10-21T08:16:05.770Z",
+  "styles": {
+    "record_count": 10,
+    "complete_count": 10
+  },
+  "standards": {
+    "record_count": 81,
+    "complete_count": 59
+  },
+  "runtime_files": [
+    "styles.normalized.jsonl",
+    "standards.normalized.jsonl"
+  ]
+}

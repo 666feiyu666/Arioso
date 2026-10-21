@@ -17,29 +17,33 @@ describe("prompt directing skill", () => {
     const discussion = await loadPromptDirectingSkill("discussion");
     const proposal = await loadPromptDirectingSkill("proposal");
 
-    expect(discussion).toContain("copy-ready final prompt");
+    expect(discussion).toContain("copy-ready final creative brief");
     expect(discussion).toContain("plain text without Markdown");
-    expect(proposal).not.toContain("copy-ready final prompt");
+    expect(proposal).not.toContain("copy-ready final creative brief");
   });
 
-  it("loads final prompt guidance only when producing the proposal", async () => {
+  it("loads the two-paragraph brief contract only when producing the proposal", async () => {
     const discussion = await loadPromptDirectingSkill("discussion");
     const proposal = await loadPromptDirectingSkill("proposal");
 
-    expect(proposal).toContain("Return only the prompt itself");
+    expect(proposal).toContain("Return only the brief itself");
+    expect(proposal).toContain("two prose paragraphs");
+    expect(proposal).toContain("Paragraph 1: creative description");
+    expect(proposal).toContain("Paragraph 2: musical direction");
+    expect(proposal).toContain("not a final Lyria prompt");
     expect(proposal).toContain("require original material");
-    expect(discussion).not.toContain("Return only the prompt itself");
+    expect(discussion).not.toContain("Return only the brief itself");
   });
 
-  it("listens for the user's feeling and unfolds it in poetic language first", async () => {
+  it("keeps the Director on emotional and sensory ground while the Composer realizes the music", async () => {
     const discussion = await loadPromptDirectingSkill("discussion");
     const proposal = await loadPromptDirectingSkill("proposal");
 
     expect(discussion).toContain("Listen for how the user feels");
     expect(discussion).toContain("poetic, sensory language");
-    expect(discussion).toContain("do not yet fix instrumentation");
-    expect(proposal).toContain("poetic, sensory sentences");
-    expect(proposal).toContain("emotional tone settled in the discussion");
+    expect(discussion).toContain("do not volunteer BPM");
+    expect(proposal).toContain("Describe the experience the music should express");
+    expect(proposal).toContain("Those mappings belong to the Composer");
   });
 
   it("keeps duration in view while directing and committing to a prompt", async () => {
@@ -68,7 +72,7 @@ describe("prompt directing skill", () => {
     expect(discussion).toContain("at most one clear sensory image");
     expect(discussion).toContain("at most one gentle question");
     expect(discussion).toContain("Begin with the user's emotional centre");
-    expect(discussion).toContain("do not yet fix instrumentation");
+    expect(discussion).toContain("do not volunteer BPM");
     expect(discussion).toContain("never mention retrieval");
     expect(discussion).toContain("direct safety language overrides");
   });
@@ -77,8 +81,25 @@ describe("prompt directing skill", () => {
     const proposal = await loadPromptDirectingSkill("proposal");
 
     expect(proposal).toContain("not a final Lyria prompt");
-    expect(proposal).toContain("important exclusions");
+    expect(proposal).toContain("exclusions");
     expect(proposal).toContain("never name a poet");
     expect(proposal).toContain("Drop a poem whose implications conflict with the user");
+  });
+
+  it("records confirmed choices, preferences and open decisions separately", async () => {
+    const proposal = await loadPromptDirectingSkill("proposal");
+
+    expect(proposal).toContain("Distinguish requirements from preferences");
+    expect(proposal).toContain("Mark a possible suggestion as optional");
+    expect(proposal).toContain("left to the Composer");
+    expect(proposal).toContain("identify it as a default");
+  });
+
+  it("does not force the creative description into one or two sentences", async () => {
+    const proposal = await loadPromptDirectingSkill("proposal");
+
+    expect(proposal).toContain("Four to seven sentences are a starting guideline");
+    expect(proposal).toContain("not a minimum-length validator");
+    expect(proposal).toContain("Emotional movement does not have to resolve");
   });
 });

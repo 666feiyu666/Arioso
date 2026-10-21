@@ -1,0 +1,17 @@
+{
+  "corpus_id": "arioso-blues-collection",
+  "music_type": "blues",
+  "generated_at": "2026-10-21T08:13:43.958Z",
+  "styles": {
+    "record_count": 39,
+    "complete_count": 39
+  },
+  "standards": {
+    "record_count": 53,
+    "complete_count": 53
+  },
+  "runtime_files": [
+    "styles.normalized.jsonl",
+    "standards.normalized.jsonl"
+  ]
+}

@@ -46,16 +46,19 @@ export function splitSentences(text) {
 }
 
 const MUSICAL_FEATURES = {
-  harmony: /\b(?:chords?|progression|harmon(?:y|ic|ies)|tonal(?:ity)?|atonal|mixolydian|dorian|lydian|phrygian|pentatonic|chromatic|diatonic|modulat\w*|reharmon\w*|voicings?|dominant|diminished|augmented|sevenths?|ninths?|thirteenths?)\b|\b(?:major|minor)(?: and (?:major|minor))? (?:keys?|modes?|scales?|chords?|blues)\b|\bkey of\b|(?:ii|II)[–-](?:V)[–-](?:I|i)/i,
-  rhythm: /\b(?:rhythm\w*|groove|syncopat\w*|tempo|bpm|meter|time signature|bars?|measures?|waltz|polyrhythm\w*|clave|ostinato|shuffle|offbeat|backbeat)\b|\b\d+\/\d+\b|\b(?:slow|fast|medium|up)[- ]tempo\b|\b(?:slow|fast|erratic)(?:\s+\w+){0,3}\s+(?:jazz|rhythms?|tempos?|music)\b/i,
+  harmony: /\b(?:chords?|progression|harmon(?:y|ic|ies)|tonal(?:ity)?|atonal|mixolydian|dorian|lydian|phrygian|pentatonic|chromatic|diatonic|modulat\w*|reharmon\w*|voicings?|dominant|diminished|augmented)\b|\b(?:major|minor)(?: and (?:major|minor))? (?:keys?|modes?|scales?|chords?|blues)\b|\bkey of\b|(?:ii|II)[–-](?:V)[–-](?:I|i)/i,
+  rhythm: /\b(?:rhythm\w*|groove|syncopat\w*|tempo|bpm|meter|time signature|measures?|waltz|polyrhythm\w*|clave|ostinato|shuffle|offbeat|backbeat|downtempo|mid-?tempo|half-?time|breakbeats?)\b|\b\d+\/\d+\b|\b\d+\s+bars?\b|\b(?:slow|fast|medium|up)[- ]tempo\b|\b(?:slow|fast|erratic)(?:\s+\w+){0,3}\s+(?:jazz|rhythms?|tempos?|music)\b/i,
   melody: /\b(?:melod(?:y|ic)|motif|riff|theme|phrasing|intervals?|counterpoint|call.and.response)\b/i,
   form: /\b(?:chorus|choruses|verse|bridge|refrain|AABA|ABAC|ABAB|ABA|twelve[- ]bar|12[- ]bar|32[- ]bar)\b/i,
-  instrumentation: /\b(?:piano|organ|guitar|bass|drums?|percussion|saxophone|sax|trumpet|trombone|clarinet|violin|vibraphone|flute|horns?|brushes|ride cymbal|ensemble|orchestra|band|duo|trio|quartet|quintet|sextet|octet|rhythm section)\b/i,
-  arrangement: /\b(?:phrasing|timbre|texture|register|comping|accompaniment|improvis(?:e|ed|ation)|solo|unison|arrang(?:e|ed|ement))\b/i,
+  instrumentation: /\b(?:piano|organ|guitar|bass|basslines?|drums?|percussion|saxophone|sax|trumpet|trombone|clarinet|violin|vibraphone|flute|horns?|brushes|ride cymbal|ensemble|orchestra|band|duo|trio|quartet|quintet|sextet|octet|rhythm section|samples?|sampling|synths?|synthesi[sz]ers?|drum machines?|pads?|hi-hats?|turntabl\w*)\b/i,
+  arrangement: /\b(?:phrasing|timbre|texture|register|comping|accompaniment|improvis(?:e|ed|ation)|solo|unison|arrang(?:e|ed|ement)|reverb|distort\w*|loops?|lo-fi|vinyl|sound design|filters?|delay|mixing)\b/i,
   style: /\b(?:ragtime|swing|bebop|bop|dixieland|stride|boogie(?:-woogie)?|gospel|spiritual|ballad|bossa nova|samba|calypso|funk|modal|fusion|blues)\b/i,
   mood: /\b(?:somber|mysterious|sinister|melanchol\w*|relaxed|restrained|gentle|intimate|aggressive|energetic|joyful|solemn|dark)\b[^.!?]{0,65}\b(?:tone|mood|atmosphere|texture|sound)\b/i,
 };
-const HISTORY = /\b(?:copyright\w*|publish\w*|written by|composed by|composition by|credited|pseudonym|record(?:ing|ed)|released|debuted|charts?|sales|sold|award|grammy|popular\w*|famous|influential|born|died|death|manager|film|movie|television|broadway)\b/i;
+const HISTORY = /\b(?:copyright\w*|publish\w*|written by|composed by|composition by|produced by|credited|pseudonym|record(?:ing|ed)|released|debuted|charts?|sales|sold|award|grammy|popular\w*|famous|influential|born|died|death|manager|film|movie|television|broadway|mixtape|frontman|singer-songwriter|musician)\b/i;
+// Lyric quotations carry first/second person or slash-separated lines; a critic's
+// quoted description of the music does not.
+const QUOTED_LYRIC = /["“][^"”]*(?:\s\/\s|\b(?:I|I'm|I'll|I've|my|you|your)\b)[^"”]*["”]/;
 // Pitch letters remain case-sensitive so the article "a" cannot become key A.
 const NOTE_TONALITY = /\b(?:[Ii]n|[Kk]ey of|[Pp]layed in) [A-G](?:[♭♯#]|-flat|-sharp)?(?: major| minor)?\b/;
 const MUSICAL_ACTION = /\b(?:uses?|features?|based|built|consists?|contains?|characterized|combin\w*|mix\w*|blend\w*|plays?|played|accompani\w*|rhythm\w*|melod\w*|harmon\w*|chords?|voic\w*|solo\w*|bass line|piano part|drum pattern|instrumentation)\b/i;
@@ -77,6 +80,8 @@ export function isMusicalEvidence(sentence, title = "") {
   const features = musicalFeatures(sentence, title);
   if (!features.length || !/[a-z]{2}/i.test(content)) return false;
   if (/\b(?:lyrics?|lyrical|words of the song)\b/i.test(content)) return false;
+  if (QUOTED_LYRIC.test(content)) return false;
+  if (/\b(?:final|first|second|last) verse of the song\b/i.test(content)) return false;
   // Artist credits and recording history are retained only with concrete musical behavior.
   const hasMusicalStructure = features.includes("rhythm") || features.includes("form");
   const hasMusicalDetail = /\b(?:melod(?:y|ic)|chords?|harmon\w*|voicings?|motif|riff|phrasing|comping|timbre|texture|key of|major key|minor key)\b/i.test(content);
