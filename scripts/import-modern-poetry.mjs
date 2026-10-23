@@ -23,7 +23,7 @@ const REPOSITORY_URL = `https://github.com/${REPOSITORY}.git`;
 const SCHEMA_VERSION = "1.0";
 const IMPORTER_VERSION = "1.0.0";
 
-const OUTPUT_DIR = path.resolve(process.env.ARIOSO_POEM_OUTPUT ?? path.join("corpus", "poem"));
+const OUTPUT_DIR = path.resolve(process.env.ARIOSO_POEM_OUTPUT ?? path.join("corpus", "poem", "Chinese"));
 const NORMALIZED_FILE = "modern_poems.normalized.jsonl";
 const MANIFEST_FILE = "modern_poems.manifest.json";
 // Curated input, not generated output: it stays next to the songs it annotates.

@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "version": "1.0.1",
-  "description": "Bilingual mood vocabulary shared by the poetry importer and the poem retriever. The lists are retrieval hints, not emotion assignments for a poem.",
+  "version": "1.0.2",
+  "description": "Bilingual mood vocabulary shared by the poetry importers and the poem retriever. The lists are retrieval hints, not emotion assignments for a poem. The plutchik block maps the English corpus tags (Plutchik emotions + sentiment) onto these categories; the stop_terms list carries both the Chinese filler vocabulary and the English stop words used by the Latin tokenizer.",
   "categories": {
     "anxious": ["anxious", "uneasy", "tense", "restless", "焦虑", "不安", "紧张", "彷徨", "压迫", "慌乱", "睡不着"],
     "angry": ["angry", "furious", "rage", "hostile", "愤怒", "怒火", "咆哮", "憎恨", "仇恨"],
@@ -22,12 +22,47 @@
   },
   "single_character_tokens": ["雨", "夜", "梦", "光", "海", "风", "月", "船", "灯"],
   "stop_terms": [
-    "a", "an", "and", "are", "as", "at", "be", "but", "by", "for", "from", "had",
-    "has", "have", "her", "his", "i", "in", "is", "it", "its", "me", "my", "not",
-    "of", "on", "or", "our", "she", "so", "that", "the", "their", "them", "there",
-    "they", "this", "to", "was", "we", "were", "what", "when", "with", "you", "your",
+    "a", "about", "above", "after", "again", "against", "all", "am", "an", "and",
+    "any", "are", "as", "at", "be", "because", "been", "before", "being", "below",
+    "between", "both", "but", "by", "can", "cannot", "could", "did", "do", "does",
+    "doing", "down", "during", "each", "even", "few", "for", "from", "further",
+    "had", "has", "have", "having", "he", "her", "here", "hers", "herself", "him",
+    "himself", "his", "how", "i", "if", "in", "into", "is", "it", "its", "itself",
+    "just", "let", "like", "little", "me", "more", "most", "much", "must", "my",
+    "myself", "no", "nor", "not", "now", "of", "off", "on", "once", "only", "or",
+    "other", "ought", "our", "ours", "ourselves", "out", "over", "own", "same",
+    "she", "should", "so", "some", "such", "than", "that", "the", "their", "theirs",
+    "them", "themselves", "then", "there", "these", "they", "this", "those",
+    "through", "to", "too", "under", "until", "up", "upon", "very", "was", "we",
+    "were", "what", "when", "where", "which", "while", "who", "whom", "why",
+    "will", "with", "would", "you", "your", "yours", "yourself", "yourselves",
+    "can't", "couldn't", "didn't", "doesn't", "don't", "hadn't", "hasn't",
+    "haven't", "he'd", "he'll", "he's", "here's", "how's", "i'd", "i'll", "i'm",
+    "i've", "isn't", "it's", "let's", "mustn't", "shan't", "she'd", "she'll",
+    "she's", "shouldn't", "that's", "there's", "they'd", "they'll", "they're",
+    "they've", "we'd", "we'll", "we're", "we've", "wasn't", "weren't", "what's",
+    "when's", "where's", "who's", "why's", "won't", "wouldn't", "you'd", "you'll",
+    "you're", "you've",
     "一个", "一些", "一样", "什么", "这样", "那样", "我们", "你们", "他们", "自己",
     "没有", "就是", "可以", "因为", "所以", "但是", "如果", "已经", "还是",
     "感到", "觉得", "感觉", "有点", "今晚", "今天", "帮我", "一首", "一点", "想要", "音乐"
-  ]
+  ],
+  "plutchik": {
+    "version": "1.0.0",
+    "emotions_to_categories": {
+      "anger": ["angry", "frustrated"],
+      "anticipation": ["excited", "enthusiastic"],
+      "disgust": ["frustrated", "angry"],
+      "fear": ["anxious", "overwhelmed"],
+      "joy": ["joyful", "excited", "content"],
+      "sadness": ["sad", "lonely", "drained", "discouraged"],
+      "surprise": ["excited", "anxious"],
+      "trust": ["calm", "content", "peaceful", "relaxed"]
+    },
+    "sentiment_to_categories": {
+      "positive": ["joyful", "content", "excited", "enthusiastic", "peaceful", "relaxed"],
+      "neutral": ["calm", "content"],
+      "negative": ["sad", "anxious", "frustrated", "angry", "overwhelmed", "drained", "discouraged", "lonely"]
+    }
+  }
 }

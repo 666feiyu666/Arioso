@@ -72,6 +72,44 @@ export const MIN_POEM_RELEVANCE = 0.045;
 const CJK_RUN = /[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]+/gu;
 const LATIN_WORD = /[a-z0-9]+(?:'[a-z0-9]+)?/gu;
 
+/**
+ * Lightweight English inflection stripping for retrieval only. It maps common
+ * inflections onto a shared stem (`walking` -> `walk`) so an English query
+ * reaches the same term as the poem text; it is deliberately not a
+ * linguistically correct stemmer. Numbers are left untouched.
+ */
+function stemLatin(word: string): string {
+  if (/^[0-9]+$/u.test(word)) return word;
+  const lower = word.toLowerCase();
+  let base = lower;
+  if (base.endsWith("'s") || base.endsWith("s'")) base = base.slice(0, -2);
+  const rules: [string, string][] = [
+    ["ies", "y"],
+    ["ied", "y"],
+    ["iest", "y"],
+    ["iness", "y"],
+    ["ingly", ""],
+    ["edly", ""],
+    ["ing", ""],
+    ["ed", ""],
+    ["ly", ""],
+    ["ment", ""],
+    ["ness", ""],
+    ["tion", ""],
+    ["sion", ""],
+    ["est", ""],
+    ["er", ""],
+    ["es", ""],
+    ["s", ""],
+  ];
+  for (const [suffix, replacement] of rules) {
+    if (base.length - suffix.length >= 3 && base.endsWith(suffix)) {
+      return base.slice(0, -suffix.length) + replacement;
+    }
+  }
+  return base;
+}
+
 const PoemRecordSchema = z.object({
   schema_version: z.string(),
   id: z.string().min(1),
@@ -140,8 +178,8 @@ export function tokenizePoemText(value: string, lexicon: MoodLexicon): string[] 
   const tokens: string[] = [];
 
   for (const match of normalized.matchAll(LATIN_WORD)) {
-    const token = match[0];
-    if (token.length > 1 && !stops.has(token)) tokens.push(token);
+    const token = stemLatin(match[0]);
+    if (token.length > 1 && !stops.has(token) && !stops.has(match[0])) tokens.push(token);
   }
   for (const match of normalized.matchAll(CJK_RUN)) {
     const run = match[0];
@@ -386,11 +424,38 @@ export function parsePoemRecords(text: string): {
   return { records, rejected };
 }
 
+export type PoemLanguage = "zh" | "en";
+
+/** Pick the corpus language from what the user actually wrote. */
+export function detectPoemLanguage(userMessages: string[]): PoemLanguage {
+  const text = userMessages.join(" ");
+  let cjk = 0;
+  let latin = 0;
+  for (const character of text) {
+    if (/[\u3400-\u9fff]/u.test(character)) cjk += 1;
+    else if (/[a-z]/iu.test(character)) latin += 1;
+  }
+  return cjk >= latin ? "zh" : "en";
+}
+
+const POEM_CORPUS_DEFAULTS: Record<PoemLanguage, { corpus: string; manifest: string }> = {
+  zh: {
+    corpus: path.join("corpus", "poem", "Chinese", "modern_poems.normalized.jsonl"),
+    manifest: "modern_poems.manifest.json",
+  },
+  en: {
+    corpus: path.join("corpus", "poem", "English", "english_poems.normalized.jsonl"),
+    manifest: "english_poems.manifest.json",
+  },
+};
+
 export interface LoadPoemRetrieverOptions {
   corpusPath?: string | undefined;
   manifestPath?: string | undefined;
   lexiconPath?: string | undefined;
   lexicon?: MoodLexicon | undefined;
+  /** Default corpus language when no explicit path is supplied. */
+  language?: PoemLanguage | undefined;
 }
 
 export interface LoadedPoemRetriever {
@@ -407,13 +472,14 @@ export interface LoadedPoemRetriever {
 export async function loadPoemRetriever(
   options: LoadPoemRetrieverOptions = {},
 ): Promise<LoadedPoemRetriever> {
+  const defaults = POEM_CORPUS_DEFAULTS[options.language ?? "zh"];
   const corpusPath = path.resolve(
     options.corpusPath
       ?? process.env.ARIOSO_POEM_CORPUS
-      ?? path.join("corpus", "poem", "modern_poems.normalized.jsonl"),
+      ?? defaults.corpus,
   );
   const manifestPath = path.resolve(
-    options.manifestPath ?? path.join(path.dirname(corpusPath), "modern_poems.manifest.json"),
+    options.manifestPath ?? path.join(path.dirname(corpusPath), defaults.manifest),
   );
   const lexicon = options.lexicon ?? await loadMoodLexicon(options.lexiconPath);
 

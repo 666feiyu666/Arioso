@@ -254,7 +254,7 @@ describe("poem corpus loading", () => {
   });
 
   it("parses the checked-in modern-poetry corpus with reproducible provenance", async () => {
-    const corpusPath = path.resolve("corpus", "poem", "modern_poems.normalized.jsonl");
+    const corpusPath = path.resolve("corpus", "poem", "Chinese", "modern_poems.normalized.jsonl");
     const text = await readFile(corpusPath, "utf8");
     const { records, rejected } = parsePoemRecords(text);
     expect(rejected).toBe(0);
@@ -269,10 +269,10 @@ describe("poem corpus loading", () => {
   });
 
   it("matches the shipped manifest checksum and counts", async () => {
-    const corpusPath = path.resolve("corpus", "poem", "modern_poems.normalized.jsonl");
+    const corpusPath = path.resolve("corpus", "poem", "Chinese", "modern_poems.normalized.jsonl");
     const text = await readFile(corpusPath, "utf8");
     const manifest = JSON.parse(
-      await readFile(path.resolve("corpus", "poem", "modern_poems.manifest.json"), "utf8"),
+      await readFile(path.resolve("corpus", "poem", "Chinese", "modern_poems.manifest.json"), "utf8"),
     ) as { checksum: { value: string }; corpus_count: number; meets_minimum: boolean; authors: Record<string, number> };
     expect(manifest.checksum.value).toBe(createHash("sha256").update(text, "utf8").digest("hex"));
     expect(manifest.meets_minimum).toBe(true);

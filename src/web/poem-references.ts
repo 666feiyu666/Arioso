@@ -1,10 +1,12 @@
 import type { PoemReference } from "../discussion/types.js";
 import {
   buildPoemQuery,
+  detectPoemLanguage,
   hashPoemQuery,
   loadMoodLexicon,
   loadPoemRetriever,
   type MoodLexicon,
+  type PoemLanguage,
   type PoemRetriever,
 } from "../retrieval/poem-retriever.js";
 import type { MoodChat, PoemRetrievalTrace } from "./mood-chat-store.js";
@@ -29,17 +31,20 @@ export interface PoemReferenceDependencies {
   now?: () => Date;
 }
 
-let cachedRetriever: Promise<PoemRetriever> | undefined;
+const cachedRetrievers = new Map<PoemLanguage, Promise<PoemRetriever>>();
 
-function defaultRetriever(): Promise<PoemRetriever> {
-  cachedRetriever ??= loadPoemRetriever()
-    .then((loaded) => loaded.retriever)
+function defaultRetriever(language: PoemLanguage): Promise<PoemRetriever> {
+  const cached = cachedRetrievers.get(language);
+  if (cached) return cached;
+  const loaded = loadPoemRetriever({ language })
+    .then((result) => result.retriever)
     .catch((error: unknown) => {
       // A missing or corrupt corpus must not poison later attempts.
-      cachedRetriever = undefined;
+      cachedRetrievers.delete(language);
       throw error;
     });
-  return cachedRetriever;
+  cachedRetrievers.set(language, loaded);
+  return loaded;
 }
 
 function traceWithoutReferences(
@@ -129,7 +134,7 @@ export async function poemReferencesForChat(
   try {
     retriever = dependencies.loadRetriever
       ? await dependencies.loadRetriever()
-      : await defaultRetriever();
+      : await defaultRetriever(detectPoemLanguage(userMessages));
   } catch (error: unknown) {
     const reason = error instanceof Error ? error.message : String(error);
     console.error(`[poem-retrieval] corpus unavailable: ${reason.slice(0, MAX_REASON_LENGTH)}`);
