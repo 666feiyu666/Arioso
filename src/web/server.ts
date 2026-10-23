@@ -150,6 +150,14 @@ async function runTask(
       return;
     }
 
+    // MoodMic shows the composed Lyria prompt for confirmation before the first
+    // generation. The confirm endpoint flips the flag and re-enters here, where
+    // the spec already exists, so the pause is skipped on the second pass.
+    if (task.moodChatId && !task.lyriaPromptApproved) {
+      await store.update(task.id, { status: "planning", error: undefined });
+      return;
+    }
+
     // MoodMic creations run the generation check: generate, let Gemini listen,
     // then deliver or pause for the user's regenerate/keep decision.
     if (task.moodChatId) {
@@ -733,6 +741,7 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
       const productionArtifactMatch = /^\/api\/tasks\/([^/]+)\/production\/(audio|video|tracklist|manifest)$/.exec(url.pathname);
       const retryMatch = /^\/api\/tasks\/([^/]+)\/retry$/.exec(url.pathname);
       const reviewDecisionMatch = /^\/api\/tasks\/([^/]+)\/review$/.exec(url.pathname);
+      const promptApproveMatch = /^\/api\/tasks\/([^/]+)\/prompt\/approve$/.exec(url.pathname);
       const credentialMatch = /^\/api\/settings\/credentials\/(openai|gemini)$/.exec(url.pathname);
       const discussionMatch = /^\/api\/discussions\/([^/]+)$/.exec(url.pathname);
       const discussionMessagesMatch = /^\/api\/discussions\/([^/]+)\/messages$/.exec(url.pathname);
@@ -1704,6 +1713,24 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
         const audioPath = task && track ? store.albumTrackAudioPath(task, track) : undefined;
         if (!task || !track || !audioPath) throw new HttpError(404, "Candidate audio is not available.");
         await sendAudio(request, response, audioPath);
+        return;
+      }
+
+      if (request.method === "POST" && promptApproveMatch?.[1]) {
+        const task = store.get(promptApproveMatch[1]);
+        if (!task || !task.moodChatId) throw new HttpError(404, "MoodMic task not found.");
+        if (task.status !== "planning" || task.lyriaPromptApproved) {
+          throw new HttpError(409, "This task is not awaiting prompt confirmation.");
+        }
+        if (activeTaskIds.has(task.id)) throw new HttpError(409, "This task is already being processed.");
+        const config = loadConfig(true, await settings.runtimeEnvironment());
+        const queued = await store.update(task.id, {
+          status: "queued",
+          lyriaPromptApproved: true,
+          error: undefined,
+        });
+        startTask(queued, config);
+        sendJson(response, 202, queued);
         return;
       }
 

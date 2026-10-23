@@ -115,6 +115,10 @@ const COPY = {
     statusAssembling: "正在拼接乐章", statusProcessing: "正在后期处理",
     statusCompleted: "已完成", statusFailed: "未完成",
     statusReview: "待你确认",
+    statusPlanning: "编曲提示已就绪",
+    promptConfirmTitle: "确认生成音乐",
+    promptConfirmLead: "Lyria 生成提示已就绪。确认后开始生成音频。",
+    promptConfirmAction: "确认生成",
     reviewTitle: "这首音乐符合你的想法吗？",
     reviewLead: "先听一遍。如果和你的需求明显不符，可以重新生成；觉得可以就保留这首。",
     reviewMatchNote: "自动检查认为这首音乐基本符合你的需求。",
@@ -221,6 +225,10 @@ const COPY = {
     statusAssembling: "Assembling movements", statusProcessing: "Post-processing",
     statusCompleted: "Completed", statusFailed: "Not finished",
     statusReview: "Needs your confirmation",
+    statusPlanning: "Composition prompt ready",
+    promptConfirmTitle: "Confirm to generate",
+    promptConfirmLead: "The Lyria generation prompt is ready. Confirm to start generating audio.",
+    promptConfirmAction: "Confirm generation",
     reviewTitle: "Does this music match what you asked for?",
     reviewLead: "Listen first. If it clearly misses the request, regenerate; if it works, keep this one.",
     reviewMatchNote: "The automatic check found this broadly matches your request.",
@@ -259,7 +267,7 @@ const COPY = {
 };
 
 const STATUS_KEYS = {
-  queued: "statusQueued", composing: "statusComposing", generating: "statusGenerating",
+  queued: "statusQueued", composing: "statusComposing", planning: "statusPlanning", generating: "statusGenerating",
   review: "statusReview", assembling: "statusAssembling", processing: "statusProcessing",
   completed: "statusCompleted", failed: "statusFailed",
 };
@@ -839,6 +847,18 @@ function renderResult() {
         </div>
       </div>`;
   }
+  if (task.status === "planning") {
+    const prompt = task.musicSpec?.lyriaPrompt;
+    return `
+      <div class="mm-block mm-result" style="--group:${group?.color ?? "#b1642f"}">
+        <h3 class="mm-review-title">${esc(t("promptConfirmTitle"))}</h3>
+        <p class="mm-review-lead">${esc(t("promptConfirmLead"))}</p>
+        ${prompt ? `<div class="mm-prompt"><strong>${esc(t("lyriaPrompt"))}</strong><div class="mm-prompt-body">${esc(prompt)}</div></div>` : ""}
+        <div class="mm-foot-actions">
+          <button class="e-btn e-btn-primary" type="button" id="mm-prompt-approve" ${state.busy ? "disabled" : ""}>${esc(t("promptConfirmAction"))}</button>
+        </div>
+      </div>`;
+  }
   if (task.status === "review") {
     const review = task.musicReview;
     const points = review?.mismatchedPoints ?? [];
@@ -1048,6 +1068,7 @@ function bindChat() {
   stage.querySelector("#mm-new-2")?.addEventListener("click", newChat);
   stage.querySelector("#mm-review-regenerate")?.addEventListener("click", () => decideReview("regenerate"));
   stage.querySelector("#mm-review-keep")?.addEventListener("click", () => decideReview("keep"));
+  stage.querySelector("#mm-prompt-approve")?.addEventListener("click", approvePrompt);
   // The album continuation: theme, size, and the shared album stage.
   stage.querySelector("#mm-album-theme")?.addEventListener("input", (event) => {
     state.albumTheme = event.target.value;
@@ -1417,6 +1438,29 @@ async function retryAsNewAttempt(taskId) {
   }
 }
 
+async function approvePrompt() {
+  const task = activeTask();
+  if (!task || state.busy || task.status !== "planning") return;
+  state.busy = true;
+  state.message = "";
+  render();
+  try {
+    const updated = await api(`/api/tasks/${encodeURIComponent(task.id)}/prompt/approve`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+    state.task = updated;
+    state.busy = false;
+    render();
+    pollTask();
+  } catch (error) {
+    state.busy = false;
+    state.message = error instanceof Error ? error.message : String(error);
+    state.messageError = true;
+    render();
+  }
+}
+
 async function decideReview(decision) {
   const task = activeTask();
   if (!task || state.busy || task.status !== "review") return;
@@ -1449,7 +1493,7 @@ function pollTask() {
     try {
       const task = await api(`/api/tasks/${encodeURIComponent(id)}`);
       state.task = task;
-      if (task.status === "completed" || task.status === "failed" || task.status === "review") {
+      if (task.status === "completed" || task.status === "failed" || task.status === "review" || task.status === "planning") {
         await loadEntries();
         await loadDiscussions();
         render();

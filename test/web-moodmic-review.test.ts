@@ -105,7 +105,7 @@ describe("MoodMic review decision endpoint", () => {
       expect(final.reviewAttempt).toBe(2);
       expect(generateMock).toHaveBeenCalledTimes(1);
       expect(reviewMock).toHaveBeenCalledTimes(1);
-    }, { prepare: (root) => prepareTask(root, "regen-task"), environment });
+    }, { prepare: (root) => prepareTask(root, "regen-task", { lyriaPromptApproved: true }), environment });
   });
 
   it("rejects an unsupported decision", async () => {
@@ -127,5 +127,37 @@ describe("MoodMic review decision endpoint", () => {
       const response = await postDecision(baseUrl, "studio-task", { decision: "keep" });
       expect(response.status).toBe(404);
     }, { prepare: (root) => prepareTask(root, "studio-task", { moodChatId: undefined }), environment });
+  });
+});
+
+function postApprove(baseUrl: string, id: string) {
+  return fetch(`${baseUrl}/api/tasks/${id}/prompt/approve`, { method: "POST" });
+}
+
+describe("MoodMic prompt confirmation endpoint", () => {
+  it("generates after the composed prompt is confirmed", async () => {
+    await withWebServer(async ({ baseUrl }) => {
+      const response = await postApprove(baseUrl, "confirm-task");
+      expect(response.status).toBe(202);
+      expect((await response.json() as TaskShape).status).toBe("queued");
+      const final = await waitForTask(baseUrl, "confirm-task", (task) => task.status === "completed");
+      expect(final.status).toBe("completed");
+      expect(generateMock).toHaveBeenCalledTimes(1);
+      expect(reviewMock).toHaveBeenCalledTimes(1);
+    }, { prepare: (root) => prepareTask(root, "confirm-task", { status: "planning" }), environment });
+  });
+
+  it("refuses confirmation when the task is not awaiting it", async () => {
+    await withWebServer(async ({ baseUrl }) => {
+      const response = await postApprove(baseUrl, "done-prompt");
+      expect(response.status).toBe(409);
+    }, { prepare: (root) => prepareTask(root, "done-prompt", { status: "completed" }), environment });
+  });
+
+  it("does not expose confirmation for non-MoodMic tasks", async () => {
+    await withWebServer(async ({ baseUrl }) => {
+      const response = await postApprove(baseUrl, "studio-prompt");
+      expect(response.status).toBe(404);
+    }, { prepare: (root) => prepareTask(root, "studio-prompt", { status: "planning", moodChatId: undefined }), environment });
   });
 });

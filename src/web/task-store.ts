@@ -28,7 +28,7 @@ import { isPlaylistDiscussionMessage, PlaylistBriefingSchema, type PlaylistBrief
 import { isPlaylistReference, type PlaylistReference } from "../playlist/reference.js";
 
 export type TaskMode = "compose" | "generate";
-export type TaskStatus = "queued" | "composing" | "generating" | "review" | "assembling" | "processing" | "completed" | "failed";
+export type TaskStatus = "queued" | "composing" | "planning" | "generating" | "review" | "assembling" | "processing" | "completed" | "failed";
 export type VocalMode = "auto" | "instrumental" | "vocals";
 export type CorpusMode = "none" | "music";
 export type CompositionMode = "single" | "orchestral" | "album";
@@ -159,6 +159,8 @@ export interface MusicTask {
   retrievalQuery?: string;
   retrievedReferenceIds?: string[];
   musicSpec?: MusicSpec;
+  /** Set once the user confirms the composed Lyria prompt; generation may proceed. */
+  lyriaPromptApproved?: boolean;
   albumPlan?: AlbumPlan;
   albumTracks?: AlbumTrackTask[];
   albumReview?: AlbumReview;
@@ -227,7 +229,7 @@ function isSafeFileName(value: unknown): value is string {
 }
 
 const TASK_STATUSES: readonly TaskStatus[] = [
-  "queued", "composing", "generating", "review", "assembling", "processing", "completed", "failed",
+  "queued", "composing", "planning", "generating", "review", "assembling", "processing", "completed", "failed",
 ];
 const ACTIVE_TASK_STATUSES: readonly TaskStatus[] = [
   "queued", "composing", "generating", "assembling", "processing",
@@ -296,13 +298,15 @@ function isTaskRecord(value: unknown): value is MusicTask {
   const discussionValid = value.playlistDiscussion === undefined
     || (Array.isArray(value.playlistDiscussion) && value.playlistDiscussion.every(isPlaylistDiscussionMessage));
   const approvedValid = value.playlistPlanApproved === undefined || typeof value.playlistPlanApproved === "boolean";
+  const lyriaPromptApprovedValid = value.lyriaPromptApproved === undefined || typeof value.lyriaPromptApproved === "boolean";
   const planRevisionValid = value.albumPlanRevision === undefined
     || (Number.isInteger(value.albumPlanRevision) && Number(value.albumPlanRevision) > 0);
   const lineageValid = (value.journeyId === undefined || isSafeFileName(value.journeyId))
     && (value.parentTaskId === undefined || isSafeFileName(value.parentTaskId));
   return movementsValid && tracksValid && playlistValid && albumPlanValid && productionValid
     && musicReviewValid && moodChatValid && reviewAttemptValid && referencesValid
-    && briefingValid && discussionValid && approvedValid && planRevisionValid && lineageValid;
+    && briefingValid && discussionValid && approvedValid && lyriaPromptApprovedValid
+    && planRevisionValid && lineageValid;
 }
 
 function safeAudioName(value: string | undefined, fallback: string): string {

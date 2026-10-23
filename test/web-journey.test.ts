@@ -179,6 +179,12 @@ describe("Journey: mood to song to album", () => {
         body: JSON.stringify({ prompt: "安静的雨夜钢琴，慢速，纯器乐" }),
       }).then((response) => response.json()) as { task: { id: string } };
 
+      // The composed Lyria prompt pauses first for confirmation.
+      const paused = await waitForJourney(baseUrl, chat.id, (body) => body.songTask?.status === "planning");
+      expect(paused.songTask?.status).toBe("planning");
+      const approved = await fetch(`${baseUrl}/api/tasks/${submitted.task.id}/prompt/approve`, { method: "POST" });
+      expect(approved.status).toBe(202);
+
       // The review check pauses the song, and the journey follows the pause.
       const reviewing = await waitForJourney(baseUrl, chat.id, (body) => body.journey.phase === "song-review");
       expect(reviewing.journey.songTaskId).toBe(submitted.task.id);
