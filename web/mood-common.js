@@ -67,6 +67,20 @@ export function emotionLabel(groupId, emotionId, language) {
   return language === "en" ? emotion.en : emotion.zh;
 }
 
+/**
+ * Emotion words are not limited to the four per colour: anything the user types
+ * is stored as-is, so a word with no built-in id is already the display text.
+ */
+export function isCustomEmotion(groupId, emotion) {
+  if (!emotion) return false;
+  return !groupById(groupId).emotions.some((item) => item.id === emotion);
+}
+
+/** The word to prefill the custom field with, or "" when a built-in word is chosen. */
+export function customEmotionDraft(groupId, emotion) {
+  return isCustomEmotion(groupId, emotion) ? String(emotion) : "";
+}
+
 export function groupName(group, language) {
   return language === "en" ? group.name.en : group.name.zh;
 }

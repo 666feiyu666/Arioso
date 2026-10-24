@@ -569,6 +569,23 @@
   font-weight: 700;
 }
 
+/* A word of the user's own, next to the built-in ones. */
+.mm-custom-word {
+  margin-top: 12px;
+  max-width: 320px;
+}
+
+.mm-custom-word:focus {
+  border-color: var(--group, var(--brand));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--group, var(--brand)) 22%, transparent);
+}
+
+/* Editable Lyria prompt on the confirmation card. */
+.mm-lyria-prompt {
+  min-height: 160px;
+  margin-top: 8px;
+}
+
 /* Calendar --------------------------------------------------------------- */
 
 .mm-calendar-head {

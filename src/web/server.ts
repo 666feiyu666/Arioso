@@ -525,6 +525,27 @@ function parseMoodEntryInput(value: unknown): MoodEntryInput {
   };
 }
 
+async function readOptionalJsonBody(request: IncomingMessage): Promise<unknown> {
+  // An absent body is legal for endpoints whose payload is optional; it means
+  // "no change", which is different from malformed JSON.
+  if (!Number(request.headers["content-length"] ?? 0)) return undefined;
+  return readJsonBody(request);
+}
+
+/**
+ * Confirming the Lyria prompt may carry an edited version of it. No body means
+ * "use the prompt the Composer wrote", which keeps the older clients working.
+ */
+function parseApprovedPrompt(value: unknown): string | undefined {
+  if (value === undefined) return undefined;
+  if (!isRecord(value) || value.prompt === undefined) return undefined;
+  if (typeof value.prompt !== "string") throw new HttpError(400, "The prompt must be text.");
+  const prompt = value.prompt.trim();
+  if (!prompt) throw new HttpError(400, "The prompt cannot be empty.");
+  if (prompt.length > 8_000) throw new HttpError(400, "The prompt is too long.");
+  return prompt;
+}
+
 function parseMoodEntryPatch(value: unknown) {
   if (!isRecord(value)) throw new HttpError(400, "A feeling update is required.");
   if (value.date !== undefined && !isCalendarDate(value.date)) {
@@ -1723,10 +1744,16 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
           throw new HttpError(409, "This task is not awaiting prompt confirmation.");
         }
         if (activeTaskIds.has(task.id)) throw new HttpError(409, "This task is already being processed.");
+        // The prompt the user confirmed wins over the composed one, so an edited
+        // prompt is what the very first generation receives.
+        const editedPrompt = parseApprovedPrompt(await readOptionalJsonBody(request));
         const config = loadConfig(true, await settings.runtimeEnvironment());
         const queued = await store.update(task.id, {
           status: "queued",
           lyriaPromptApproved: true,
+          ...(editedPrompt && task.musicSpec && editedPrompt !== task.musicSpec.lyriaPrompt
+            ? { musicSpec: { ...task.musicSpec, lyriaPrompt: editedPrompt } }
+            : {}),
           error: undefined,
         });
         startTask(queued, config);

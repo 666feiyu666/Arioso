@@ -8,7 +8,7 @@
 // from history alone: delete a piece and it leaves the calendar.
 
 import {
-  GROUPS, WEEKDAYS, api, applyI18n, dateParts, emotionLabel, esc,
+  GROUPS, WEEKDAYS, api, applyI18n, customEmotionDraft, dateParts, emotionLabel, esc,
   groupById, groupName, markerStyle, readLanguage, persistLanguage,
 } from "./mood-common.js";
 
@@ -32,6 +32,7 @@ const COPY = {
     save: "保存",
     moodColorLabel: "颜色",
     moodWordLabel: "情绪词",
+    customEmotionPlaceholder: "或写下你自己的词，例如「振奋」",
     needPick: "先选一个颜色和词。",
     download: "下载音频",
     tryAgain: "再试一次",
@@ -60,6 +61,7 @@ const COPY = {
     save: "Save",
     moodColorLabel: "Colour",
     moodWordLabel: "Emotion word",
+    customEmotionPlaceholder: "Or write your own word, e.g. “Energised”",
     needPick: "Pick a colour and a word first.",
     download: "Download audio",
     tryAgain: "Try again",
@@ -313,8 +315,13 @@ function renderColorEditor(entry) {
               aria-pressed="${state.draft.emotion === emotion.id}"
               style="--group:${group.color}">${esc(state.language === "en" ? emotion.en : emotion.zh)}</button>
           `).join("")}
-        </div>` : ""}
-      ${state.draft.group && !state.draft.emotion ? `<p class="e-hint">${esc(t("needPick"))}</p>` : ""}
+        </div>
+        <input class="e-input mm-custom-word" type="text" id="mm-custom-emotion" maxlength="64"
+          style="--group:${group.color}"
+          value="${esc(customEmotionDraft(state.draft.group, state.draft.emotion))}"
+          placeholder="${esc(t("customEmotionPlaceholder"))}"
+          aria-label="${esc(t("customEmotionPlaceholder"))}" />` : ""}
+      <p class="e-hint"${canSave ? " hidden" : ""}>${esc(t("needPick"))}</p>
       <div class="mm-actions">
         <button class="e-btn e-btn-secondary" type="button" data-cancel-edit="1">${esc(t("cancel"))}</button>
         <button class="e-btn e-btn-primary" type="button" data-save-edit="${esc(entry.id)}" ${canSave ? "" : "disabled"}>${esc(t("save"))}</button>
@@ -354,6 +361,21 @@ function bind() {
   }
   for (const button of stage.querySelectorAll("[data-emotion]")) {
     button.addEventListener("click", () => { state.draft.emotion = button.dataset.emotion; render(); });
+  }
+  // A typed word replaces the built-in choice; input is not re-rendered so the
+  // field keeps focus while the save button's state is updated in place.
+  const customEmotion = stage.querySelector("#mm-custom-emotion");
+  if (customEmotion) {
+    customEmotion.addEventListener("input", () => {
+      state.draft.emotion = customEmotion.value.trim() || null;
+      for (const button of stage.querySelectorAll("[data-emotion]")) {
+        button.setAttribute("aria-pressed", "false");
+      }
+      const save = stage.querySelector("[data-save-edit]");
+      if (save) save.disabled = !(state.draft.group && state.draft.emotion) || state.saving;
+      const hint = stage.querySelector(".mm-edit .e-hint");
+      if (hint) hint.hidden = Boolean(state.draft.group && state.draft.emotion);
+    });
   }
   stage.querySelector("[data-cancel-edit]")?.addEventListener("click", () => {
     state.editingId = null;

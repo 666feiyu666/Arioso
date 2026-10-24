@@ -7,7 +7,7 @@
 // to the conversation a day belongs to.
 
 import {
-  GROUPS, api, applyI18n, emotionLabel, esc, groupById, groupName,
+  GROUPS, api, applyI18n, customEmotionDraft, emotionLabel, esc, groupById, groupName,
   persistLanguage, readLanguage,
 } from "./mood-common.js";
 import { createAlbumStage } from "./album-view.js";
@@ -84,6 +84,7 @@ const COPY = {
     moodTitle: "你的心情",
     moodColorLabel: "颜色",
     moodWordLabel: "情绪词",
+    customEmotionPlaceholder: "或写下你自己的词，例如「振奋」",
     moodJudged: (emotion) => `读出的心情是「${emotion}」。你可以改。`,
     moodEdited: (from, to) => `原本读出的心情是「${from}」，现在是「${to}」。`,
     moodManual: "选一个颜色和词。",
@@ -118,6 +119,7 @@ const COPY = {
     statusPlanning: "编曲提示已就绪",
     promptConfirmTitle: "确认生成音乐",
     promptConfirmLead: "Lyria 生成提示已就绪。确认后开始生成音频。",
+    promptEditHint: "可以直接修改这段提示；确认后会按你修改后的文字生成。",
     promptConfirmAction: "确认生成",
     reviewTitle: "这首音乐符合你的想法吗？",
     reviewLead: "先听一遍。如果和你的需求明显不符，可以重新生成；觉得可以就保留这首。",
@@ -194,6 +196,7 @@ const COPY = {
     moodTitle: "Your feeling",
     moodColorLabel: "Colour",
     moodWordLabel: "Emotion word",
+    customEmotionPlaceholder: "Or write your own word, e.g. “Energised”",
     moodJudged: (emotion) => `The feeling reads as “${emotion}”. You can change it.`,
     moodEdited: (from, to) => `It read “${from}”; it is now “${to}”.`,
     moodManual: "Pick a colour and a word.",
@@ -228,6 +231,7 @@ const COPY = {
     statusPlanning: "Composition prompt ready",
     promptConfirmTitle: "Confirm to generate",
     promptConfirmLead: "The Lyria generation prompt is ready. Confirm to start generating audio.",
+    promptEditHint: "You can edit this prompt — generation follows your wording once you confirm.",
     promptConfirmAction: "Confirm generation",
     reviewTitle: "Does this music match what you asked for?",
     reviewLead: "Listen first. If it clearly misses the request, regenerate; if it works, keep this one.",
@@ -325,6 +329,8 @@ const state = {
   threadSignature: null,
   replyDraft: "",
   proposal: "",
+  // The Lyria prompt the user is reviewing; "" means "use the composed one".
+  lyriaPrompt: "",
   judged: false,
   detected: null,
   mood: { group: null, emotion: null },
@@ -697,6 +703,7 @@ function renderColorPicker() {
 function renderWordPicker() {
   if (!state.mood.group) return "";
   const group = groupById(state.mood.group);
+  const custom = customEmotionDraft(state.mood.group, state.mood.emotion);
   return `
     <div class="mm-words" role="group" aria-label="${esc(t("moodWordLabel"))}">
       ${group.emotions.map((emotion) => `
@@ -705,6 +712,10 @@ function renderWordPicker() {
           style="--group:${group.color}">${esc(state.language === "en" ? emotion.en : emotion.zh)}</button>
       `).join("")}
     </div>
+    <input class="e-input mm-custom-word" type="text" id="mm-custom-emotion" maxlength="64"
+      data-group="${group.id}" style="--group:${group.color}"
+      value="${esc(custom)}" placeholder="${esc(t("customEmotionPlaceholder"))}"
+      aria-label="${esc(t("customEmotionPlaceholder"))}" />
   `;
 }
 
@@ -718,6 +729,16 @@ function moodHint() {
   }
   if (state.detected) return t("moodJudged", detectedLabel());
   return t("moodManual");
+}
+
+// Reflect a typed emotion on the confirm button without re-rendering, so the
+// field keeps focus and the caret while the user is still typing.
+function syncMoodReady() {
+  const ready = Boolean(state.mood.group && state.mood.emotion);
+  const approve = stage.querySelector("#mm-approve");
+  if (approve) approve.disabled = !ready || state.busy;
+  const hint = stage.querySelector("#mm-mood-need");
+  if (hint) hint.hidden = ready;
 }
 
 function moodLabel() {
@@ -794,7 +815,7 @@ function renderProposal() {
       <div class="mm-actions">
         <button class="e-btn e-btn-primary" type="button" id="mm-approve" ${moodReady && !state.busy ? "" : "disabled"}>${esc(t("startCreating"))} →</button>
       </div>
-      ${!moodReady ? `<p class="e-hint">${esc(t("moodNeedPick"))}</p>` : ""}
+      <p class="e-hint" id="mm-mood-need"${moodReady ? " hidden" : ""}>${esc(t("moodNeedPick"))}</p>
     </div>
   `;
 }
@@ -848,12 +869,18 @@ function renderResult() {
       </div>`;
   }
   if (task.status === "planning") {
-    const prompt = task.musicSpec?.lyriaPrompt;
+    // The composed prompt is a starting point: it stays editable until the user
+    // confirms, and whatever is in the box is what Lyria receives.
+    const prompt = state.lyriaPrompt || task.musicSpec?.lyriaPrompt || "";
     return `
       <div class="mm-block mm-result" style="--group:${group?.color ?? "#b1642f"}">
         <h3 class="mm-review-title">${esc(t("promptConfirmTitle"))}</h3>
         <p class="mm-review-lead">${esc(t("promptConfirmLead"))}</p>
-        ${prompt ? `<div class="mm-prompt"><strong>${esc(t("lyriaPrompt"))}</strong><div class="mm-prompt-body">${esc(prompt)}</div></div>` : ""}
+        ${prompt ? `<label class="mm-prompt" for="mm-lyria-prompt">
+          <strong>${esc(t("lyriaPrompt"))}</strong>
+          <textarea class="e-textarea mm-lyria-prompt" id="mm-lyria-prompt" maxlength="8000">${esc(prompt)}</textarea>
+        </label>
+        <p class="e-hint">${esc(t("promptEditHint"))}</p>` : ""}
         <div class="mm-foot-actions">
           <button class="e-btn e-btn-primary" type="button" id="mm-prompt-approve" ${state.busy ? "disabled" : ""}>${esc(t("promptConfirmAction"))}</button>
         </div>
@@ -979,6 +1006,9 @@ function progressPhase(task) {
 function renderComposer() {
   const submitted = sessionTasks(state.session).length > 0 || state.session?.status === "submitted";
   if (submitted) return "";
+  // Once the brief exists, the only next step is "start creating": keeping the
+  // message composer would put two competing primary actions on screen.
+  if (state.proposal) return "";
   const previews = state.attachments.length ? `
     <div class="mm-attach-row">
       ${state.attachments.map((item, index) => `
@@ -1064,11 +1094,28 @@ function bindChat() {
   for (const button of stage.querySelectorAll("[data-emotion]")) {
     button.addEventListener("click", () => { state.mood.emotion = button.dataset.emotion; render(); });
   }
+  // A typed word is a first-class emotion: it replaces the built-in choice and
+  // is stored as its own text, so the four colours all accept new words.
+  const customEmotion = stage.querySelector("#mm-custom-emotion");
+  if (customEmotion) {
+    customEmotion.addEventListener("input", () => {
+      state.mood.emotion = customEmotion.value.trim() || null;
+      for (const button of stage.querySelectorAll("[data-emotion]")) {
+        button.setAttribute("aria-pressed", "false");
+      }
+      syncMoodReady();
+    });
+  }
   stage.querySelector("#mm-retry")?.addEventListener("click", () => retryAsNewAttempt(state.session?.tasks?.at(-1)?.id));
   stage.querySelector("#mm-new-2")?.addEventListener("click", newChat);
   stage.querySelector("#mm-review-regenerate")?.addEventListener("click", () => decideReview("regenerate"));
   stage.querySelector("#mm-review-keep")?.addEventListener("click", () => decideReview("keep"));
   stage.querySelector("#mm-prompt-approve")?.addEventListener("click", approvePrompt);
+  // Editing the prompt must not re-render, or the caret would jump on each key.
+  const lyriaPrompt = stage.querySelector("#mm-lyria-prompt");
+  if (lyriaPrompt) {
+    lyriaPrompt.addEventListener("input", () => { state.lyriaPrompt = lyriaPrompt.value; });
+  }
   // The album continuation: theme, size, and the shared album stage.
   stage.querySelector("#mm-album-theme")?.addEventListener("input", (event) => {
     state.albumTheme = event.target.value;
@@ -1233,6 +1280,7 @@ function chatOptions() {
 
 function resetForNewSession() {
   state.proposal = "";
+  state.lyriaPrompt = "";
   state.judged = false;
   state.detected = null;
   state.mood = { group: null, emotion: null };
@@ -1341,6 +1389,7 @@ async function approveAndCreate() {
   if (!session || state.busy || !prompt || !group || !emotion) return;
   state.busy = true;
   state.message = "";
+  state.lyriaPrompt = "";
   render();
   try {
     const entry = await rememberFeeling(group, emotion);
@@ -1412,6 +1461,7 @@ async function retryAsNewAttempt(taskId) {
   if (!task || state.busy) return;
   state.busy = true;
   state.message = "";
+  state.lyriaPrompt = "";
   try {
     const created = await api("/api/tasks", {
       method: "POST",
@@ -1441,6 +1491,7 @@ async function retryAsNewAttempt(taskId) {
 async function approvePrompt() {
   const task = activeTask();
   if (!task || state.busy || task.status !== "planning") return;
+  const prompt = state.lyriaPrompt.trim();
   state.busy = true;
   state.message = "";
   render();
@@ -1448,8 +1499,10 @@ async function approvePrompt() {
     const updated = await api(`/api/tasks/${encodeURIComponent(task.id)}/prompt/approve`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(prompt ? { prompt } : {}),
     });
     state.task = updated;
+    state.lyriaPrompt = "";
     state.busy = false;
     render();
     pollTask();

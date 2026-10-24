@@ -130,11 +130,35 @@ describe("MoodMic review decision endpoint", () => {
   });
 });
 
-function postApprove(baseUrl: string, id: string) {
-  return fetch(`${baseUrl}/api/tasks/${id}/prompt/approve`, { method: "POST" });
+function postApprove(baseUrl: string, id: string, body?: unknown) {
+  return fetch(`${baseUrl}/api/tasks/${id}/prompt/approve`, {
+    method: "POST",
+    ...(body === undefined
+      ? {}
+      : { headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }),
+  });
 }
 
 describe("MoodMic prompt confirmation endpoint", () => {
+  it("generates with the prompt the user edited before confirming", async () => {
+    await withWebServer(async ({ baseUrl }) => {
+      const prompt = "warm slow ambient piano with a distant cello, instrumental only";
+      const response = await postApprove(baseUrl, "edited-task", { prompt });
+      expect(response.status).toBe(202);
+      await waitForTask(baseUrl, "edited-task", (task) => task.status === "completed");
+      expect(generateMock).toHaveBeenCalledTimes(1);
+      expect(generateMock.mock.calls[0]![0]).toBe(prompt);
+    }, { prepare: (root) => prepareTask(root, "edited-task", { status: "planning" }), environment });
+  });
+
+  it("rejects an empty edited prompt", async () => {
+    await withWebServer(async ({ baseUrl }) => {
+      const response = await postApprove(baseUrl, "blank-task", { prompt: "   " });
+      expect(response.status).toBe(400);
+      expect((await readTask(baseUrl, "blank-task")).status).toBe("planning");
+    }, { prepare: (root) => prepareTask(root, "blank-task", { status: "planning" }), environment });
+  });
+
   it("generates after the composed prompt is confirmed", async () => {
     await withWebServer(async ({ baseUrl }) => {
       const response = await postApprove(baseUrl, "confirm-task");
