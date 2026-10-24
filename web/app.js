@@ -653,6 +653,14 @@ function workflowTypeForTask(task) {
   return "01-general";
 }
 
+/** A session keeps its own scope; historical sessions still store "02-jazz". */
+function workflowTypeForSession(session) {
+  const declared = normalizeWorkflowType(session?.taskOptions?.workflowType);
+  if (declared) return declared;
+  const task = latestSessionTask(session);
+  return task ? workflowTypeForTask(task) : "01-general";
+}
+
 function workflowLabel(workflowType) {
   return t({
     "01-general": "workflow01",
@@ -1290,18 +1298,21 @@ function renderExamples() {
 
 function renderTaskList() {
   const sessionTaskIds = new Set(state.discussionSessions.flatMap((session) => session.taskIds || []));
-  const legacyTasks = state.tasks.filter((task) => !sessionTaskIds.has(task.id));
+  // MoodMic conversations own their songs. They belong to the MoodMic tab, so
+  // they are not listed or counted as tasks created by this workflow studio.
+  const legacyTasks = state.tasks.filter((task) => !sessionTaskIds.has(task.id) && !task.moodChatId);
   const workflowTypes = ["01-general", "02-music", "03-orchestral", "04-album"];
   // Playlist (05) has its own tab and is not listed here, so count only what
   // the list actually shows: the badge and the rows must agree.
+  const listedSessions = state.discussionSessions.filter((session) =>
+    workflowTypes.includes(workflowTypeForSession(session)),
+  );
   const listedTasks = legacyTasks.filter((task) => workflowTypes.includes(workflowTypeForTask(task)));
-  elements.taskCount.textContent = String(state.discussionSessions.length + listedTasks.length);
+  elements.taskCount.textContent = String(listedSessions.length + listedTasks.length);
   // Keep the reader's place: re-rendering the list must not jump the sidebar.
   const previousScrollTop = elements.taskList.scrollTop;
   elements.taskList.innerHTML = workflowTypes.map((workflowType) => {
-    const sessions = state.discussionSessions.filter((session) =>
-      (session.taskOptions?.workflowType || workflowTypeForTask(latestSessionTask(session) || {})) === workflowType,
-    );
+    const sessions = listedSessions.filter((session) => workflowTypeForSession(session) === workflowType);
     const tasks = legacyTasks.filter((task) => workflowTypeForTask(task) === workflowType);
     const sessionItems = sessions.map((session) => {
       const task = latestSessionTask(session);
