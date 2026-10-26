@@ -1,0 +1,128 @@
+{
+  "condition": "arioso-electronic",
+  "provider": "google-genai",
+  "model": "lyria-3.5",
+  "composerModel": "gpt-6-sol",
+  "reviewModel": "gemini-3.5-flash",
+  "musicType": "electronic",
+  "musicRetrievalTrace": {
+    "musicType": "electronic",
+    "selectionSource": "interface",
+    "query": "steady restrained ambient electronic instrumental for pre-presentation focus, breathing space, gentle forward pulse, alert calm gradual resolve without dramatic shifts",
+    "mode": "description",
+    "styleReferenceIds": [
+      "electronic-style-ambient",
+      "electronic-style-space-rock"
+    ],
+    "standardReferenceIds": [
+      "electronic-standard-sketches-from-an-island-2",
+      "electronic-standard-detached-from-the-rest-of-you",
+      "electronic-standard-sounds-of-the-unborn"
+    ]
+  },
+  "brief": "这段音乐陪伴汇报前的短暂准备：呼吸还有些急，注意力被即将发生的事牵扯，却需要慢慢回到眼前。像是看一眼提纲，再抬起头准备开口的几秒钟，周围并没有改变，自己却逐渐站稳了。它应当给呼吸留出空间，也保留一份清醒的警觉；结束时，紧张未必完全消失，但思路能重新聚拢。\n\n创作一首独立的原创纯音乐，默认时长约两分钟。整体方向平稳、清晰，带一点持续向前的力量，帮助听者在重要汇报前稳定呼吸、集中注意力。避免突然的强烈变化，也不要舒缓到令人犯困。没有指定乐器、旋律、速度或曲式，这些音乐实现交由作曲者决定。",
+  "briefSubmitted": "这段音乐陪伴汇报前的短暂准备：呼吸还有些急，注意力被即将发生的事牵扯，却需要慢慢回到眼前。像是看一眼提纲，再抬起头准备开口的几秒钟，周围并没有改变，自己却逐渐站稳了。它应当给呼吸留出空间，也保留一份清醒的警觉；结束时，紧张未必完全消失，但思路能重新聚拢。\n\n创作一首独立的原创纯音乐，默认时长约两分钟。整体方向平稳、清晰，带一点持续向前的力量，帮助听者在重要汇报前稳定呼吸、集中注意力。避免突然的强烈变化，也不要舒缓到令人犯困。没有指定乐器、旋律、速度或曲式，这些音乐实现交由作曲者决定。\n\nApplication setting for this generation: instrumental only, no vocals; target total duration about three minutes (180 seconds).",
+  "musicSpec": {
+    "schemaVersion": "1.0",
+    "title": "抬头之前",
+    "intent": "陪伴重要汇报前的短暂准备：让略急的呼吸慢下来，保留清醒的警觉，并在结束时让注意力重新聚拢，而非抹去所有紧张。",
+    "genres": [
+      "氛围电子",
+      "极简电子"
+    ],
+    "moods": [
+      "轻微紧绷",
+      "逐渐平稳",
+      "清醒而坚定"
+    ],
+    "tempo": {
+      "bpm": 84,
+      "feel": "稳定的四拍脉动，节奏稀疏，乐句之间留有呼吸空间"
+    },
+    "tonality": {
+      "tonic": "D",
+      "mode": "多利亚调式"
+    },
+    "meter": "4/4",
+    "instrumentation": [
+      {
+        "name": "柔和合成器铺底",
+        "role": "承托缓慢变化的和声，维持稳定空间",
+        "timbre": "温润、通透，缓慢起伏"
+      },
+      {
+        "name": "短音合成器",
+        "role": "奏出简短的上行旋律动机，并逐渐收拢为更明确的乐句",
+        "timbre": "圆润、清晰，音尾自然淡去"
+      },
+      {
+        "name": "低音合成器",
+        "role": "以简洁的根音稳住脉动",
+        "timbre": "柔和、克制，不压迫"
+      },
+      {
+        "name": "轻电子打击乐",
+        "role": "提供持续向前的节拍，不占据注意力",
+        "timbre": "低沉轻拍与细微沙沙声，平滑而不尖锐"
+      }
+    ],
+    "structure": [
+      {
+        "section": "Intro",
+        "durationSeconds": 30,
+        "direction": "稀疏和声与间隔较长的短音动机开场，留出呼吸空间，轻微悬而未决。"
+      },
+      {
+        "section": "Development",
+        "durationSeconds": 45,
+        "direction": "低音和轻拍渐入，建立稳定脉动；旋律重复并略向上延伸，力度保持克制。"
+      },
+      {
+        "section": "Focus",
+        "durationSeconds": 60,
+        "direction": "脉动保持不变，和声稍转明亮；旋律变得更连贯，层次略增却不形成高潮。"
+      },
+      {
+        "section": "Outro",
+        "durationSeconds": 45,
+        "direction": "逐层减去打击乐，简短动机清晰回归；以安定但仍带一点开放感的和声轻柔结束。"
+      }
+    ],
+    "vocals": {
+      "enabled": false,
+      "language": null,
+      "style": null,
+      "lyricalTheme": null
+    },
+    "production": "干净的录音室质感，保留合成器本身的电子音色；前景旋律清楚，背景宽而轻，动态平稳，瞬态柔顺、峰值受控。",
+    "avoid": [
+      "人声",
+      "突兀的强拍或音量变化",
+      "令人昏昏欲睡的无脉动铺陈",
+      "削波、杂裂声或数字失真"
+    ],
+    "assumptions": [
+      "以应用设定的约三分钟为时长目标。",
+      "采用轻脉动的氛围电子编制与84 BPM四拍。"
+    ],
+    "lyriaPrompt": "创作约三分钟的原创氛围电子纯音乐，陪伴重要汇报前稳定呼吸、重新集中注意力。84 BPM、4/4拍，以D多利亚调式为中心：和声最初略带悬念，随后稍微明亮，但不变成热烈的胜利感。温润通透的合成器铺底留出宽敞间隙；圆润的短音合成器奏出简短上行动机，逐渐将它连成更清楚的乐句；柔和低音与轻拍、细微沙沙声构成稳定而稀疏的向前脉动。[Intro] 稀疏、略紧绷，给呼吸留白。[Development] 低音和节拍缓缓进入，动机逐次延伸。[Focus] 保持相同速度，和声稍转明亮，层次略增，始终清醒克制。[Outro] 逐层收去节拍，动机清晰回归，以安定而略带开放感的和声轻柔结束。避免突然的高潮、尖锐重击或令人犯困的漂浮感。干净的录音室录制，忠实保留电子乐器音色，前景清晰、背景轻而宽，瞬态柔顺、峰值受控；无削波、杂裂声或数字失真。instrumental only, no vocals."
+  },
+  "lyriaPrompt": "创作约三分钟的原创氛围电子纯音乐，陪伴重要汇报前稳定呼吸、重新集中注意力。84 BPM、4/4拍，以D多利亚调式为中心：和声最初略带悬念，随后稍微明亮，但不变成热烈的胜利感。温润通透的合成器铺底留出宽敞间隙；圆润的短音合成器奏出简短上行动机，逐渐将它连成更清楚的乐句；柔和低音与轻拍、细微沙沙声构成稳定而稀疏的向前脉动。[Intro] 稀疏、略紧绷，给呼吸留白。[Development] 低音和节拍缓缓进入，动机逐次延伸。[Focus] 保持相同速度，和声稍转明亮，层次略增，始终清醒克制。[Outro] 逐层收去节拍，动机清晰回归，以安定而略带开放感的和声轻柔结束。避免突然的高潮、尖锐重击或令人犯困的漂浮感。干净的录音室录制，忠实保留电子乐器音色，前景清晰、背景轻而宽，瞬态柔顺、峰值受控；无削波、杂裂声或数字失真。instrumental only, no vocals.",
+  "generatedText": "[[A0]]\n[[B1]]\n[[B2]]\n[[C3]]",
+  "requestedAt": "2026-10-26T06:58:00.154Z",
+  "audioFile": "eval\\runs\\scenario-01\\condition-b-electronic\\audio.mp3",
+  "durationSeconds": 179.984,
+  "sha256": "e78a13cc2dd70f395e795686c2a3be6a2cada2515aadb7744659b61979ad3d48",
+  "automaticReview": {
+    "verdict": "match",
+    "summary": "这首纯音乐完全符合用户的需求，曲风为平稳且清晰的氛围/极简电子乐，节奏稳定在84 BPM左右。柔和的合成器铺底与清脆的短音拨弦相融合，营造出清醒、专注且逐渐平稳的氛围。",
+    "matchedPoints": [
+      "全程无人声，为纯音乐形式",
+      "风格属于氛围电子与极简电子，整体清晰平稳",
+      "节奏维持在84 BPM左右，脉动稀疏而稳定，为呼吸留出了空间",
+      "动态过渡自然，没有突兀的强拍或剧烈音量变化"
+    ],
+    "mismatchedPoints": []
+  },
+  "failureHistory": []
+}

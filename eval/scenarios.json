@@ -1,0 +1,46 @@
+{
+  "protocolVersion": "DH6012_Eval.md",
+  "durationTargetSeconds": 180,
+  "scenarios": [
+    {
+      "id": "01",
+      "moodGroup": "red-high-energy-unpleasant",
+      "initialMessage": "我现在很焦虑，想听点纯音乐。",
+      "underlyingNeed": "The user is about to give an important presentation. They want to settle their breathing and regain focus without becoming sleepy or losing alertness.",
+      "evaluatorTurns": [
+        "我马上要去做一个很重要的汇报，想先让呼吸平稳下来、把注意力收回来，但又不想听得犯困，也不想失去警觉。",
+        "我没有具体的音乐偏好，请根据这个需求决定。"
+      ]
+    },
+    {
+      "id": "02",
+      "moodGroup": "yellow-high-energy-pleasant",
+      "initialMessage": "我现在很兴奋，想听点纯音乐。",
+      "underlyingNeed": "The user has completed an important project. They want to sustain joy and a sense of achievement without the music becoming chaotic, noisy, or overstimulating.",
+      "evaluatorTurns": [
+        "我刚完成了一个很重要的项目，想保持这份开心和成就感，但又不希望音乐变得嘈杂、吵闹或者太刺激。",
+        "我没有具体的音乐偏好，请根据这个需求决定。"
+      ]
+    },
+    {
+      "id": "03",
+      "moodGroup": "blue-low-energy-unpleasant",
+      "initialMessage": "我现在很疲惫，想听点纯音乐。",
+      "underlyingNeed": "The user must continue working for another hour. They want to recover energy and concentration gently, without becoming sleepier or being confronted by sudden intensity.",
+      "evaluatorTurns": [
+        "我还得再工作一个小时，想温和地恢复一点精力和专注，但不想越听越困，也不想被突然的强烈声音打断。",
+        "我没有具体的音乐偏好，请根据这个需求决定。"
+      ]
+    },
+    {
+      "id": "04",
+      "moodGroup": "green-low-energy-pleasant",
+      "initialMessage": "我现在很平静，想听点纯音乐。",
+      "underlyingNeed": "The user is preparing to read before sleep. They want to preserve a calm, comfortable state, with subtle development but no dramatic climax or tension.",
+      "evaluatorTurns": [
+        "我准备睡前读点书，想保持现在这种平静舒服的状态，有一点细微的变化就好，不要有突然的高潮或紧张感。",
+        "我没有具体的音乐偏好，请根据这个需求决定。"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,131 @@
+{
+  "condition": "arioso-jazz",
+  "provider": "google-genai",
+  "model": "lyria-3.5",
+  "composerModel": "gpt-6-sol",
+  "reviewModel": "gemini-3.5-flash",
+  "musicType": "jazz",
+  "musicRetrievalTrace": {
+    "musicType": "jazz",
+    "selectionSource": "interface",
+    "query": "gentle light instrumental jazz for focused work, steady understated midtempo groove, restrained piano melody, soft brushed drums and upright bass, quietly uplifting",
+    "mode": "description",
+    "styleReferenceIds": [
+      "jazz-style-soul-jazz",
+      "jazz-style-samba-jazz"
+    ],
+    "standardReferenceIds": [
+      "jazz-standard-naima",
+      "jazz-standard-spain",
+      "gioia-2012-east-of-the-sun-and-west-of-the-moon"
+    ]
+  },
+  "brief": "这段音乐陪伴的是疲惫之后仍要继续工作的一个小时。注意力有些散，停一下、喝口水，再回到手头的事；精力不必一下子回来，只要能一点点接上。它应当让人保持清醒，却不催促，听的时候可以继续思考、继续做事，不必时时留意音乐。结束后留下的是稍微稳住了的状态，而不是困意或紧绷感。\n\n创作一首独立的原创纯音乐，默认时长约两分钟。整体温和、轻盈，有平稳的推进感，帮助恢复一点精力和专注；避免突然的强烈声音，也不要过于舒缓而使人越听越困。音乐可以有存在感，但不应反复将注意力从工作中拉走。没有指定乐器、曲风或具体结构，这些由作曲者根据上述用途决定。",
+  "briefSubmitted": "这段音乐陪伴的是疲惫之后仍要继续工作的一个小时。注意力有些散，停一下、喝口水，再回到手头的事；精力不必一下子回来，只要能一点点接上。它应当让人保持清醒，却不催促，听的时候可以继续思考、继续做事，不必时时留意音乐。结束后留下的是稍微稳住了的状态，而不是困意或紧绷感。\n\n创作一首独立的原创纯音乐，默认时长约两分钟。整体温和、轻盈，有平稳的推进感，帮助恢复一点精力和专注；避免突然的强烈声音，也不要过于舒缓而使人越听越困。音乐可以有存在感，但不应反复将注意力从工作中拉走。没有指定乐器、曲风或具体结构，这些由作曲者根据上述用途决定。\n\nApplication setting for this generation: instrumental only, no vocals; target total duration about three minutes (180 seconds).",
+  "musicSpec": {
+    "schemaVersion": "1.0",
+    "title": "重新接上",
+    "intent": "陪伴疲惫后的工作时段：允许短暂停顿，再以不催促的步伐回到手头的事，结束时留下清醒而稍微稳住的感觉。",
+    "genres": [
+      "爵士",
+      "轻盈的钢琴三重奏"
+    ],
+    "moods": [
+      "温和清醒",
+      "逐渐找回专注",
+      "平稳安定"
+    ],
+    "tempo": {
+      "bpm": 94,
+      "feel": "轻微摇摆的中速律动，稳定向前，不急促"
+    },
+    "tonality": {
+      "tonic": "F",
+      "mode": "大调，穿插柔和的九和弦与短暂的小调色彩"
+    },
+    "meter": "4/4",
+    "instrumentation": [
+      {
+        "name": "原声钢琴",
+        "role": "以留白充足的短句担任旋律，柔和和弦支撑其间",
+        "timbre": "清晰、温暖，触键轻巧"
+      },
+      {
+        "name": "原声低音提琴",
+        "role": "用简洁、规律的音型维持前进感",
+        "timbre": "圆润、收敛的拨弦"
+      },
+      {
+        "name": "爵士鼓",
+        "role": "以刷奏和轻柔的镲片维持脉搏",
+        "timbre": "细致、低动态，无突出的重击"
+      }
+    ],
+    "structure": [
+      {
+        "section": "Intro",
+        "durationSeconds": 18,
+        "direction": "钢琴提出简短上行音型，低音提琴与刷奏逐步接入，建立稳定脉搏。"
+      },
+      {
+        "section": "Theme",
+        "durationSeconds": 52,
+        "direction": "钢琴反复呈示留有呼吸空间的主题；低音与鼓保持轻盈、规律的配合。"
+      },
+      {
+        "section": "Variation",
+        "durationSeconds": 48,
+        "direction": "主题稍作节奏和声部变化，短暂经过小调色彩；整体音量和密度基本不变。"
+      },
+      {
+        "section": "Return",
+        "durationSeconds": 42,
+        "direction": "回到较明亮的主题，钢琴音型略向上伸展，带来一点恢复精力的感觉。"
+      },
+      {
+        "section": "Outro",
+        "durationSeconds": 20,
+        "direction": "旋律收拢，律动保持到温和明确的终止，不拖慢成催眠式淡出。"
+      }
+    ],
+    "vocals": {
+      "enabled": false,
+      "language": null,
+      "style": null,
+      "lyricalTheme": null
+    },
+    "production": "干净、亲近的录音室钢琴三重奏；原声乐器音色自然，声部清楚，瞬态平滑，峰值受控，动态始终温和。",
+    "avoid": [
+      "人声",
+      "突然的强烈声音",
+      "炫技式独奏",
+      "催眠般的缓慢拖拍",
+      "削波",
+      "噼啪杂音",
+      "数字失真"
+    ],
+    "assumptions": [
+      "采用界面指定的爵士乐类型。",
+      "采用应用设置的约三分钟时长，而非简述中的默认两分钟。",
+      "选用F大调钢琴三重奏与94 BPM。"
+    ],
+    "lyriaPrompt": "An original, gentle piano-trio jazz piece for a tired person steadily returning to focused work, about three minutes long. Instrumental only, no vocals. F major, 4/4 at around 94 BPM, with a light swing and a consistent, unhurried pulse. Warm acoustic piano leads with a small rising motif and spacious, easily followed phrases; upright bass plays simple, regular plucked figures, while brushed drums and quiet cymbals keep the music awake without demanding attention. Use soft major-ninth and sixth chords, with brief minor-color turns that resolve naturally. [Intro] Introduce the piano motif, then bring in bass and brushes. [Theme] Establish the restrained melody and steady groove. [Variation] Gently reshape the motif and harmony without increasing volume or density. [Return] Let the brighter theme regain a little lift. [Outro] Settle into a soft, clear ending without slowing into a lullaby. Keep dynamics even and the instruments distinct. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No sudden loud accents, showy solos, clipping, crackling or digital distortion."
+  },
+  "lyriaPrompt": "An original, gentle piano-trio jazz piece for a tired person steadily returning to focused work, about three minutes long. Instrumental only, no vocals. F major, 4/4 at around 94 BPM, with a light swing and a consistent, unhurried pulse. Warm acoustic piano leads with a small rising motif and spacious, easily followed phrases; upright bass plays simple, regular plucked figures, while brushed drums and quiet cymbals keep the music awake without demanding attention. Use soft major-ninth and sixth chords, with brief minor-color turns that resolve naturally. [Intro] Introduce the piano motif, then bring in bass and brushes. [Theme] Establish the restrained melody and steady groove. [Variation] Gently reshape the motif and harmony without increasing volume or density. [Return] Let the brighter theme regain a little lift. [Outro] Settle into a soft, clear ending without slowing into a lullaby. Keep dynamics even and the instruments distinct. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No sudden loud accents, showy solos, clipping, crackling or digital distortion.",
+  "generatedText": "[[A0]]\n[[B1]]\n[[C2]]\n[[D3]]\n[[E4]]",
+  "requestedAt": "2026-10-26T07:07:27.290Z",
+  "audioFile": "eval\\runs\\scenario-03\\condition-b-jazz\\audio.mp3",
+  "durationSeconds": 169.613,
+  "sha256": "117bf89ee1e90e31e6e5dd9acc45963780505f49529e23a81d7998f5a3b1b3e3",
+  "automaticReview": {
+    "verdict": "match",
+    "summary": "这首作品采用了温和轻盈的爵士钢琴三重奏形式，律动稳定顺畅，氛围清醒而不张扬，完全符合陪伴工作、帮助恢复专注力的需求。",
+    "matchedPoints": [
+      "采用了原声钢琴、低音提琴与爵士鼓组成的三重奏编制，呈现出优雅轻盈的爵士风格。",
+      "节奏平稳且富有适度推进感，速度适中，没有任何突兀的强烈声音或过分炫技的独奏。",
+      "全曲为纯音乐，无任何人声干扰，非常适合作为工作和思考时的背景音乐。"
+    ],
+    "mismatchedPoints": []
+  },
+  "failureHistory": []
+}

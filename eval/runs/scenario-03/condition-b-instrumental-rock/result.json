@@ -1,0 +1,128 @@
+{
+  "condition": "arioso-instrumental-rock",
+  "provider": "google-genai",
+  "model": "lyria-3.5",
+  "composerModel": "gpt-6-sol",
+  "reviewModel": "gemini-3.5-flash",
+  "musicType": "instrumental-rock",
+  "musicRetrievalTrace": {
+    "musicType": "instrumental-rock",
+    "selectionSource": "interface",
+    "query": "gentle restrained instrumental rock clean interlocking guitars steady light drums gradual subtle development focused calm alert no dramatic crescendos",
+    "mode": "description",
+    "styleReferenceIds": [
+      "instrumental-rock-style-post-rock",
+      "instrumental-rock-style-space-rock"
+    ],
+    "standardReferenceIds": [
+      "instrumental-rock-standard-let-there-be-drums",
+      "instrumental-rock-standard-no-matter-what-shape-your-stomach-s-in",
+      "instrumental-rock-standard-like-long-hair"
+    ]
+  },
+  "brief": "这段音乐陪伴的是疲惫之后仍要继续工作的一个小时。注意力有些散，停一下、喝口水，再回到手头的事；精力不必一下子回来，只要能一点点接上。它应当让人保持清醒，却不催促，听的时候可以继续思考、继续做事，不必时时留意音乐。结束后留下的是稍微稳住了的状态，而不是困意或紧绷感。\n\n创作一首独立的原创纯音乐，默认时长约两分钟。整体温和、轻盈，有平稳的推进感，帮助恢复一点精力和专注；避免突然的强烈声音，也不要过于舒缓而使人越听越困。音乐可以有存在感，但不应反复将注意力从工作中拉走。没有指定乐器、曲风或具体结构，这些由作曲者根据上述用途决定。",
+  "briefSubmitted": "这段音乐陪伴的是疲惫之后仍要继续工作的一个小时。注意力有些散，停一下、喝口水，再回到手头的事；精力不必一下子回来，只要能一点点接上。它应当让人保持清醒，却不催促，听的时候可以继续思考、继续做事，不必时时留意音乐。结束后留下的是稍微稳住了的状态，而不是困意或紧绷感。\n\n创作一首独立的原创纯音乐，默认时长约两分钟。整体温和、轻盈，有平稳的推进感，帮助恢复一点精力和专注；避免突然的强烈声音，也不要过于舒缓而使人越听越困。音乐可以有存在感，但不应反复将注意力从工作中拉走。没有指定乐器、曲风或具体结构，这些由作曲者根据上述用途决定。\n\nApplication setting for this generation: instrumental only, no vocals; target total duration about three minutes (180 seconds).",
+  "musicSpec": {
+    "schemaVersion": "1.0",
+    "title": "重新接上",
+    "intent": "陪伴疲惫后的工作时段：允许短暂停顿，再平稳地找回一点精力与专注。音乐保持清醒但不催促，结束时留下稍微稳住的感觉。",
+    "genres": [
+      "器乐摇滚",
+      "轻量后摇"
+    ],
+    "moods": [
+      "温和轻盈",
+      "平稳而清醒",
+      "逐渐安定"
+    ],
+    "tempo": {
+      "bpm": 94,
+      "feel": "4/4均匀中速，轻微向前推进，不急促"
+    },
+    "tonality": {
+      "tonic": "D",
+      "mode": "大调，以柔和的附加音和弦增加流动感"
+    },
+    "meter": "4/4",
+    "instrumentation": [
+      {
+        "name": "清音电吉他",
+        "role": "以短小、留白的分解和弦维持流动感",
+        "timbre": "圆润清晰，轻拨，无明显失真"
+      },
+      {
+        "name": "第二把清音电吉他",
+        "role": "偶尔回应简短旋律动机，不持续占据前景",
+        "timbre": "柔和、略有空间感"
+      },
+      {
+        "name": "电贝斯",
+        "role": "用简洁的重复音型连接鼓点与和声",
+        "timbre": "温暖、音头克制"
+      },
+      {
+        "name": "鼓组",
+        "role": "以轻鼓点和细密但低调的踩镲维持稳定脉搏",
+        "timbre": "自然、轻柔，不使用猛烈镲击"
+      }
+    ],
+    "structure": [
+      {
+        "section": "Intro",
+        "durationSeconds": 25,
+        "direction": "清音吉他先呈示安静的循环动机，贝斯与轻鼓点逐步加入。"
+      },
+      {
+        "section": "Theme",
+        "durationSeconds": 65,
+        "direction": "保持稳定律动；第二把吉他以疏朗的短句回应，旋律不过度重复或突出。"
+      },
+      {
+        "section": "Variation",
+        "durationSeconds": 55,
+        "direction": "短暂收去回应吉他，留出一次呼吸般的空隙，随后让它以稍明亮的音区返回；节奏和音量基本不变。"
+      },
+      {
+        "section": "Outro",
+        "durationSeconds": 35,
+        "direction": "旋律逐渐减少，保留熟悉的脉搏与和声，轻轻收束而非突然停止。"
+      }
+    ],
+    "vocals": {
+      "enabled": false,
+      "language": null,
+      "style": null,
+      "lyricalTheme": null
+    },
+    "production": "干净的录音室声音，保留电吉他的清音质感和鼓组的自然音色；层次清楚、空间感适度，瞬态柔顺、峰值受控，动态平稳。",
+    "avoid": [
+      "人声、哼唱或口白",
+      "突然的强音和猛烈镲击",
+      "戏剧性渐强",
+      "削波、噼啪杂音和数字失真"
+    ],
+    "assumptions": [
+      "采用约94 BPM的轻量器乐摇滚",
+      "按应用设置以约三分钟为目标时长"
+    ],
+    "lyriaPrompt": "创作约三分钟的原创轻量后摇器乐：温和、轻盈，适合疲惫后继续工作时聆听，帮助人保持清醒和专注，但不催促，也不反复抢走注意力。94 BPM，4/4，D大调；柔和的附加音和弦缓慢循环。一把清音电吉他轻拨留白的分解和弦，温暖的电贝斯与轻鼓点、低调踩镲形成平稳脉搏；第二把清音吉他只偶尔用短小、疏朗的旋律回应。[Intro] 吉他先建立循环，贝斯和鼓逐步进入。[Theme] 维持均匀推进，让短旋律自然浮现又退回背景。[Variation] 暂时收去回应吉他，留一次呼吸般的空隙，再以稍明亮的音区返回，不提高整体音量。[Outro] 逐渐减少旋律，以熟悉的脉搏轻轻收束，留下稍微稳住的感觉。干净的录音室录制，保留电吉他的清音质感和鼓组的自然音色，层次清楚，瞬态柔顺、峰值受控。instrumental only, no vocals。不要突然的强音、猛烈镲击或戏剧性渐强；不要削波、噼啪杂音或数字失真。"
+  },
+  "lyriaPrompt": "创作约三分钟的原创轻量后摇器乐：温和、轻盈，适合疲惫后继续工作时聆听，帮助人保持清醒和专注，但不催促，也不反复抢走注意力。94 BPM，4/4，D大调；柔和的附加音和弦缓慢循环。一把清音电吉他轻拨留白的分解和弦，温暖的电贝斯与轻鼓点、低调踩镲形成平稳脉搏；第二把清音吉他只偶尔用短小、疏朗的旋律回应。[Intro] 吉他先建立循环，贝斯和鼓逐步进入。[Theme] 维持均匀推进，让短旋律自然浮现又退回背景。[Variation] 暂时收去回应吉他，留一次呼吸般的空隙，再以稍明亮的音区返回，不提高整体音量。[Outro] 逐渐减少旋律，以熟悉的脉搏轻轻收束，留下稍微稳住的感觉。干净的录音室录制，保留电吉他的清音质感和鼓组的自然音色，层次清楚，瞬态柔顺、峰值受控。instrumental only, no vocals。不要突然的强音、猛烈镲击或戏剧性渐强；不要削波、噼啪杂音或数字失真。",
+  "generatedText": "[[A0]]\n[[B1]]\n[[C2]]\n[[B3]]\n[[C4]]\n[[D5]]",
+  "requestedAt": "2026-10-26T07:11:19.349Z",
+  "audioFile": "eval\\runs\\scenario-03\\condition-b-instrumental-rock\\audio.mp3",
+  "durationSeconds": 169.77,
+  "sha256": "e0c7d6db5c725eefe5a228df6294f71ae25cfdfd855dcd49e351fde1aa79bb4e",
+  "automaticReview": {
+    "verdict": "match",
+    "summary": "生成音频完美契合了用户的使用场景与情绪需求。温和舒缓的清音电吉他伴随平稳的鼓点节奏，保持了恰到好的清醒度与专注感，没有任何干扰工作的突兀声音。",
+    "matchedPoints": [
+      "整体为纯音乐器乐演奏，无任何人声或口白成分",
+      "曲风呈现轻量后摇与器乐摇滚的温理质感，双清音电吉他与贝斯、鼓组搭配和谐",
+      "节奏平稳流畅，既不过于缓慢沉闷，也没有急促或过于强烈的动态变化",
+      "符合陪伴疲惫后继续工作、恢复专注的氛围需求"
+    ],
+    "mismatchedPoints": []
+  },
+  "failureHistory": []
+}

@@ -1,0 +1,334 @@
+{
+  "protocol": "docs/DH6012-Documentation/DH6012_Eval.md",
+  "scenario": {
+    "id": "04",
+    "moodGroup": "green-low-energy-pleasant",
+    "initialMessage": "我现在很平静，想听点纯音乐。",
+    "underlyingNeed": "The user is preparing to read before sleep. They want to preserve a calm, comfortable state, with subtle development but no dramatic climax or tension.",
+    "evaluatorTurns": [
+      "我准备睡前读点书，想保持现在这种平静舒服的状态，有一点细微的变化就好，不要有突然的高潮或紧张感。",
+      "我没有具体的音乐偏好，请根据这个需求决定。"
+    ]
+  },
+  "duration": {
+    "targetSeconds": 180,
+    "note": "Fixed at about three minutes for both conditions by study instruction; the plan otherwise leaves duration uncontrolled."
+  },
+  "conditions": {
+    "baseline": {
+      "condition": "baseline-direct",
+      "provider": "google-genai",
+      "model": "lyria-3.5",
+      "prompt": "我现在很平静，想听点纯音乐。\n\nInstrumental only, no vocals. Target duration: about three minutes (180 seconds).",
+      "generatedText": null,
+      "requestedAt": "2026-10-26T06:43:58.985Z",
+      "reused": true,
+      "audioFile": "eval\\runs\\scenario-04\\condition-a-baseline\\audio.mp3",
+      "durationSeconds": 176.483,
+      "sha256": "51301deba5a7c9548471f341aa75f3d84723ccebde92f6478392921e2ca70931",
+      "failureHistory": []
+    },
+    "arioso": {
+      "condition": "arioso-workflow",
+      "provider": "google-genai",
+      "model": "lyria-3.5",
+      "composerModel": "gpt-6-sol",
+      "discussionModel": "gpt-6-sol",
+      "reviewModel": "gemini-3.5-flash",
+      "transcript": [
+        {
+          "role": "user",
+          "content": "我现在很平静，想听点纯音乐。"
+        },
+        {
+          "role": "assistant",
+          "content": "你好呀，我是你的情绪导演。你说的平静，让我想到傍晚把洗好的杯子倒扣在桌上，窗边还有一点亮，水槽里偶尔落下一滴水；手停下来时，杯沿那圈水光还没干。\n\n也可能是夜里合上书，灯照着摊开的书页，窗外有很轻的风声。你想让这首纯音乐留住此刻的哪个细节？",
+          "mood": {
+            "label": "平静",
+            "imagery": ""
+          }
+        },
+        {
+          "role": "user",
+          "content": "我准备睡前读点书，想保持现在这种平静舒服的状态，有一点细微的变化就好，不要有突然的高潮或紧张感。"
+        },
+        {
+          "role": "assistant",
+          "content": "那就让它陪你读书，而不是把注意力从书页上拉走。翻过几页时，能觉察到一点点变化，但整体仍然平静、舒服；始终是纯音乐，不出现突然的高潮或紧张感。",
+          "mood": {
+            "label": "平静舒服",
+            "imagery": "睡前读书"
+          }
+        },
+        {
+          "role": "user",
+          "content": "我没有具体的音乐偏好，请根据这个需求决定。"
+        },
+        {
+          "role": "assistant",
+          "content": "好，具体的音乐选择就交给后续创作来定。方向已经很清楚了：这首纯音乐要适合睡前读书，让你能安心留在书里；细微的变化像翻过几页后才察觉，始终保持平静舒服，不出现突然的高潮或紧张感。",
+          "mood": {
+            "label": "平静舒服",
+            "imagery": "睡前读书"
+          }
+        }
+      ],
+      "retrievals": [
+        {
+          "turn": "initial",
+          "query": "我现在很平静，想听点纯音乐。 calm gentle still 安宁 平静 微风 清澈 舒缓 静谧",
+          "query_hash": "517b28bdd75d66f65c46c2157a1879de99eb596f8c723f999da9729e7aa59245",
+          "corpus_version": "119be6544a3d001fb1e6ab3d3a4cedb776e59b0eed576b61d2d8e4fc6178df5c",
+          "reused": false,
+          "retrieved_at": "2026-10-26T06:43:59.222Z",
+          "references": [
+            {
+              "id": "modern-poem-371ec114ca398486",
+              "title": "蛛网",
+              "author": "余光中",
+              "score": 0.071519,
+              "matched_terms": [
+                "平静"
+              ]
+            },
+            {
+              "id": "modern-poem-b2733564e5cff880",
+              "title": "泡影",
+              "author": "顾城",
+              "score": 0.05411,
+              "matched_terms": [
+                "微风",
+                "风"
+              ]
+            },
+            {
+              "id": "modern-poem-8334c93519794bdb",
+              "title": "圆月夜",
+              "author": "何其芳",
+              "score": 0.052804,
+              "matched_terms": [
+                "平静",
+                "微风",
+                "风"
+              ]
+            }
+          ]
+        },
+        {
+          "turn": "turn-1",
+          "query": "我现在很平静，想听点纯音乐。 我准备睡前读点书，想保持现在这种平静舒服的状态，有一点细微的变化就好，不要有突然的高潮或紧张感。 平静 anxious calm gentle restless still tense uneasy 不安 压迫 安宁 平静 彷徨 微风 慌乱 清澈 焦虑 睡不着 紧张 舒缓 静谧",
+          "query_hash": "04316b5b742821697becc49f1be262e934fc4c8ea4c3f3b1f85a91b714dba783",
+          "corpus_version": "119be6544a3d001fb1e6ab3d3a4cedb776e59b0eed576b61d2d8e4fc6178df5c",
+          "reused": false,
+          "retrieved_at": "2026-10-26T06:44:08.064Z",
+          "references": [
+            {
+              "id": "modern-poem-0ba185956f2d4cce",
+              "title": "他们死去了",
+              "author": "穆旦",
+              "score": 0.057009,
+              "matched_terms": [
+                "紧张",
+                "安宁",
+                "现在",
+                "然的",
+                "风"
+              ]
+            },
+            {
+              "id": "modern-poem-371ec114ca398486",
+              "title": "蛛网",
+              "author": "余光中",
+              "score": 0.053478,
+              "matched_terms": [
+                "平静"
+              ]
+            },
+            {
+              "id": "modern-poem-b53eed2a2ab27732",
+              "title": "片章",
+              "author": "韩东",
+              "score": 0.049107,
+              "matched_terms": [
+                "睡不",
+                "睡不着",
+                "不着",
+                "风"
+              ]
+            }
+          ]
+        },
+        {
+          "turn": "turn-2",
+          "query": "我现在很平静，想听点纯音乐。 我准备睡前读点书，想保持现在这种平静舒服的状态，有一点细微的变化就好，不要有突然的高潮或紧张感。 我没有具体的音乐偏好，请根据这个需求决定。 平静舒服 睡前读书 anxious calm gentle restless still tense uneasy 不安 压迫 安宁 平静 彷徨 微风 慌乱 清澈 焦虑 睡不着 紧张 舒缓 静谧",
+          "query_hash": "9fd1fa2b1d4a4e47b081b0b44f4b9f2d41670aa16612fec93ae581f05ecdedd2",
+          "corpus_version": "119be6544a3d001fb1e6ab3d3a4cedb776e59b0eed576b61d2d8e4fc6178df5c",
+          "reused": true,
+          "retrieved_at": "2026-10-26T06:44:13.563Z",
+          "references": [
+            {
+              "id": "modern-poem-0ba185956f2d4cce",
+              "title": "他们死去了",
+              "author": "穆旦",
+              "score": 0.051811,
+              "matched_terms": [
+                "紧张",
+                "安宁",
+                "现在",
+                "然的",
+                "风"
+              ]
+            },
+            {
+              "id": "modern-poem-371ec114ca398486",
+              "title": "蛛网",
+              "author": "余光中",
+              "score": 0.048603,
+              "matched_terms": [
+                "平静"
+              ]
+            },
+            {
+              "id": "modern-poem-b53eed2a2ab27732",
+              "title": "片章",
+              "author": "韩东",
+              "score": 0.048005,
+              "matched_terms": [
+                "睡不",
+                "睡不着",
+                "不着",
+                "体的",
+                "风"
+              ]
+            }
+          ]
+        }
+      ],
+      "musicRetrievalTrace": {
+        "musicType": "electronic",
+        "selectionSource": "composer",
+        "query": "quiet ambient electronic instrumental for bedtime reading, slow subtle evolution, warm soft pads, sparse muted keys, no pronounced beat or climax",
+        "mode": "description",
+        "styleReferenceIds": [
+          "electronic-style-trance-music",
+          "electronic-style-vocal-trance"
+        ],
+        "standardReferenceIds": [
+          "electronic-standard-dissolution-grip",
+          "electronic-standard-three-four-tet-album",
+          "electronic-standard-detached-from-the-rest-of-you"
+        ]
+      },
+      "brief": "睡前读书时，这首音乐应安静地陪在身边，让注意力仍能停留在书页上。翻过几页，或许才察觉它有了一点变化，就像阅读间隙里片刻的停顿；变化不必催促人跟随，也不打断此刻平静、舒服的感觉。从开始到结束，都让这份安稳保持下来。\n\n这是一首独立的纯音乐作品，默认时长约两分钟，供睡前阅读时聆听。整体保持平静舒适，只需细微变化，不要突然的高潮或紧张感。用户没有指定风格、乐器或其他音乐细节，均交由作曲方决定；请使用原创音乐素材。",
+      "briefSubmitted": "睡前读书时，这首音乐应安静地陪在身边，让注意力仍能停留在书页上。翻过几页，或许才察觉它有了一点变化，就像阅读间隙里片刻的停顿；变化不必催促人跟随，也不打断此刻平静、舒服的感觉。从开始到结束，都让这份安稳保持下来。\n\n这是一首独立的纯音乐作品，默认时长约两分钟，供睡前阅读时聆听。整体保持平静舒适，只需细微变化，不要突然的高潮或紧张感。用户没有指定风格、乐器或其他音乐细节，均交由作曲方决定；请使用原创音乐素材。\n\nApplication setting for this generation: instrumental only, no vocals; target total duration about three minutes (180 seconds).",
+      "musicSpec": {
+        "schemaVersion": "1.0",
+        "title": "书页之间",
+        "intent": "为睡前阅读提供安静、舒适的陪伴；音乐只在翻页般的间隙里缓慢变化，始终不争夺注意力。",
+        "genres": [
+          "氛围电子",
+          "极简器乐"
+        ],
+        "moods": [
+          "平静",
+          "温暖",
+          "安稳"
+        ],
+        "tempo": {
+          "bpm": null,
+          "feel": "缓慢舒展，不设明显鼓点；音符之间留有呼吸般的空隙"
+        },
+        "tonality": {
+          "tonic": null,
+          "mode": "柔和的大调色彩，以延伸和弦与悬留音保持开放感"
+        },
+        "meter": "自由节拍",
+        "instrumentation": [
+          {
+            "name": "柔音钢琴",
+            "role": "以稀疏的短句和轻柔和弦作为前景，短句反复时仅略改尾音",
+            "timbre": "贴近、圆润，保留自然触键与渐弱"
+          },
+          {
+            "name": "温暖合成器铺底",
+            "role": "在钢琴后方维持缓慢变化的和声与低音支撑",
+            "timbre": "柔软、平滑、低调，不盖过钢琴"
+          }
+        ],
+        "structure": [
+          {
+            "section": "开篇",
+            "durationSeconds": 45,
+            "direction": "轻柔铺底先出现，钢琴留出充足间隔，建立稳定而安静的空间。"
+          },
+          {
+            "section": "缓慢展开",
+            "durationSeconds": 55,
+            "direction": "钢琴短句偶尔改变尾音；背景和声缓缓转换，音量和密度基本不变。"
+          },
+          {
+            "section": "片刻停顿",
+            "durationSeconds": 45,
+            "direction": "钢琴短暂变得更稀疏，让延音自然消散；随后轻轻拾回原有短句。"
+          },
+          {
+            "section": "收束",
+            "durationSeconds": 35,
+            "direction": "保留熟悉的和声与少量钢琴音，逐渐淡出，不制造终曲高潮。"
+          }
+        ],
+        "vocals": {
+          "enabled": false,
+          "language": null,
+          "style": null,
+          "lyricalTheme": null
+        },
+        "production": "干净的录音室声音；钢琴保持自然声学质感，合成器保持柔和的电子音色。近距离但不突出的钢琴、宽而轻的背景空间、平滑瞬态和受控峰值，整体音量稳定。",
+        "avoid": [
+          "人声、哼唱与口语",
+          "明显鼓点",
+          "突然的高潮或紧张感",
+          "削波、噼啪杂音及数字失真"
+        ],
+        "assumptions": [
+          "以氛围电子和柔音钢琴实现未指定的风格与配器。"
+        ],
+        "lyriaPrompt": "原创氛围电子纯音乐，约三分钟，陪伴睡前阅读；instrumental only, no vocals。始终平静、温暖且不抢占注意力。自由而缓慢的呼吸感，不设明显鼓点。柔音钢琴以稀疏短句和轻柔和弦置于前景，温暖合成器在后方维持平滑的低音与缓慢转换的和声；使用柔和的大调色彩、延伸和弦与悬留音，不制造紧张感。[开篇] 铺底轻轻出现，钢琴音符之间留白。[缓慢展开] 只让短句尾音与背景和声发生细微变化，保持音量和密度。[片刻停顿] 钢琴稍稍退去，延音自然消散，再轻轻拾回原有短句。[收束] 熟悉的和声与少量钢琴音逐渐淡出。没有突然的高潮。干净的录音室录制，钢琴音色自然，合成器保持柔和的电子质感；平滑瞬态、受控峰值，空间宽而轻。无削波、噼啪杂音或数字失真。"
+      },
+      "lyriaPrompt": "原创氛围电子纯音乐，约三分钟，陪伴睡前阅读；instrumental only, no vocals。始终平静、温暖且不抢占注意力。自由而缓慢的呼吸感，不设明显鼓点。柔音钢琴以稀疏短句和轻柔和弦置于前景，温暖合成器在后方维持平滑的低音与缓慢转换的和声；使用柔和的大调色彩、延伸和弦与悬留音，不制造紧张感。[开篇] 铺底轻轻出现，钢琴音符之间留白。[缓慢展开] 只让短句尾音与背景和声发生细微变化，保持音量和密度。[片刻停顿] 钢琴稍稍退去，延音自然消散，再轻轻拾回原有短句。[收束] 熟悉的和声与少量钢琴音逐渐淡出。没有突然的高潮。干净的录音室录制，钢琴音色自然，合成器保持柔和的电子质感；平滑瞬态、受控峰值，空间宽而轻。无削波、噼啪杂音或数字失真。",
+      "generatedText": "[[A0]]\n[[B1]]\n[[B2]]\n[[C3]]",
+      "requestedAt": "2026-10-26T06:45:29.806Z",
+      "audioFile": "eval\\runs\\scenario-04\\condition-b-arioso\\audio.mp3",
+      "durationSeconds": 177.815,
+      "sha256": "37bdf6928ee8b1e11e8bf2b39612973d7e0016e79e694582a5d226248dcff046",
+      "automaticReview": {
+        "verdict": "match",
+        "summary": "这首纯音乐由温柔的柔音钢琴与温暖的合成器铺底构成，节奏缓慢舒展且没有任何明显鼓点或突兀的高潮，完美契合睡前阅读时安静、舒适的伴随需求。",
+        "matchedPoints": [
+          "采用了柔音钢琴与温暖合成器铺底进行演奏",
+          "曲调缓慢舒展，留有充分的呼吸感，且全曲无明显鼓点",
+          "全程保持平静、温暖、安稳的氛围，没有突兀的高潮或紧张感",
+          "全程为纯音乐，无任何人声或哼唱"
+        ],
+        "mismatchedPoints": []
+      },
+      "failureHistory": []
+    }
+  },
+  "abMapping": {
+    "A": "arioso",
+    "B": "baseline"
+  },
+  "versions": {
+    "lyriaModel": "lyria-3.5",
+    "composerModel": "gpt-6-sol",
+    "discussionModel": "gpt-6-sol",
+    "reviewModel": "gemini-3.5-flash"
+  },
+  "generatedAt": "2026-10-26T06:46:42.011Z",
+  "notes": [
+    "Duration fixed at about three minutes for both conditions by study instruction. The Director's brief kept its own ~2-minute default; the Composer scaled the MusicSpec/sections to ~180s via an application setting appended at composition time.",
+    "A prior Arioso attempt for this scenario had its Lyria request rejected with a transient '400 Request blocked for an unspecified policy reason'. The partial state was reused with --resume; this record captures the first successful generation, and the rejected attempt produced no audio.",
+    "The baseline audio was generated once and reused across harness retries (no duplicate Lyria billing)."
+  ]
+}

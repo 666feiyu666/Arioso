@@ -1,0 +1,89 @@
+{
+  "schemaVersion": "1.0",
+  "title": "提交之后",
+  "intent": "捕捉重要项目完成后，紧绷感缓缓退去、喜悦终于变得真实的片刻；轻快而不狂欢，让满足感在尾音之后停留。",
+  "genres": [
+    "轻快器乐蓝调"
+  ],
+  "moods": [
+    "短暂的松一口气",
+    "轻盈的喜悦",
+    "安稳的满足"
+  ],
+  "tempo": {
+    "bpm": 96,
+    "feel": "4/4轻摇摆律动，步伐轻快但从容"
+  },
+  "tonality": {
+    "tonic": "C",
+    "mode": "大调蓝调；以简洁的十二小节和声为基础"
+  },
+  "meter": "4/4",
+  "instrumentation": [
+    {
+      "name": "清音电吉他",
+      "role": "奏出简短、易记的主旋律，与钢琴交替应答",
+      "timbre": "圆润明亮，轻微弯音，留出呼吸般的停顿"
+    },
+    {
+      "name": "原声钢琴",
+      "role": "提供轻巧的和弦切分，并回应吉他旋律",
+      "timbre": "清脆而温暖，不作密集炫技"
+    },
+    {
+      "name": "低音提琴",
+      "role": "以简约的行进低音维持向前的步伐",
+      "timbre": "饱满、弹性适中"
+    },
+    {
+      "name": "轻型鼓组",
+      "role": "用刷奏、柔和军鼓和轻踩镲托住摇摆律动",
+      "timbre": "克制、清晰，不以重击推动情绪"
+    }
+  ],
+  "structure": [
+    {
+      "section": "Intro",
+      "durationSeconds": 30,
+      "direction": "钢琴先以稀疏和弦留出几秒空白，吉他轻轻试探主旋律；低音与鼓随后加入，像终于意识到事情已经完成。"
+    },
+    {
+      "section": "Theme",
+      "durationSeconds": 60,
+      "direction": "两个十二小节循环展开吉他主旋律与钢琴应答；第二遍让低音步伐更轻快、旋律略向上扬，保持音量克制。"
+    },
+    {
+      "section": "Middle",
+      "durationSeconds": 30,
+      "direction": "吉他退后，钢琴接过旋律；鼓组收得更轻，短暂带出可以踏实坐下的松弛感。"
+    },
+    {
+      "section": "Return",
+      "durationSeconds": 30,
+      "direction": "吉他带回主旋律，钢琴作简短回应；喜悦更明确，但不增加配器密度或冲向高潮。"
+    },
+    {
+      "section": "Outro",
+      "durationSeconds": 30,
+      "direction": "旋律逐渐简化，鼓和低音依次退去；钢琴与吉他以温暖的主和弦及自然延音收束。"
+    }
+  ],
+  "vocals": {
+    "enabled": false,
+    "language": null,
+    "style": null,
+    "lyricalTheme": null
+  },
+  "production": "亲近、清爽的录音室声场；各乐器清晰分开，保留自然动态，不靠持续增大音量制造庆祝感。干净的录音、自然的原声乐器音色、平滑的瞬态与受控的峰值；电吉他保留其温润的扩声音色。",
+  "avoid": [
+    "人声",
+    "嘈杂的派对氛围",
+    "重击鼓点或激烈独奏",
+    "削波、爆裂杂音或非刻意的数字失真"
+  ],
+  "assumptions": [
+    "按应用设置采用约180秒，而非正文中的默认约两分钟。",
+    "按界面指定采用蓝调，以轻摇摆而非激烈演奏呈现。"
+  ],
+  "lyriaPrompt": "An original, light instrumental blues piece, about three minutes, at 96 BPM in 4/4 with a relaxed shuffle. In C major blues, use an unhurried twelve-bar progression and a short, memorable clean electric-guitar melody: a fleeting blue note resolves into a warm major tone. Acoustic piano answers the guitar with spare, bright phrases; upright bass walks lightly beneath soft brushed drums and restrained hi-hat. The feeling is the quiet realization, a few seconds after submitting an important project, that it is truly done—tension easing into buoyant joy and settled satisfaction. [Intro] Leave space between the first piano chords, then let the guitar motif and rhythm section arrive gently. [Theme] Develop the guitar-and-piano call and response across two cycles, adding a little spring to the bass without raising the volume. [Middle] Let piano carry the motif while drums soften. [Return] Bring back the guitar theme, confident but never triumphant or crowded. [Outro] Thin the arrangement and end on a warm, sustained tonic chord with a lingering decay. Intimate, airy studio sound with clear instrumental separation and natural dynamics. Clean studio recording, natural acoustic timbres for piano, bass and drums, warm clean amplified guitar, smooth transients and controlled peaks. Instrumental only, no vocals. No boisterous party sounds, aggressive solos, clipping, crackling or digital distortion."
+}

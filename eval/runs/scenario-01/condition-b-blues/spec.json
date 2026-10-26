@@ -1,0 +1,93 @@
+{
+  "schemaVersion": "1.0",
+  "title": "抬头之前",
+  "intent": "陪伴汇报前约三分钟的准备：从呼吸稍急、注意力分散，逐渐走向清醒而稳定的专注；结束时仍留有一点警觉。",
+  "genres": [
+    "布鲁斯",
+    "克制的器乐布鲁斯"
+  ],
+  "moods": [
+    "轻微紧绷",
+    "逐渐安定",
+    "清醒而专注"
+  ],
+  "tempo": {
+    "bpm": 80,
+    "feel": "4/4，轻微摇摆的稳定律动；留出宽裕的乐句间隙"
+  },
+  "tonality": {
+    "tonic": "E",
+    "mode": "布鲁斯调性，以E7、A7、B7为主要和声"
+  },
+  "meter": "4/4",
+  "instrumentation": [
+    {
+      "name": "干净音色的电吉他",
+      "role": "奏出简短主题，并在重现时使旋律更完整",
+      "timbre": "温暖、清晰；克制的推弦与蓝调音，句尾留白"
+    },
+    {
+      "name": "钢琴",
+      "role": "以疏朗和弦回应吉他，维持和声方向",
+      "timbre": "柔和、颗粒清楚，避免密集装饰"
+    },
+    {
+      "name": "原声贝斯",
+      "role": "提供可靠、不过分忙碌的低音脉搏",
+      "timbre": "圆润、音头明确"
+    },
+    {
+      "name": "鼓组",
+      "role": "以轻刷奏和低调底鼓维持向前的力量",
+      "timbre": "细腻、均匀，不作突兀的加花"
+    }
+  ],
+  "structure": [
+    {
+      "section": "Intro",
+      "durationSeconds": 24,
+      "direction": "贝斯与轻刷奏先建立脉搏；钢琴铺开稀疏和声，吉他提出略带悬念的短句。"
+    },
+    {
+      "section": "Theme",
+      "durationSeconds": 48,
+      "direction": "吉他奏出带停顿的主题，钢琴在句间回应；律动稳定，给呼吸留下空间。"
+    },
+    {
+      "section": "Development",
+      "durationSeconds": 48,
+      "direction": "围绕主题作小幅旋律变化；钢琴回应稍趋明确，低音与鼓保持原有力度，不制造高潮。"
+    },
+    {
+      "section": "Return",
+      "durationSeconds": 48,
+      "direction": "主题以更连贯的乐句返回，和声更稳，呈现思路重新聚拢的感觉。"
+    },
+    {
+      "section": "Outro",
+      "durationSeconds": 12,
+      "direction": "乐器逐步收束，吉他以简短句子落向安定的终止；保留一点蓝调音带来的清醒张力。"
+    }
+  ],
+  "vocals": {
+    "enabled": false,
+    "language": null,
+    "style": null,
+    "lyricalTheme": null
+  },
+  "production": "近距离、清晰而不过分干燥的录音；钢琴和吉他彼此分明，贝斯与鼓保持柔和的推进。干净的录音室录制，原声乐器音色自然，并保留电吉他的干净放大音色；瞬态平顺，峰值受控。",
+  "avoid": [
+    "人声",
+    "突兀的强奏或节奏变化",
+    "过度舒缓的拖沓感",
+    "削波",
+    "噼啪杂音",
+    "数字失真"
+  ],
+  "assumptions": [
+    "采用约80 BPM的轻摇摆布鲁斯律动。",
+    "以吉他和钢琴的问答表现注意力逐渐聚拢。",
+    "时长遵循应用设置，约三分钟。"
+  ],
+  "lyriaPrompt": "Create an original three-minute instrumental blues piece for the few minutes before an important presentation: initially a little tense, then steadily clearer and more grounded, alert rather than sleepy. Instrumental only, no vocals. At about 80 BPM in 4/4, use a gently swung, restrained groove and E blues harmony centered on E7, A7 and B7. A clean electric guitar leads with short, expressive phrases, subtle blue notes and audible pauses for breathing; a softly played piano answers between phrases. Upright bass and lightly brushed drums provide a dependable, quiet forward pulse. [Intro] Establish the pulse sparsely, then introduce an unsettled guitar phrase. [Theme] Let guitar and piano exchange a simple, memorable motif with generous space. [Development] Vary the motif slightly and make the responses more assured without a sudden swell. [Return] Bring back the motif in a more connected, settled form. [Outro] Thin the texture and end with a clear, gentle cadence that retains a trace of blues tension. Keep the instruments distinct and close, with natural acoustic timbres for piano, bass and drums and a clean amplified guitar tone. Clean studio recording, smooth transients and controlled peaks. No vocals, abrupt dynamic shifts, clipping, crackling or digital distortion."
+}

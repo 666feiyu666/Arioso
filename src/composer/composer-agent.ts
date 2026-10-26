@@ -152,14 +152,20 @@ export async function composeMusic(
   const skill = await loadComposerSkill();
   const targetModel = options.lyriaModel ?? process.env.LYRIA_MODEL ?? "lyria-3-clip-preview";
   const corpusMode = options.corpusMode ?? "none";
-  const boundMusicType = options.musicType;
+  // Auto music reference (no explicit type) is not left to the Composer, which
+  // biased toward one type; the application picks one supported type at random.
+  const explicitMusicType = options.musicType;
+  const boundMusicType = explicitMusicType
+    ?? (corpusMode === "music" ? MUSIC_TYPES[Math.floor(Math.random() * MUSIC_TYPES.length)] : undefined);
 
   const agent = new Agent({
     name: "Arioso Composer",
     instructions: [
       COMPOSER_INSTRUCTIONS,
       boundMusicType
-        ? `The interface bound the music type to ${boundMusicType}. Use exactly that type and report selectionSource "interface".`
+        ? (explicitMusicType
+            ? `The interface bound the music type to ${boundMusicType}. Use exactly that type and report selectionSource "interface".`
+            : `The Auto music reference randomly selected the music type ${boundMusicType}. Use exactly that type and report selectionSource "interface".`)
         : "",
       corpusMode === "music" ? MUSIC_CORPUS_INSTRUCTIONS : NO_CORPUS_INSTRUCTIONS,
       `Target Lyria model: ${targetModel}`,

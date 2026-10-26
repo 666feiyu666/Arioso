@@ -1,0 +1,124 @@
+{
+  "condition": "arioso-instrumental-hip-hop",
+  "provider": "google-genai",
+  "model": "lyria-3.5",
+  "composerModel": "gpt-6-sol",
+  "reviewModel": "gemini-3.5-flash",
+  "musicType": "instrumental-hip-hop",
+  "musicRetrievalTrace": null,
+  "brief": "这首音乐要留住完成重要项目后的开心与成就感。像按下提交后，手还停在桌上，过了几秒才真正确认：这件事做成了。紧绷感可以慢慢退去，喜悦仍在，带着一点想起身走动的轻快，也带着终于能踏实坐下来的满足。不必把这一刻推向狂欢，让那份高兴在音乐结束后还留一会儿。\n\n创作一首独立的原创纯音乐作品，默认时长约两分钟。整体保持轻快、清爽和有成就感，但不要嘈杂、吵闹或过于刺激，也不需要靠不断加大音量来表达庆祝。用户没有指定乐器或具体音乐风格；旋律、节奏、配器与结构由作曲者决定，以贴合上述感受为准。",
+  "briefSubmitted": "这首音乐要留住完成重要项目后的开心与成就感。像按下提交后，手还停在桌上，过了几秒才真正确认：这件事做成了。紧绷感可以慢慢退去，喜悦仍在，带着一点想起身走动的轻快，也带着终于能踏实坐下来的满足。不必把这一刻推向狂欢，让那份高兴在音乐结束后还留一会儿。\n\n创作一首独立的原创纯音乐作品，默认时长约两分钟。整体保持轻快、清爽和有成就感，但不要嘈杂、吵闹或过于刺激，也不需要靠不断加大音量来表达庆祝。用户没有指定乐器或具体音乐风格；旋律、节奏、配器与结构由作曲者决定，以贴合上述感受为准。\n\nApplication setting for this generation: instrumental only, no vocals; target total duration about three minutes (180 seconds).",
+  "musicSpec": {
+    "schemaVersion": "1.0",
+    "title": "提交之后",
+    "intent": "捕捉重要项目完成后迟几秒才涌上的开心：紧绷慢慢退去，脚步变轻，最后留下踏实而安静的满足感。",
+    "genres": [
+      "器乐嘻哈",
+      "轻盈的爵士色彩节拍"
+    ],
+    "moods": [
+      "短暂的悬念",
+      "轻快的喜悦",
+      "从容的满足"
+    ],
+    "tempo": {
+      "bpm": 92,
+      "feel": "4/4中速律动，鼓点略微后靠，踩镲轻巧摇摆"
+    },
+    "tonality": {
+      "tonic": "D",
+      "mode": "大调；开头暂以B小调和弦保留一点未落定的感觉"
+    },
+    "meter": "4/4",
+    "instrumentation": [
+      {
+        "name": "电钢琴",
+        "role": "以简短上行旋律和宽松的延伸和弦承载主线",
+        "timbre": "温暖、清亮，留有呼吸"
+      },
+      {
+        "name": "干净音色的电吉他",
+        "role": "在主旋律的空隙作短句回应",
+        "timbre": "轻拨、圆润，不抢前景"
+      },
+      {
+        "name": "合成器贝斯",
+        "role": "用简洁而有弹性的音型支撑步伐感",
+        "timbre": "柔和、饱满，低频收束"
+      },
+      {
+        "name": "鼓机",
+        "role": "以克制的底鼓、军鼓和细碎踩镲维持律动",
+        "timbre": "干净、轻脆，避免猛烈重击"
+      }
+    ],
+    "structure": [
+      {
+        "section": "Intro",
+        "durationSeconds": 20,
+        "direction": "电钢琴从略带悬念的和弦中弹出短小动机；鼓与贝斯稍后轻轻进入，像等待提交后的确认。"
+      },
+      {
+        "section": "Theme",
+        "durationSeconds": 40,
+        "direction": "主旋律成为完整的上行乐句，吉他在句尾回应；稳定的轻摆鼓点让喜悦开始流动。"
+      },
+      {
+        "section": "Variation",
+        "durationSeconds": 35,
+        "direction": "贝斯略显活泼，旋律作小幅变化；增加节奏活力，但不提高整体音量。"
+      },
+      {
+        "section": "Bridge",
+        "durationSeconds": 30,
+        "direction": "鼓点暂时变疏，电钢琴舒展和声，留出紧绷感消散的空间。"
+      },
+      {
+        "section": "Return",
+        "durationSeconds": 35,
+        "direction": "完整律动和主旋律回归，以更明确的D大调落点表达踏实的成就感。"
+      },
+      {
+        "section": "Outro",
+        "durationSeconds": 20,
+        "direction": "鼓与贝斯逐层退出，电钢琴和吉他留下简短回应，让最后的和弦自然延续。"
+      }
+    ],
+    "vocals": {
+      "enabled": false,
+      "language": null,
+      "style": null,
+      "lyricalTheme": null
+    },
+    "production": "干净的录音室质感；电钢琴与吉他清晰自然，鼓组柔和而有弹性。声部彼此分明，瞬态平滑、峰值受控，保留轻重变化而不靠持续增大音量推进。",
+    "avoid": [
+      "人声、说唱或人声采样",
+      "嘈杂的狂欢式高潮",
+      "持续增大的音量",
+      "削波、噼啪杂音或非预期的数字失真"
+    ],
+    "assumptions": [
+      "以轻盈器乐嘻哈实现未指定的风格。",
+      "采用应用设置的约180秒时长，而非正文中的两分钟默认值。"
+    ],
+    "lyriaPrompt": "Create an original three-minute instrumental hip-hop piece about the quiet joy of finishing an important project. Instrumental only, no vocals. At 92 BPM in 4/4, use a lightly swung, laid-back drum-machine groove with soft kick, restrained snare and crisp hi-hats. Warm electric piano carries a short rising melody; clean, lightly picked electric guitar answers between phrases, while a rounded synth bass adds a gentle bounce. In D major, begin briefly on B minor to suggest the few seconds before the achievement sinks in, then let spacious major-seventh and add-nine chords bring relief. [Intro] Sparse piano motif; bass and drums enter softly. [Theme] The rising melody takes shape over the easy head-nod groove. [Variation] Give the bass and melody a little more movement without getting louder. [Bridge] Thin the drums and open the harmony, letting tension fall away. [Return] Restore the full groove and resolve the melody warmly in D major. [Outro] Remove layers gradually and let a final piano-and-guitar exchange linger. Keep the celebration light, clear and satisfied, never boisterous. Clean studio recording, natural acoustic timbres where applicable, clear electric-instrument tones, smooth transients and controlled peaks. No clipping, crackling or digital distortion; no vocal samples, harsh crashes or oversized build."
+  },
+  "lyriaPrompt": "Create an original three-minute instrumental hip-hop piece about the quiet joy of finishing an important project. Instrumental only, no vocals. At 92 BPM in 4/4, use a lightly swung, laid-back drum-machine groove with soft kick, restrained snare and crisp hi-hats. Warm electric piano carries a short rising melody; clean, lightly picked electric guitar answers between phrases, while a rounded synth bass adds a gentle bounce. In D major, begin briefly on B minor to suggest the few seconds before the achievement sinks in, then let spacious major-seventh and add-nine chords bring relief. [Intro] Sparse piano motif; bass and drums enter softly. [Theme] The rising melody takes shape over the easy head-nod groove. [Variation] Give the bass and melody a little more movement without getting louder. [Bridge] Thin the drums and open the harmony, letting tension fall away. [Return] Restore the full groove and resolve the melody warmly in D major. [Outro] Remove layers gradually and let a final piano-and-guitar exchange linger. Keep the celebration light, clear and satisfied, never boisterous. Clean studio recording, natural acoustic timbres where applicable, clear electric-instrument tones, smooth transients and controlled peaks. No clipping, crackling or digital distortion; no vocal samples, harsh crashes or oversized build.",
+  "generatedText": "[[A0]]\n[[B1]]\n[[C2]]\n[[D3]]\n[[B4]]\n[[E5]]",
+  "requestedAt": "2026-10-26T07:20:09.025Z",
+  "audioFile": "eval\\runs\\scenario-02\\condition-b-instrumental-hip-hop\\audio.mp3",
+  "durationSeconds": 179.017,
+  "sha256": "fa13cde7087b87840a0b9c6ce328e4ed295ffb5cecb3849dd427df5994adeb83",
+  "automaticReview": {
+    "verdict": "match",
+    "summary": "这首器乐作品完美契合了要求，采用了带有轻盈爵士色彩的器乐嘻哈风格。电钢琴与干净的电吉他演奏出舒缓而轻快的旋律，整体节奏从容踏实，没有任何人声与喧闹高潮，很好地呈现了完成项目后的满足感。",
+    "matchedPoints": [
+      "全程为纯音乐作品，未出现任何人声或人声采样",
+      "采用了爵士器乐嘻哈（Instrumental Jazz Hop）风格，包含电钢琴、电吉他与中速鼓点律动",
+      "音乐情绪轻快清爽且带有踏实的成就感，没有嘈杂喧闹的狂欢或过度刺激的高音量",
+      "曲目时长约为三分钟，结构完整且氛围连贯"
+    ],
+    "mismatchedPoints": []
+  },
+  "failureHistory": []
+}

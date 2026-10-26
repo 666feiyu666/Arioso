@@ -1,0 +1,129 @@
+{
+  "condition": "arioso-instrumental-rock",
+  "provider": "google-genai",
+  "model": "lyria-3.5",
+  "composerModel": "gpt-6-sol",
+  "reviewModel": "gemini-3.5-flash",
+  "musicType": "instrumental-rock",
+  "musicRetrievalTrace": {
+    "musicType": "instrumental-rock",
+    "selectionSource": "interface",
+    "query": "restrained instrumental post-rock gentle clean electric guitar repeating motif steady soft drums gradual controlled build calm focused alert spacious breathing room no dramatic changes",
+    "mode": "description",
+    "styleReferenceIds": [
+      "instrumental-rock-style-post-rock",
+      "instrumental-rock-style-post-metal"
+    ],
+    "standardReferenceIds": [
+      "instrumental-rock-standard-no-matter-what-shape-your-stomach-s-in",
+      "instrumental-rock-standard-let-there-be-drums",
+      "instrumental-rock-standard-like-long-hair"
+    ]
+  },
+  "brief": "这段音乐陪伴汇报前的短暂准备：呼吸还有些急，注意力被即将发生的事牵扯，却需要慢慢回到眼前。像是看一眼提纲，再抬起头准备开口的几秒钟，周围并没有改变，自己却逐渐站稳了。它应当给呼吸留出空间，也保留一份清醒的警觉；结束时，紧张未必完全消失，但思路能重新聚拢。\n\n创作一首独立的原创纯音乐，默认时长约两分钟。整体方向平稳、清晰，带一点持续向前的力量，帮助听者在重要汇报前稳定呼吸、集中注意力。避免突然的强烈变化，也不要舒缓到令人犯困。没有指定乐器、旋律、速度或曲式，这些音乐实现交由作曲者决定。",
+  "briefSubmitted": "这段音乐陪伴汇报前的短暂准备：呼吸还有些急，注意力被即将发生的事牵扯，却需要慢慢回到眼前。像是看一眼提纲，再抬起头准备开口的几秒钟，周围并没有改变，自己却逐渐站稳了。它应当给呼吸留出空间，也保留一份清醒的警觉；结束时，紧张未必完全消失，但思路能重新聚拢。\n\n创作一首独立的原创纯音乐，默认时长约两分钟。整体方向平稳、清晰，带一点持续向前的力量，帮助听者在重要汇报前稳定呼吸、集中注意力。避免突然的强烈变化，也不要舒缓到令人犯困。没有指定乐器、旋律、速度或曲式，这些音乐实现交由作曲者决定。\n\nApplication setting for this generation: instrumental only, no vocals; target total duration about three minutes (180 seconds).",
+  "musicSpec": {
+    "schemaVersion": "1.0",
+    "title": "抬头之前",
+    "intent": "陪伴重要汇报前的短暂准备：从呼吸略急、注意力游移，逐渐回到眼前；结束时仍保留清醒的警觉，但思路已重新聚拢。",
+    "genres": [
+      "器乐摇滚",
+      "克制的后摇滚"
+    ],
+    "moods": [
+      "轻微紧绷",
+      "逐渐安定",
+      "清醒而专注"
+    ],
+    "tempo": {
+      "bpm": 84,
+      "feel": "平稳的四拍脉动，鼓点轻而有推进感；乐句之间留出呼吸空间"
+    },
+    "tonality": {
+      "tonic": "D",
+      "mode": "多利亚调式"
+    },
+    "meter": "4/4",
+    "instrumentation": [
+      {
+        "name": "清音电吉他",
+        "role": "奏出带停顿的短小上行旋律，并在后段使乐句更完整",
+        "timbre": "清晰、温和，音符自然延续"
+      },
+      {
+        "name": "第二把清音电吉他",
+        "role": "以稀疏的延音和分解和弦托住主旋律",
+        "timbre": "柔和、宽阔，保持在背景"
+      },
+      {
+        "name": "电贝斯",
+        "role": "用简洁而稳定的低音线固定重心",
+        "timbre": "圆润、清楚"
+      },
+      {
+        "name": "架子鼓",
+        "role": "以轻踩镲、低音鼓和克制的边击建立持续脉动",
+        "timbre": "自然、轻巧，不作猛烈填充"
+      }
+    ],
+    "structure": [
+      {
+        "section": "Intro",
+        "durationSeconds": 30,
+        "direction": "稀疏吉他音符与低音先出现，短小旋律留有停顿，鼓点轻轻进入；呈现尚未完全平稳的呼吸。"
+      },
+      {
+        "section": "Development",
+        "durationSeconds": 55,
+        "direction": "四拍脉动稳定下来，第二把吉他铺开简洁和声；旋律重复并微调落点，让注意力逐渐聚拢。"
+      },
+      {
+        "section": "Lift",
+        "durationSeconds": 60,
+        "direction": "贝斯和鼓略增推动力，主旋律的上行乐句变得完整、清楚；保持中等音量，不形成戏剧性高潮。"
+      },
+      {
+        "section": "Outro",
+        "durationSeconds": 35,
+        "direction": "逐层收起伴奏，回到开头的旋律动机；以稳定但不过分圆满的和声安静结束。"
+      }
+    ],
+    "vocals": {
+      "enabled": false,
+      "language": null,
+      "style": null,
+      "lyricalTheme": null
+    },
+    "production": "干净的录音室质感；保留电吉他和电贝斯的清音特性，以及鼓组自然的原声质感。声部清晰、有适度空间感，瞬态平顺、峰值受控，动态变化循序渐进。",
+    "avoid": [
+      "人声",
+      "突发的强烈变化或猛烈鼓花",
+      "厚重失真吉他",
+      "削波、噼啪杂音或非预期的数字失真"
+    ],
+    "assumptions": [
+      "采用应用设置的约三分钟时长，而非简报中的默认约两分钟。",
+      "以清音吉他、贝斯和轻鼓组成克制的器乐摇滚编制。",
+      "选用84 BPM、D多利亚调式，让音乐稳定而不显昏沉。"
+    ],
+    "lyriaPrompt": "创作约三分钟的原创器乐摇滚，带克制的后摇滚质感。84 BPM，4/4拍，D多利亚调式。音乐陪伴重要汇报前的准备：起初呼吸略急、注意力游移，随后逐渐站稳、聚拢思路；始终清醒，不沉入催眠般的舒缓。instrumental only, no vocals。\n\n[Intro] 稀疏的清音电吉他奏出带停顿的短小上行旋律，圆润的电贝斯固定重心，轻鼓缓缓进入，留出呼吸空间。\n[Development] 稳定的低音鼓、轻踩镲与克制的边击维持四拍脉动；第二把清音电吉他用分解和弦和柔和延音托住旋律，旋律反复时细微改变落点。\n[Lift] 节奏略增推动力，主旋律的乐句逐渐完整、明晰，和声稍稍敞开；保持适中音量，不制造戏剧性高潮。\n[Outro] 伴奏逐层收起，开头动机安静返回，在稳定却不过分圆满的和声中结束。\n\n干净的录音室录制，保留电吉他与电贝斯清晰的放大音色和鼓组自然的原声质感；声部层次分明，瞬态平顺，峰值受控。避免突然的强烈变化、厚重失真吉他和猛烈鼓花；无削波、噼啪杂音或数字失真。"
+  },
+  "lyriaPrompt": "创作约三分钟的原创器乐摇滚，带克制的后摇滚质感。84 BPM，4/4拍，D多利亚调式。音乐陪伴重要汇报前的准备：起初呼吸略急、注意力游移，随后逐渐站稳、聚拢思路；始终清醒，不沉入催眠般的舒缓。instrumental only, no vocals。\n\n[Intro] 稀疏的清音电吉他奏出带停顿的短小上行旋律，圆润的电贝斯固定重心，轻鼓缓缓进入，留出呼吸空间。\n[Development] 稳定的低音鼓、轻踩镲与克制的边击维持四拍脉动；第二把清音电吉他用分解和弦和柔和延音托住旋律，旋律反复时细微改变落点。\n[Lift] 节奏略增推动力，主旋律的乐句逐渐完整、明晰，和声稍稍敞开；保持适中音量，不制造戏剧性高潮。\n[Outro] 伴奏逐层收起，开头动机安静返回，在稳定却不过分圆满的和声中结束。\n\n干净的录音室录制，保留电吉他与电贝斯清晰的放大音色和鼓组自然的原声质感；声部层次分明，瞬态平顺，峰值受控。避免突然的强烈变化、厚重失真吉他和猛烈鼓花；无削波、噼啪杂音或数字失真。",
+  "generatedText": "[[A0]]\n[[B1]]\n[[C2]]\n[[B3]]\n[[D4]]",
+  "requestedAt": "2026-10-26T06:59:38.211Z",
+  "audioFile": "eval\\runs\\scenario-01\\condition-b-instrumental-rock\\audio.mp3",
+  "durationSeconds": 179.017,
+  "sha256": "13dd5a96620c5048b4e81872852e870d9ec92ae80f87c674981ecee23130bccb",
+  "automaticReview": {
+    "verdict": "match",
+    "summary": "音乐完全符合需求，采用清音电吉他与稳健的节奏组，呈现出克制且富有一点推进感的器乐摇滚风格。整体律动平稳，情绪清醒而专注，非常适合在重要汇报前稳定呼吸与集中注意力。",
+    "matchedPoints": [
+      "采用清音电吉他、电贝斯与架子鼓组合，呈现出克制的后摇滚风格",
+      "全程无 occur 人声，且没有使用厚重的失真吉他",
+      "节奏维持在平稳的中速四拍，鼓点轻盈并带有持续向前的推进感",
+      "无突发的强烈变化，成功营造出清醒、专注且逐渐安定的情绪氛围"
+    ],
+    "mismatchedPoints": []
+  },
+  "failureHistory": []
+}

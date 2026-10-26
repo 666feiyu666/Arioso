@@ -1,0 +1,89 @@
+{
+  "schemaVersion": "1.0",
+  "title": "重新接上",
+  "intent": "陪伴疲惫后的工作时段：允许短暂停顿，再以不催促的步伐回到手头的事，结束时留下清醒而稍微稳住的感觉。",
+  "genres": [
+    "爵士",
+    "轻盈的钢琴三重奏"
+  ],
+  "moods": [
+    "温和清醒",
+    "逐渐找回专注",
+    "平稳安定"
+  ],
+  "tempo": {
+    "bpm": 94,
+    "feel": "轻微摇摆的中速律动，稳定向前，不急促"
+  },
+  "tonality": {
+    "tonic": "F",
+    "mode": "大调，穿插柔和的九和弦与短暂的小调色彩"
+  },
+  "meter": "4/4",
+  "instrumentation": [
+    {
+      "name": "原声钢琴",
+      "role": "以留白充足的短句担任旋律，柔和和弦支撑其间",
+      "timbre": "清晰、温暖，触键轻巧"
+    },
+    {
+      "name": "原声低音提琴",
+      "role": "用简洁、规律的音型维持前进感",
+      "timbre": "圆润、收敛的拨弦"
+    },
+    {
+      "name": "爵士鼓",
+      "role": "以刷奏和轻柔的镲片维持脉搏",
+      "timbre": "细致、低动态，无突出的重击"
+    }
+  ],
+  "structure": [
+    {
+      "section": "Intro",
+      "durationSeconds": 18,
+      "direction": "钢琴提出简短上行音型，低音提琴与刷奏逐步接入，建立稳定脉搏。"
+    },
+    {
+      "section": "Theme",
+      "durationSeconds": 52,
+      "direction": "钢琴反复呈示留有呼吸空间的主题；低音与鼓保持轻盈、规律的配合。"
+    },
+    {
+      "section": "Variation",
+      "durationSeconds": 48,
+      "direction": "主题稍作节奏和声部变化，短暂经过小调色彩；整体音量和密度基本不变。"
+    },
+    {
+      "section": "Return",
+      "durationSeconds": 42,
+      "direction": "回到较明亮的主题，钢琴音型略向上伸展，带来一点恢复精力的感觉。"
+    },
+    {
+      "section": "Outro",
+      "durationSeconds": 20,
+      "direction": "旋律收拢，律动保持到温和明确的终止，不拖慢成催眠式淡出。"
+    }
+  ],
+  "vocals": {
+    "enabled": false,
+    "language": null,
+    "style": null,
+    "lyricalTheme": null
+  },
+  "production": "干净、亲近的录音室钢琴三重奏；原声乐器音色自然，声部清楚，瞬态平滑，峰值受控，动态始终温和。",
+  "avoid": [
+    "人声",
+    "突然的强烈声音",
+    "炫技式独奏",
+    "催眠般的缓慢拖拍",
+    "削波",
+    "噼啪杂音",
+    "数字失真"
+  ],
+  "assumptions": [
+    "采用界面指定的爵士乐类型。",
+    "采用应用设置的约三分钟时长，而非简述中的默认两分钟。",
+    "选用F大调钢琴三重奏与94 BPM。"
+  ],
+  "lyriaPrompt": "An original, gentle piano-trio jazz piece for a tired person steadily returning to focused work, about three minutes long. Instrumental only, no vocals. F major, 4/4 at around 94 BPM, with a light swing and a consistent, unhurried pulse. Warm acoustic piano leads with a small rising motif and spacious, easily followed phrases; upright bass plays simple, regular plucked figures, while brushed drums and quiet cymbals keep the music awake without demanding attention. Use soft major-ninth and sixth chords, with brief minor-color turns that resolve naturally. [Intro] Introduce the piano motif, then bring in bass and brushes. [Theme] Establish the restrained melody and steady groove. [Variation] Gently reshape the motif and harmony without increasing volume or density. [Return] Let the brighter theme regain a little lift. [Outro] Settle into a soft, clear ending without slowing into a lullaby. Keep dynamics even and the instruments distinct. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No sudden loud accents, showy solos, clipping, crackling or digital distortion."
+}

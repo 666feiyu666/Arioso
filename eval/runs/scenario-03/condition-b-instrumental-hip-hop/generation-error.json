@@ -1,0 +1,6 @@
+{
+  "error": "400 Request blocked for an unspecified policy reason. Please modify your input and retry.",
+  "musicType": "instrumental-hip-hop",
+  "lyriaPrompt": "创作一首约三分钟的原创器乐嘻哈，陪伴疲惫后继续工作的时段：温和、轻盈、清醒，不催促，也不把注意力从任务上拉走。88 BPM，4/4，轻微摇摆的稳定鼓点；D大调，以柔和的九和弦和少量小调和弦带出从疲惫到逐渐稳住的变化。圆润清晰的电钢琴弹奏简短、稀疏的上行主题；温暖的电贝斯贴合底鼓，闷音电吉他只在乐句间轻声回应。鼓机使用柔软的底鼓、克制的边击与轻柔踩镲，不做突出的鼓花。[Intro] 电钢琴起头，贝斯和鼓逐步加入。[A] 建立适合持续工作的重复律动。[B] 和声稍微明亮，主题略向上延伸，音量和鼓点仍保持平稳。[A'] 熟悉主题以细微变化返回。[Outro] 逐层收束，在清醒安定的和声上自然结束。声部清晰、留有空间，避免突然的强音或过于催眠的铺底。Clean studio recording, natural acoustic timbres for the guitar, smooth transients and controlled peaks; preserve the intended electric-keyboard and drum-machine tones. No clipping, crackling or digital distortion. instrumental only, no vocals; no speech or vocal samples.",
+  "requestedAt": "2026-10-26T07:21:08.073Z"
+}

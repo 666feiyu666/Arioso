@@ -47,7 +47,7 @@ The result card shows the title, the prompt as written, a player, a collapsible 
 
 ## The music reference setting
 
-The prompt card carries one compact setting, "Music reference", with these choices: Auto, None, and every music type whose local corpus is available (Jazz today, plus Blues, Electronic, Instrumental Rock and Instrumental Hip-Hop once collected). Auto is the default: the Composer chooses exactly one supported type from the conversation's mood, imagery, instrumentation, energy, tempo or production language and records that choice in the retrieval trace. Choosing a specific type binds retrieval to it; None keeps the no-corpus path.
+The prompt card carries one compact setting, "Music reference", with these choices: Auto, None, and every music type whose local corpus is available (Jazz, Blues, Electronic, Instrumental Rock and Instrumental Hip-Hop). Auto is the default: the application picks one supported type at random, binds the Composer to it, and records that choice in the retrieval trace instead of leaving the choice to the model. Choosing a specific type binds retrieval to it; None keeps the no-corpus path.
 
 Natural-language requests remain authoritative. A clearly named type or child style (ambient, lo-fi hip-hop, post-rock, modal jazz, Chicago blues) selects that parent type; a genre outside the five supported types keeps the request as written and composes without corpus evidence. The interface names the retrieved poems, never the retrieved corpus text, and the setting can be changed before creation starts.
 

@@ -1,0 +1,129 @@
+{
+  "condition": "arioso-instrumental-hip-hop",
+  "provider": "google-genai",
+  "model": "lyria-3.5",
+  "composerModel": "gpt-6-sol",
+  "reviewModel": "gemini-3.5-flash",
+  "musicType": "instrumental-hip-hop",
+  "musicRetrievalTrace": {
+    "musicType": "instrumental-hip-hop",
+    "selectionSource": "interface",
+    "query": "quiet bedtime reading instrumental hip hop soft restrained drums warm keys unobtrusive repeating melody subtle gradual variation calm comfortable",
+    "mode": "description",
+    "styleReferenceIds": [
+      "instrumental-hip-hop-style-instrumental-hip-hop",
+      "instrumental-hip-hop-style-lo-fi-hip-hop"
+    ],
+    "standardReferenceIds": [
+      "instrumental-hip-hop-standard-endtroducing",
+      "instrumental-hip-hop-standard-petestrumentals-2",
+      "instrumental-hip-hop-standard-1988-knxwledge-album"
+    ]
+  },
+  "brief": "睡前读书时，这首音乐应安静地陪在身边，让注意力仍能停留在书页上。翻过几页，或许才察觉它有了一点变化，就像阅读间隙里片刻的停顿；变化不必催促人跟随，也不打断此刻平静、舒服的感觉。从开始到结束，都让这份安稳保持下来。\n\n这是一首独立的纯音乐作品，默认时长约两分钟，供睡前阅读时聆听。整体保持平静舒适，只需细微变化，不要突然的高潮或紧张感。用户没有指定风格、乐器或其他音乐细节，均交由作曲方决定；请使用原创音乐素材。",
+  "briefSubmitted": "睡前读书时，这首音乐应安静地陪在身边，让注意力仍能停留在书页上。翻过几页，或许才察觉它有了一点变化，就像阅读间隙里片刻的停顿；变化不必催促人跟随，也不打断此刻平静、舒服的感觉。从开始到结束，都让这份安稳保持下来。\n\n这是一首独立的纯音乐作品，默认时长约两分钟，供睡前阅读时聆听。整体保持平静舒适，只需细微变化，不要突然的高潮或紧张感。用户没有指定风格、乐器或其他音乐细节，均交由作曲方决定；请使用原创音乐素材。\n\nApplication setting for this generation: instrumental only, no vocals; target total duration about three minutes (180 seconds).",
+  "musicSpec": {
+    "schemaVersion": "1.0",
+    "title": "书页之间",
+    "intent": "陪伴睡前阅读，让细微变化像翻页后的短暂停顿，始终不牵走注意力。",
+    "genres": [
+      "器乐嘻哈",
+      "轻柔慢拍"
+    ],
+    "moods": [
+      "平静舒适",
+      "略有流动",
+      "安稳收束"
+    ],
+    "tempo": {
+      "bpm": 72,
+      "feel": "松弛的四拍律动，轻微摇摆，鼓点低调"
+    },
+    "tonality": {
+      "tonic": "F",
+      "mode": "大调，以柔和的七和弦、加九和弦为主"
+    },
+    "meter": "4/4",
+    "instrumentation": [
+      {
+        "name": "电钢琴",
+        "role": "以疏朗和弦维持温暖、稳定的背景",
+        "timbre": "圆润柔和，延音适度"
+      },
+      {
+        "name": "尼龙弦吉他",
+        "role": "奏出简短的原创旋律，偶尔改变句尾",
+        "timbre": "轻拨、靠后、不突出"
+      },
+      {
+        "name": "电贝斯",
+        "role": "用稀疏的音符连接和弦与鼓点",
+        "timbre": "温暖、低沉"
+      },
+      {
+        "name": "鼓机",
+        "role": "以轻柔底鼓、边击和细弱踩镲维持慢拍",
+        "timbre": "柔和短促，无强烈反拍"
+      }
+    ],
+    "structure": [
+      {
+        "section": "Intro",
+        "durationSeconds": 35,
+        "direction": "电钢琴先铺开和弦，吉他轻声引入两三音动机；鼓与贝斯缓缓进入。"
+      },
+      {
+        "section": "Main Groove",
+        "durationSeconds": 65,
+        "direction": "维持稳定的轻柔律动；吉他动机留出长空隙，与电钢琴错开出现。"
+      },
+      {
+        "section": "Subtle Variation",
+        "durationSeconds": 45,
+        "direction": "吉他只改变少量句尾音，电钢琴偶尔换一种和弦排列；短暂收起踩镲，形成阅读间隙般的停顿，不增加强度。"
+      },
+      {
+        "section": "Outro",
+        "durationSeconds": 35,
+        "direction": "熟悉的动机轻轻返回，鼓和贝斯逐渐退去，以电钢琴和吉他的安静余音结束。"
+      }
+    ],
+    "vocals": {
+      "enabled": false,
+      "language": null,
+      "style": null,
+      "lyricalTheme": null
+    },
+    "production": "约180秒。亲近、克制的声场，乐器层次清晰且整体音量平稳；保留电钢琴与鼓机的本来音色，以及尼龙弦吉他的自然音色。干净的录音质感，顺滑的瞬态和受控的峰值。",
+    "avoid": [
+      "人声及人声采样",
+      "突然的高潮或紧张转折",
+      "突出的鼓击",
+      "削波、噼啪杂音或数字失真"
+    ],
+    "assumptions": [
+      "采用72 BPM的器乐嘻哈慢拍。",
+      "以电钢琴和尼龙弦吉他承载原创素材。",
+      "以应用设置的约180秒为时长目标。"
+    ],
+    "lyriaPrompt": "A roughly three-minute instrumental hip-hop piece for quiet bedtime reading: calm, comfortable, and unobtrusive from beginning to end. At 72 BPM in 4/4, use a gently laid-back beat with a soft kick, muted side-stick and faint closed hi-hat; no forceful backbeat. Warm electric piano plays spacious F-major seventh and add-nine chords, a rounded electric bass moves sparingly beneath them, and a softly picked nylon-string guitar carries an original, restrained two- or three-note motif. [Intro] Establish the chords and motif before the beat settles in. [Main Groove] Let the motif recur with generous space between phrases. [Subtle Variation] Change only a few phrase endings and chord voicings; briefly thin the hi-hat like a pause between pages, without building intensity. [Outro] Return to the familiar motif as drums and bass recede, ending quietly. Keep the dynamics even and the sound intimate. Clean studio recording, natural acoustic guitar timbre, faithful electric-piano and drum-machine tones, smooth transients and controlled peaks. No clipping, crackling or digital distortion. Original musical material; instrumental only, no vocals or vocal samples."
+  },
+  "lyriaPrompt": "A roughly three-minute instrumental hip-hop piece for quiet bedtime reading: calm, comfortable, and unobtrusive from beginning to end. At 72 BPM in 4/4, use a gently laid-back beat with a soft kick, muted side-stick and faint closed hi-hat; no forceful backbeat. Warm electric piano plays spacious F-major seventh and add-nine chords, a rounded electric bass moves sparingly beneath them, and a softly picked nylon-string guitar carries an original, restrained two- or three-note motif. [Intro] Establish the chords and motif before the beat settles in. [Main Groove] Let the motif recur with generous space between phrases. [Subtle Variation] Change only a few phrase endings and chord voicings; briefly thin the hi-hat like a pause between pages, without building intensity. [Outro] Return to the familiar motif as drums and bass recede, ending quietly. Keep the dynamics even and the sound intimate. Clean studio recording, natural acoustic guitar timbre, faithful electric-piano and drum-machine tones, smooth transients and controlled peaks. No clipping, crackling or digital distortion. Original musical material; instrumental only, no vocals or vocal samples.",
+  "generatedText": "[[A0]]\n[[B1]]\n[[C2]]\n[[D3]]\n[[B4]]\n[[E5]]",
+  "requestedAt": "2026-10-26T07:18:03.366Z",
+  "audioFile": "eval\\runs\\scenario-04\\condition-b-instrumental-hip-hop\\audio.mp3",
+  "durationSeconds": 169.926,
+  "sha256": "3f66f0525b7652cc769246c119af26353597b402b84e593b2cf3ab5c32ef4634",
+  "automaticReview": {
+    "verdict": "match",
+    "summary": "该音乐完美符合睡前阅读的场景需求，整体氛围极其平静舒缓。采用了轻柔的电钢琴、尼龙弦吉他与低调的慢拍鼓点，没有任何人声干扰或突兀的高潮转折。",
+    "matchedPoints": [
+      "完全为纯音乐，没有任何人声或人声采样",
+      "曲风为平静优雅的轻柔慢拍/器乐嘻哈，节奏松弛且低调",
+      "使用了电钢琴、尼龙弦吉他与低音鼓点等符合要求的乐器配置",
+      "动态平稳，仅有细微渐进的变化，没有任何突然的高潮或紧张感，非常适合作为睡前阅读背景音"
+    ],
+    "mismatchedPoints": []
+  },
+  "failureHistory": []
+}

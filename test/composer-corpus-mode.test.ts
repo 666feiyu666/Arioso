@@ -61,4 +61,14 @@ describe("music corpus choice", () => {
     const agent = mocks.run.mock.calls[0]?.[0] as Agent;
     expect(agent.instructions).toContain("bound the music type to electronic");
   });
+
+  it("picks a random supported type for the Auto music reference", async () => {
+    const types = ["jazz", "blues", "electronic", "instrumental-rock", "instrumental-hip-hop"];
+    await composeMusic("a quiet evening", { corpusMode: "music" });
+    const agent = mocks.run.mock.calls[0]?.[0] as Agent;
+    expect(agent.instructions).toMatch(
+      new RegExp(`randomly selected the music type (${types.join("|")})`),
+    );
+    expect(agent.instructions).not.toContain("bound the music type to");
+  });
 });

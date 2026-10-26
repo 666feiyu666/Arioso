@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "1.0",
+  "title": "书页之间",
+  "intent": "为睡前阅读提供安静、舒适的陪伴；变化轻到不必分神追随，始终保留安稳感。",
+  "genres": [
+    "轻柔爵士",
+    "钢琴三重奏"
+  ],
+  "moods": [
+    "平静",
+    "温暖",
+    "始终安稳，只有细微起伏"
+  ],
+  "tempo": {
+    "bpm": 64,
+    "feel": "缓慢、松弛的四拍；节奏轻到不推动注意力"
+  },
+  "tonality": {
+    "tonic": "F",
+    "mode": "大调，以柔和的七和弦与九和弦为主"
+  },
+  "meter": "4/4",
+  "instrumentation": [
+    {
+      "name": "原声钢琴",
+      "role": "以留有空隙的短小旋律和疏朗和弦承载全曲",
+      "timbre": "轻触键、圆润、不过分明亮"
+    },
+    {
+      "name": "低音提琴",
+      "role": "用稀疏的低音回应钢琴，温和地维持脉搏",
+      "timbre": "柔和拨弦，音头克制"
+    },
+    {
+      "name": "刷奏鼓组",
+      "role": "提供几乎不显眼的轻柔节奏纹理",
+      "timbre": "细薄、均匀的鼓刷声，无突出的敲击"
+    }
+  ],
+  "structure": [
+    {
+      "section": "开篇",
+      "durationSeconds": 45,
+      "direction": "钢琴以简短、缓缓下行的原创动机开始；低音提琴随后加入，留出充分静隙。"
+    },
+    {
+      "section": "细微展开",
+      "durationSeconds": 90,
+      "direction": "极轻的鼓刷加入；钢琴偶尔改变动机结尾或和弦转位，密度和音量基本不变。"
+    },
+    {
+      "section": "收束",
+      "durationSeconds": 45,
+      "direction": "鼓刷逐渐退去，钢琴回到最初的动机，与低音提琴安静落定。"
+    }
+  ],
+  "vocals": {
+    "enabled": false,
+    "language": null,
+    "style": null,
+    "lyricalTheme": null
+  },
+  "production": "近距离、低音量感的干净录音，保留自然声学音色与适度空间感；瞬态柔顺、峰值受控，不让任何乐器突然突出。",
+  "avoid": [
+    "人声",
+    "突然的高潮或紧张感",
+    "醒目的鼓点或炫技独奏",
+    "削波、噼啪杂音和数字失真"
+  ],
+  "assumptions": [
+    "按应用设置采用约180秒，取代正文中默认的约两分钟。",
+    "以轻柔的爵士钢琴三重奏实现未指定的风格与配器。"
+  ],
+  "lyriaPrompt": "创作一首约三分钟的原创轻柔爵士钢琴三重奏，供睡前阅读时聆听。F大调，约64 BPM，松弛的4/4拍；温暖的七和弦、九和弦缓慢流转，始终平静舒适。原声钢琴轻触键，弹奏音域不宽、留有静隙的短小下行旋律；低音提琴以稀疏拨弦温和回应，鼓刷只提供很轻的节奏纹理。[开篇] 钢琴先呈现动机，低音随后加入。[细微展开] 鼓刷轻轻加入，钢琴偶尔改变动机结尾与和弦转位，音量和密度基本不变。[收束] 鼓刷退去，原动机安静返回，钢琴与低音自然落定。全程不要突然的高潮、紧张感、醒目鼓点或炫技独奏。instrumental only, no vocals. Clean studio recording, natural acoustic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion."
+}
