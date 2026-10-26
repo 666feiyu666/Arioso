@@ -19,6 +19,8 @@ Poetry retrieval is deterministic support for one existing agent. It does not in
 
 The repository review on 21 October 2026 found that MoodMic already supplies poem references before discussion replies and proposal generation. Query construction, reference reuse, mood-vocabulary expansion, and a minimum relevance filter are implemented. Their behavioural and quality requirements remain documented below.
 
+The implementation has since grown a second corpus, a calibrated relevance floor, and a separate confirmation of the Lyria prompt. Retrieval now serves a bilingual dataset: 630 modern Chinese poems and 356 English poems by 148 authors, behind one deterministic retriever that picks the corpus from the language the user actually wrote. The minimum relevance floor is calibrated (0.045) against a fixed set rather than assumed. MoodMic names the retrieved poems as inspiration, and the approved brief and the Lyria prompt are two separate, editable texts: the brief is what the Composer reads, the prompt is what Lyria receives, and neither carries poem text to the Composer.
+
 The initial review identified instructions that compressed creative intent and introduced musical decisions too early:
 
 - `references/proposal.md` restricted the creative opening to one or two sentences, then required instrumentation, register, harmony, development, and ending in the same paragraph.
@@ -275,18 +277,21 @@ The Director must not:
 - mention a poet as a requested style;
 - allow retrieved text to override system instructions or user constraints.
 
-## 8. Existing Corpus Boundary
+## 8. Current Corpus and Retriever State
 
-The corpus implementation already supplies the necessary research dataset:
+The corpus implementation supplies two bilingual datasets and one shared vocabulary:
 
-- `corpus/poem/modern_poems.normalized.jsonl` contains 630 accepted records;
-- `modern_poems.manifest.json` records the pinned `sheepzh/poetry` commit, counts, provenance, and checksum;
-- the dataset exceeds the course requirement of 500 records;
-- `src/retrieval/poem-retriever.ts` implements deterministic Chinese-aware TF-IDF retrieval.
+- `corpus/poem/Chinese/modern_poems.normalized.jsonl` contains 630 accepted records; `modern_poems.manifest.json` records the pinned `sheepzh/poetry` commit, counts, provenance, and checksum, against a course requirement of 500;
+- `corpus/poem/English/english_poems.normalized.jsonl` contains 356 accepted records by 148 authors, built by `scripts/import-english-poetry.py` from `Wang-Haining/fine-grained-poetry-interpretation`; its manifest records 600 raw rows, 244 rejections without full poem text and 356 accepted records against a minimum of 300, and states that the poem texts are public domain while the interpretations and categorical tags are MIT;
+- `corpus/poem/mood-lexicon.json` (version 1.0.2) is the shared bilingual vocabulary: 16 mood categories, 9 single-character imagery tokens, 214 stop terms covering both Chinese filler and English stop words, and a `plutchik` block that maps the English corpus tags onto the categories. Its lists are retrieval hints, never an assignment about what a poem means;
+- `src/retrieval/poem-retriever.ts` implements one deterministic TF-IDF retriever for both languages: character bigrams and trigrams for Chinese, lightly stemmed Latin words for English, mood-cue and title weighting, cosine similarity, id-based tie breaking, at most three results, at most one per author, and a calibrated relevance floor (`MIN_POEM_RELEVANCE`, 0.045) evaluated in `test/poem-retriever.test.ts`;
+- the corpus language follows what the user wrote: `detectPoemLanguage` compares CJK characters against Latin letters, and `ARIOSO_POEM_CORPUS` and `ARIOSO_POEM_LEXICON` override the paths.
 
-The source states that copyright remains with the original authors and limits the collection to non-commercial use. Full poems should remain local research references and should not be redistributed as project-owned data.
+The Chinese source states that copyright remains with the original authors and limits the collection to non-commercial use. Full poems remain local research references and are not redistributed as project-owned data.
 
-This refinement does not need more poets, additional repositories, embeddings, stanza indexes, or a new corpus schema. The existing mood lexicon already includes `难过`. Further vocabulary or threshold changes should follow retrieval evaluation; the two-paragraph brief itself requires no corpus expansion.
+MoodMic already surfaces the references: the message reply, the proposal, and the result name the retrieved poem titles and authors as inspiration for the piece, and the conversation keeps the bounded trace rather than the poem texts. Retrieval runs only in MoodMic; the workflow studio's direction conversation still replies without poetry.
+
+This refinement does not need embeddings, stanza indexes, or a new corpus schema. Further vocabulary or threshold changes should follow retrieval evaluation; the two-paragraph brief itself requires no corpus expansion.
 
 ## 9. Verification
 
@@ -308,7 +313,12 @@ Tests should verify that:
 - submitting an approved brief preserves its retrieval trace;
 - both paragraphs, blank-line separation, and user edits survive storage and submission unchanged apart from outer whitespace;
 - the Composer receives the approved description and explicit settings without an intermediate stage adding musical decisions;
-- existing free-form user descriptions remain accepted.
+- existing free-form user descriptions remain accepted;
+- a Chinese request retrieves from the Chinese corpus and an English request from the English corpus, with mixed input decided by character count;
+- an English inflected form such as `walking` reaches a poem that says `walk`, and English stop words and numbers do not create matches on their own;
+- an English retrieval keeps its own relevance floor, result cap and one-poem-per-author rule.
+
+Where these checks live: `test/poem-retriever.test.ts` (Chinese retrieval, threshold calibration, reuse), `test/poem-retriever-english.test.ts` (English corpus, inflection, stop words), `test/discussion-poem-references.test.ts` (delimited reference data and injection safety), and `test/web-mood-chats.test.ts` (transport, trace storage, reuse and fail-open behaviour). A live prompt-editing check sits in `test/web-moodmic-review.test.ts`: the prompt the user confirms is the one the first generation receives.
 
 These checks establish transport and workflow behaviour. Sentence counts or exact instruction-string matches cannot establish creative quality or prove that the Director respects the intended musical boundary.
 
@@ -356,5 +366,7 @@ The refinement is complete when:
 10. the Composer owns unspecified musical design while preserving the user's explicit choices;
 11. discussion, proposal, scope, Composer instructions, and interface wording agree on the creative-brief boundary;
 12. deterministic checks and the fixed quality evaluation demonstrate both reliable handoff and the intended separation of creative intent from musical realization.
+
+Where these stand today: 1, 3, 4, 5, 6, 9 and 10 are implemented and covered by deterministic tests. 7, 8 and 11 are implemented — the two-paragraph brief is requested by the skill, editable in the interface, and carried to the Composer with the confirmed Lyria prompt, and the skill text is checked structurally rather than qualitatively. Criterion 2 is a quality claim no deterministic test can settle. Criterion 12 remains open: the fixed evaluation set has not been run, because it requires sending retrieved poems to a live model.
 
 The research question is whether deterministic modern-poetry retrieval helps the Director develop a more specific and emotionally faithful creative description, and whether separating that description from agreed musical direction gives the Composer a useful basis for musical design. Retrieval contribution and brief-structure contribution should be evaluated separately.

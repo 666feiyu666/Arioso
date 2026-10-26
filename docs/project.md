@@ -5,11 +5,11 @@ Arioso is an agentic music-composition workspace. An agent first turns a human i
 ## Document map
 
 - [`abstract.md`](abstract.md) defines the stable product idea, target architecture, and long-term boundaries. Read it to understand what Arioso is intended to become.
-- [`current.md`](current.md) records what the repository implements now: MoodMic, the mood calendar, the playlist library, the journey from a piece to an album, the workflow studio, and how all of it differs from the target. Read it before planning an architectural change.
+- [`current.md`](current.md) records what the repository implements now: MoodMic with its poetry references and confirmed Lyria prompt, the mood calendar, the playlist library, the journey from a piece to an album, the workflow studio, and how all of it differs from the target. Read it before planning an architectural change.
 - [`development.md`](development.md) contains the commands and working practices for developing and testing the current implementation.
 - [`background-music-producer.md`](background-music-producer.md) documents the optional album production workflow in the studio.
 - [`nextphase-plan.md`](nextphase-plan.md) records what is in place for the mood-driven product and what is still open.
-- [`DH6012-Documentation/`](DH6012-Documentation/) holds the course material: the project brief, the MoodMic experience and its decisions, the finalization record of the journey round, and the audio-quality plan (what exists and what is planned).
+- [`DH6012-Documentation/`](DH6012-Documentation/) holds the course material: the project brief, the MoodMic experience and its decisions, the finalization record of the journey round, the two refinements (the general music corpus and the poetry-informed direction, each with its implementation status), and the audio-quality plan (what exists and what is planned).
 
 ## Maintenance rule
 

@@ -55,7 +55,7 @@ for the selected operation.
 
 The pages are:
 
-- `/` for MoodMic, including the album continuation after a piece is kept;
+- `/` for MoodMic, including the poem references, the confirmed Lyria prompt, and the album continuation after a piece is kept;
 - `/calendar.html` for the mood calendar;
 - `/playlist.html` for the album library built from MoodMic references;
 - `/workflow.html` for the studio's four workflows; and
@@ -101,6 +101,12 @@ instead of calling live providers. A focused run for the newer features:
 
 ```powershell
 npx vitest run test/web-journey.test.ts test/web-playlist.test.ts test/web-moodmic-review.test.ts test/web-mood-chats.test.ts
+```
+
+Poetry retrieval has its own focused set:
+
+```powershell
+npx vitest run test/poem-retriever.test.ts test/poem-retriever-english.test.ts test/discussion-poem-references.test.ts
 ```
 
 Live provider calls are not part of the default verification set. Use them only
@@ -152,6 +158,32 @@ unit is a source document about a tune, so different sources discussing the
 same tune remain separate records. Book-derived text retains its own copyright
 metadata rather than inheriting Wikipedia's license.
 
+## Rebuild the poetry corpora
+
+Poetry retrieval reads `corpus/poem/`, one directory per language, plus the
+shared bilingual lexicon:
+
+```powershell
+node scripts/import-modern-poetry.mjs
+python scripts/import-english-poetry.py
+```
+
+The Chinese importer reads the pinned `sheepzh/poetry` commit and writes
+`corpus/poem/Chinese/modern_poems.normalized.jsonl`; `ARIOSO_POETRY_SOURCE`
+points it at an existing clone and `ARIOSO_POEM_OUTPUT` changes the output
+directory. The English importer downloads the checked-in `sample.csv` of
+`Wang-Haining/fine-grained-poetry-interpretation` unless `--source` names a
+local copy, keeps only the public-domain rows that carry full poem text, and
+writes `corpus/poem/English/english_poems.normalized.jsonl`. It needs Python 3;
+no other dependency is required.
+
+Both importers write a manifest with a sha256 checksum, and the retriever uses
+that checksum as its corpus version while refusing a mismatched file. A rebuilt
+corpus therefore invalidates previously stored traces instead of silently
+reusing old reference ids. The mood vocabulary in
+`corpus/poem/mood-lexicon.json` is shared by both importers and the retriever,
+so a change there must be reapplied to both corpora.
+
 ## Generated and local state
 
 The following are runtime state or evidence rather than hand-authored source:
@@ -160,7 +192,8 @@ The following are runtime state or evidence rather than hand-authored source:
 - browser task JSON and audio under `outputs/tasks/` by default;
 - workflow discussion sessions under `outputs/discussions/`;
 - MoodMic conversations under `outputs/moodmic/chats/` and mood entries in
-  `outputs/moodmic/entries.json`;
+  `outputs/moodmic/entries.json`; the session file carries the bounded poem
+  retrieval trace, not the poem texts;
 - journey records under `outputs/journeys/`;
 - local interface settings; and
 - credentials in `.env`.

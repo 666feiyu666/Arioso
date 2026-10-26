@@ -19,6 +19,8 @@ The four groups appear in the mood picker of the prompt card, in the order red, 
 
 Choosing a group shows its four words as rounded buttons. The word is what gets recorded; the colour is how the calendar reads it back. One colour per group, no extra shades for intensity, so the same red always means the same kind of feeling.
 
+The four words are a starting vocabulary, not a closed list. A word typed into the picker replaces the choice and is stored as written, up to 64 characters, so "restless", "homesick" or "振奋" do not need to be one of the built-in sixteen. The calendar's colour editor offers the same field, and a typed word is displayed exactly as recorded.
+
 Colour never carries the meaning alone. Every swatch sits next to an emotion word, text uses dark ink on pale surfaces, focus rings are visible from the keyboard, and a day with no music stays unfilled. Grey is not used for sadness.
 
 The feeling a user records and the feeling they want the music to have are separate values. Someone can mark a red, restless day and still ask for something quiet. The calendar keeps the recorded colour; the requested musical mood lives in the prompt and in the generated specification, where words such as "nocturnal" describe sound rather than an emotion category.
@@ -27,9 +29,13 @@ The feeling a user records and the feeling they want the music to have are separ
 
 MoodMic opens on a conversation, not a form. The first screen shows the heading, one line of guidance, four example mood cards, and the composer. Each example card carries a sentence in one feeling colour, plays a short audio example, and fills the composer with its text when the sentence is clicked. Nothing needs to be read before typing.
 
-The user's message goes to the discussion agent, which replies in the same tone as the conversation. Once a direction exists, MoodMic offers one action: turn the current agreement into a prompt. The prompt card then shows the editable text alongside the mood picker, so the recorded feeling and the requested music are visible at the same time and can still be changed.
+The user's message goes to the discussion agent, which replies in the same tone as the conversation. Before each reply the server retrieves up to three poems that match what the user has written, and the conversation names their titles and authors as inspiration for the piece. The poems are reference material for the agent; they are never quoted at the user and never reach the composer, which reads only the approved brief. Once a direction exists, MoodMic offers one action: turn the current agreement into a prompt. The prompt card then shows the editable text alongside the mood picker, so the recorded feeling and the requested music are visible at the same time and can still be changed.
 
 Images can be attached to a message when a reference helps describe the sound. The transcript keeps them with the message they belong to.
+
+## Confirming the Lyria prompt
+
+Composing and generating are two decisions. The Composer first writes the music specification and its Lyria prompt, and the piece pauses there: the prompt is shown as editable text with a line saying that generation will follow the wording as confirmed. Editing it replaces the composed prompt before any audio exists; confirming without an edit generates from the composed text. No audio generation is requested before that confirmation, and the pause survives a refresh.
 
 ## Generation and review
 
@@ -65,4 +71,4 @@ Choosing a day lists its pieces with the time they were created and their curren
 
 ## Acceptance
 
-The course demonstration shows the four-colour mood picker, the editable prompt, playback of generated pieces, the listening review with both keep and regenerate, the album continuation from a kept piece through plan confirmation, background generation, curation and export, and the calendar reading back the recorded colours with playable music. No numbered step indicator appears in either language.
+The course demonstration shows the four-colour mood picker with a free-text emotion word, the editable brief and its named poem references, the editable Lyria prompt confirmed before generation, playback of generated pieces, the listening review with both keep and regenerate, the album continuation from a kept piece through plan confirmation, background generation, curation and export, and the calendar reading back the recorded colours with playable music. No numbered step indicator appears in either language.

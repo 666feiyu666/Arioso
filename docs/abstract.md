@@ -27,6 +27,13 @@ turns it into a clear, production-useful direction, which the user confirms
 before any plan is written. Direction is a distinct, revisable stage, and the
 user remains the decision-maker.
 
+Listening may draw on reference material. The direction agent can read retrieved
+poetry as evidence for imagery, atmosphere, movement, and emotional
+development, while the user's own words stay authoritative: reference text
+informs an interpretation and never becomes a quotation, an attribution, or a
+substitute for what the user said. Reference material belongs to the direction
+stage; the composer receives the confirmed direction, not the sources behind it.
+
 Arioso supports three scopes: a standalone piece, one multi-movement orchestral
 work, and a themed album of related pieces. The standalone piece is the entry
 point: once a listener keeps one, it can continue into an album without a new

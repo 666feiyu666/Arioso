@@ -22,12 +22,19 @@ A MoodMic conversation keeps its own record, separate from the workflow studio's
 - `outputs/moodmic/chats/<id>/session.json` holds the transcript, image attachments, the proposal, and the task ids the conversation produced;
 - `outputs/moodmic/entries.json` holds mood entries: a calendar date, a colour group, an emotion word, an optional note, an optional "how I want the music to feel" note, and the task ids linked to that entry.
 
-The interface shows four colour groups (red, yellow, blue, green) with four emotion words each, from `web/mood-common.js`. The colour is what the calendar reads back; the word is what the entry records.
+The interface shows four colour groups (red, yellow, blue, green) with four emotion words each, from `web/mood-common.js`. The colour is what the calendar reads back; the word is what the entry records. A word typed into the picker is stored as written, up to 64 characters, and needs no built-in id; the mood picker and the calendar's colour editor accept such a word the same way.
 
-Submitting a conversation creates one `MusicTask` with `moodChatId` set. That flag makes the task run the listening review instead of a plain generation:
+Every substantive user turn retrieves poems before the Director replies, and the proposal step retrieves again; see [Poetry references](#poetry-references).
+
+Submitting a conversation creates one `MusicTask` with `moodChatId` set. Composition runs first, then generation waits for the user to confirm the composed Lyria prompt. That flag also makes the task run the listening review instead of a plain generation:
 
 ```text
 prompt + music specification
+        |
+        v
+ composed Lyria prompt, editable, task paused in "planning"
+        |
+   user confirms (an edited prompt wins over the composed one)
         |
         v
    Lyria generation
@@ -44,6 +51,8 @@ prompt + music specification
                           +--> keep: completed
                           +--> regenerate: queued, generate and review again
 ```
+
+`POST /api/tasks/<id>/prompt/approve` resumes a paused task. A `{ "prompt": "..." }` body replaces the composed Lyria prompt before the first generation; an absent body generates from the composed text, which keeps older clients working.
 
 The review compares the audio with the approved request, using the task description and the `MusicSpec`. It returns a verdict, a summary, matched and mismatched points, the model name, and the attempt number, all stored on the task as `musicReview`. When the reviewer cannot run, the piece is delivered with a summary saying so. `POST /api/tasks/<id>/review` records the user's keep or regenerate decision.
 
@@ -144,6 +153,22 @@ The workflow studio's album page uses these same records through the `04-album` 
 
 An album exports as a merged MP3 with per-track timestamps (`/api/tasks/<id>/album/export`). Optionally the Background Music Producer (`produceAlbum: true`) denoises all non-excluded candidates into a single-channel 44.1 kHz 24-bit WAV album plus an MP4 and a manifest, stored under the task's `production/` directory and served from `/api/tasks/<id>/production/...`; see [`background-music-producer.md`](background-music-producer.md). Albums created by the playlist page or a journey do not run the producer; they keep the candidate MP3s and the merged export.
 
+## Poetry references
+
+Poetry retrieval supports the direction stage only. Before the Director replies to a MoodMic message, and again before it writes the proposal — the editable creative brief — the server retrieves at most three complete poems. The query is every user-authored message plus the latest structured mood; Director prose, earlier poem text, system instructions, and interface copy are excluded. A shared bilingual mood lexicon expands the query, so a phrase reaches the same terms whether the user wrote Chinese or English.
+
+Two corpora share one deterministic retriever:
+
+- `corpus/poem/Chinese/` holds 630 modern Chinese poems from the pinned `sheepzh/poetry` commit;
+- `corpus/poem/English/` holds 356 English poems by 148 authors, tagged with Plutchik-derived mood cues;
+- `corpus/poem/mood-lexicon.json` (version 1.0.2) holds the bilingual mood categories, the single-character allowlist, and the stop words for both tokenizers.
+
+The corpus language follows what the user actually wrote: CJK characters against Latin letters. Ranking is TF-IDF over character bigrams and trigrams for Chinese and lightly stemmed words for English, weighted towards mood cues and titles. A calibrated relevance floor keeps a generic phrase such as `感到` from supplying a poem, results are capped at three with at most one poem per author, and ties break on record id.
+
+The conversation stores a bounded trace as `poem_retrieval`: query, query hash, corpus version, reference ids with titles, authors, scores and matched terms, retrieval time, and an unavailable reason. Full poem text is not duplicated into the saved session. An unchanged query and corpus version reuse the stored references; a new user message changes the hash and retrieves again; a corpus version change re-retrieves. Retrieval fails open — a missing corpus, unreadable manifest, bad record, or empty query leaves the reference set empty and the conversation continues.
+
+The Director receives the poems as delimited, untrusted reference data and the Composer never receives poem text. The interface shows only poem titles and authors, as inspiration for the piece; the poetry refinement in `DH6012-Documentation/DH6012-Project-Poem-Corpus.md` records the intended Director behaviour and the evaluation that is still open.
+
 ## Lyria integration
 
 `LyriaClient` uses the Google Gen AI Interactions API. It sends one text prompt to a selected model and expects base64-encoded audio, which it saves as MP3. The current interfaces expose:
@@ -168,7 +193,7 @@ The JSON metadata records the original description, model names, generated text 
 
 The local web application provides:
 
-- MoodMic: a conversation, four mood examples, an editable proposal, generation, the listening review, the kept-piece result, and the album continuation;
+- MoodMic: a conversation, four mood examples, an editable brief, poem inspiration for the piece, an editable Lyria prompt confirmed before the first generation, the listening review, the kept-piece result, and the album continuation;
 - the mood calendar: a month grid of made pieces, day detail, playback, retry, and mood-colour editing;
 - the playlist page: references, album planning, plan confirmation and revision, candidate listening, inclusion, ordering, MP3 export, and timestamps;
 - the workflow studio: four workflows (no-corpus single, music-corpus single, orchestral multi-movement, themed album), a direction conversation with text and image input, an editable proposal, explicit approval before handoff, compose-only and compose-and-generate modes, Lyria and vocal settings, a music-reference selector, and optional Background Music Producer;
@@ -181,9 +206,9 @@ The local web application provides:
 
 `GET /api/capabilities` reports `apiVersion: 11`, the five workflow types, the album candidate range (12 to 28, default 14), the orchestral duration limits (5 to 12 minutes in total, 3 minutes per movement), the supported music types with their availability, and feature flags for discussions, mood entries, playlist references, plan confirmation, album playlist and export, orchestral assembly, and the producer.
 
-Other route families: `/api/tasks` and `/api/tasks/<id>` with audio, movements, album tracks, album playlist, album export, review, retry, and production artifacts; `/api/discussions/...`; `/api/mood-chats/...`; `/api/mood-entries/...` and `/api/mood-entries/classify`; `/api/playlists/...`; `/api/journeys/...`; and `/api/settings/...`.
+Other route families: `/api/tasks` and `/api/tasks/<id>` with audio, movements, album tracks, album playlist, album export, prompt confirmation, review, retry, and production artifacts; `/api/discussions/...`; `/api/mood-chats/...`; `/api/mood-entries/...` and `/api/mood-entries/classify`; `/api/playlists/...`; `/api/journeys/...`; and `/api/settings/...`.
 
-Tasks move through `queued`, `composing`, `generating`, `review`, `assembling`, `processing`, `completed`, or `failed`. `review` is used by the MoodMic listening review and by a playlist plan waiting for confirmation. Each task is saved as JSON under `outputs/tasks` with its audio; interrupted active tasks are marked failed on startup rather than resumed. Retrying reuses an existing `MusicSpec` when present. A task carries `workflowType`, `compositionMode`, and its scope-specific records (`albumPlan`, `albumTracks`, `orchestralPlan`, `movements`, `albumProduction`), plus optional journey lineage (`journeyId`, `parentTaskId`) and the playlist plan revision (`albumPlanRevision`).
+Tasks move through `queued`, `composing`, `planning`, `generating`, `review`, `assembling`, `processing`, `completed`, or `failed`. `planning` is a MoodMic piece whose composed Lyria prompt awaits confirmation; `review` is used by the MoodMic listening review and by a playlist plan waiting for confirmation. Each task is saved as JSON under `outputs/tasks` with its audio; interrupted active tasks are marked failed on startup rather than resumed. Retrying reuses an existing `MusicSpec` when present. A task carries `workflowType`, `compositionMode`, and its scope-specific records (`albumPlan`, `albumTracks`, `orchestralPlan`, `movements`, `albumProduction`), plus optional journey lineage (`journeyId`, `parentTaskId`), the playlist plan revision (`albumPlanRevision`), and the Lyria prompt confirmation (`lyriaPromptApproved`).
 
 Credentials may be held for the current server session or, with explicit user selection, written to the local `.env`. The settings API returns only masked credential summaries and never the complete stored value.
 
@@ -201,7 +226,7 @@ The runtime reads:
 - `GEMINI_REVIEW_MODEL`, defaulting to `gemini-3.5-flash`;
 - `LYRIA_MODEL`, defaulting to `lyria-3-clip-preview`;
 - `ARIOSO_OUTPUT_DIR`, defaulting to `outputs`;
-- optional paths for the composer skill, the prompt-directing skill, the music corpus root (`ARIOSO_MUSIC_CORPUS_ROOT`, with `ARIOSO_JAZZ_CORPUS` as a temporary Jazz fallback), settings, and `.env`;
+- optional paths for the composer skill, the prompt-directing skill, the music corpus root (`ARIOSO_MUSIC_CORPUS_ROOT`, with `ARIOSO_JAZZ_CORPUS` as a temporary Jazz fallback), the poetry corpus and its lexicon (`ARIOSO_POEM_CORPUS`, `ARIOSO_POEM_LEXICON`), settings, and `.env`;
 - `ARIOSO_WEB_HOST` and `ARIOSO_WEB_PORT` for the local server, defaulting to `127.0.0.1:4173`; and
 - optional producer pipeline paths (`ARIOSO_PIPELINE_PYTHON`, `ARIOSO_PIPELINE_CONFIG`).
 
@@ -218,6 +243,8 @@ The implementation covers the three composition modes, the MoodMic journey, and 
 - no take-level comparison or retention of superseded generations;
 - no release-level metadata;
 - only Jazz has validated style and standard collections; the other four music types are coded but stay unavailable until their corpora exist;
+- poetry retrieval is wired into MoodMic only; the workflow studio's direction conversation does not retrieve poems;
+- the two-paragraph brief and the poetry-on/off comparison have deterministic coverage but no recorded live text evaluation;
 - evaluation covers schemas and behavior, not listening coherence or album diversity; and
 - the journey has only been exercised with fake providers, so its end-to-end behavior against live Lyria and Gemini is still unverified.
 
@@ -233,6 +260,10 @@ The implementation covers the three composition modes, the MoodMic journey, and 
 - orchestral plan schema: `src/schema/orchestral-plan.ts`
 - album plan schema: `src/schema/album-plan.ts`
 - music retrieval: `src/retrieval/music-retriever.ts`
+- poetry retrieval: `src/retrieval/poem-retriever.ts`
+- MoodMic poetry references: `src/web/poem-references.ts`
+- poetry corpora and bilingual mood lexicon: `corpus/poem/`
+- poetry importers: `scripts/import-modern-poetry.mjs`, `scripts/import-english-poetry.py`
 - music corpus migration: `src/corpus/build-music-corpus.mjs`
 - Lyria adapter: `src/lyria/lyria-client.ts`
 - MoodMic listening review: `src/moodmic/music-review.ts`
