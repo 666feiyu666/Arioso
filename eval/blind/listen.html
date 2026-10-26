@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arioso 盲听评分</title>
+<style>
+  body { font-family: -apple-system, "Segoe UI", Arial, sans-serif; max-width: 920px; margin: 24px auto; padding: 0 16px; color: #1f2a37; background: #fff; }
+  h1 { font-size: 22px; }
+  h2 { font-size: 18px; margin-top: 32px; border-top: 1px solid #e1e6eb; padding-top: 16px; }
+  .need { color: #64727f; font-size: 14px; }
+  .card { border: 1px solid #e1e6eb; border-radius: 8px; padding: 12px; margin: 12px 0; background: #f9fafb; }
+  .row { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin-top: 8px; }
+  label { font-size: 13px; color: #3e4c59; }
+  select, textarea { font-size: 13px; padding: 2px 4px; }
+  select { min-width: 64px; }
+  textarea { width: 100%; min-height: 38px; margin-top: 6px; box-sizing: border-box; }
+  audio { width: 100%; margin-top: 6px; }
+  button { font-size: 15px; padding: 8px 16px; border-radius: 8px; border: 0; background: #12233a; color: #fff; cursor: pointer; }
+  .hint { font-size: 12px; color: #64727f; }
+</style>
+</head>
+<body>
+<h1>Arioso 盲听评分</h1>
+<p class="hint">每个场景先看“初始消息”和“隐含需求”，再把该场景的音频完整听一遍，然后逐段打分。1 分是很不合适，5 分是很合适。别根据文件名猜条件，听的时候也不要打开别的文件。</p>
+<p><label>听众编号：<input id="listener" value="P01" size="8"></label></p>
+<div id="app"></div>
+<p><button id="export">导出我的评分（CSV）</button> <span id="status" class="hint"></span></p>
+<script>
+const DATA = {"protocol": "docs/DH6012-Documentation/DH6012_Eval.md", "note": "Condition and music type are concealed. Do not open key.json while listening.", "scenarios": [{"scenario_id": "01", "initial_message": "我现在很焦虑，想听点纯音乐。", "underlying_need": "马上要做一个很重要的汇报，想先让呼吸稳下来、把注意力收回来，但又不想听得犯困，也不想丢了警觉。", "audio": [{"audio_id": "S01-1", "file": "audio/S01-1.mp3", "presentation_order": 1}, {"audio_id": "S01-2", "file": "audio/S01-2.mp3", "presentation_order": 2}, {"audio_id": "S01-3", "file": "audio/S01-3.mp3", "presentation_order": 3}, {"audio_id": "S01-4", "file": "audio/S01-4.mp3", "presentation_order": 4}, {"audio_id": "S01-5", "file": "audio/S01-5.mp3", "presentation_order": 5}, {"audio_id": "S01-6", "file": "audio/S01-6.mp3", "presentation_order": 6}]}, {"scenario_id": "02", "initial_message": "我现在很兴奋，想听点纯音乐。", "underlying_need": "刚做完一个很重要的项目，想留住这份开心和成就感，但别让音乐变得吵闹、刺激，反而搅了心情。", "audio": [{"audio_id": "S02-1", "file": "audio/S02-1.mp3", "presentation_order": 1}, {"audio_id": "S02-2", "file": "audio/S02-2.mp3", "presentation_order": 2}, {"audio_id": "S02-3", "file": "audio/S02-3.mp3", "presentation_order": 3}, {"audio_id": "S02-4", "file": "audio/S02-4.mp3", "presentation_order": 4}, {"audio_id": "S02-5", "file": "audio/S02-5.mp3", "presentation_order": 5}, {"audio_id": "S02-6", "file": "audio/S02-6.mp3", "presentation_order": 6}]}, {"scenario_id": "03", "initial_message": "我现在很疲惫，想听点纯音乐。", "underlying_need": "还得再撑一个小时的工作，想慢慢把精力和专注找回来，别越听越困，也别被突然的强音打断。", "audio": [{"audio_id": "S03-1", "file": "audio/S03-1.mp3", "presentation_order": 1}, {"audio_id": "S03-2", "file": "audio/S03-2.mp3", "presentation_order": 2}, {"audio_id": "S03-3", "file": "audio/S03-3.mp3", "presentation_order": 3}, {"audio_id": "S03-4", "file": "audio/S03-4.mp3", "presentation_order": 4}, {"audio_id": "S03-5", "file": "audio/S03-5.mp3", "presentation_order": 5}, {"audio_id": "S03-6", "file": "audio/S03-6.mp3", "presentation_order": 6}]}, {"scenario_id": "04", "initial_message": "我现在很平静，想听点纯音乐。", "underlying_need": "准备睡前读点书，想保持现在这种平静舒服的状态，有一点细微的变化就好，不要突然的高潮或紧张。", "audio": [{"audio_id": "S04-1", "file": "audio/S04-1.mp3", "presentation_order": 1}, {"audio_id": "S04-2", "file": "audio/S04-2.mp3", "presentation_order": 2}, {"audio_id": "S04-3", "file": "audio/S04-3.mp3", "presentation_order": 3}, {"audio_id": "S04-4", "file": "audio/S04-4.mp3", "presentation_order": 4}, {"audio_id": "S04-5", "file": "audio/S04-5.mp3", "presentation_order": 5}, {"audio_id": "S04-6", "file": "audio/S04-6.mp3", "presentation_order": 6}]}]};
+
+function scoreSelect(audioId, cls, values) {
+  return '<select class="' + cls + '" data-audio="' + audioId + '"><option value="">&ndash;</option>' +
+    values.map(function (v) { return '<option value="' + v + '">' + v + '</option>'; }).join('') +
+    '</select>';
+}
+
+function render() {
+  const app = document.getElementById('app');
+  DATA.scenarios.forEach(function (sc) {
+    const section = document.createElement('section');
+    const heading = document.createElement('h2');
+    heading.textContent = '场景 ' + sc.scenario_id;
+    section.appendChild(heading);
+    const msg = document.createElement('div');
+    msg.textContent = '初始消息：' + sc.initial_message;
+    section.appendChild(msg);
+    const need = document.createElement('div');
+    need.className = 'need';
+    need.textContent = '隐含需求：' + sc.underlying_need;
+    section.appendChild(need);
+
+    sc.audio.forEach(function (a) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML =
+        '<div><b>' + a.audio_id + '</b> <span class="hint">第 ' + a.presentation_order + ' 段</span></div>' +
+        '<audio controls preload="none" src="' + a.file + '"></audio>' +
+        '<div class="row">' +
+          '<label>情绪适配 ' + scoreSelect(a.audio_id, 'fit', ['1', '2', '3', '4', '5']) + '</label>' +
+          '<label>需求达成 ' + scoreSelect(a.audio_id, 'need', ['1', '2', '3', '4', '5']) + '</label>' +
+          '<label>保留选择 <select class="retain" data-audio="' + a.audio_id + '">' +
+            '<option value="">&ndash;</option>' +
+            '<option value="' + a.audio_id + '">保留这一段</option>' +
+            '<option value="无明显差别">无明显差别</option>' +
+          '</select></label>' +
+        '</div>' +
+        '<textarea class="reason" data-audio="' + a.audio_id + '" placeholder="可选：一句话理由"></textarea>';
+      section.appendChild(card);
+    });
+    app.appendChild(section);
+  });
+}
+
+function valueOf(selector) {
+  const node = document.querySelector(selector);
+  return node && node.value ? node.value : '';
+}
+
+document.getElementById('export').addEventListener('click', function () {
+  const listener = document.getElementById('listener').value.trim() || 'anonymous';
+  const esc = function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; };
+  const rows = [['听众编号', '场景编号', '音频编号', '播放顺序',
+    '情绪适配_1到5', '需求达成_1到5', '保留选择', '理由']];
+  DATA.scenarios.forEach(function (sc) {
+    sc.audio.forEach(function (a) {
+      rows.push([
+        listener, sc.scenario_id, a.audio_id, a.presentation_order,
+        valueOf('select.fit[data-audio="' + a.audio_id + '"]'),
+        valueOf('select.need[data-audio="' + a.audio_id + '"]'),
+        valueOf('select.retain[data-audio="' + a.audio_id + '"]'),
+        valueOf('textarea.reason[data-audio="' + a.audio_id + '"]'),
+      ]);
+    });
+  });
+  const csv = '\ufeff' + rows.map(function (row) { return row.map(esc).join(','); }).join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'ratings-' + listener + '.csv';
+  link.click();
+  URL.revokeObjectURL(url);
+  document.getElementById('status').textContent = '已导出 ratings-' + listener + '.csv，请发给研究者。';
+});
+
+render();
+</script>
+</body>
+</html>

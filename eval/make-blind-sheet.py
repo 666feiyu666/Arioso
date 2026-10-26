@@ -74,20 +74,20 @@ def main() -> None:
             }
             for listener in LISTENERS:
                 rows.append({
-                    "listener_id": listener,
-                    "scenario_id": sid,
-                    "audio_id": audio_id,
-                    "presentation_order": position,
-                    "emotional_fit_1to5": "",
-                    "need_fulfilment_1to5": "",
-                    "retention_choice": "",
-                    "reason": "",
+                    "听众编号": listener,
+                    "场景编号": sid,
+                    "音频编号": audio_id,
+                    "播放顺序": position,
+                    "情绪适配_1到5": "",
+                    "需求达成_1到5": "",
+                    "保留选择": "",
+                    "理由": "",
                 })
 
         inventory["scenarios"].append({
             "scenario_id": sid,
             "initial_message": scenario["initialMessage"],
-            "underlying_need": scenario["underlyingNeed"],
+            "underlying_need": scenario.get("underlyingNeedZh", scenario["underlyingNeed"]),
             "audio": audio_list,
         })
 
@@ -95,8 +95,8 @@ def main() -> None:
     json.dump(key, open(os.path.join(BLIND, "key.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=2)
     with open(os.path.join(BLIND, "ratings-template.csv"), "w", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=[
-            "listener_id", "scenario_id", "audio_id", "presentation_order",
-            "emotional_fit_1to5", "need_fulfilment_1to5", "retention_choice", "reason",
+            "听众编号", "场景编号", "音频编号", "播放顺序",
+            "情绪适配_1到5", "需求达成_1到5", "保留选择", "理由",
         ])
         writer.writeheader()
         writer.writerows(rows)

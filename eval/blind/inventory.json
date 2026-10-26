@@ -5,7 +5,7 @@
     {
       "scenario_id": "01",
       "initial_message": "我现在很焦虑，想听点纯音乐。",
-      "underlying_need": "The user is about to give an important presentation. They want to settle their breathing and regain focus without becoming sleepy or losing alertness.",
+      "underlying_need": "马上要做一个很重要的汇报，想先让呼吸稳下来、把注意力收回来，但又不想听得犯困，也不想丢了警觉。",
       "audio": [
         {
           "audio_id": "S01-1",
@@ -42,7 +42,7 @@
     {
       "scenario_id": "02",
       "initial_message": "我现在很兴奋，想听点纯音乐。",
-      "underlying_need": "The user has completed an important project. They want to sustain joy and a sense of achievement without the music becoming chaotic, noisy, or overstimulating.",
+      "underlying_need": "刚做完一个很重要的项目，想留住这份开心和成就感，但别让音乐变得吵闹、刺激，反而搅了心情。",
       "audio": [
         {
           "audio_id": "S02-1",
@@ -79,7 +79,7 @@
     {
       "scenario_id": "03",
       "initial_message": "我现在很疲惫，想听点纯音乐。",
-      "underlying_need": "The user must continue working for another hour. They want to recover energy and concentration gently, without becoming sleepier or being confronted by sudden intensity.",
+      "underlying_need": "还得再撑一个小时的工作，想慢慢把精力和专注找回来，别越听越困，也别被突然的强音打断。",
       "audio": [
         {
           "audio_id": "S03-1",
@@ -116,7 +116,7 @@
     {
       "scenario_id": "04",
       "initial_message": "我现在很平静，想听点纯音乐。",
-      "underlying_need": "The user is preparing to read before sleep. They want to preserve a calm, comfortable state, with subtle development but no dramatic climax or tension.",
+      "underlying_need": "准备睡前读点书，想保持现在这种平静舒服的状态，有一点细微的变化就好，不要突然的高潮或紧张。",
       "audio": [
         {
           "audio_id": "S04-1",
