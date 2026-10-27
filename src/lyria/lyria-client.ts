@@ -2,6 +2,10 @@ import { GoogleGenAI } from "@google/genai";
 
 export interface GenerateMusicOptions {
   model?: string;
+  /** Deadline for this dispatch; the client does not retry on its own. */
+  timeoutMs?: number;
+  /** Cancellation from the caller; cancelling may not cancel remote work. */
+  signal?: AbortSignal;
 }
 
 export interface GeneratedMusic {
@@ -30,6 +34,12 @@ export class LyriaClient {
     const interaction = await this.#client.interactions.create({
       model: options.model ?? "lyria-3-clip-preview",
       input,
+    }, {
+      // A paid generation is dispatched exactly once: the SDK must not repeat it
+      // behind our back, and the deadline is explicit rather than a default.
+      maxRetries: 0,
+      ...(options.timeoutMs === undefined ? {} : { timeout: options.timeoutMs }),
+      ...(options.signal ? { fetchOptions: { signal: options.signal } } : {}),
     });
 
     const encodedAudio = interaction.output_audio?.data;

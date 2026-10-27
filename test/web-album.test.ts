@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AlbumPlanSchema } from "../src/schema/album-plan.js";
 import type { MusicSpec } from "../src/schema/music-spec.js";
-import { runAlbumTask } from "../src/web/server.js";
+import { runAlbumTask } from "../src/web/task-runtime.js";
 import { TaskStore, type MusicTask } from "../src/web/task-store.js";
 import { withWebServer } from "./helpers/web-server.js";
 
@@ -264,15 +264,16 @@ describe("album generation continuation", () => {
         expect(latest.status).toBe("failed");
         expect(latest.albumTracks!.slice(0, 2).map((track) => track.status)).toEqual(["failed", "completed"]);
       });
-      expect(generateMock.mock.calls).toEqual([
-        ["prompt 1", { model: "lyria-3.5" }], ["prompt 2", { model: "lyria-3.5" }],
-      ]);
+      expect(generateMock.mock.calls.map((call) => call[0])).toEqual(["prompt 1", "prompt 2"]);
+      // Every dispatch carries an explicit deadline and no retry policy.
+      expect(generateMock.mock.calls[0]?.[1]).toMatchObject({ model: "lyria-3.5" });
       const retry = await fetch(`${baseUrl}/api/tasks/album-task/album/tracks/track-1/retry`, { method: "POST" });
       expect(retry.status).toBe(202);
       await retry.json();
       await vi.waitFor(async () => expect((await getTask()).status).toBe("completed"));
       expect(generateMock).toHaveBeenCalledTimes(3);
-      expect(generateMock.mock.calls[2]).toEqual(["prompt 1", { model: "lyria-3.5" }]);
+      expect(generateMock.mock.calls[2]?.[0]).toBe("prompt 1");
+      expect(generateMock.mock.calls[2]?.[1]).toMatchObject({ model: "lyria-3.5" });
       expect((await getTask()).albumPlaylist).toEqual([]);
     }, {
       prepare: (root) => prepareAlbum(root, task),

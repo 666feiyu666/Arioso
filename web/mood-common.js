@@ -85,10 +85,6 @@ export function groupName(group, language) {
   return language === "en" ? group.name.en : group.name.zh;
 }
 
-export function groupMeaning(group, language) {
-  return language === "en" ? group.meaning.en : group.meaning.zh;
-}
-
 export const WEEKDAYS = {
   "zh-CN": ["一", "二", "三", "四", "五", "六", "日"],
   en: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
@@ -112,13 +108,6 @@ export function dateParts(value) {
   return { year, month, day };
 }
 
-export function formatDayLabel(date, language) {
-  const { year, month, day } = dateParts(date);
-  return language === "en"
-    ? new Date(`${date}T00:00:00`).toLocaleDateString("en", { weekday: "long", month: "long", day: "numeric" })
-    : `${year} 年 ${month} 月 ${day} 日`;
-}
-
 // Marker background for one calendar day: solid for a single colour, or equal
 // colour segments in the given order, clockwise from the top.
 export function markerStyle(colors) {
@@ -128,10 +117,6 @@ export function markerStyle(colors) {
     .map((color, index) => `${color} ${((index * 360) / n).toFixed(3)}deg ${(((index + 1) * 360) / n).toFixed(3)}deg`)
     .join(", ");
   return `background: conic-gradient(from 0deg, ${stops})`;
-}
-
-export function entryHasMusic(entry) {
-  return (entry.tasks ?? []).some((task) => task.status === "completed");
 }
 
 export async function api(path, options = {}) {

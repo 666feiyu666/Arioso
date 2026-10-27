@@ -7,7 +7,25 @@ const EnvironmentSchema = z.object({
   GEMINI_REVIEW_MODEL: z.string().trim().min(1).default("gemini-3.5-flash"),
   LYRIA_MODEL: z.string().trim().min(1).default("lyria-3-clip-preview"),
   ARIOSO_OUTPUT_DIR: z.string().trim().min(1).default("outputs"),
+  // Explicit deadlines per kind of work: long audio generation is not bounded
+  // like a short connection check.
+  ARIOSO_COMPOSE_TIMEOUT_MS: z.string().trim().regex(/^[1-9]\d*$/u).optional(),
+  ARIOSO_GENERATE_TIMEOUT_MS: z.string().trim().regex(/^[1-9]\d*$/u).optional(),
+  ARIOSO_REVIEW_TIMEOUT_MS: z.string().trim().regex(/^[1-9]\d*$/u).optional(),
 });
+
+/** Deadlines in milliseconds for each kind of provider work. */
+export interface AriosoTimeouts {
+  composeMs: number;
+  generateMs: number;
+  reviewMs: number;
+}
+
+export const DEFAULT_TIMEOUTS: AriosoTimeouts = {
+  composeMs: 300_000,
+  generateMs: 900_000,
+  reviewMs: 180_000,
+};
 
 export interface AriosoConfig {
   openAiApiKey: string;
@@ -16,8 +34,15 @@ export interface AriosoConfig {
   geminiReviewModel: string;
   lyriaModel: string;
   outputDirectory: string;
+  /** Optional so existing callers and fixtures keep working; see timeoutsFor(). */
+  timeouts?: AriosoTimeouts;
   pipelinePython?: string;
   pipelineConfig?: string;
+}
+
+/** Deadlines for a config, falling back to the defaults when unset. */
+export function timeoutsFor(config: Pick<AriosoConfig, "timeouts">): AriosoTimeouts {
+  return config.timeouts ?? DEFAULT_TIMEOUTS;
 }
 
 export function loadConfig(
@@ -42,6 +67,11 @@ export function loadConfig(
     geminiReviewModel: parsed.data.GEMINI_REVIEW_MODEL,
     lyriaModel: parsed.data.LYRIA_MODEL,
     outputDirectory: parsed.data.ARIOSO_OUTPUT_DIR,
+    timeouts: {
+      composeMs: Number(parsed.data.ARIOSO_COMPOSE_TIMEOUT_MS ?? DEFAULT_TIMEOUTS.composeMs),
+      generateMs: Number(parsed.data.ARIOSO_GENERATE_TIMEOUT_MS ?? DEFAULT_TIMEOUTS.generateMs),
+      reviewMs: Number(parsed.data.ARIOSO_REVIEW_TIMEOUT_MS ?? DEFAULT_TIMEOUTS.reviewMs),
+    },
     ...(environment.ARIOSO_PIPELINE_PYTHON ? { pipelinePython: environment.ARIOSO_PIPELINE_PYTHON } : {}),
     ...(environment.ARIOSO_PIPELINE_CONFIG ? { pipelineConfig: environment.ARIOSO_PIPELINE_CONFIG } : {}),
   };

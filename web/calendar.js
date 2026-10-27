@@ -9,7 +9,7 @@
 
 import {
   GROUPS, WEEKDAYS, api, applyI18n, customEmotionDraft, dateParts, emotionLabel, esc,
-  groupById, groupName, markerStyle, readLanguage, persistLanguage,
+  groupById, groupName, markerStyle, readLanguage, persistLanguage, todayISO,
 } from "./mood-common.js";
 
 const COPY = {
@@ -103,11 +103,6 @@ function t(key, ...args) {
 
 function statusLabel(status) {
   return t(STATUS_KEYS[status] ?? "statusQueued");
-}
-
-function todayISO() {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 }
 
 // The local calendar day a piece belongs to, from its creation time.

@@ -2,6 +2,7 @@ import { mkdir, readFile, readdir, rm } from "node:fs/promises";
 import path from "node:path";
 
 import { writeTextFileAtomic } from "../utils/files.js";
+import { KeyedQueue } from "../utils/queues.js";
 import { isMusicJourney, type MusicJourney } from "./types.js";
 
 /**
@@ -12,6 +13,8 @@ import { isMusicJourney, type MusicJourney } from "./types.js";
 export class JourneyStore {
   readonly #directory: string;
   readonly #journeys = new Map<string, MusicJourney>();
+  /** One mutation at a time per journey: read, derive, persist, publish. */
+  readonly #mutations = new KeyedQueue();
 
   constructor(directory: string) {
     this.#directory = path.resolve(directory);
@@ -53,32 +56,39 @@ export class JourneyStore {
 
   /** One journey per MoodMic conversation; repeated creation returns the same record. */
   async create(input: { moodChatId: string; moodEntryId?: string; songTaskId?: string }): Promise<MusicJourney> {
-    const existing = this.findByChatId(input.moodChatId);
-    if (existing) {
-      return this.update(existing.id, {
-        ...(input.songTaskId && !existing.songTaskId ? { songTaskId: input.songTaskId } : {}),
-        ...(input.moodEntryId && !existing.moodEntryId ? { moodEntryId: input.moodEntryId } : {}),
-      });
-    }
-    const now = new Date().toISOString();
-    const journey: MusicJourney = {
-      id: crypto.randomUUID(),
-      moodChatId: input.moodChatId,
-      phase: input.songTaskId ? "song-running" : "mood",
-      ...(input.songTaskId ? { songTaskId: input.songTaskId } : {}),
-      ...(input.moodEntryId ? { moodEntryId: input.moodEntryId } : {}),
-      createdAt: now,
-      updatedAt: now,
-    };
-    this.#journeys.set(journey.id, journey);
-    await this.save(journey);
-    return journey;
+    // Serialize per conversation so two concurrent starts cannot open two journeys.
+    return this.#mutations.run(`chat:${input.moodChatId}`, async () => {
+      const existing = this.findByChatId(input.moodChatId);
+      if (existing) {
+        return this.update(existing.id, {
+          ...(input.songTaskId && !existing.songTaskId ? { songTaskId: input.songTaskId } : {}),
+          ...(input.moodEntryId && !existing.moodEntryId ? { moodEntryId: input.moodEntryId } : {}),
+        });
+      }
+      const now = new Date().toISOString();
+      const journey: MusicJourney = {
+        id: crypto.randomUUID(),
+        moodChatId: input.moodChatId,
+        phase: input.songTaskId ? "song-running" : "mood",
+        ...(input.songTaskId ? { songTaskId: input.songTaskId } : {}),
+        ...(input.moodEntryId ? { moodEntryId: input.moodEntryId } : {}),
+        createdAt: now,
+        updatedAt: now,
+      };
+      await this.save(journey);
+      this.#journeys.set(journey.id, journey);
+      return journey;
+    });
   }
 
   async remove(id: string): Promise<boolean> {
-    if (!this.#journeys.delete(id)) return false;
-    await rm(path.join(this.#directory, `${id}.json`), { force: true });
-    return true;
+    return this.#mutations.run(id, async () => {
+      if (!this.#journeys.has(id)) return false;
+      // Remove the record from disk first: a failed delete keeps it retryable.
+      await rm(path.join(this.#directory, `${id}.json`), { force: true });
+      this.#journeys.delete(id);
+      return true;
+    });
   }
 
   /** Deletes the journey that belongs to a MoodMic conversation, if one exists. */
@@ -92,19 +102,21 @@ export class JourneyStore {
   }
 
   async update(id: string, changes: Partial<MusicJourney>): Promise<MusicJourney> {
-    const journey = this.#journeys.get(id);
-    if (!journey) throw new Error("Journey not found.");
-    const updated: MusicJourney = {
-      ...journey,
-      ...changes,
-      id: journey.id,
-      moodChatId: journey.moodChatId,
-      updatedAt: new Date().toISOString(),
-    };
-    if (!isMusicJourney(updated)) throw new Error("Invalid journey record.");
-    this.#journeys.set(id, updated);
-    await this.save(updated);
-    return updated;
+    return this.#mutations.run(id, async () => {
+      const journey = this.#journeys.get(id);
+      if (!journey) throw new Error("Journey not found.");
+      const updated: MusicJourney = {
+        ...journey,
+        ...changes,
+        id: journey.id,
+        moodChatId: journey.moodChatId,
+        updatedAt: new Date().toISOString(),
+      };
+      if (!isMusicJourney(updated)) throw new Error("Invalid journey record.");
+      await this.save(updated);
+      this.#journeys.set(id, updated);
+      return updated;
+    });
   }
 
   private save(journey: MusicJourney): Promise<void> {

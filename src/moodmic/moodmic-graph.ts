@@ -3,6 +3,9 @@ import { readFile } from "node:fs/promises";
 import { Annotation, END, START, StateGraph } from "@langchain/langgraph";
 
 import type { AriosoConfig } from "../config/env.js";
+import { timeoutsFor } from "../config/env.js";
+import { withDeadline } from "../utils/attempts.js";
+import { dispatchGeneration } from "../web/generation.js";
 import { LyriaClient } from "../lyria/lyria-client.js";
 import type { MusicSpec } from "../schema/music-spec.js";
 import type { MusicTask, TaskStore } from "../web/task-store.js";
@@ -59,7 +62,7 @@ function requireTask(store: TaskStore, taskId: string): MusicTask {
   return task;
 }
 
-function unavailableReview(language: "zh-CN" | "en" | undefined, attempt: number, model: string): MusicReview {
+function unavailableReview(language: "zh-CN" | "en" | undefined): MusicReview {
   return {
     verdict: "match",
     summary: language === "en"
@@ -87,7 +90,16 @@ export function buildMoodMicReviewGraph(deps: MoodMicReviewGraphDeps) {
     const spec = task.musicSpec;
     if (!spec) throw new Error("A composed music spec is required before generation.");
     await store.update(task.id, { status: "generating", error: undefined });
-    const generated = await generate(spec, task.lyriaModel);
+    // MoodMic dispatches through its own graph, so it records the same attempt
+    // metadata and applies the same deadline and no-retry policy as Web/CLI.
+    const generated = await dispatchGeneration(store, task, {
+      purpose: "generate",
+      model: task.lyriaModel,
+      prompt: spec.lyriaPrompt,
+      apiKey: config.geminiApiKey ?? "",
+      timeoutMs: timeoutsFor(config).generateMs,
+      generate: () => generate(spec, task.lyriaModel),
+    });
     const audioFile = await store.writeAudio(task, generated.audio);
     await store.update(task.id, {
       audioFile,
@@ -100,19 +112,29 @@ export function buildMoodMicReviewGraph(deps: MoodMicReviewGraphDeps) {
   const reviewNode = async (state: MoodMicReviewStateValue) => {
     const task = requireTask(store, state.taskId);
     const attempt = (task.reviewAttempt ?? 0) + 1;
+    // Generation always receives the spec's prompt; once the user confirmed it,
+    // that is the exact request the reviewer must judge the audio against.
+    const confirmedPrompt = task.lyriaPromptApproved ? task.musicSpec?.lyriaPrompt : undefined;
     let review: MusicReview;
     try {
       const audioPath = store.audioPath(task);
       if (!audioPath) throw new Error("Generated audio is not available for review.");
-      review = await reviewer.review({
-        audio: await readFile(audioPath),
-        description: task.description,
-        ...(task.musicSpec ? { spec: task.musicSpec } : {}),
-        ...(language ? { language } : {}),
-      });
+      const audio = await readFile(audioPath);
+      review = await withDeadline(
+        () => reviewer.review({
+          audio,
+          description: task.description,
+          ...(task.musicSpec ? { spec: task.musicSpec } : {}),
+          ...(confirmedPrompt?.trim() ? { confirmedPrompt } : {}),
+          ...(language ? { language } : {}),
+        }),
+        // A stalled review falls back to the documented as-is delivery rather
+        // than holding the task open indefinitely.
+        { timeoutMs: timeoutsFor(config).reviewMs, label: "music review" },
+      );
     } catch (error) {
       console.error(`Music review unavailable for task ${task.id}: ${error instanceof Error ? error.message : String(error)}`);
-      review = unavailableReview(language, attempt, model);
+      review = unavailableReview(language);
     }
     const record: MusicReviewRecord = {
       ...review,

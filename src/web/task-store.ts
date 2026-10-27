@@ -21,7 +21,9 @@ import {
 } from "../schema/album-plan.js";
 import type { OrchestralMovementPlan, OrchestralWorkPlan } from "../schema/orchestral-plan.js";
 import { writeTextFileAtomic } from "../utils/files.js";
+import { KeyedQueue } from "../utils/queues.js";
 import { isRecord } from "../utils/validation.js";
+import type { GenerationAttempt } from "../utils/attempts.js";
 import { isProductionRunId, type AlbumProduction } from "../producer/types.js";
 import type { MusicReviewRecord } from "../moodmic/music-review.js";
 import { isPlaylistDiscussionMessage, PlaylistBriefingSchema, type PlaylistBriefing, type PlaylistDiscussionMessage } from "../playlist/briefing.js";
@@ -182,6 +184,10 @@ export interface MusicTask {
   moodChatId?: string;
   musicReview?: MusicReviewRecord;
   reviewAttempt?: number;
+  /** The attempt that owns the current generation, so a late result cannot win. */
+  generationAttemptId?: string;
+  /** Bounded history of provider dispatches, oldest first. */
+  generationAttempts?: GenerationAttempt[];
   /** MoodMic creations reused as references when planning a Playlist album. */
   playlistReferences?: PlaylistReference[];
   /** How the album author read the references and the user's theme, shown for confirmation. */
@@ -303,10 +309,22 @@ function isTaskRecord(value: unknown): value is MusicTask {
     || (Number.isInteger(value.albumPlanRevision) && Number(value.albumPlanRevision) > 0);
   const lineageValid = (value.journeyId === undefined || isSafeFileName(value.journeyId))
     && (value.parentTaskId === undefined || isSafeFileName(value.parentTaskId));
+  const attemptsValid = (value.generationAttemptId === undefined || typeof value.generationAttemptId === "string")
+    && (value.generationAttempts === undefined || (Array.isArray(value.generationAttempts)
+      && value.generationAttempts.every((attempt: unknown) => isRecord(attempt)
+        && typeof attempt.id === "string"
+        && ["generate", "movement", "album-track"].includes(String(attempt.purpose))
+        && typeof attempt.model === "string"
+        && typeof attempt.requestRef === "string"
+        && typeof attempt.startedAt === "string"
+        && (attempt.endedAt === undefined || typeof attempt.endedAt === "string")
+        && (attempt.outcome === undefined
+          || ["completed", "rejected", "unknown", "cancelled"].includes(String(attempt.outcome)))
+        && (attempt.error === undefined || typeof attempt.error === "string"))));
   return movementsValid && tracksValid && playlistValid && albumPlanValid && productionValid
     && musicReviewValid && moodChatValid && reviewAttemptValid && referencesValid
     && briefingValid && discussionValid && approvedValid && lyriaPromptApprovedValid
-    && planRevisionValid && lineageValid;
+    && planRevisionValid && lineageValid && attemptsValid;
 }
 
 function safeAudioName(value: string | undefined, fallback: string): string {
@@ -482,6 +500,8 @@ export class TaskStore {
   readonly #tasks = new Map<string, MusicTask>();
   readonly #taskDirectories = new Map<string, string>();
   readonly #albumExports = new Map<string, Promise<AlbumAudioExport>>();
+  /** One mutation at a time per task record: read, derive, persist, then publish. */
+  readonly #mutations = new KeyedQueue();
 
   constructor(directory: string) {
     this.#directory = directory;
@@ -597,9 +617,11 @@ export class TaskStore {
       ...(input.journeyId ? { journeyId: input.journeyId } : {}),
       ...(input.parentTaskId ? { parentTaskId: input.parentTaskId } : {}),
     };
+    // Publish only once the record is on disk: a failed write must not leave a
+    // phantom task that nothing can recover.
+    await this.save(task);
     this.#tasks.set(task.id, task);
     this.#taskDirectories.set(task.id, this.taskDirectory(task));
-    await this.save(task);
     return task;
   }
 
@@ -627,22 +649,23 @@ export class TaskStore {
     tracks: PreparedAlbumTrack[],
   ): Promise<MusicTask> {
     validatePreparedAlbum(plan, tracks);
-    const task = this.get(id);
-    if (!task || task.compositionMode !== "album") throw new Error("Album task not found.");
-    if (task.albumTracks?.some((track) => track.audioFile)) {
-      throw new Error("Cannot replace an album plan after audio generation.");
-    }
-    const now = new Date().toISOString();
-    return this.update(id, {
-      title: plan.albumTitle,
-      albumPlan: plan,
-      albumPromptsReady: true,
-      albumPlaylist: [],
-      albumTracks: tracks.map((track) => ({
-        ...track, id: crypto.randomUUID(), admission: "candidate",
-        status: task.mode === "compose" ? "completed" : "queued",
-        createdAt: now, updatedAt: now,
-      })),
+    return this.#mutate(id, (task) => {
+      if (task.compositionMode !== "album") throw new Error("Album task not found.");
+      if (task.albumTracks?.some((track) => track.audioFile)) {
+        throw new Error("Cannot replace an album plan after audio generation.");
+      }
+      const now = new Date().toISOString();
+      return {
+        title: plan.albumTitle,
+        albumPlan: plan,
+        albumPromptsReady: true,
+        albumPlaylist: [],
+        albumTracks: tracks.map((track) => ({
+          ...track, id: crypto.randomUUID(), admission: "candidate",
+          status: task.mode === "compose" ? "completed" : "queued",
+          createdAt: now, updatedAt: now,
+        })),
+      };
     });
   }
 
@@ -651,47 +674,50 @@ export class TaskStore {
     trackId: string,
     changes: Partial<AlbumTrackTask>,
   ): Promise<MusicTask> {
-    const task = this.#tasks.get(taskId);
-    if (!task?.albumTracks?.some((track) => track.id === trackId)) {
-      throw new Error(`Unknown album track: ${trackId}`);
-    }
-    return this.update(taskId, {
-      albumTracks: task.albumTracks.map((track) => track.id === trackId
-        ? { ...track, ...changes, id: trackId, updatedAt: new Date().toISOString() }
-        : track),
+    return this.#mutate(taskId, (task) => {
+      if (!task.albumTracks?.some((track) => track.id === trackId)) {
+        throw new Error(`Unknown album track: ${trackId}`);
+      }
+      return {
+        albumTracks: task.albumTracks.map((track) => track.id === trackId
+          ? { ...track, ...changes, id: trackId, updatedAt: new Date().toISOString() }
+          : track),
+      };
     });
   }
 
   async setAlbumAdmission(taskId: string, trackId: string, admission: AlbumAdmission): Promise<MusicTask> {
-    const task = this.#tasks.get(taskId);
-    const track = task?.albumTracks?.find((candidate) => candidate.id === trackId);
-    if (!task || !track) throw new Error("Album track not found.");
-    if (admission === "included" && (track.status !== "completed" || !track.audioFile)) {
-      throw new Error("Only completed audio candidates can be included.");
-    }
-    const albumPlaylist = (task.albumPlaylist ?? []).filter((id) => id !== trackId);
-    if (admission === "included") {
-      // Repeating an inclusion keeps its existing place in the playlist.
-      const currentIndex = task.albumPlaylist?.indexOf(trackId) ?? -1;
-      albumPlaylist.splice(currentIndex < 0 ? albumPlaylist.length : currentIndex, 0, trackId);
-    }
-    return this.update(taskId, {
-      albumTracks: task.albumTracks!.map((candidate) => candidate.id === trackId
-        ? { ...candidate, admission, updatedAt: new Date().toISOString() } : candidate),
-      albumPlaylist,
+    return this.#mutate(taskId, (task) => {
+      const track = task.albumTracks?.find((candidate) => candidate.id === trackId);
+      if (!track) throw new Error("Album track not found.");
+      if (admission === "included" && (track.status !== "completed" || !track.audioFile)) {
+        throw new Error("Only completed audio candidates can be included.");
+      }
+      const albumPlaylist = (task.albumPlaylist ?? []).filter((id) => id !== trackId);
+      if (admission === "included") {
+        // Repeating an inclusion keeps its existing place in the playlist.
+        const currentIndex = task.albumPlaylist?.indexOf(trackId) ?? -1;
+        albumPlaylist.splice(currentIndex < 0 ? albumPlaylist.length : currentIndex, 0, trackId);
+      }
+      return {
+        albumTracks: (task.albumTracks ?? []).map((candidate) => candidate.id === trackId
+          ? { ...candidate, admission, updatedAt: new Date().toISOString() } : candidate),
+        albumPlaylist,
+      };
     });
   }
 
   async setAlbumPlaylist(taskId: string, trackIds: string[]): Promise<MusicTask> {
-    const task = this.#tasks.get(taskId);
-    if (!task || task.compositionMode !== "album") throw new Error("Album task not found.");
-    const included = task.albumTracks?.filter((track) => track.admission === "included") ?? [];
-    if (new Set(trackIds).size !== trackIds.length
-      || trackIds.length !== included.length
-      || trackIds.some((id) => !included.some((track) => track.id === id))) {
-      throw new Error("Playlist must contain every included track exactly once.");
-    }
-    return this.update(taskId, { albumPlaylist: [...trackIds] });
+    return this.#mutate(taskId, (task) => {
+      if (task.compositionMode !== "album") throw new Error("Album task not found.");
+      const included = task.albumTracks?.filter((track) => track.admission === "included") ?? [];
+      if (new Set(trackIds).size !== trackIds.length
+        || trackIds.length !== included.length
+        || trackIds.some((id) => !included.some((track) => track.id === id))) {
+        throw new Error("Playlist must contain every included track exactly once.");
+      }
+      return { albumPlaylist: [...trackIds] };
+    });
   }
 
   albumTrackAudioPath(task: MusicTask, track: AlbumTrackTask): string | undefined {
@@ -808,32 +834,29 @@ export class TaskStore {
    * album tracks, and exported files. Running tasks must not be deleted.
    */
   async delete(id: string): Promise<MusicTask | undefined> {
-    const task = this.#tasks.get(id);
-    if (!task) return undefined;
-    if (ACTIVE_TASK_STATUSES.includes(task.status)) {
-      throw new Error("A task that is still running cannot be deleted.");
-    }
-    if (task.albumProduction && ["pending", "running"].includes(task.albumProduction.status)) {
-      throw new Error("A task that is still running cannot be deleted.");
-    }
-    const directory = this.#taskDirectories.get(id) ?? this.taskDirectory(task);
-    this.#tasks.delete(id);
-    this.#taskDirectories.delete(id);
-    // Cached exports may point at the directory that is about to disappear.
-    this.#albumExports.clear();
-    await rm(directory, { recursive: true, force: true });
-    return task;
+    return this.#mutations.run(id, async () => {
+      const task = this.#tasks.get(id);
+      if (!task) return undefined;
+      if (ACTIVE_TASK_STATUSES.includes(task.status)) {
+        throw new Error("A task that is still running cannot be deleted.");
+      }
+      if (task.albumProduction && ["pending", "running"].includes(task.albumProduction.status)) {
+        throw new Error("A task that is still running cannot be deleted.");
+      }
+      const directory = this.#taskDirectories.get(id) ?? this.taskDirectory(task);
+      // Remove the record from disk first: a failed delete keeps a usable record
+      // and a retry path instead of erasing the index before confirming removal.
+      await rm(directory, { recursive: true, force: true });
+      this.#tasks.delete(id);
+      this.#taskDirectories.delete(id);
+      // Cached exports may point at the directory that has just disappeared.
+      this.#albumExports.clear();
+      return task;
+    });
   }
 
   async update(id: string, changes: Partial<MusicTask>): Promise<MusicTask> {
-    const current = this.#tasks.get(id);
-    if (!current) {
-      throw new Error(`Unknown task: ${id}`);
-    }
-    const task = { ...current, ...changes, id, updatedAt: new Date().toISOString() };
-    this.#tasks.set(id, task);
-    await this.save(task);
-    return task;
+    return this.#mutate(id, () => changes);
   }
 
   async updateMovement(
@@ -841,16 +864,41 @@ export class TaskStore {
     movementId: string,
     changes: Partial<OrchestralMovementTask>,
   ): Promise<MusicTask> {
-    const task = this.#tasks.get(taskId);
-    const movement = task?.movements?.find((candidate) => candidate.id === movementId);
-    if (!task || !movement) {
-      throw new Error(`Unknown orchestral movement: ${movementId}`);
-    }
-    const updatedAt = new Date().toISOString();
-    const movements = task.movements!.map((candidate) => candidate.id === movementId
-      ? { ...candidate, ...changes, id: movementId, updatedAt }
-      : candidate);
-    return this.update(taskId, { movements });
+    return this.#mutate(taskId, (task) => {
+      if (!task.movements?.some((candidate) => candidate.id === movementId)) {
+        throw new Error(`Unknown orchestral movement: ${movementId}`);
+      }
+      const updatedAt = new Date().toISOString();
+      return {
+        movements: task.movements.map((candidate) => candidate.id === movementId
+          ? { ...candidate, ...changes, id: movementId, updatedAt }
+          : candidate),
+      };
+    });
+  }
+
+  /**
+   * The single mutation path for a stored task: read the current record, derive
+   * the change from it, persist it, and only then publish it in memory. Callers
+   * must not acquire the same task's lock again inside `derive`.
+   */
+  #mutate(id: string, derive: (current: MusicTask) => Partial<MusicTask>): Promise<MusicTask> {
+    return this.#mutations.run(id, async () => {
+      const current = this.#tasks.get(id);
+      if (!current) {
+        throw new Error(`Unknown task: ${id}`);
+      }
+      const task: MusicTask = {
+        ...current,
+        ...derive(current),
+        id,
+        updatedAt: new Date().toISOString(),
+      };
+      await this.save(task);
+      this.#tasks.set(id, task);
+      this.#taskDirectories.set(id, this.taskDirectory(task));
+      return task;
+    });
   }
 
   audioPath(task: MusicTask): string | undefined {

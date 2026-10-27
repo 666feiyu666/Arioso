@@ -1,14 +1,10 @@
 import { readFileSync } from "node:fs";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import path from "node:path";
-import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 
-import { measureAudioDuration } from "../audio/stitch.js";
-import { planAlbum, planPlaylist, refinePlaylistPlan, composeAlbumTrack, reviewAlbumCandidates, reviseAlbumTrack } from "../composer/album-agent.js";
-import { composeMusic } from "../composer/composer-agent.js";
-import { composeOrchestralMovement, planOrchestralWork } from "../composer/orchestral-agent.js";
-import { loadConfig, type AriosoConfig } from "../config/env.js";
+import { configureModelDeadlines, refinePlaylistPlan } from "../composer/bounded-agent.js";
+import { loadConfig, timeoutsFor, type AriosoConfig } from "../config/env.js";
 import { SettingsStore, SUPPORTED_LANGUAGES, type ApiProvider, type InterfaceLanguage } from "../config/settings.js";
 import { CreativeSessionStore } from "../discussion/creative-session-store.js";
 import { LangChainDiscussionAgent } from "../discussion/langchain-discussion.js";
@@ -19,26 +15,20 @@ import {
   type DiscussionAgent,
   type DiscussionTaskOptions,
 } from "../discussion/types.js";
-import { LyriaClient } from "../lyria/lyria-client.js";
 import { JourneyRuntime } from "../journey/journey-runtime.js";
 import { JourneyStore } from "../journey/journey-store.js";
 import { JourneyTransitionError } from "../journey/journey-graph.js";
-import { runMoodMicGeneration } from "../moodmic/moodmic-graph.js";
 import { MAX_PLAYLIST_REFERENCES, type PlaylistReference } from "../playlist/reference.js";
 import { MAX_PLAYLIST_DISCUSSION_MESSAGES, MAX_PLAYLIST_FEEDBACK_LENGTH, type PlaylistDiscussionMessage } from "../playlist/briefing.js";
 import type { PoemRetriever } from "../retrieval/poem-retriever.js";
-import {
-  MUSIC_TYPES,
-  loadMusicRetriever,
-  type MusicRetrievalTrace,
-} from "../retrieval/music-retriever.js";
+import { MUSIC_TYPES, loadMusicRetriever } from "../retrieval/music-retriever.js";
 import {
   ALBUM_MAX_CANDIDATES,
   ALBUM_MAX_TOTAL_MINUTES,
   ALBUM_MIN_CANDIDATES,
   ALBUM_MIN_TOTAL_MINUTES,
-  type AlbumPlan,
 } from "../schema/album-plan.js";
+import { runTask, TaskAdmission } from "./task-runtime.js";
 import { TaskStore, parseTaskInput, type AlbumAdmission, type AlbumAudioExport, type MusicTask } from "./task-store.js";
 import { MoodEntryStore, isCalendarDate, isMoodGroup, type MoodEntryInput } from "./mood-store.js";
 import { LangChainMoodClassifier, type MoodClassifier } from "./mood-classifier.js";
@@ -47,7 +37,7 @@ import { musicReferencesForTask } from "./music-references.js";
 import { poemReferencesForChat } from "./poem-references.js";
 import { HttpError, readBinaryBody, readJsonBody, sendAudio, sendFile, sendJson, serveAsset, serveStatic } from "./http.js";
 import { isRecord } from "../utils/validation.js";
-import { runBackgroundMusicProducer } from "../producer/background-music-producer.js";
+import { KeyedQueue } from "../utils/queues.js";
 import { productionArtifactPath } from "../producer/pipeline.js";
 import { PRODUCTION_ARTIFACTS, type ProductionArtifact } from "../producer/types.js";
 
@@ -69,381 +59,6 @@ async function sendAlbumExport(request: IncomingMessage, response: ServerRespons
   response.setHeader("X-Album-Track-Count", exported.trackCount);
   response.setHeader("X-Album-Duration-Seconds", exported.durationSeconds);
   await sendAudio(request, response, exported.outputPath);
-}
-
-const REQUEST_RETRY_DELAYS_MS = [750, 1_500];
-
-function isRetryableRequestError(error: unknown): boolean {
-  const candidate = error as { status?: unknown; statusCode?: unknown } | null;
-  const status = Number(candidate?.status ?? candidate?.statusCode);
-  if (status === 408 || status === 409 || status === 429 || status >= 500) {
-    return true;
-  }
-
-  const message = error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
-  return [
-    "fetch failed",
-    "network",
-    "timeout",
-    "timed out",
-    "econnreset",
-    "econnrefused",
-    "eai_again",
-    "socket hang up",
-  ].some((fragment) => message.includes(fragment));
-}
-
-async function withRequestRetry<T>(operation: () => Promise<T>): Promise<T> {
-  for (let attempt = 0; ; attempt += 1) {
-    try {
-      return await operation();
-    } catch (error) {
-      const retryDelay = REQUEST_RETRY_DELAYS_MS[attempt];
-      if (retryDelay === undefined || !isRetryableRequestError(error)) {
-        throw error;
-      }
-      await delay(retryDelay);
-    }
-  }
-}
-
-async function runTask(
-  store: TaskStore,
-  task: MusicTask,
-  config: AriosoConfig,
-  albumTrackId?: string,
-  language?: InterfaceLanguage,
-): Promise<void> {
-  try {
-    if (task.compositionMode === "album") {
-      if (task.albumProduction) {
-        await runBackgroundMusicProducer(store, task, config, () => runAlbumTask(store, store.get(task.id) ?? task, config, albumTrackId));
-      } else {
-        await runAlbumTask(store, task, config, albumTrackId);
-      }
-      return;
-    }
-    if (task.compositionMode === "orchestral") {
-      await runOrchestralTask(store, task, config);
-      return;
-    }
-
-    let spec = task.musicSpec;
-    if (!spec) {
-      await store.update(task.id, { status: "composing", error: undefined });
-      spec = await composeMusic(task.description, {
-        apiKey: config.openAiApiKey,
-        model: task.composerModel,
-        lyriaModel: task.lyriaModel,
-        vocalMode: task.vocalMode ?? "auto",
-        corpusMode: task.corpusMode ?? "none",
-        ...(task.musicType ? { musicType: task.musicType } : {}),
-        onMusicRetrieval: async (trace: MusicRetrievalTrace) => {
-          await store.update(task.id, { musicRetrieval: trace });
-        },
-      });
-      await store.update(task.id, { musicSpec: spec, title: spec.title });
-    }
-
-    if (task.mode === "compose") {
-      await store.update(task.id, { status: "completed", error: undefined });
-      return;
-    }
-
-    // MoodMic shows the composed Lyria prompt for confirmation before the first
-    // generation. The confirm endpoint flips the flag and re-enters here, where
-    // the spec already exists, so the pause is skipped on the second pass.
-    if (task.moodChatId && !task.lyriaPromptApproved) {
-      await store.update(task.id, { status: "planning", error: undefined });
-      return;
-    }
-
-    // MoodMic creations run the generation check: generate, let Gemini listen,
-    // then deliver or pause for the user's regenerate/keep decision.
-    if (task.moodChatId) {
-      await runMoodMicGeneration(store, store.get(task.id) ?? task, config, {
-        ...(language ? { language } : {}),
-      });
-      return;
-    }
-
-    await store.update(task.id, { status: "generating", error: undefined });
-    const client = new LyriaClient(config.geminiApiKey!);
-    const generated = await withRequestRetry(() => client.generate(spec.lyriaPrompt, {
-      model: task.lyriaModel,
-    }));
-    const latestTask = store.get(task.id) ?? task;
-    const audioFile = await store.writeAudio(latestTask, generated.audio);
-    await store.update(task.id, {
-      status: "completed",
-      audioFile,
-      generatedText: generated.generatedText,
-      error: undefined,
-    });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    await store.update(task.id, { status: "failed", error: message });
-  }
-}
-
-async function runOrchestralTask(
-  store: TaskStore,
-  task: MusicTask,
-  config: AriosoConfig,
-): Promise<void> {
-  let currentTask = task;
-  let workPlan = currentTask.orchestralPlan;
-
-  if (!workPlan) {
-    await store.update(currentTask.id, { status: "composing", error: undefined });
-    workPlan = await planOrchestralWork(currentTask.description, {
-      apiKey: config.openAiApiKey,
-      model: currentTask.composerModel,
-      lyriaModel: currentTask.lyriaModel,
-    });
-    const now = new Date().toISOString();
-    currentTask = await store.update(currentTask.id, {
-      title: workPlan.title,
-      orchestralPlan: workPlan,
-      movements: workPlan.movements.map((movement) => ({
-        id: crypto.randomUUID(),
-        order: movement.order,
-        title: movement.title,
-        status: "queued",
-        createdAt: now,
-        updatedAt: now,
-      })),
-    });
-  }
-
-  for (const movement of currentTask.movements ?? []) {
-    if (movement.status === "completed") continue;
-
-    try {
-      let movementPlan = movement.plan;
-      if (!movementPlan) {
-        await store.update(currentTask.id, { status: "composing", error: undefined });
-        await store.updateMovement(currentTask.id, movement.id, {
-          status: "composing",
-          error: undefined,
-        });
-        movementPlan = await composeOrchestralMovement(workPlan, movement.order, {
-          apiKey: config.openAiApiKey,
-          model: currentTask.composerModel,
-          lyriaModel: currentTask.lyriaModel,
-        });
-        currentTask = await store.updateMovement(currentTask.id, movement.id, {
-          title: movementPlan.title,
-          plan: movementPlan,
-          status: currentTask.mode === "compose" ? "completed" : "queued",
-          error: undefined,
-        });
-      }
-
-      if (currentTask.mode === "compose") continue;
-
-      await store.update(currentTask.id, { status: "generating", error: undefined });
-      await store.updateMovement(currentTask.id, movement.id, {
-        status: "generating",
-        error: undefined,
-      });
-      const client = new LyriaClient(config.geminiApiKey!);
-      const generated = await withRequestRetry(() => client.generate(movementPlan.lyriaPrompt, {
-        model: currentTask.lyriaModel,
-      }));
-      const currentMovement = currentTask.movements?.find(
-        (candidate) => candidate.id === movement.id,
-      ) ?? movement;
-      const audioFile = await store.writeMovementAudio(
-        currentTask,
-        currentMovement,
-        generated.audio,
-      );
-      currentTask = await store.updateMovement(currentTask.id, movement.id, {
-        status: "completed",
-        audioFile,
-        generatedText: generated.generatedText,
-        error: undefined,
-      });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      await store.updateMovement(currentTask.id, movement.id, {
-        status: "failed",
-        error: message,
-      });
-      throw error;
-    }
-  }
-
-  if (currentTask.mode === "compose") {
-    await store.update(currentTask.id, { status: "completed", error: undefined });
-    return;
-  }
-
-  currentTask = store.get(currentTask.id) ?? currentTask;
-  await store.update(currentTask.id, { status: "assembling", error: undefined });
-  const assembled = await store.assembleOrchestralAudio(currentTask);
-  await store.update(currentTask.id, {
-    status: "completed",
-    audioFile: assembled.audioFile,
-    orchestralAssembly: assembled.assembly,
-    error: undefined,
-  });
-}
-
-export async function runAlbumTask(
-  store: TaskStore,
-  task: MusicTask,
-  config: AriosoConfig,
-  retryTrackId?: string,
-): Promise<void> {
-  let current = store.get(task.id) ?? task;
-  if (current.status === "completed" && current.albumPromptsReady
-    && current.albumTracks?.length && current.albumTracks.every((track) =>
-      track.status === "completed" && (current.mode === "compose" || Boolean(track.audioFile)))) return;
-  const generationTrackId = current.albumPromptsReady ? retryTrackId : undefined;
-  const options = {
-    apiKey: config.openAiApiKey,
-    model: current.composerModel,
-    lyriaModel: current.lyriaModel,
-  };
-  if (!current.albumPlan) {
-    await store.update(task.id, { status: "composing", error: undefined });
-    const references = current.playlistReferences ?? [];
-    const now = new Date().toISOString();
-    const outlineTracks = (plan: AlbumPlan) => plan.tracks.map((outline) => ({
-      id: crypto.randomUUID(), order: outline.number, title: outline.title,
-      targetDurationSeconds: outline.targetSeconds,
-      admission: "candidate" as const, status: "queued" as const, createdAt: now, updatedAt: now,
-    }));
-    if (current.workflowType === "05-playlist") {
-      const { plan, briefing } = await planPlaylist(current.description, {
-        ...options,
-        candidateCount: current.albumCandidateCount ?? 14,
-        targetTotalMinutes: current.albumTargetTotalMinutes ?? 35,
-        ...(references.length ? { references } : {}),
-      });
-      current = await store.update(task.id, {
-        title: plan.albumTitle, albumPlan: plan, albumPlaylist: [],
-        playlistBriefing: briefing, playlistDiscussion: [], playlistPlanApproved: false,
-        albumPlanRevision: (current.albumPlanRevision ?? 0) + 1,
-        albumTracks: outlineTracks(plan),
-      });
-      // Pause for the user to confirm the author's reading before paying for generation.
-      await store.update(task.id, { status: "review", error: undefined });
-      return;
-    }
-    const plan = await planAlbum(current.description, {
-      ...options,
-      candidateCount: current.albumCandidateCount ?? 14,
-      targetTotalMinutes: current.albumTargetTotalMinutes ?? 35,
-      ...(references.length ? { references } : {}),
-    });
-    current = await store.update(task.id, {
-      title: plan.albumTitle, albumPlan: plan, albumPlaylist: [],
-      albumPlanRevision: (current.albumPlanRevision ?? 0) + 1,
-      albumTracks: outlineTracks(plan),
-    });
-  }
-  const plan = current.albumPlan!;
-  if (current.workflowType === "05-playlist" && !current.playlistPlanApproved) {
-    // A playlist that resumes before the user confirms stays paused.
-    await store.update(task.id, { status: "review", error: undefined });
-    return;
-  }
-  if (!current.albumPromptsReady) {
-    await store.update(task.id, { status: "composing", error: undefined });
-    for (const track of current.albumTracks ?? []) {
-      if (track.musicSpec) continue;
-      await store.updateAlbumTrack(task.id, track.id, { status: "composing", error: undefined });
-      try {
-        const musicSpec = await composeAlbumTrack(plan, track.order, options);
-        current = await store.updateAlbumTrack(task.id, track.id, {
-          musicSpec, title: musicSpec.title, status: "queued", error: undefined,
-        });
-      } catch (error) {
-        await store.updateAlbumTrack(task.id, track.id, {
-          status: "failed", error: error instanceof Error ? error.message : String(error),
-        });
-        throw error;
-      }
-    }
-    const orderedSpecs = () => {
-      const tracks = [...(store.get(task.id)?.albumTracks ?? [])].sort((a, b) => a.order - b.order);
-      if (tracks.length !== plan.tracks.length || tracks.some((track) => !track.musicSpec)) {
-        throw new Error("Album candidate prompts are incomplete.");
-      }
-      return tracks.map((track) => track.musicSpec!);
-    };
-    current = store.get(task.id) ?? current;
-    if (!current.albumReview) {
-      const albumReview = await reviewAlbumCandidates(plan, orderedSpecs(), options);
-      current = await store.update(task.id, { albumReview });
-    }
-    for (const finding of current.albumReview!.candidates) {
-      if (finding.verdict !== "needs-work" || !finding.revisionBrief
-        || current.albumRevisedTrackNumbers?.includes(finding.number)) continue;
-      const track = current.albumTracks?.find((candidate) => candidate.order === finding.number);
-      if (!track?.musicSpec) throw new Error(`Missing candidate ${finding.number}.`);
-      const musicSpec = await reviseAlbumTrack(
-        plan, finding.number, track.musicSpec, finding.revisionBrief, orderedSpecs(), options,
-      );
-      current = store.get(task.id) ?? current;
-      current = await store.update(task.id, {
-        albumTracks: current.albumTracks!.map((candidate) => candidate.id === track.id
-          ? { ...candidate, musicSpec, title: musicSpec.title, updatedAt: new Date().toISOString() }
-          : candidate),
-        albumRevisedTrackNumbers: [...(current.albumRevisedTrackNumbers ?? []), finding.number],
-      });
-    }
-    if (!current.albumFinalReview) {
-      const albumFinalReview = await reviewAlbumCandidates(plan, orderedSpecs(), options);
-      current = await store.update(task.id, { albumFinalReview });
-    }
-    current = await store.update(task.id, { albumPromptsReady: true });
-  }
-  if (current.mode === "compose") {
-    for (const track of current.albumTracks ?? []) {
-      await store.updateAlbumTrack(task.id, track.id, { status: "completed", error: undefined });
-    }
-    await store.update(task.id, { status: "completed", error: undefined });
-    return;
-  }
-  if (!current.albumTracks?.length) throw new Error("Album candidate tracks are missing.");
-  await store.update(task.id, { status: "generating", error: undefined });
-  const client = new LyriaClient(config.geminiApiKey!);
-  for (const track of current.albumTracks) {
-    if (generationTrackId && track.id !== generationTrackId) continue;
-    if (track.audioFile && track.status === "completed") continue;
-    try {
-      if (!track.musicSpec) throw new Error("Candidate prompt is missing.");
-      await store.updateAlbumTrack(task.id, track.id, { status: "generating", error: undefined });
-      const generated = await withRequestRetry(() => client.generate(track.musicSpec!.lyriaPrompt, {
-        model: current.lyriaModel,
-      }));
-      const audioFile = await store.writeAlbumTrackAudio(current, track, generated.audio);
-      let durationSeconds: number | undefined;
-      try {
-        durationSeconds = measureAudioDuration(generated.audio);
-      } catch {
-        // Audio stays available when its duration cannot be measured locally.
-      }
-      await store.updateAlbumTrack(task.id, track.id, {
-        status: "completed", audioFile, generatedText: generated.generatedText,
-        ...(durationSeconds === undefined ? {} : { durationSeconds }), error: undefined,
-      });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      await store.updateAlbumTrack(task.id, track.id, { status: "failed", error: message });
-    }
-  }
-  const failures = (store.get(task.id)?.albumTracks ?? [])
-    .filter((track) => track.status !== "completed")
-    .map((track) => `Candidate ${track.order}: ${track.error ?? "Awaiting generation."}`);
-  await store.update(task.id, {
-    status: failures.length ? "failed" : "completed",
-    error: failures.length ? failures.join(" ") : undefined,
-  });
 }
 
 function isApiProvider(value: unknown): value is ApiProvider {
@@ -584,6 +199,12 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
   });
   const environment = await settings.runtimeEnvironment();
   const outputDirectory = environment.ARIOSO_OUTPUT_DIR ?? "outputs";
+  // Model-call deadlines come from the same environment the server runs with.
+  try {
+    configureModelDeadlines(timeoutsFor(loadConfig(false, environment)));
+  } catch {
+    /* No model configured yet: the built-in deadlines apply. */
+  }
   const store = new TaskStore(path.resolve(outputDirectory, "tasks"));
   const discussionStore = new CreativeSessionStore(path.resolve(outputDirectory, "discussions"));
   const moodStore = new MoodEntryStore(path.resolve(outputDirectory, "moodmic", "entries.json"));
@@ -598,7 +219,14 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
   await moodChatStore.initialize();
   await journeyStore.initialize();
   const journeys = new JourneyRuntime({ tasks: store, journeys: journeyStore });
-  const activeTaskIds = new Set<string>();
+  const activeTaskIds = new TaskAdmission();
+  /**
+   * Application-level admission for user decisions: one decision at a time per
+   * task or journey, so overlapping requests cannot both pass the same gate.
+   * This lock is process-local; it does not coordinate a second CLI or server
+   * process, and it makes no provider-level exactly-once claim.
+   */
+  const decisions = new KeyedQueue();
   const RUNNING_TASK_STATUSES = new Set(["queued", "composing", "generating", "assembling", "processing"]);
 
   /**
@@ -665,8 +293,17 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
       tasks,
     };
   };
-  const startTask = (task: MusicTask, config: AriosoConfig, albumTrackId?: string): void => {
-    activeTaskIds.add(task.id);
+  /**
+   * Reserves the task's single execution owner and starts it. A duplicate
+   * dispatch is ignored: it must not start a second runner, and it must not
+   * release the reservation the first runner owns. The owning runner releases it
+   * in its own `finally` path.
+   */
+  const startTask = (task: MusicTask, config: AriosoConfig, albumTrackId?: string): boolean => {
+    if (!activeTaskIds.reserve(task.id)) {
+      console.error(`Task ${task.id} is already running; the duplicate dispatch was ignored.`);
+      return false;
+    }
     void (async () => {
       const language = task.moodChatId ? await settings.language() : undefined;
       await runTask(store, task, config, albumTrackId, language);
@@ -676,10 +313,26 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
         console.error(`Unable to persist task ${task.id}: ${message}`);
       })
       .finally(() => {
-        activeTaskIds.delete(task.id);
+        activeTaskIds.release(task.id);
         void syncJourneyForTask(store.get(task.id));
       });
+    return true;
   };
+
+  /**
+   * Runs one user decision under its resource's admission gate. The caller's
+   * `decide` rereads the authoritative record, validates the expected
+   * status/revision, persists the decision, and reserves dispatch inside this
+   * gate, so a concurrent request sees the committed state instead of a stale
+   * snapshot. Callers must not await a provider inside `decide`.
+   */
+  const decideTask = <T>(taskId: string, decide: (task: MusicTask | undefined) => Promise<T>): Promise<T> =>
+    decisions.run(`task:${taskId}`, () => decide(store.get(taskId)));
+  const decideJourney = <T>(identifier: string, decide: (journeyId: string) => Promise<T>): Promise<T> =>
+    // Resolve aliases to the canonical journey before locking, so a chat id and
+    // a journey id cannot take two different gates for the same journey.
+    decisions.run(`journey:${journeys.find(identifier)?.id ?? identifier}`,
+      () => decide(journeys.find(identifier)?.id ?? identifier));
 
   // Journeys never own task state: whenever a linked task settles, the journey
   // re-derives its phase from that task and persists the transition.
@@ -933,9 +586,6 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
         const sessionId = discussionSubmitMatch[1];
         const session = discussionStore.get(sessionId);
         if (!session) throw new HttpError(404, "Discussion session not found.");
-        if (session.status === "submitted" || activeDiscussionSubmissions.has(sessionId)) {
-          throw new HttpError(409, "This discussion has already been submitted.");
-        }
         const value = await readJsonBody(request);
         if (!isRecord(value) || typeof value.prompt !== "string" || !value.prompt.trim()) {
           throw new HttpError(400, "An approved prompt is required.");
@@ -955,25 +605,35 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
               ...(isMusicReference(value.musicReference) ? { musicReference: value.musicReference } : {}),
               ...(typeof value.workflowType === "string" ? { workflowType: value.workflowType } : {}),
             };
-        activeDiscussionSubmissions.add(sessionId);
-        try {
-          await discussionStore.setProposal(sessionId, prompt);
-          const input = parseTaskInput({
-            ...session.taskOptions,
-            ...overrides,
-            description: prompt,
-          });
-          input.sourceDiscussionId = sessionId;
-          const config = loadConfig(input.mode === "generate", await settings.runtimeEnvironment());
-          const task = await store.create(input, config);
-          await discussionStore.markSubmitted(sessionId, task.id, prompt);
-          startTask(task, config);
-          sendJson(response, 202, {
-            session: await discussionView(discussionStore.get(sessionId)!), task,
-          });
-        } finally {
-          activeDiscussionSubmissions.delete(sessionId);
-        }
+        // One submission at a time per discussion: the second request sees the
+        // submitted record instead of starting a duplicate task.
+        const submitted = await decisions.run(`discussion:${sessionId}`, async () => {
+          const current = discussionStore.get(sessionId);
+          if (!current) throw new HttpError(404, "Discussion session not found.");
+          if (current.status === "submitted" || activeDiscussionSubmissions.has(sessionId)) {
+            throw new HttpError(409, "This discussion has already been submitted.");
+          }
+          activeDiscussionSubmissions.add(sessionId);
+          try {
+            await discussionStore.setProposal(sessionId, prompt);
+            const input = parseTaskInput({
+              ...current.taskOptions,
+              ...overrides,
+              description: prompt,
+            });
+            input.sourceDiscussionId = sessionId;
+            const config = loadConfig(input.mode === "generate", await settings.runtimeEnvironment());
+            const task = await store.create(input, config);
+            await discussionStore.markSubmitted(sessionId, task.id, prompt);
+            startTask(task, config);
+            return {
+              session: await discussionView(discussionStore.get(sessionId)!), task,
+            };
+          } finally {
+            activeDiscussionSubmissions.delete(sessionId);
+          }
+        });
+        sendJson(response, 202, submitted);
         return;
       }
 
@@ -1117,44 +777,51 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
         const chatId = moodChatSubmitMatch[1];
         const chat = moodChatStore.get(chatId);
         if (!chat) throw new HttpError(404, "Conversation not found.");
-        if (chat.status === "submitted" || activeMoodSubmissions.has(chatId)) {
-          throw new HttpError(409, "This conversation has already been submitted.");
-        }
         const value = await readJsonBody(request);
         if (!isRecord(value) || typeof value.prompt !== "string" || !value.prompt.trim()) {
           throw new HttpError(400, "An approved prompt is required.");
         }
         const prompt = value.prompt.trim();
-        const musicReference = isMusicReference(value.musicReference)
-          ? value.musicReference
-          : chat.musicReference;
-        const usesMusicCorpus = musicReference !== "none";
-        activeMoodSubmissions.add(chatId);
-        try {
-          // Submitting an approved brief keeps the trace it was retrieved with.
-          await moodChatStore.setProposal(chatId, prompt, chat.poem_retrieval);
-          const input = parseTaskInput({
-            description: prompt,
-            compositionMode: "single",
-            workflowType: usesMusicCorpus ? "02-music" : "01-general",
-            corpusMode: usesMusicCorpus ? "music" : "none",
-            ...(usesMusicCorpus && musicReference !== "auto" ? { musicType: musicReference } : {}),
-            mode: typeof value.mode === "string" ? value.mode : "generate",
-            lyriaModel: typeof value.lyriaModel === "string" ? value.lyriaModel : "lyria-3.5",
-            vocalMode: typeof value.vocalMode === "string" ? value.vocalMode : "instrumental",
-          });
-          input.sourceDiscussionId = chatId;
-          input.moodChatId = chatId;
-          const config = loadConfig(input.mode === "generate", await settings.runtimeEnvironment());
-          const task = await store.create(input, config);
-          await moodChatStore.markSubmitted(chatId, task.id, prompt);
-          // The journey starts with the conversation; its first stage is the song.
-          await journeys.startForMoodChat({ moodChatId: chatId, songTaskId: task.id });
-          startTask(task, config);
-          sendJson(response, 202, { chat: await moodChatView(moodChatStore.get(chatId)!), task });
-        } finally {
-          activeMoodSubmissions.delete(chatId);
-        }
+        // One submission at a time per conversation: the second request sees the
+        // submitted record instead of starting a duplicate task.
+        const submitted = await decisions.run(`mood-chat:${chatId}`, async () => {
+          const current = moodChatStore.get(chatId);
+          if (!current) throw new HttpError(404, "Conversation not found.");
+          if (current.status === "submitted" || activeMoodSubmissions.has(chatId)) {
+            throw new HttpError(409, "This conversation has already been submitted.");
+          }
+          const musicReference = isMusicReference(value.musicReference)
+            ? value.musicReference
+            : current.musicReference;
+          const usesMusicCorpus = musicReference !== "none";
+          activeMoodSubmissions.add(chatId);
+          try {
+            // Submitting an approved brief keeps the trace it was retrieved with.
+            await moodChatStore.setProposal(chatId, prompt, current.poem_retrieval);
+            const input = parseTaskInput({
+              description: prompt,
+              compositionMode: "single",
+              workflowType: usesMusicCorpus ? "02-music" : "01-general",
+              corpusMode: usesMusicCorpus ? "music" : "none",
+              ...(usesMusicCorpus && musicReference !== "auto" ? { musicType: musicReference } : {}),
+              mode: typeof value.mode === "string" ? value.mode : "generate",
+              lyriaModel: typeof value.lyriaModel === "string" ? value.lyriaModel : "lyria-3.5",
+              vocalMode: typeof value.vocalMode === "string" ? value.vocalMode : "instrumental",
+            });
+            input.sourceDiscussionId = chatId;
+            input.moodChatId = chatId;
+            const config = loadConfig(input.mode === "generate", await settings.runtimeEnvironment());
+            const task = await store.create(input, config);
+            await moodChatStore.markSubmitted(chatId, task.id, prompt);
+            // The journey starts with the conversation; its first stage is the song.
+            await journeys.startForMoodChat({ moodChatId: chatId, songTaskId: task.id });
+            startTask(task, config);
+            return { chat: await moodChatView(moodChatStore.get(chatId)!), task };
+          } finally {
+            activeMoodSubmissions.delete(chatId);
+          }
+        });
+        sendJson(response, 202, submitted);
         return;
       }
 
@@ -1263,12 +930,13 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
           throw new HttpError(400, `Album length must be ${ALBUM_MIN_TOTAL_MINUTES}–${ALBUM_MAX_TOTAL_MINUTES} minutes.`);
         }
         const config = loadConfig(true, await settings.runtimeEnvironment());
-        const result = await withJourney(() => journeys.continueAlbum(identifier, {
-          theme,
-          ...(candidateCount === undefined ? {} : { candidateCount }),
-          ...(targetTotalMinutes === undefined ? {} : { targetTotalMinutes }),
-          ...(typeof value.songTaskId === "string" ? { songTaskId: value.songTaskId } : {}),
-        }, config));
+        const result = await withJourney(() => decideJourney(identifier, (journeyId) =>
+          journeys.continueAlbum(journeyId, {
+            theme,
+            ...(candidateCount === undefined ? {} : { candidateCount }),
+            ...(targetTotalMinutes === undefined ? {} : { targetTotalMinutes }),
+            ...(typeof value.songTaskId === "string" ? { songTaskId: value.songTaskId } : {}),
+          }, config)));
         // Planning continues in the background; the request returns immediately.
         if (result.created) startTask(result.task, config);
         sendJson(response, result.created ? 202 : 200, journeys.view(result.journey));
@@ -1277,65 +945,73 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
 
       if (request.method === "POST" && journeyPlanMessagesMatch?.[1]) {
         const identifier = journeyPlanMessagesMatch[1];
-        const journey = await withJourney(() => journeys.sync(identifier));
-        const task = journey.albumTaskId ? store.get(journey.albumTaskId) : undefined;
-        if (!task) throw new HttpError(404, "This journey has no album plan yet.");
-        if (journey.phase !== "album-review" || task.status !== "review"
-          || !task.albumPlan || !task.playlistBriefing) {
-          throw new HttpError(409, "This album plan is not open for changes.");
-        }
-        if (planRevisions.has(task.id)) {
-          throw new HttpError(409, "This album plan is already being revised.");
-        }
         const value = await readJsonBody(request);
         const message = isRecord(value) && typeof value.message === "string" ? value.message.trim() : "";
         if (!message) throw new HttpError(400, "A revision message is required.");
         if (message.length > MAX_PLAYLIST_FEEDBACK_LENGTH) {
           throw new HttpError(400, "The revision message is too long.");
         }
-        const discussion = task.playlistDiscussion ?? [];
-        if (discussion.filter((entry) => entry.role === "user").length >= MAX_PLAYLIST_DISCUSSION_MESSAGES) {
-          throw new HttpError(409, "This plan has reached its revision limit.");
-        }
         const config = loadConfig(true, await settings.runtimeEnvironment());
-        const userMessage: PlaylistDiscussionMessage = {
-          id: crypto.randomUUID(), role: "user", content: message, createdAt: new Date().toISOString(),
-        };
-        planRevisions.add(task.id);
-        try {
-          // A revision invalidates the previous approval before it is written.
-          await withJourney(() => journeys.notePlanRevised(task));
-          const refined = await refinePlaylistPlan({
-            description: task.description,
-            plan: task.albumPlan,
-            briefing: task.playlistBriefing,
-            references: task.playlistReferences ?? [],
-            history: [...discussion, userMessage],
-            feedback: message,
-          }, { apiKey: config.openAiApiKey, model: task.composerModel, lyriaModel: task.lyriaModel });
-          const latest = store.get(task.id);
-          if (!latest || latest.playlistPlanApproved || latest.status !== "review") {
-            throw new HttpError(409, "This album plan is no longer open for changes.");
+        // Gate 1: claim the revision under the journey's admission gate so an
+        // approval and a revision cannot both commit for the same plan.
+        const claimed = await withJourney(() => decideJourney(identifier, async (journeyId) => {
+          const journey = await journeys.sync(journeyId);
+          const task = journey.albumTaskId ? store.get(journey.albumTaskId) : undefined;
+          if (!task) throw new HttpError(404, "This journey has no album plan yet.");
+          if (journey.phase !== "album-review" || task.status !== "review"
+            || !task.albumPlan || !task.playlistBriefing) {
+            throw new HttpError(409, "This album plan is not open for changes.");
           }
+          if (planRevisions.has(task.id)) {
+            throw new HttpError(409, "This album plan is already being revised.");
+          }
+          const discussion = task.playlistDiscussion ?? [];
+          if (discussion.filter((entry) => entry.role === "user").length >= MAX_PLAYLIST_DISCUSSION_MESSAGES) {
+            throw new HttpError(409, "This plan has reached its revision limit.");
+          }
+          const userMessage: PlaylistDiscussionMessage = {
+            id: crypto.randomUUID(), role: "user", content: message, createdAt: new Date().toISOString(),
+          };
+          planRevisions.add(task.id);
+          // A revision invalidates the previous approval before it is written.
+          await journeys.notePlanRevised(task);
+          return { task, discussion, userMessage };
+        }));
+        try {
+          // The provider call runs outside the gate so other tasks stay usable.
+          const refined = await refinePlaylistPlan({
+            description: claimed.task.description,
+            plan: claimed.task.albumPlan!,
+            briefing: claimed.task.playlistBriefing!,
+            references: claimed.task.playlistReferences ?? [],
+            history: [...claimed.discussion, claimed.userMessage],
+            feedback: message,
+          }, { apiKey: config.openAiApiKey, model: claimed.task.composerModel, lyriaModel: claimed.task.lyriaModel });
           const now = new Date().toISOString();
           const assistantMessage: PlaylistDiscussionMessage = {
             id: crypto.randomUUID(), role: "assistant", content: refined.reply, createdAt: now,
           };
-          await store.update(task.id, {
-            title: refined.plan.albumTitle,
-            albumPlan: refined.plan,
-            playlistBriefing: refined.briefing,
-            playlistDiscussion: [...discussion, userMessage, assistantMessage],
-            albumPlanRevision: (latest.albumPlanRevision ?? 1) + 1,
-            playlistPlanApproved: false,
-            albumTracks: refined.plan.tracks.map((outline) => ({
-              id: crypto.randomUUID(), order: outline.number, title: outline.title,
-              targetDurationSeconds: outline.targetSeconds,
-              admission: "candidate", status: "queued", createdAt: now, updatedAt: now,
-            })),
-          });
+          // Gate 2: commit only if the plan is still awaiting a decision.
+          await withJourney(() => decideTask(claimed.task.id, async (task) => {
+            if (!task || task.playlistPlanApproved || task.status !== "review") {
+              throw new HttpError(409, "This album plan is no longer open for changes.");
+            }
+            return store.update(task.id, {
+              title: refined.plan.albumTitle,
+              albumPlan: refined.plan,
+              playlistBriefing: refined.briefing,
+              playlistDiscussion: [...claimed.discussion, claimed.userMessage, assistantMessage],
+              albumPlanRevision: (task.albumPlanRevision ?? 1) + 1,
+              playlistPlanApproved: false,
+              albumTracks: refined.plan.tracks.map((outline) => ({
+                id: crypto.randomUUID(), order: outline.number, title: outline.title,
+                targetDurationSeconds: outline.targetSeconds,
+                admission: "candidate", status: "queued", createdAt: now, updatedAt: now,
+              })),
+            });
+          }));
         } finally {
-          planRevisions.delete(task.id);
+          planRevisions.delete(claimed.task.id);
         }
         sendJson(response, 200, await journeyResponse(identifier));
         return;
@@ -1354,7 +1030,8 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
           throw new HttpError(400, "A plan revision number is required.");
         }
         const config = loadConfig(true, await settings.runtimeEnvironment());
-        const result = await withJourney(() => journeys.approvePlan(identifier, revision));
+        const result = await withJourney(() => decideJourney(identifier, (journeyId) =>
+          journeys.approvePlan(journeyId, revision)));
         // Approval is persisted before dispatch, so a second click cannot start
         // a second billable run.
         if (result.approved) startTask(result.task, config);
@@ -1365,7 +1042,8 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
       if (request.method === "POST" && journeyRetryMatch?.[1]) {
         const identifier = journeyRetryMatch[1];
         const config = loadConfig(true, await settings.runtimeEnvironment());
-        const result = await withJourney(() => journeys.retry(identifier));
+        const result = await withJourney(() => decideJourney(identifier, (journeyId) =>
+          journeys.retry(journeyId)));
         startTask(result.task, config);
         sendJson(response, 202, journeys.view(result.journey));
         return;
@@ -1503,15 +1181,9 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
         });
         if (references.length) input.playlistReferences = references;
         const config = loadConfig(true, await settings.runtimeEnvironment());
+        // parseTaskInput() never yields a moodChatId, so a playlist has no
+        // conversation to adopt; MoodMic adoption happens on its own route.
         const task = await store.create(input, config);
-        if (input.moodChatId) {
-          try {
-            await journeys.adoptSongTask(input.moodChatId, task);
-          } catch (error) {
-            const message = error instanceof Error ? error.message : String(error);
-            console.error(`Unable to adopt task ${task.id} into its journey: ${message}`);
-          }
-        }
         startTask(task, config);
         sendJson(response, 202, task);
         return;
@@ -1622,108 +1294,132 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
       }
 
       if (request.method === "POST" && playlistPlanApproveMatch?.[1]) {
-        const task = store.get(playlistPlanApproveMatch[1]);
-        if (!task || task.workflowType !== "05-playlist" || task.compositionMode !== "album") {
-          throw new HttpError(404, "Playlist task not found.");
+        const taskId = playlistPlanApproveMatch[1];
+        let value: unknown = {};
+        try {
+          value = await readJsonBody(request);
+        } catch (error) {
+          if (!(error instanceof HttpError) || error.status !== 400) throw error;
         }
-        if (!task.albumPlan || !task.playlistBriefing) {
-          throw new HttpError(409, "This playlist has no plan to confirm yet.");
-        }
-        if (task.playlistPlanApproved || task.status !== "review" || planRevisions.has(task.id)) {
-          throw new HttpError(409, "This playlist plan is not awaiting confirmation.");
+        const revision = isRecord(value) && value.revision !== undefined ? Number(value.revision) : undefined;
+        if (revision !== undefined && (!Number.isInteger(revision) || revision < 1)) {
+          throw new HttpError(400, "A plan revision number is required.");
         }
         const config = loadConfig(true, await settings.runtimeEnvironment());
-        const queued = await store.update(task.id, { status: "queued", playlistPlanApproved: true, error: undefined });
-        startTask(queued, config);
+        const queued = await decideTask(taskId, async (task) => {
+          if (!task || task.workflowType !== "05-playlist" || task.compositionMode !== "album") {
+            throw new HttpError(404, "Playlist task not found.");
+          }
+          if (!task.albumPlan || !task.playlistBriefing) {
+            throw new HttpError(409, "This playlist has no plan to confirm yet.");
+          }
+          if (task.playlistPlanApproved || task.status !== "review" || planRevisions.has(task.id)) {
+            throw new HttpError(409, "This playlist plan is not awaiting confirmation.");
+          }
+          // A submitted revision must describe the plan the user is looking at.
+          if (revision !== undefined && revision !== (task.albumPlanRevision ?? 1)) {
+            throw new HttpError(409, "The plan changed since you opened it. Review the latest revision.");
+          }
+          const updated = await store.update(task.id, {
+            status: "queued", playlistPlanApproved: true, error: undefined,
+          });
+          startTask(updated, config);
+          return updated;
+        });
         sendJson(response, 202, queued);
         return;
       }
 
       if (request.method === "POST" && playlistPlanMessagesMatch?.[1]) {
-        const task = store.get(playlistPlanMessagesMatch[1]);
-        if (!task || task.workflowType !== "05-playlist" || task.compositionMode !== "album") {
-          throw new HttpError(404, "Playlist task not found.");
-        }
-        if (!task.albumPlan || !task.playlistBriefing) {
-          throw new HttpError(409, "This playlist has no plan to revise yet.");
-        }
-        if (task.playlistPlanApproved || task.status !== "review" || planRevisions.has(task.id)) {
-          throw new HttpError(409, "This playlist plan is no longer open for changes.");
-        }
+        const taskId = playlistPlanMessagesMatch[1];
         const value = await readJsonBody(request);
         const message = isRecord(value) && typeof value.message === "string" ? value.message.trim() : "";
         if (!message) throw new HttpError(400, "A revision message is required.");
         if (message.length > MAX_PLAYLIST_FEEDBACK_LENGTH) {
           throw new HttpError(400, "The revision message is too long.");
         }
-        const discussion = task.playlistDiscussion ?? [];
-        if (discussion.filter((entry) => entry.role === "user").length >= MAX_PLAYLIST_DISCUSSION_MESSAGES) {
-          throw new HttpError(409, "This plan has reached its revision limit.");
-        }
         const config = loadConfig(true, await settings.runtimeEnvironment());
-        const userMessage: PlaylistDiscussionMessage = {
-          id: crypto.randomUUID(), role: "user", content: message, createdAt: new Date().toISOString(),
-        };
-        planRevisions.add(task.id);
-        try {
-          const refined = await refinePlaylistPlan({
-            description: task.description,
-            plan: task.albumPlan,
-            briefing: task.playlistBriefing,
-            references: task.playlistReferences ?? [],
-            history: [...discussion, userMessage],
-            feedback: message,
-          }, { apiKey: config.openAiApiKey, model: task.composerModel, lyriaModel: task.lyriaModel });
-          const now = new Date().toISOString();
-          // The user may have confirmed while this revision was running.
-          const latest = store.get(task.id);
-          if (!latest || latest.playlistPlanApproved || latest.status !== "review") {
+        // Gate 1: a short state transition that claims the revision. An approval
+        // arriving now is rejected instead of confirming a plan being rewritten.
+        const claimed = await decideTask(taskId, async (task) => {
+          if (!task || task.workflowType !== "05-playlist" || task.compositionMode !== "album") {
+            throw new HttpError(404, "Playlist task not found.");
+          }
+          if (!task.albumPlan || !task.playlistBriefing) {
+            throw new HttpError(409, "This playlist has no plan to revise yet.");
+          }
+          if (task.playlistPlanApproved || task.status !== "review" || planRevisions.has(task.id)) {
             throw new HttpError(409, "This playlist plan is no longer open for changes.");
           }
+          const discussion = task.playlistDiscussion ?? [];
+          if (discussion.filter((entry) => entry.role === "user").length >= MAX_PLAYLIST_DISCUSSION_MESSAGES) {
+            throw new HttpError(409, "This plan has reached its revision limit.");
+          }
+          planRevisions.add(task.id);
+          return {
+            task,
+            discussion,
+            userMessage: {
+              id: crypto.randomUUID(), role: "user", content: message, createdAt: new Date().toISOString(),
+            } as PlaylistDiscussionMessage,
+          };
+        });
+        try {
+          // The provider call runs outside the gate so other tasks stay usable.
+          const refined = await refinePlaylistPlan({
+            description: claimed.task.description,
+            plan: claimed.task.albumPlan!,
+            briefing: claimed.task.playlistBriefing!,
+            references: claimed.task.playlistReferences ?? [],
+            history: [...claimed.discussion, claimed.userMessage],
+            feedback: message,
+          }, { apiKey: config.openAiApiKey, model: claimed.task.composerModel, lyriaModel: claimed.task.lyriaModel });
+          const now = new Date().toISOString();
           const assistantMessage: PlaylistDiscussionMessage = {
             id: crypto.randomUUID(), role: "assistant", content: refined.reply, createdAt: now,
           };
-          const updated = await store.update(task.id, {
-            title: refined.plan.albumTitle,
-            albumPlan: refined.plan,
-            playlistBriefing: refined.briefing,
-            playlistDiscussion: [...discussion, userMessage, assistantMessage],
-            albumTracks: refined.plan.tracks.map((outline) => ({
-              id: crypto.randomUUID(), order: outline.number, title: outline.title,
-              targetDurationSeconds: outline.targetSeconds,
-              admission: "candidate", status: "queued", createdAt: now, updatedAt: now,
-            })),
+          // Gate 2: the user may have confirmed while this revision was running.
+          const updated = await decideTask(taskId, async (task) => {
+            if (!task || task.playlistPlanApproved || task.status !== "review") {
+              throw new HttpError(409, "This playlist plan is no longer open for changes.");
+            }
+            return store.update(task.id, {
+              title: refined.plan.albumTitle,
+              albumPlan: refined.plan,
+              playlistBriefing: refined.briefing,
+              playlistDiscussion: [...claimed.discussion, claimed.userMessage, assistantMessage],
+              albumTracks: refined.plan.tracks.map((outline) => ({
+                id: crypto.randomUUID(), order: outline.number, title: outline.title,
+                targetDurationSeconds: outline.targetSeconds,
+                admission: "candidate", status: "queued", createdAt: now, updatedAt: now,
+              })),
+            });
           });
           sendJson(response, 200, updated);
         } finally {
-          planRevisions.delete(task.id);
+          planRevisions.delete(claimed.task.id);
         }
         return;
       }
 
       if (request.method === "POST" && albumTrackRetryMatch?.[1] && albumTrackRetryMatch[2]) {
-        const task = store.get(albumTrackRetryMatch[1]);
-        const track = task?.albumTracks?.find((candidate) => candidate.id === albumTrackRetryMatch[2]);
-        if (!task || task.compositionMode !== "album" || !track) {
-          throw new HttpError(404, "Album track not found.");
-        }
-        if (track.status !== "failed" || activeTaskIds.has(task.id)) {
-          throw new HttpError(409, "Only failed candidates in an idle album can be continued.");
-        }
-        const config = loadConfig(task.mode === "generate", await settings.runtimeEnvironment());
-        if (activeTaskIds.has(task.id) || store.get(task.id)?.albumTracks?.find((candidate) => candidate.id === track.id)?.status !== "failed") {
-          throw new HttpError(409, "Only failed candidates in an idle album can be continued.");
-        }
-        // Reserve this album before awaiting persistence to prevent double generation.
-        activeTaskIds.add(task.id);
-        let queued: MusicTask;
-        try {
-          queued = await store.update(task.id, { status: "queued", error: undefined });
-        } catch (error) {
-          activeTaskIds.delete(task.id);
-          throw error;
-        }
-        startTask(queued, config, track.id);
+        const taskId = albumTrackRetryMatch[1];
+        const trackId = albumTrackRetryMatch[2];
+        const queued = await decideTask(taskId, async (task) => {
+          const track = task?.albumTracks?.find((candidate) => candidate.id === trackId);
+          if (!task || task.compositionMode !== "album" || !track) {
+            throw new HttpError(404, "Album track not found.");
+          }
+          // Reread inside the gate: another retry may already own this album.
+          const current = task.albumTracks?.find((candidate) => candidate.id === track.id);
+          if (current?.status !== "failed" || activeTaskIds.has(task.id)) {
+            throw new HttpError(409, "Only failed candidates in an idle album can be continued.");
+          }
+          const config = loadConfig(task.mode === "generate", await settings.runtimeEnvironment());
+          const updated = await store.update(task.id, { status: "queued", error: undefined });
+          startTask(updated, config, track.id);
+          return updated;
+        });
         sendJson(response, 202, queued);
         return;
       }
@@ -1738,92 +1434,74 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
       }
 
       if (request.method === "POST" && promptApproveMatch?.[1]) {
-        const task = store.get(promptApproveMatch[1]);
-        if (!task || !task.moodChatId) throw new HttpError(404, "MoodMic task not found.");
-        if (task.status !== "planning" || task.lyriaPromptApproved) {
-          throw new HttpError(409, "This task is not awaiting prompt confirmation.");
-        }
-        if (activeTaskIds.has(task.id)) throw new HttpError(409, "This task is already being processed.");
+        const taskId = promptApproveMatch[1];
         // The prompt the user confirmed wins over the composed one, so an edited
-        // prompt is what the very first generation receives.
+        // prompt is what the very first generation receives. Input and
+        // configuration are prepared before the task's admission gate.
         const editedPrompt = parseApprovedPrompt(await readOptionalJsonBody(request));
         const config = loadConfig(true, await settings.runtimeEnvironment());
-        const queued = await store.update(task.id, {
-          status: "queued",
-          lyriaPromptApproved: true,
-          ...(editedPrompt && task.musicSpec && editedPrompt !== task.musicSpec.lyriaPrompt
-            ? { musicSpec: { ...task.musicSpec, lyriaPrompt: editedPrompt } }
-            : {}),
-          error: undefined,
+        const queued = await decideTask(taskId, async (task) => {
+          if (!task || !task.moodChatId) throw new HttpError(404, "MoodMic task not found.");
+          if (task.status !== "planning" || task.lyriaPromptApproved) {
+            throw new HttpError(409, "This task is not awaiting prompt confirmation.");
+          }
+          if (activeTaskIds.has(task.id)) throw new HttpError(409, "This task is already being processed.");
+          const updated = await store.update(task.id, {
+            status: "queued",
+            lyriaPromptApproved: true,
+            ...(editedPrompt && task.musicSpec && editedPrompt !== task.musicSpec.lyriaPrompt
+              ? { musicSpec: { ...task.musicSpec, lyriaPrompt: editedPrompt } }
+              : {}),
+            error: undefined,
+          });
+          // Persist, then reserve, then dispatch before the gate is released.
+          startTask(updated, config);
+          return updated;
         });
-        startTask(queued, config);
         sendJson(response, 202, queued);
         return;
       }
 
       if (request.method === "POST" && reviewDecisionMatch?.[1]) {
-        const task = store.get(reviewDecisionMatch[1]);
-        if (!task || !task.moodChatId) throw new HttpError(404, "MoodMic task not found.");
-        if (task.status !== "review") {
-          throw new HttpError(409, "This task is not awaiting a review decision.");
-        }
-        if (activeTaskIds.has(task.id)) throw new HttpError(409, "This task is already being processed.");
+        const taskId = reviewDecisionMatch[1];
         const value = await readJsonBody(request);
         if (!isRecord(value) || (value.decision !== "regenerate" && value.decision !== "keep")) {
           throw new HttpError(400, "A review decision of \"regenerate\" or \"keep\" is required.");
         }
-        if (value.decision === "keep") {
-          const kept = await store.update(task.id, { status: "completed", error: undefined });
-          await journeySafe(() => journeys.noteSongReady(kept));
-          sendJson(response, 200, kept);
-          return;
-        }
         const config = loadConfig(true, await settings.runtimeEnvironment());
-        if (store.get(task.id)?.status !== "review" || activeTaskIds.has(task.id)) {
-          throw new HttpError(409, "This task is not awaiting a review decision.");
-        }
-        activeTaskIds.add(task.id);
-        let queued: MusicTask;
-        try {
-          queued = await store.update(task.id, { status: "queued", error: undefined });
-        } catch (error) {
-          activeTaskIds.delete(task.id);
-          throw error;
-        }
-        await journeySafe(() => journeys.noteSongRegenerating(queued));
-        startTask(queued, config);
-        sendJson(response, 202, queued);
+        const decided = await decideTask(taskId, async (task) => {
+          if (!task || !task.moodChatId) throw new HttpError(404, "MoodMic task not found.");
+          // Reread inside the gate: the other decision may already have won.
+          if (task.status !== "review") {
+            throw new HttpError(409, "This task is not awaiting a review decision.");
+          }
+          if (activeTaskIds.has(task.id)) throw new HttpError(409, "This task is already being processed.");
+          if (value.decision === "keep") {
+            const kept = await store.update(task.id, { status: "completed", error: undefined });
+            await journeySafe(() => journeys.noteSongReady(kept));
+            return { task: kept, status: 200 };
+          }
+          const queued = await store.update(task.id, { status: "queued", error: undefined });
+          await journeySafe(() => journeys.noteSongRegenerating(queued));
+          startTask(queued, config);
+          return { task: queued, status: 202 };
+        });
+        sendJson(response, decided.status, decided.task);
         return;
       }
 
       if (request.method === "POST" && retryMatch?.[1]) {
-        const task = store.get(retryMatch[1]);
-        if (!task) {
-          sendJson(response, 404, { error: "Task not found." });
-          return;
-        }
-        if (task.status !== "failed" || activeTaskIds.has(task.id)) {
-          sendJson(response, 409, { error: "Only failed tasks can be continued." });
-          return;
-        }
-
-        const config = loadConfig(
-          task.mode === "generate",
-          await settings.runtimeEnvironment(),
-        );
-        if (store.get(task.id)?.status !== "failed" || activeTaskIds.has(task.id)) {
-          sendJson(response, 409, { error: "Only failed tasks can be continued." });
-          return;
-        }
-        activeTaskIds.add(task.id);
-        let queued: MusicTask;
-        try {
-          queued = await store.update(task.id, { status: "queued", error: undefined });
-        } catch (error) {
-          activeTaskIds.delete(task.id);
-          throw error;
-        }
-        startTask(queued, config);
+        const taskId = retryMatch[1];
+        const queued = await decideTask(taskId, async (task) => {
+          if (!task) throw new HttpError(404, "Task not found.");
+          if (task.status !== "failed" || activeTaskIds.has(task.id)) {
+            throw new HttpError(409, "Only failed tasks can be continued.");
+          }
+          const config = loadConfig(task.mode === "generate", await settings.runtimeEnvironment());
+          const updated = await store.update(task.id, { status: "queued", error: undefined });
+          startTask(updated, config);
+          return updated;
+        });
         sendJson(response, 202, queued);
         return;
       }

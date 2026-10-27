@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { runBackgroundMusicProducer } from "../src/producer/background-music-producer.js";
 import { productionArtifactPath, type PipelineCommand } from "../src/producer/pipeline.js";
-import { runAlbumTask } from "../src/web/server.js";
+import { runAlbumTask } from "../src/web/task-runtime.js";
 import { parseTaskInput, TaskStore } from "../src/web/task-store.js";
 import { albumPlanFixture, albumReviewFixture, albumSpecFixture } from "./album-fixtures.js";
 import { withWebServer } from "./helpers/web-server.js";

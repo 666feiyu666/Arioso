@@ -1,4 +1,4 @@
-import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, rm, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import {
@@ -11,6 +11,7 @@ import {
 } from "../discussion/types.js";
 import { MUSIC_TYPES, type MusicType } from "../retrieval/music-retriever.js";
 import { writeTextFileAtomic } from "../utils/files.js";
+import { KeyedQueue } from "../utils/queues.js";
 import { isRecord } from "../utils/validation.js";
 
 // MoodMic keeps its own conversations, separate from the workflow studio's
@@ -147,6 +148,8 @@ function cleanOriginalName(value: string): string {
 export class MoodChatStore {
   readonly #directory: string;
   readonly #chats = new Map<string, MoodChat>();
+  /** One mutation at a time per conversation: read, derive, persist, publish. */
+  readonly #mutations = new KeyedQueue();
 
   constructor(directory: string) {
     this.#directory = path.resolve(directory);
@@ -190,9 +193,13 @@ export class MoodChatStore {
 
   /** Removes the conversation record together with its uploaded images. */
   async delete(id: string): Promise<boolean> {
-    if (!this.#chats.delete(id)) return false;
-    await rm(this.chatDirectory(id), { recursive: true, force: true });
-    return true;
+    return this.#mutations.run(id, async () => {
+      if (!this.#chats.has(id)) return false;
+      // Remove the files first: a failed delete keeps a usable record to retry.
+      await rm(this.chatDirectory(id), { recursive: true, force: true });
+      this.#chats.delete(id);
+      return true;
+    });
   }
 
   async create(musicReference: MusicReference = "auto"): Promise<MoodChat> {
@@ -201,8 +208,8 @@ export class MoodChatStore {
       id: crypto.randomUUID(), status: "discussing", musicReference,
       messages: [], attachments: [], taskIds: [], createdAt: now, updatedAt: now,
     };
-    this.#chats.set(chat.id, chat);
     await this.save(chat);
+    this.#chats.set(chat.id, chat);
     return chat;
   }
 
@@ -210,36 +217,39 @@ export class MoodChatStore {
     id: string,
     input: { originalName: string; mimeType: string; data: Buffer },
   ): Promise<MoodChat> {
-    const chat = this.require(id);
-    if (chat.status === "submitted") throw new Error("This conversation has already been submitted.");
-    if (!DISCUSSION_IMAGE_TYPES.includes(input.mimeType as DiscussionImageType)) {
-      throw new Error("Only JPEG, PNG, and WebP images are supported.");
-    }
-    if (!input.data.length || input.data.length > MAX_DISCUSSION_IMAGE_BYTES) {
-      throw new Error("Images must be between 1 byte and 8 MiB.");
-    }
-    if (chat.attachments.length >= MAX_DISCUSSION_ATTACHMENTS) {
-      throw new Error(`A conversation supports at most ${MAX_DISCUSSION_ATTACHMENTS} images.`);
-    }
-    const mimeType = input.mimeType as DiscussionImageType;
-    const attachmentId = crypto.randomUUID();
-    const fileName = `${attachmentId}${extensionFor(mimeType)}`;
-    const now = new Date().toISOString();
-    const attachment: MoodChatAttachment = {
-      id: attachmentId,
-      originalName: cleanOriginalName(input.originalName),
-      fileName,
-      mimeType,
-      size: input.data.length,
-      createdAt: now,
-    };
-    const attachmentsDirectory = path.join(this.chatDirectory(chat.id), "attachments");
-    await mkdir(attachmentsDirectory, { recursive: true });
-    await writeFile(path.join(attachmentsDirectory, fileName), input.data, { flag: "wx" });
-    const updated = { ...chat, attachments: [...chat.attachments, attachment], updatedAt: now };
-    this.#chats.set(id, updated);
-    await this.save(updated);
-    return updated;
+    return this.mutate(id, async (chat) => {
+      if (chat.status === "submitted") throw new Error("This conversation has already been submitted.");
+      if (!DISCUSSION_IMAGE_TYPES.includes(input.mimeType as DiscussionImageType)) {
+        throw new Error("Only JPEG, PNG, and WebP images are supported.");
+      }
+      if (!input.data.length || input.data.length > MAX_DISCUSSION_IMAGE_BYTES) {
+        throw new Error("Images must be between 1 byte and 8 MiB.");
+      }
+      if (chat.attachments.length >= MAX_DISCUSSION_ATTACHMENTS) {
+        throw new Error(`A conversation supports at most ${MAX_DISCUSSION_ATTACHMENTS} images.`);
+      }
+      const mimeType = input.mimeType as DiscussionImageType;
+      const attachmentId = crypto.randomUUID();
+      const fileName = `${attachmentId}${extensionFor(mimeType)}`;
+      const now = new Date().toISOString();
+      const attachment: MoodChatAttachment = {
+        id: attachmentId,
+        originalName: cleanOriginalName(input.originalName),
+        fileName,
+        mimeType,
+        size: input.data.length,
+        createdAt: now,
+      };
+      const attachmentsDirectory = path.join(this.chatDirectory(chat.id), "attachments");
+      await mkdir(attachmentsDirectory, { recursive: true });
+      const attachmentPath = path.join(attachmentsDirectory, fileName);
+      await writeFile(attachmentPath, input.data, { flag: "wx" });
+      return {
+        next: { ...chat, attachments: [...chat.attachments, attachment], updatedAt: now },
+        // A record that never reached disk must not keep its uploaded image.
+        rollback: () => unlink(attachmentPath).catch(() => undefined),
+      };
+    });
   }
 
   async addMessage(
@@ -249,30 +259,29 @@ export class MoodChatStore {
     attachmentIds: string[] = [],
     mood?: DiscussionMood,
   ): Promise<MoodChat> {
-    const chat = this.require(id);
-    if (chat.status === "submitted") throw new Error("This conversation has already been submitted.");
-    const text = content.trim();
-    if (!text && !attachmentIds.length) throw new Error("A message or image is required.");
-    if (text.length > 8_000) throw new Error("Messages must be 8,000 characters or fewer.");
-    if (role === "assistant" && attachmentIds.length) throw new Error("Assistant messages cannot attach images.");
-    const known = new Set(chat.attachments.map((attachment) => attachment.id));
-    if (attachmentIds.some((attachmentId) => !known.has(attachmentId))) {
-      throw new Error("An attachment is unavailable.");
-    }
-    const now = new Date().toISOString();
-    const { proposal: _proposal, poem_retrieval: _poemRetrieval, ...withoutProposal } = chat;
-    const updated: MoodChat = {
-      ...withoutProposal,
-      status: "discussing",
-      messages: [...chat.messages, {
-        id: crypto.randomUUID(), role, content: text, attachmentIds: [...new Set(attachmentIds)], createdAt: now,
-        ...(role === "assistant" && mood ? { mood } : {}),
-      }],
-      updatedAt: now,
-    };
-    this.#chats.set(id, updated);
-    await this.save(updated);
-    return updated;
+    return this.mutate(id, (chat) => {
+      if (chat.status === "submitted") throw new Error("This conversation has already been submitted.");
+      const text = content.trim();
+      if (!text && !attachmentIds.length) throw new Error("A message or image is required.");
+      if (text.length > 8_000) throw new Error("Messages must be 8,000 characters or fewer.");
+      if (role === "assistant" && attachmentIds.length) throw new Error("Assistant messages cannot attach images.");
+      const known = new Set(chat.attachments.map((attachment) => attachment.id));
+      if (attachmentIds.some((attachmentId) => !known.has(attachmentId))) {
+        throw new Error("An attachment is unavailable.");
+      }
+      const now = new Date().toISOString();
+      const { proposal: _proposal, poem_retrieval: _poemRetrieval, ...withoutProposal } = chat;
+      const updated: MoodChat = {
+        ...withoutProposal,
+        status: "discussing",
+        messages: [...chat.messages, {
+          id: crypto.randomUUID(), role, content: text, attachmentIds: [...new Set(attachmentIds)], createdAt: now,
+          ...(role === "assistant" && mood ? { mood } : {}),
+        }],
+        updatedAt: now,
+      };
+      return { next: updated };
+    });
   }
 
   /**
@@ -281,15 +290,9 @@ export class MoodChatStore {
    * corpus version still match.
    */
   async setPoemRetrieval(id: string, trace: PoemRetrievalTrace): Promise<MoodChat> {
-    const chat = this.require(id);
-    const updated: MoodChat = {
-      ...chat,
-      poem_retrieval: trace,
-      updatedAt: new Date().toISOString(),
-    };
-    this.#chats.set(id, updated);
-    await this.save(updated);
-    return updated;
+    return this.mutate(id, (chat) => ({
+      next: { ...chat, poem_retrieval: trace, updatedAt: new Date().toISOString() },
+    }));
   }
 
   async setProposal(
@@ -297,38 +300,36 @@ export class MoodChatStore {
     proposal: string,
     poemRetrieval?: PoemRetrievalTrace,
   ): Promise<MoodChat> {
-    const chat = this.require(id);
-    if (chat.status === "submitted") throw new Error("This conversation has already been submitted.");
-    if (!chat.messages.some((message) => message.role === "user")) {
-      throw new Error("Discuss the music before generating a prompt.");
-    }
-    const text = proposal.trim();
-    if (!text) throw new Error("The generated prompt is empty.");
-    if (text.length > 8_000) throw new Error("The generated prompt must be 8,000 characters or fewer.");
-    // A regenerated proposal always replaces the trace it was produced with.
-    const { poem_retrieval: _previousTrace, ...withoutTrace } = chat;
-    const updated: MoodChat = {
-      ...withoutTrace,
-      status: "proposal-ready",
-      proposal: text,
-      ...(poemRetrieval ? { poem_retrieval: poemRetrieval } : {}),
-      updatedAt: new Date().toISOString(),
-    };
-    this.#chats.set(id, updated);
-    await this.save(updated);
-    return updated;
+    return this.mutate(id, (chat) => {
+      if (chat.status === "submitted") throw new Error("This conversation has already been submitted.");
+      if (!chat.messages.some((message) => message.role === "user")) {
+        throw new Error("Discuss the music before generating a prompt.");
+      }
+      const text = proposal.trim();
+      if (!text) throw new Error("The generated prompt is empty.");
+      if (text.length > 8_000) throw new Error("The generated prompt must be 8,000 characters or fewer.");
+      // A regenerated proposal always replaces the trace it was produced with.
+      const { poem_retrieval: _previousTrace, ...withoutTrace } = chat;
+      const updated: MoodChat = {
+        ...withoutTrace,
+        status: "proposal-ready",
+        proposal: text,
+        ...(poemRetrieval ? { poem_retrieval: poemRetrieval } : {}),
+        updatedAt: new Date().toISOString(),
+      };
+      return { next: updated };
+    });
   }
 
   async markSubmitted(id: string, taskId: string, proposal: string): Promise<MoodChat> {
-    const chat = this.require(id);
-    const taskIds = [...new Set([...chat.taskIds, taskId])];
-    const updated: MoodChat = {
-      ...chat, status: "submitted", proposal: proposal.trim(), taskIds,
-      updatedAt: new Date().toISOString(),
-    };
-    this.#chats.set(id, updated);
-    await this.save(updated);
-    return updated;
+    return this.mutate(id, (chat) => {
+      const taskIds = [...new Set([...chat.taskIds, taskId])];
+      const updated: MoodChat = {
+        ...chat, status: "submitted", proposal: proposal.trim(), taskIds,
+        updatedAt: new Date().toISOString(),
+      };
+      return { next: updated };
+    });
   }
 
   attachmentPath(id: string, attachmentId: string): { path: string; mimeType: DiscussionImageType } | undefined {
@@ -359,6 +360,31 @@ export class MoodChatStore {
     const chat = this.get(id);
     if (!chat) throw new Error("Conversation not found.");
     return chat;
+  }
+
+  /**
+   * The single mutation path for one conversation: derive the next record from
+   * the current one, persist it, then publish it. A failed write leaves memory
+   * unchanged. `derive` must not re-enter this conversation's lock.
+   */
+  private mutate(
+    id: string,
+    derive: (current: MoodChat) => { next: MoodChat; rollback?: () => Promise<void> }
+      | Promise<{ next: MoodChat; rollback?: () => Promise<void> }>,
+  ): Promise<MoodChat> {
+    return this.#mutations.run(id, async () => {
+      const current = this.#chats.get(id);
+      if (!current) throw new Error("Conversation not found.");
+      const { next, rollback } = await derive(current);
+      try {
+        await this.save(next);
+      } catch (error) {
+        await rollback?.();
+        throw error;
+      }
+      this.#chats.set(id, next);
+      return next;
+    });
   }
 
   private chatDirectory(id: string): string {

@@ -137,7 +137,9 @@ describe("task retry", () => {
       expect(retries.map((response) => response.status).sort()).toEqual([202, 409]);
       await Promise.all(retries.map((response) => response.json()));
       await vi.waitFor(() => expect(generateMock).toHaveBeenCalledTimes(1));
-      expect(generateMock).toHaveBeenCalledWith("saved prompt", { model: "lyria-3.5" });
+      expect(generateMock).toHaveBeenCalledTimes(1);
+      expect(generateMock.mock.calls[0]?.[0]).toBe("saved prompt");
+      expect(generateMock.mock.calls[0]?.[1]).toMatchObject({ model: "lyria-3.5" });
       finishGeneration!();
       await vi.waitFor(async () => {
         const task = await fetch(`${baseUrl}/api/tasks/saved-task`).then((response) => response.json());

@@ -7,7 +7,7 @@ import { loadConfig } from "../config/env.js";
 import { AlbumPlanSchema } from "../schema/album-plan.js";
 import { MusicSpecSchema } from "../schema/music-spec.js";
 import { writeTextFileAtomic } from "../utils/files.js";
-import { runAlbumTask } from "../web/server.js";
+import { runAlbumTask } from "../web/task-runtime.js";
 import { TaskStore } from "../web/task-store.js";
 
 /** Import the reviewed study without altering its original prompts or review evidence. */

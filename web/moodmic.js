@@ -8,7 +8,7 @@
 
 import {
   GROUPS, api, applyI18n, customEmotionDraft, emotionLabel, esc, groupById, groupName,
-  persistLanguage, readLanguage,
+  persistLanguage, readLanguage, todayISO,
 } from "./mood-common.js";
 import { createAlbumStage } from "./album-view.js";
 
@@ -309,11 +309,6 @@ function toggleSidebar() {
   applySideState();
   persistSidePreference(state.sideCollapsed);
   renderSidebar();
-}
-
-function todayISO() {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 }
 
 const state = {

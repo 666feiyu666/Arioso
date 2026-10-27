@@ -11,7 +11,7 @@ import { loadConfig } from "./config/env.js";
 import { LyriaClient } from "./lyria/lyria-client.js";
 import { stitchAudioFiles } from "./audio/stitch.js";
 import { TaskStore, parseTaskInput } from "./web/task-store.js";
-import { runAlbumTask } from "./web/server.js";
+import { runAlbumTask } from "./web/task-runtime.js";
 import { runBackgroundMusicProducer } from "./producer/background-music-producer.js";
 import { productionArtifactPath } from "./producer/pipeline.js";
 
