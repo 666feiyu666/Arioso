@@ -158,6 +158,32 @@ export async function readJsonBody(request: IncomingMessage): Promise<unknown> {
   }
 }
 
+/**
+ * Reads a body that may legitimately be absent. Absence is decided by the bytes
+ * actually received, not by `Content-Length`: a chunked request can carry a body
+ * without that header. An absent body is `undefined`; any other content must
+ * parse as JSON, so malformed or whitespace-only bytes are a `400`.
+ */
+export async function readOptionalJsonBody(request: IncomingMessage): Promise<unknown> {
+  const chunks: Buffer[] = [];
+  let size = 0;
+
+  for await (const chunk of request) {
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    size += buffer.length;
+    if (size <= MAX_BODY_BYTES) chunks.push(buffer);
+  }
+
+  if (size > MAX_BODY_BYTES) throw new HttpError(413, "Request body is too large.");
+  if (size === 0) return undefined;
+
+  try {
+    return JSON.parse(Buffer.concat(chunks).toString("utf8"));
+  } catch {
+    throw new HttpError(400, "Request body must be valid JSON.");
+  }
+}
+
 export async function readBinaryBody(request: IncomingMessage, maximumBytes: number): Promise<Buffer> {
   const chunks: Buffer[] = [];
   let size = 0;

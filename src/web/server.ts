@@ -35,7 +35,17 @@ import { LangChainMoodClassifier, type MoodClassifier } from "./mood-classifier.
 import { MoodChatStore, isMusicReference, type MoodChat } from "./mood-chat-store.js";
 import { musicReferencesForTask } from "./music-references.js";
 import { poemReferencesForChat } from "./poem-references.js";
-import { HttpError, readBinaryBody, readJsonBody, sendAudio, sendFile, sendJson, serveAsset, serveStatic } from "./http.js";
+import {
+  HttpError,
+  readBinaryBody,
+  readJsonBody,
+  readOptionalJsonBody,
+  sendAudio,
+  sendFile,
+  sendJson,
+  serveAsset,
+  serveStatic,
+} from "./http.js";
 import { isRecord } from "../utils/validation.js";
 import { KeyedQueue } from "../utils/queues.js";
 import { productionArtifactPath } from "../producer/pipeline.js";
@@ -140,11 +150,18 @@ function parseMoodEntryInput(value: unknown): MoodEntryInput {
   };
 }
 
-async function readOptionalJsonBody(request: IncomingMessage): Promise<unknown> {
-  // An absent body is legal for endpoints whose payload is optional; it means
-  // "no change", which is different from malformed JSON.
-  if (!Number(request.headers["content-length"] ?? 0)) return undefined;
-  return readJsonBody(request);
+/**
+ * An optional object body for approval requests. An absent body keeps the
+ * documented compatibility; any other payload must be a JSON object, so a
+ * malformed or non-object body cannot be read as an approval.
+ */
+async function readOptionalObjectBody(
+  request: IncomingMessage,
+): Promise<Record<string, unknown> | undefined> {
+  const value = await readOptionalJsonBody(request);
+  if (value === undefined) return undefined;
+  if (!isRecord(value)) throw new HttpError(400, "Request body must be a JSON object.");
+  return value;
 }
 
 /**
@@ -333,6 +350,21 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
     // a journey id cannot take two different gates for the same journey.
     decisions.run(`journey:${journeys.find(identifier)?.id ?? identifier}`,
       () => decide(journeys.find(identifier)?.id ?? identifier));
+  /**
+   * One gate for an album plan, whichever route asks for it. A Journey request
+   * resolves to its linked album task, so the Journey and direct task endpoints
+   * cannot approve and revise the same plan independently. The task is reread
+   * inside the gate, and a journey without a plan task falls back to its own key.
+   */
+  const decidePlanTask = <T>(
+    identifier: string,
+    decide: (task: MusicTask | undefined, journeyId: string | undefined) => Promise<T>,
+  ): Promise<T> => {
+    const journey = journeys.find(identifier);
+    const taskId = journey?.albumTaskId;
+    const key = taskId ? `task:${taskId}` : `journey:${journey?.id ?? identifier}`;
+    return decisions.run(key, () => decide(taskId ? store.get(taskId) : undefined, journey?.id));
+  };
 
   // Journeys never own task state: whenever a linked task settles, the journey
   // re-derives its phase from that task and persists the transition.
@@ -952,32 +984,35 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
           throw new HttpError(400, "The revision message is too long.");
         }
         const config = loadConfig(true, await settings.runtimeEnvironment());
-        // Gate 1: claim the revision under the journey's admission gate so an
-        // approval and a revision cannot both commit for the same plan.
-        const claimed = await withJourney(() => decideJourney(identifier, async (journeyId) => {
-          const journey = await journeys.sync(journeyId);
-          const task = journey.albumTaskId ? store.get(journey.albumTaskId) : undefined;
-          if (!task) throw new HttpError(404, "This journey has no album plan yet.");
-          if (journey.phase !== "album-review" || task.status !== "review"
-            || !task.albumPlan || !task.playlistBriefing) {
-            throw new HttpError(409, "This album plan is not open for changes.");
-          }
-          if (planRevisions.has(task.id)) {
-            throw new HttpError(409, "This album plan is already being revised.");
-          }
-          const discussion = task.playlistDiscussion ?? [];
-          if (discussion.filter((entry) => entry.role === "user").length >= MAX_PLAYLIST_DISCUSSION_MESSAGES) {
-            throw new HttpError(409, "This plan has reached its revision limit.");
-          }
-          const userMessage: PlaylistDiscussionMessage = {
-            id: crypto.randomUUID(), role: "user", content: message, createdAt: new Date().toISOString(),
-          };
-          planRevisions.add(task.id);
-          // A revision invalidates the previous approval before it is written.
-          await journeys.notePlanRevised(task);
-          return { task, discussion, userMessage };
-        }));
+        // Gate 1: claim the revision under the album plan's admission gate. The
+        // claim is recorded before anything else can fail, so every exit below
+        // can release it, including a failed Journey notification.
+        let claimedTaskId: string | undefined;
         try {
+          const claimed = await withJourney(() => decidePlanTask(identifier, async (task, journeyId) => {
+            if (!journeyId) throw new JourneyTransitionError("Journey not found.");
+            const journey = await journeys.sync(journeyId);
+            if (!task) throw new HttpError(404, "This journey has no album plan yet.");
+            if (journey.phase !== "album-review" || task.status !== "review"
+              || !task.albumPlan || !task.playlistBriefing) {
+              throw new HttpError(409, "This album plan is not open for changes.");
+            }
+            if (planRevisions.has(task.id)) {
+              throw new HttpError(409, "This album plan is already being revised.");
+            }
+            const discussion = task.playlistDiscussion ?? [];
+            if (discussion.filter((entry) => entry.role === "user").length >= MAX_PLAYLIST_DISCUSSION_MESSAGES) {
+              throw new HttpError(409, "This plan has reached its revision limit.");
+            }
+            const userMessage: PlaylistDiscussionMessage = {
+              id: crypto.randomUUID(), role: "user", content: message, createdAt: new Date().toISOString(),
+            };
+            planRevisions.add(task.id);
+            claimedTaskId = task.id;
+            // A revision invalidates the previous approval before it is written.
+            await journeys.notePlanRevised(task);
+            return { task, discussion, userMessage };
+          }));
           // The provider call runs outside the gate so other tasks stay usable.
           const refined = await refinePlaylistPlan({
             description: claimed.task.description,
@@ -1010,28 +1045,31 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
               })),
             });
           }));
+          sendJson(response, 200, await journeyResponse(identifier));
         } finally {
-          planRevisions.delete(claimed.task.id);
+          if (claimedTaskId) planRevisions.delete(claimedTaskId);
         }
-        sendJson(response, 200, await journeyResponse(identifier));
         return;
       }
 
       if (request.method === "POST" && journeyPlanApproveMatch?.[1]) {
         const identifier = journeyPlanApproveMatch[1];
-        let value: unknown = {};
-        try {
-          value = await readJsonBody(request);
-        } catch (error) {
-          if (!(error instanceof HttpError) || error.status !== 400) throw error;
-        }
-        const revision = isRecord(value) && value.revision !== undefined ? Number(value.revision) : undefined;
+        const value = await readOptionalObjectBody(request);
+        const revision = value?.revision !== undefined ? Number(value.revision) : undefined;
         if (revision !== undefined && (!Number.isInteger(revision) || revision < 1)) {
           throw new HttpError(400, "A plan revision number is required.");
         }
         const config = loadConfig(true, await settings.runtimeEnvironment());
-        const result = await withJourney(() => decideJourney(identifier, (journeyId) =>
-          journeys.approvePlan(journeyId, revision)));
+        const result = await withJourney(() => decidePlanTask(identifier, (task, journeyId) => {
+          if (!journeyId) throw new JourneyTransitionError("Journey not found.");
+          if (!task) throw new JourneyTransitionError("This journey has no album plan yet.");
+          // A revision owns the plan while it is in flight: approving now would
+          // admit the plan that is about to be replaced.
+          if (planRevisions.has(task.id)) {
+            throw new HttpError(409, "This album plan is already being revised.");
+          }
+          return journeys.approvePlan(journeyId, revision);
+        }));
         // Approval is persisted before dispatch, so a second click cannot start
         // a second billable run.
         if (result.approved) startTask(result.task, config);
@@ -1295,13 +1333,8 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
 
       if (request.method === "POST" && playlistPlanApproveMatch?.[1]) {
         const taskId = playlistPlanApproveMatch[1];
-        let value: unknown = {};
-        try {
-          value = await readJsonBody(request);
-        } catch (error) {
-          if (!(error instanceof HttpError) || error.status !== 400) throw error;
-        }
-        const revision = isRecord(value) && value.revision !== undefined ? Number(value.revision) : undefined;
+        const value = await readOptionalObjectBody(request);
+        const revision = value?.revision !== undefined ? Number(value.revision) : undefined;
         if (revision !== undefined && (!Number.isInteger(revision) || revision < 1)) {
           throw new HttpError(400, "A plan revision number is required.");
         }
@@ -1388,6 +1421,10 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
               albumPlan: refined.plan,
               playlistBriefing: refined.briefing,
               playlistDiscussion: [...claimed.discussion, claimed.userMessage, assistantMessage],
+              // The committed plan is a new version, so an approval opened on an
+              // earlier revision cannot confirm it.
+              albumPlanRevision: (task.albumPlanRevision ?? 1) + 1,
+              playlistPlanApproved: false,
               albumTracks: refined.plan.tracks.map((outline) => ({
                 id: crypto.randomUUID(), order: outline.number, title: outline.title,
                 targetDurationSeconds: outline.targetSeconds,

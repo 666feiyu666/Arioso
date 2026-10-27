@@ -35,20 +35,40 @@ export interface GeneratedAudio {
   generatedText: string | null;
 }
 
+/** Dispatch controls the caller owns: the deadline and its cancellation signal. */
+export interface GenerateDispatchOptions {
+  timeoutMs?: number;
+  signal?: AbortSignal;
+}
+
+export type GraphGenerate = (
+  spec: MusicSpec,
+  model: string,
+  options?: GenerateDispatchOptions,
+) => Promise<GeneratedAudio>;
+
 export interface MoodMicReviewGraphDeps {
   store: TaskStore;
   config: AriosoConfig;
   language?: "zh-CN" | "en";
-  /** Overridable for tests; defaults to the Lyria client. */
-  generate?: (spec: MusicSpec, model: string) => Promise<GeneratedAudio>;
+  /**
+   * Overridable for tests; defaults to the Lyria client. The optional third
+   * argument carries the deadline and cancellation signal, so the default path
+   * forwards them to the provider call.
+   */
+  generate?: GraphGenerate;
   /** Overridable for tests; defaults to the Gemini audio reviewer. */
   reviewer?: MusicReviewer;
 }
 
-function defaultGenerate(config: AriosoConfig) {
-  return async (spec: MusicSpec, model: string): Promise<GeneratedAudio> => {
+function defaultGenerate(config: AriosoConfig): GraphGenerate {
+  return async (spec: MusicSpec, model: string, options: GenerateDispatchOptions = {}): Promise<GeneratedAudio> => {
     const client = new LyriaClient(config.geminiApiKey ?? "");
-    return client.generate(spec.lyriaPrompt, { model });
+    return client.generate(spec.lyriaPrompt, {
+      model,
+      ...(options.timeoutMs === undefined ? {} : { timeoutMs: options.timeoutMs }),
+      ...(options.signal ? { signal: options.signal } : {}),
+    });
   };
 }
 
@@ -98,7 +118,7 @@ export function buildMoodMicReviewGraph(deps: MoodMicReviewGraphDeps) {
       prompt: spec.lyriaPrompt,
       apiKey: config.geminiApiKey ?? "",
       timeoutMs: timeoutsFor(config).generateMs,
-      generate: () => generate(spec, task.lyriaModel),
+      generate: (_prompt, generateOptions) => generate(spec, task.lyriaModel, generateOptions),
     });
     const audioFile = await store.writeAudio(task, generated.audio);
     await store.update(task.id, {
