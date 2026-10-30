@@ -11,6 +11,7 @@ import {
   persistLanguage, readLanguage, todayISO,
 } from "./mood-common.js";
 import { createAlbumStage } from "./album-view.js";
+import { openSettingsDialog } from "./settings-dialog.js";
 
 // Four starting prompts, one per feeling colour. They fill the otherwise
 // empty MoodMic screen and reuse the four mood signals already defined in
@@ -47,7 +48,7 @@ const COPY = {
   "zh-CN": {
     pageTitle: "MoodMic · 把心情变成音乐",
     tabMoodMic: "MoodMic", tabCalendar: "心情日历", tabWorkflow: "工作流", tabPlaylist: "播放列表（测试）", tabHelp: "帮助",
-    tabBarLabel: "主导航", switchLanguage: "切换界面语言",
+    tabBarLabel: "主导航", switchLanguage: "切换界面语言", openSettings: "设置",
     historyLabel: "对话记录",
     collapseSide: "收起对话记录",
     expandSide: "展开对话记录",
@@ -159,7 +160,7 @@ const COPY = {
   en: {
     pageTitle: "MoodMic · Music from your mood",
     tabMoodMic: "MoodMic", tabCalendar: "Mood calendar", tabWorkflow: "Workflow", tabPlaylist: "Playlist (test)", tabHelp: "Help",
-    tabBarLabel: "Tab navigation", switchLanguage: "Switch interface language",
+    tabBarLabel: "Tab navigation", switchLanguage: "Switch interface language", openSettings: "Settings",
     historyLabel: "Conversations",
     collapseSide: "Collapse conversations",
     expandSide: "Expand conversations",
@@ -1782,6 +1783,22 @@ langToggle.addEventListener("click", async () => {
   state.language = state.language === "zh-CN" ? "en" : "zh-CN";
   render();
   await persistLanguage(state.language);
+});
+
+// Settings lives in the top bar so the API keys and the interface language are
+// reachable without leaving the home page. Saving a different language redraws
+// the page in it.
+document.querySelector("#open-settings").addEventListener("click", () => {
+  openSettingsDialog({
+    language: state.language,
+    onSaved: (settings) => {
+      const next = settings?.language;
+      if ((next === "en" || next === "zh-CN") && next !== state.language) {
+        state.language = next;
+        render();
+      }
+    },
+  });
 });
 
 async function boot() {

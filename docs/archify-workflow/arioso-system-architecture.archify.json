@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Arioso Agentic System Architecture",
+    "locale": "en",
+    "quality_profile": "showcase",
+    "viewBox": [1180, 730]
+  },
+  "components": [
+    {
+      "id": "listener",
+      "type": "external",
+      "label": "Listener",
+      "sublabel": "mood, edits, approvals",
+      "pos": [30, 285],
+      "size": [145, 68]
+    },
+    {
+      "id": "web_app",
+      "type": "frontend",
+      "label": "MoodMic Web App",
+      "sublabel": "conversation and curation UI",
+      "pos": [210, 285],
+      "size": [165, 68]
+    },
+    {
+      "id": "prompt_director",
+      "type": "backend",
+      "label": "Prompt Director",
+      "sublabel": "editable creative brief",
+      "tag": "model-led",
+      "pos": [410, 285],
+      "size": [165, 68]
+    },
+    {
+      "id": "composer",
+      "type": "backend",
+      "label": "Composer",
+      "sublabel": "validated MusicSpec",
+      "tag": "typed output",
+      "pos": [610, 285],
+      "size": [165, 68]
+    },
+    {
+      "id": "lyria",
+      "type": "cloud",
+      "label": "Google Lyria",
+      "sublabel": "instrumental audio generation",
+      "pos": [810, 285],
+      "size": [165, 68]
+    },
+    {
+      "id": "reviewer",
+      "type": "security",
+      "label": "Gemini Reviewer",
+      "sublabel": "match or mismatch",
+      "pos": [1010, 285],
+      "size": [150, 68]
+    },
+    {
+      "id": "poetry_corpus",
+      "type": "database",
+      "label": "Poetry Corpus",
+      "sublabel": "bilingual TF-IDF index",
+      "pos": [410, 85],
+      "size": [165, 68]
+    },
+    {
+      "id": "music_corpus",
+      "type": "database",
+      "label": "Music Corpora",
+      "sublabel": "five bounded style indexes",
+      "pos": [610, 85],
+      "size": [165, 68]
+    },
+    {
+      "id": "journey_runtime",
+      "type": "backend",
+      "label": "Journey Runtime",
+      "sublabel": "legal transitions and idempotency",
+      "tag": "deterministic",
+      "pos": [610, 485],
+      "size": [165, 68]
+    },
+    {
+      "id": "state_store",
+      "type": "database",
+      "label": "Persistent Records",
+      "sublabel": "sessions, tasks, journeys",
+      "pos": [410, 485],
+      "size": [165, 68]
+    },
+    {
+      "id": "album_author",
+      "type": "backend",
+      "label": "Album Author",
+      "sublabel": "plan, review, candidate roles",
+      "tag": "after kept song",
+      "pos": [810, 485],
+      "size": [165, 68]
+    }
+  ],
+  "connections": [
+    { "id": "listener_ui", "from": "listener", "to": "web_app", "label": "mood and decisions", "variant": "emphasis", "labelAt": [193, 367] },
+    { "id": "ui_director", "from": "web_app", "to": "prompt_director", "label": "conversation turns", "variant": "emphasis", "labelAt": [393, 281] },
+    { "id": "poetry_director", "from": "poetry_corpus", "to": "prompt_director", "label": "up to three references", "fromSide": "bottom", "toSide": "top", "labelAt": [493, 167] },
+    { "id": "director_composer", "from": "prompt_director", "to": "composer", "label": "approved brief", "variant": "emphasis", "labelAt": [593, 367] },
+    { "id": "music_composer", "from": "music_corpus", "to": "composer", "label": "styles and works", "fromSide": "bottom", "toSide": "top", "labelAt": [693, 167] },
+    { "id": "composer_lyria", "from": "composer", "to": "lyria", "label": "approved prompt", "variant": "emphasis", "labelAt": [793, 281] },
+    { "id": "lyria_reviewer", "from": "lyria", "to": "reviewer", "label": "generated audio", "variant": "emphasis", "labelAt": [993, 367] },
+    { "id": "ui_journey", "from": "web_app", "to": "journey_runtime", "label": "approval events", "fromSide": "bottom", "toSide": "left", "variant": "security" },
+    { "id": "journey_state", "from": "journey_runtime", "to": "state_store", "label": "atomic JSON updates", "labelAt": [593, 567] },
+    { "id": "journey_album", "from": "journey_runtime", "to": "album_author", "label": "kept song and theme", "variant": "emphasis", "labelAt": [793, 567] }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Corpus mediation",
+      "items": [
+        "Poetry stays inside the Prompt Director boundary",
+        "The Composer receives the approved brief and bounded music evidence"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Human authority",
+      "items": [
+        "The listener edits the brief and generation prompt",
+        "A kept song and an approved plan are required before album generation"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Durable control",
+      "items": [
+        "Typed schemas reject malformed model output",
+        "The journey runtime owns transitions, retries and idempotent side effects"
+      ]
+    }
+  ]
+}

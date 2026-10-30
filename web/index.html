@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="/nav.css" />
     <link rel="stylesheet" href="/moodmic.css" />
     <link rel="stylesheet" href="/playlist.css" />
+    <link rel="stylesheet" href="/settings.css" />
   </head>
   <body class="e-page mm has-tabbar mm-home">
     <nav class="tabbar" aria-label="主导航" data-i18n-aria-label="tabBarLabel">
@@ -28,6 +29,10 @@
         <a class="tabbar-tab" href="/help.html" data-i18n="tabHelp">帮助</a>
       </div>
       <div class="tabbar-end">
+        <button class="e-btn e-btn-ghost tabbar-settings" id="open-settings" type="button" aria-haspopup="dialog" aria-label="设置" data-i18n-aria-label="openSettings">
+          <span class="gear" aria-hidden="true">⚙</span>
+          <span class="label" data-i18n="openSettings">设置</span>
+        </button>
         <button class="e-btn e-btn-ghost" id="lang-toggle" type="button" aria-label="Switch language" data-i18n-aria-label="switchLanguage">EN</button>
       </div>
     </nav>

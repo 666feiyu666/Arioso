@@ -91,6 +91,17 @@
   gap: 10px;
 }
 
+/* Settings entry in the bar: the gear stays, the word folds away on narrow
+   screens where the tab row already needs the width. */
+.tabbar-settings {
+  gap: 7px;
+}
+
+.tabbar-settings .gear {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
 /* Every page with the bar is pushed below it. */
 body.has-tabbar {
   padding-top: var(--tabbar-h);
@@ -111,7 +122,7 @@ body.has-tabbar .brand-row {
 
 @media (max-width: 640px) {
   .tabbar {
-    gap: 12px;
+    gap: 10px;
     padding: 0 14px;
   }
 
@@ -119,13 +130,40 @@ body.has-tabbar .brand-row {
     display: none;
   }
 
+  /* The tab row is the part that gives way: it scrolls sideways instead of
+     pushing the settings and language buttons off the screen. */
+  .tabbar-tabs {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .tabbar-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tabbar-end {
+    flex: none;
+  }
+
   .tabbar-tab {
+    flex: 0 0 auto;
     padding: 0 8px;
     font-size: 0.88rem;
+    white-space: nowrap;
   }
 
   .tabbar-tab.is-active::after {
     left: 8px;
     right: 8px;
+  }
+
+  .tabbar-settings {
+    padding: 8px 10px;
+  }
+
+  .tabbar-settings .label {
+    display: none;
   }
 }

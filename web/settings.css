@@ -1,0 +1,244 @@
+/* Settings dialog — shared by pages that are not the workflow studio
+   (MoodMic home). Loaded after theme.css; only consumes tokens. The workflow
+   studio keeps an equivalent block in styles.css. */
+
+.settings-dialog {
+  width: min(620px, calc(100vw - 32px));
+  max-height: calc(100vh - 40px);
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: 0 28px 80px -40px rgba(16, 21, 31, 0.6);
+}
+
+.settings-dialog::backdrop {
+  background: var(--overlay);
+  backdrop-filter: blur(3px);
+}
+
+.settings-dialog form { padding: 28px; }
+
+.settings-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.settings-header h2 {
+  margin: 6px 0 0;
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.dialog-close {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  background: transparent;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.dialog-close:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.settings-field {
+  display: grid;
+  grid-template-columns: 1fr minmax(180px, auto);
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.settings-field select {
+  min-width: 180px;
+  padding: 10px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  background: var(--surface);
+}
+
+.api-settings { padding-top: 22px; }
+
+.settings-section-title h3 {
+  margin: 0 0 6px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.settings-section-title p {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.65;
+}
+
+.credential-card {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+}
+
+.credential-card[hidden] { display: none; }
+
+.credential-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.credential-status {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.credential-status.configured { color: var(--ok); }
+
+.credential-card input {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  background: var(--surface);
+}
+
+.credential-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.secondary-button,
+.primary-button,
+.text-button {
+  padding: 9px 14px;
+  border-radius: var(--radius-md);
+  font-size: 0.78rem;
+  font-weight: 600;
+  transition: 150ms var(--ease);
+}
+
+.secondary-button {
+  border: 1px solid var(--line-strong);
+  color: var(--ink);
+  background: transparent;
+}
+
+.secondary-button:hover {
+  border-color: var(--ink);
+  background: var(--surface-2);
+}
+
+.primary-button {
+  border: 1px solid var(--ink);
+  color: var(--surface);
+  background: var(--ink);
+}
+
+.primary-button:hover {
+  border-color: var(--brand);
+  background: var(--brand);
+}
+
+.text-button {
+  padding-inline: 0;
+  border: 0;
+  color: var(--muted);
+  background: transparent;
+}
+
+.text-button:hover { color: var(--danger); }
+
+/* The second, confirming click on "remove saved key". */
+.text-button.is-confirming {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.secondary-button:disabled,
+.primary-button:disabled,
+.text-button:disabled {
+  cursor: wait;
+  opacity: 0.5;
+}
+
+.remember-setting {
+  display: flex;
+  align-items: start;
+  gap: 10px;
+  margin-top: 16px;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.remember-setting input {
+  margin-top: 3px;
+  accent-color: var(--brand);
+}
+
+.remember-setting span {
+  display: grid;
+  gap: 3px;
+}
+
+.remember-setting strong { font-size: 0.82rem; }
+
+.remember-setting small {
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.settings-message {
+  min-height: 18px;
+  margin: 14px 0 0;
+  color: var(--danger);
+  font-size: 0.75rem;
+}
+
+.settings-message.success { color: var(--ok); }
+
+.settings-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+  margin-top: 8px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+@media (max-width: 560px) {
+  .settings-dialog form { padding: 20px; }
+
+  .settings-header h2 { font-size: 24px; }
+
+  .settings-field {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .settings-field select { min-width: 0; }
+}

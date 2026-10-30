@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "Arioso MusicJourney State Transitions",
+    "locale": "en",
+    "quality_profile": "showcase",
+    "viewBox": [1000, 760]
+  },
+  "lanes": [
+    { "id": "main", "label": "Durable journey phases" },
+    { "id": "gates", "label": "Human gates" },
+    { "id": "terminal", "label": "Terminal and recovery" }
+  ],
+  "states": [
+    { "id": "mood", "type": "start", "label": "mood", "sublabel": "conversation exists", "lane": "main", "col": 0, "step": "01" },
+    { "id": "song_running", "type": "active", "label": "song-running", "sublabel": "compose and generate", "lane": "main", "col": 1, "step": "02", "tag": "song-submitted" },
+    { "id": "song_ready", "type": "waiting", "label": "song-ready", "sublabel": "kept song available", "lane": "main", "col": 2, "step": "03", "tag": "song-kept" },
+    { "id": "album_planning", "type": "active", "label": "album-planning", "sublabel": "authoring a revision", "lane": "main", "col": 3, "step": "04", "tag": "continue-album" },
+    { "id": "album_running", "type": "active", "label": "album-running", "sublabel": "approved candidates", "lane": "main", "col": 4, "step": "05", "tag": "plan-approved" },
+    { "id": "song_review", "type": "decision", "label": "song-review", "sublabel": "keep or regenerate", "lane": "gates", "col": 0, "tag": "song-reviewing" },
+    { "id": "album_review", "type": "decision", "label": "album-review", "sublabel": "approve exact revision", "lane": "gates", "col": 1, "tag": "plan-ready" },
+    { "id": "album_curation", "type": "waiting", "label": "album-curation", "sublabel": "include, order, export", "lane": "gates", "col": 2, "tag": "album-complete" },
+    { "id": "completed", "type": "success", "label": "completed", "sublabel": "curated album exported", "lane": "terminal", "col": 2, "yOffset": -50, "tag": "finish" },
+    { "id": "failed", "type": "failure", "label": "failed", "sublabel": "error retained for retry", "lane": "terminal", "col": 2, "yOffset": 70, "tag": "recoverable" }
+  ],
+  "transitions": [
+    { "id": "submit_song", "from": "mood", "to": "song_running", "variant": "emphasis" },
+    { "id": "open_song_review", "from": "song_running", "to": "song_review", "variant": "security" },
+    { "id": "keep_song", "from": "song_review", "to": "song_ready", "variant": "emphasis" },
+    { "id": "continue_album", "from": "song_ready", "to": "album_planning", "variant": "emphasis" },
+    { "id": "plan_ready", "from": "album_planning", "to": "album_review", "variant": "security" },
+    { "id": "approve_plan", "from": "album_review", "to": "album_running", "variant": "emphasis" },
+    { "id": "complete_album", "from": "album_running", "to": "album_curation", "variant": "emphasis" },
+    { "id": "finish_album", "from": "album_curation", "to": "completed", "variant": "emphasis" },
+    { "id": "album_failure", "from": "album_running", "to": "failed", "variant": "security", "route": "right-channel", "fromSide": "right", "toSide": "right", "channelX": 850 },
+    { "id": "retry_album", "from": "failed", "to": "album_running", "variant": "dashed", "route": "right-channel", "fromSide": "right", "toSide": "right", "channelX": 900 }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "Human gates",
+      "items": [
+        "song-regenerating returns from song-review to song-running",
+        "plan-revised returns to album-planning and clears the earlier approval"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Idempotent progress",
+      "items": [
+        "Repeated approvals reuse the existing task",
+        "Refresh derives the visible phase from linked persisted records"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Recovery",
+      "items": [
+        "song-failed and album-failed preserve the error and stage",
+        "retry resumes song-running, album-planning or album-running"
+      ]
+    }
+  ]
+}
