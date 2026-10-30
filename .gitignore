@@ -40,5 +40,7 @@ venv/
 Thumbs.db
 Desktop.ini
 
-# Other
-DH6012_Presentation/*
+# Course material and evaluation harness, kept in the local checkout only
+DH6012_Presentation/
+docs/DH6012-Documentation/
+eval/
