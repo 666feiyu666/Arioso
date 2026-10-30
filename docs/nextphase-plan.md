@@ -18,7 +18,7 @@ A background-music generator that responds to the listener's mood: describe how 
 - One coordinating agent across inputs. Today the user describes the mood in words and can attach reference images; nothing coordinates an image, a style, and a requirement in one pass, and image generation is not planned.
 - A mood language and imagery corpus. The picker still offers four colour groups with four words each, but any word the listener types is recorded as written and the classifier lexicon is bilingual. The larger vocabulary of places, weather, bodily sensation, and movement has not been built.
 - A live evaluation of poetry-informed direction. Deterministic tests cover retrieval, reuse, fail-open, and the prompt handoff; whether the poems make the Director's creative description more specific, and whether the two-paragraph brief helps the Composer, still needs a fixed comparison with and without retrieval.
-- Standalone audio defect assessment. The current review judges whether the music matches the request; finding clicks, dropouts, and damaged audio is separate work, described in `DH6012-Documentation/DH6012-Audio-Quality-Workflow.md`.
+- Standalone audio defect assessment. The current review judges whether the music matches the request; finding clicks, dropouts, and damaged audio is separate work.
 - A real-provider end-to-end run of the journey. All journey verification so far uses fake audio and model responses.
 - Section-and-take structure for long-form music, so a long track can be generated in planned sections and assembled rather than requested as one opaque generation.
 - Concurrent candidate generation, if waiting time becomes the limiting factor for curation.

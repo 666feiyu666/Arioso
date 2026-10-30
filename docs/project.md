@@ -9,7 +9,6 @@ Arioso is an agentic music-composition workspace. An agent first turns a human i
 - [`development.md`](development.md) contains the commands and working practices for developing and testing the current implementation.
 - [`background-music-producer.md`](background-music-producer.md) documents the optional album production workflow in the studio.
 - [`nextphase-plan.md`](nextphase-plan.md) records what is in place for the mood-driven product and what is still open.
-- [`DH6012-Documentation/`](DH6012-Documentation/) holds the course material: the project brief, the MoodMic experience and its decisions, the finalization record of the journey round, the two refinements (the general music corpus and the poetry-informed direction, each with its implementation status), and the audio-quality plan (what exists and what is planned).
 
 ## Maintenance rule
 

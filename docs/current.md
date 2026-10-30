@@ -167,7 +167,7 @@ The corpus language follows what the user actually wrote: CJK characters against
 
 The conversation stores a bounded trace as `poem_retrieval`: query, query hash, corpus version, reference ids with titles, authors, scores and matched terms, retrieval time, and an unavailable reason. Full poem text is not duplicated into the saved session. An unchanged query and corpus version reuse the stored references; a new user message changes the hash and retrieves again; a corpus version change re-retrieves. Retrieval fails open — a missing corpus, unreadable manifest, bad record, or empty query leaves the reference set empty and the conversation continues.
 
-The Director receives the poems as delimited, untrusted reference data and the Composer never receives poem text. The interface shows only poem titles and authors, as inspiration for the piece; the poetry refinement in `DH6012-Documentation/DH6012-Project-Poem-Corpus.md` records the intended Director behaviour and the evaluation that is still open.
+The Director receives the poems as delimited, untrusted reference data and the Composer never receives poem text. The interface shows only poem titles and authors, as inspiration for the piece; the intended Director behaviour and the evaluation that is still open are recorded in the course material, which is kept outside this repository.
 
 ## Lyria integration
 

@@ -1,6 +1,0 @@
-{
-  "error": "400 Input blocked: The prompt could not be submitted. The prompt contains sensitive words that violate Google's [Generative AI Prohibited Use policy](https://policies.google.com/terms/generative-ai/use-policy). Try rephrasing the prompt.",
-  "musicType": "electronic",
-  "lyriaPrompt": "创作约三分钟的轻快电子纯音乐，104 BPM，4/4拍，D大调。写出重要项目提交后，停顿片刻才意识到「做成了」的心情：清爽的喜悦逐渐浮现，随后归于踏实的满足。以柔和电钢琴的简短、略带停顿的动机为核心，让它发展为易记的上行旋律；钟铃感合成器只在句尾轻声应答。温暖合成器铺底与圆润贝斯支撑和声，软底鼓、轻军鼓边击和细沙锤带来想起身走动的轻盈律动。[Intro] 留白的电钢琴与渐入的铺底。[Theme] 鼓点和贝斯加入，旋律舒展开来。[Lift] 应答声部增多、和声变得明朗，以配器层次而非音量推高欣喜。[Reprise] 回到较低音区，鼓点渐疏。[Outro] 鼓点退出，让电钢琴动机与温暖和弦自然消散，留下满足的余韵。声场清爽、有层次，不要喧闹或过于刺激。Clean studio recording, natural acoustic timbres for any acoustic sounds, preserve the intended electronic timbres, smooth transients and controlled peaks. No clipping, crackling or digital distortion. instrumental only, no vocals.",
-  "requestedAt": "2026-10-26T07:05:04.176Z"
-}
