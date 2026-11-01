@@ -12,6 +12,9 @@ const PNG = Buffer.from(
   "base64",
 );
 
+// A JPEG header is enough for the format check; the body never gets decoded here.
+const JPEG = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(32)]);
+
 /** Starts a server with one finished album and hands its id to the test. */
 async function withAlbum(
   test: (context: { baseUrl: string; albumId: string }) => Promise<void>,
@@ -53,8 +56,10 @@ describe("album cover", () => {
         body: PNG,
       });
       expect(uploaded.status).toBe(200);
-      const task = await uploaded.json() as { coverUpdatedAt?: string };
+      const task = await uploaded.json() as { coverUpdatedAt?: string; coverFile?: string };
       expect(task.coverUpdatedAt).toBeTruthy();
+      // The stored file is named after the album, keeping its own extension.
+      expect(task.coverFile).toBe("A cover test album.png");
 
       const served = await fetch(`${baseUrl}/api/tasks/${albumId}/cover`);
       expect(served.status).toBe(200);
@@ -69,7 +74,7 @@ describe("album cover", () => {
     });
   });
 
-  it("rejects an upload that is not a PNG", async () => {
+  it("rejects an upload that is not an image", async () => {
     await withAlbum(async ({ baseUrl, albumId }) => {
       const response = await fetch(`${baseUrl}/api/tasks/${albumId}/cover`, {
         method: "POST",
@@ -77,6 +82,21 @@ describe("album cover", () => {
         body: Buffer.from("not an image"),
       });
       expect(response.status).toBe(415);
+    });
+  });
+
+  it("keeps a JPEG cover as a .jpg file", async () => {
+    await withAlbum(async ({ baseUrl, albumId }) => {
+      const uploaded = await fetch(`${baseUrl}/api/tasks/${albumId}/cover`, {
+        method: "POST",
+        headers: { "Content-Type": "image/jpeg" },
+        body: JPEG,
+      });
+      expect(uploaded.status).toBe(200);
+      expect((await uploaded.json() as { coverFile?: string }).coverFile).toBe("A cover test album.jpg");
+
+      const served = await fetch(`${baseUrl}/api/tasks/${albumId}/cover`);
+      expect(served.headers.get("content-type")).toContain("image/jpeg");
     });
   });
 });

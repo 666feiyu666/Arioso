@@ -131,7 +131,7 @@ export async function produceAlbum(
     throw new Error("Every production candidate must have completed audio.");
   }
   const productionDirectory = path.join(store.taskDirectory(task), "production");
-  const cover = path.join(store.taskDirectory(task), "cover.png");
+  const cover = store.coverPath(task);
   const videoCreated = existsSync(cover);
   await mkdir(productionDirectory, { recursive: true });
   const sources: Array<{ file: string; hash: string }> = [];

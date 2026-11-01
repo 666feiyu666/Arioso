@@ -127,10 +127,25 @@ function decodedFileName(value: string | null): string {
 
 const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
-/** Covers are re-encoded PNGs from the browser, so check the header, not the name. */
-function isPngImage(data: Buffer): boolean {
-  return data.length > PNG_SIGNATURE.length
-    && data.subarray(0, PNG_SIGNATURE.length).equals(PNG_SIGNATURE);
+/** Identifies the image from its header, so the stored file gets a real extension. */
+function imageExtension(data: Buffer): "png" | "jpg" | "webp" | undefined {
+  if (data.length > PNG_SIGNATURE.length && data.subarray(0, PNG_SIGNATURE.length).equals(PNG_SIGNATURE)) {
+    return "png";
+  }
+  if (data.length > 3 && data[0] === 0xff && data[1] === 0xd8 && data[2] === 0xff) return "jpg";
+  if (data.length > 12
+    && data.subarray(0, 4).toString("ascii") === "RIFF"
+    && data.subarray(8, 12).toString("ascii") === "WEBP") {
+    return "webp";
+  }
+  return undefined;
+}
+
+function imageMimeType(fileName: string): string {
+  const extension = path.extname(fileName).slice(1).toLowerCase();
+  if (extension === "jpg" || extension === "jpeg") return "image/jpeg";
+  if (extension === "webp") return "image/webp";
+  return "image/png";
 }
 
 function moodText(value: unknown, field: string): string | undefined {
@@ -1595,13 +1610,14 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
         if (request.method === "GET" || request.method === "HEAD") {
           const coverFile = store.coverPath(task);
           if (!existsSync(coverFile)) throw new HttpError(404, "This album has no cover.");
-          await sendFile(request, response, coverFile, "image/png");
+          await sendFile(request, response, coverFile, imageMimeType(coverFile));
           return;
         }
         if (request.method === "POST") {
           const data = await readBinaryBody(request, MAX_DISCUSSION_IMAGE_BYTES);
-          if (!isPngImage(data)) throw new HttpError(415, "Upload a PNG image.");
-          const updated = await store.writeCover(task, data);
+          const extension = imageExtension(data);
+          if (!extension) throw new HttpError(415, "Upload a PNG, JPEG, or WebP image.");
+          const updated = await store.writeCover(task, data, extension);
           sendJson(response, 200, await taskWithMusicReferences(updated));
           return;
         }

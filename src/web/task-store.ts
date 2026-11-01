@@ -178,7 +178,9 @@ export interface MusicTask {
   orchestralAssembly?: OrchestralAssembly;
   generatedText?: string | null;
   audioFile?: string;
-  /** Set when the user picked an album cover; the image is `cover.png`. */
+  /** Set when the user picked an album cover; names the file inside the task directory. */
+  coverFile?: string | undefined;
+  /** Set when the user picked an album cover. */
   coverUpdatedAt?: string | undefined;
   error?: string | undefined;
   sourceDiscussionId?: string;
@@ -337,6 +339,17 @@ function safeAudioName(value: string | undefined, fallback: string): string {
     .trim();
   const name = Array.from(normalized).slice(0, 96).join("").replace(/[. ]+$/g, "") || fallback;
   return `${isSafeFileName(name) ? name : `_${name}`}.mp3`;
+}
+
+/** A cover keeps the album's name, so the task directory reads at a glance. */
+function safeCoverName(value: string | undefined, fallback: string, extension: string): string {
+  const normalized = (value ?? "")
+    .replace(/[<>:"/\\|?*\u0000-\u001f]/g, " ")
+    .replace(/\s+/g, " ")
+    .replace(/[. ]+$/g, "")
+    .trim();
+  const name = Array.from(normalized).slice(0, 80).join("").replace(/[. ]+$/g, "") || fallback;
+  return `${isSafeFileName(name) ? name : `_${name}`}.${extension}`;
 }
 
 async function taskRecordPaths(directory: string): Promise<string[]> {
@@ -929,22 +942,31 @@ export class TaskStore {
   }
 
   /**
-   * Where the album cover lives. The same file is what the producer uses as the
-   * video's static cover, so a user-picked image and the export share one file.
+   * Where the album cover lives: a file named after the album, inside the task
+   * directory. `cover.png` is the fallback for covers written before the file
+   * carried the album's name, and is what the producer looks for by default.
    */
   coverPath(task: MusicTask): string {
-    return path.join(this.taskDirectory(task), "cover.png");
+    return path.join(this.taskDirectory(task), task.coverFile ?? "cover.png");
   }
 
-  async writeCover(task: MusicTask, image: Buffer): Promise<MusicTask> {
-    await mkdir(this.taskDirectory(task), { recursive: true });
-    await writeFile(this.coverPath(task), image);
-    return this.update(task.id, { coverUpdatedAt: new Date().toISOString() });
+  async writeCover(task: MusicTask, image: Buffer, extension: string): Promise<MusicTask> {
+    const directory = this.taskDirectory(task);
+    await mkdir(directory, { recursive: true });
+    const fileName = safeCoverName(
+      task.albumPlan?.albumTitle || task.title || task.description,
+      task.id,
+      extension,
+    );
+    const previous = this.coverPath(task);
+    await writeFile(path.join(directory, fileName), image);
+    if (path.basename(previous) !== fileName) await rm(previous, { force: true });
+    return this.update(task.id, { coverFile: fileName, coverUpdatedAt: new Date().toISOString() });
   }
 
   async removeCover(task: MusicTask): Promise<MusicTask> {
     await rm(this.coverPath(task), { force: true });
-    return this.update(task.id, { coverUpdatedAt: undefined });
+    return this.update(task.id, { coverFile: undefined, coverUpdatedAt: undefined });
   }
 
   async writeMovementAudio(

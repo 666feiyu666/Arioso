@@ -502,8 +502,11 @@ function restorePlayback() {
   stage.controls.resume(saved.trackId, saved.position, false);
 }
 
-/** Square-crops and re-encodes a picked image, so every cover is one small PNG. */
-async function coverPng(file) {
+const COVER_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
+
+/** Scales the picked image to a square cover and keeps its own format. */
+async function coverBlob(file) {
+  const type = COVER_TYPES.has(file.type) ? file.type : "image/png";
   const bitmap = await createImageBitmap(file);
   const size = 512;
   const canvas = document.createElement("canvas");
@@ -516,7 +519,9 @@ async function coverPng(file) {
   const height = bitmap.height * scale;
   context.drawImage(bitmap, (size - width) / 2, (size - height) / 2, width, height);
   bitmap.close?.();
-  const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+  const blob = await new Promise((resolve) => (
+    type === "image/png" ? canvas.toBlob(resolve, type) : canvas.toBlob(resolve, type, 0.9)
+  ));
   if (!blob) throw new Error("The image could not be converted.");
   return blob;
 }
@@ -525,16 +530,17 @@ async function uploadCover(file) {
   const id = state.currentId;
   if (!id) return;
   try {
-    const blob = await coverPng(file);
+    const blob = await coverBlob(file);
     const updated = await api(`/api/tasks/${encodeURIComponent(id)}/cover`, {
       method: "POST",
-      headers: { "Content-Type": "image/png" },
+      headers: { "Content-Type": blob.type || "image/png" },
       body: blob,
     });
     replaceTask(updated);
     state.message = "";
-  } catch {
-    state.message = t("coverError");
+  } catch (error) {
+    const reason = error instanceof Error && error.message ? ` (${error.message})` : "";
+    state.message = `${t("coverError")}${reason}`;
   }
   render();
 }
