@@ -48,6 +48,8 @@ export async function withWebServer(
       server.close();
       await closed;
     }
-    await rm(root, { recursive: true, force: true });
+    // A background generation may still be writing when the test ends, so the
+    // removal retries instead of failing the suite on a transient empty check.
+    await rm(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 40 });
   }
 }

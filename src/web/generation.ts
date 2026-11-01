@@ -13,10 +13,10 @@ import {
 
 /** A provider failure together with the kind of outcome it leaves behind. */
 export class GenerationFailure extends Error {
-  constructor(readonly kind: FailureKind, message: string) {
+  constructor(readonly kind: FailureKind, message: string, readonly retryable = true) {
     super(kind === "unknown"
       ? `${message} The remote outcome is unknown: the audio may already have been generated. `
-        + "Nothing was retried automatically; start a new attempt only if you want another generation."
+        + "The automatic retries stop here; start a new attempt only if you want another generation."
       : message);
     this.name = "GenerationFailure";
   }
@@ -36,16 +36,87 @@ export interface DispatchGenerationOptions {
     prompt: string,
     options: { model: string; timeoutMs: number; signal: AbortSignal },
   ) => Promise<{ audio: Buffer; generatedText: string | null }>;
+  /** Waits between dispatches; tests shorten them. */
+  retryDelaysMs?: number[];
+}
+
+/** How many provider dispatches one generation may spend before it fails. */
+export const MAX_GENERATION_ATTEMPTS = 3;
+
+/** Waits between dispatches, so a transient provider fault can clear. */
+const RETRY_DELAYS_MS = [1500, 4000];
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** Rejecting the request itself cannot be fixed by sending it again. */
+function isRetryable(failure: GenerationFailure): boolean {
+  return failure.retryable && failure.kind !== "auth" && failure.kind !== "invalid-input";
+}
+
+/** Waits between dispatches; the environment shortens them for the test suite. */
+function retryDelays(options: DispatchGenerationOptions): number[] {
+  if (options.retryDelaysMs?.length) return options.retryDelaysMs;
+  const configured = process.env.ARIOSO_GENERATION_RETRY_DELAYS_MS;
+  if (configured !== undefined) {
+    const parsed = configured.split(",").map((value) => Number(value.trim()))
+      .filter((value) => Number.isFinite(value) && value >= 0);
+    if (parsed.length) return parsed;
+  }
+  return RETRY_DELAYS_MS;
 }
 
 /**
- * Dispatches one paid generation under an explicit deadline and records bounded
- * attempt metadata before the request leaves this process. There is no automatic
- * retry: repeating a request whose outcome is unknown could pay for the same
- * audio twice, so the task fails and the user decides whether to try again. A
- * result that arrives after a newer attempt replaced this one is discarded.
+ * Dispatches a generation and, when the provider fails, tries again up to
+ * `MAX_GENERATION_ATTEMPTS` times. While a retry is in flight the task carries
+ * `generationRetry`, so the interface can say that the first attempt failed.
+ *
+ * Each dispatch is recorded separately and the newest one owns the result, so a
+ * late return from a superseded attempt is discarded rather than written twice.
  */
 export async function dispatchGeneration(
+  store: TaskStore,
+  task: MusicTask,
+  options: DispatchGenerationOptions,
+): Promise<{ audio: Buffer; generatedText: string | null; attemptId: string }> {
+  let failure: GenerationFailure | undefined;
+  for (let attemptNumber = 1; attemptNumber <= MAX_GENERATION_ATTEMPTS; attemptNumber += 1) {
+    try {
+      const result = await dispatchAttempt(store, task, options);
+      await clearRetryNotice(store, task.id);
+      return result;
+    } catch (error) {
+      if (!(error instanceof GenerationFailure)) throw error;
+      failure = error;
+      if (!isRetryable(error) || attemptNumber === MAX_GENERATION_ATTEMPTS) break;
+      await store.update(task.id, {
+        generationRetry: {
+          failedAttempt: attemptNumber,
+          maxAttempts: MAX_GENERATION_ATTEMPTS,
+          reason: error.message,
+          retryingAt: new Date().toISOString(),
+        },
+      });
+      const delays = retryDelays(options);
+      await sleep(delays[attemptNumber - 1] ?? delays[delays.length - 1] ?? 4000);
+    }
+  }
+  await clearRetryNotice(store, task.id);
+  throw failure ?? new GenerationFailure("rejected", "Generation failed.");
+}
+
+/** Removes the retry note once the generation has settled either way. */
+async function clearRetryNotice(store: TaskStore, taskId: string): Promise<void> {
+  if (!store.get(taskId)?.generationRetry) return;
+  await store.update(taskId, { generationRetry: undefined });
+}
+
+/**
+ * One paid dispatch under an explicit deadline, with the attempt metadata
+ * recorded before the request leaves this process.
+ */
+async function dispatchAttempt(
   store: TaskStore,
   task: MusicTask,
   options: DispatchGenerationOptions,
@@ -57,9 +128,12 @@ export async function dispatchGeneration(
     requestRef: requestReference(options.purpose, options.model, options.prompt),
     startedAt: new Date().toISOString(),
   };
+  // A retry must extend the history rather than replace it, so the record is
+  // read from the store instead of the task this call was handed.
+  const beforeDispatch = store.get(task.id) ?? task;
   await store.update(task.id, {
     generationAttemptId: attempt.id,
-    generationAttempts: recordGenerationAttempt(task.generationAttempts, attempt),
+    generationAttempts: recordGenerationAttempt(beforeDispatch.generationAttempts, attempt),
   });
 
   const client = options.generate ? undefined : new LyriaClient(options.apiKey);
@@ -102,7 +176,11 @@ export async function dispatchGeneration(
         "A newer attempt replaced this one.",
       ),
     });
-    throw new GenerationFailure("rejected", "A newer attempt replaced this one; the late result was discarded.");
+    throw new GenerationFailure(
+      "rejected",
+      "A newer attempt replaced this one; the late result was discarded.",
+      false,
+    );
   }
   await store.update(task.id, {
     generationAttempts: completeGenerationAttempt(

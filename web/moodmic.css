@@ -1261,6 +1261,18 @@
   max-width: 46ch;
 }
 
+.mm-retry {
+  margin: 14px auto 0;
+  max-width: 46ch;
+  padding: 8px 12px;
+  border: 1px solid color-mix(in srgb, var(--group) 34%, var(--line));
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--group) 8%, var(--surface));
+  color: var(--ink);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
 .mm-bar {
   height: 6px;
   border-radius: 999px;

@@ -66,9 +66,9 @@ export function classifyRequestFailure(error: unknown): FailureKind {
   return "unknown";
 }
 
-/** A paid generation is dispatched once; repeating it could pay twice. */
+/** Dispatches one generation may spend before it fails; see web/generation.ts. */
 export function attemptsForPaidGeneration(): number {
-  return 1;
+  return 3;
 }
 
 /**

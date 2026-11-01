@@ -117,6 +117,7 @@ const COPY = {
     statusQueued: "排队中", statusComposing: "正在构思编曲", statusGenerating: "正在生成音频",
     statusAssembling: "正在拼接乐章", statusProcessing: "正在后期处理",
     statusCompleted: "已完成", statusFailed: "未完成",
+    generationRetry: "第 {failed} 次生成失败，正在重新生成（第 {next}/{max} 次尝试）",
     statusReview: "待你确认",
     statusPlanning: "编曲提示已就绪",
     promptConfirmTitle: "确认生成音乐",
@@ -229,6 +230,7 @@ const COPY = {
     statusQueued: "Queued", statusComposing: "Shaping the arrangement", statusGenerating: "Generating audio",
     statusAssembling: "Assembling movements", statusProcessing: "Post-processing",
     statusCompleted: "Completed", statusFailed: "Not finished",
+    generationRetry: "Generation failed on attempt {failed}. Retrying automatically, attempt {next} of {max}.",
     statusReview: "Needs your confirmation",
     statusPlanning: "Composition prompt ready",
     promptConfirmTitle: "Confirm to generate",
@@ -923,12 +925,20 @@ function renderResult() {
       </div>`;
   }
   if (task.status !== "completed") {
+    const retry = task.generationRetry
+      ? `<p class="mm-retry" role="status">${esc(t("generationRetry", {
+          failed: task.generationRetry.failedAttempt,
+          next: task.generationRetry.failedAttempt + 1,
+          max: task.generationRetry.maxAttempts,
+        }))}</p>`
+      : "";
     const progress = `
       <div class="mm-progress">
         <div class="mm-disc" aria-hidden="true"></div>
         <h3>${esc(statusLabel(task.status))}</h3>
         <p>${esc(progressPhase(task))}</p>
         <div class="mm-bar"><span></span></div>
+        ${retry}
       </div>`;
     return `<div class="mm-block mm-result" style="--group:${group?.color ?? "#b1642f"}">${progress}</div>`;
   }

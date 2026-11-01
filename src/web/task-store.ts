@@ -139,6 +139,16 @@ interface OrchestralAssembly {
   assembledAt: string;
 }
 
+export interface GenerationRetry {
+  /** Which dispatch failed, counting from one. */
+  failedAttempt: number;
+  /** How many dispatches this generation may spend in total. */
+  maxAttempts: number;
+  /** The provider's message, kept for the note shown while the retry runs. */
+  reason: string;
+  retryingAt: string;
+}
+
 export interface MusicTask {
   id: string;
   description: string;
@@ -192,6 +202,8 @@ export interface MusicTask {
   generationAttemptId?: string;
   /** Bounded history of provider dispatches, oldest first. */
   generationAttempts?: GenerationAttempt[];
+  /** Set while a failed dispatch is being retried automatically. */
+  generationRetry?: GenerationRetry | undefined;
   /** MoodMic creations reused as references when planning a Playlist album. */
   playlistReferences?: PlaylistReference[];
   /** How the album author read the references and the user's theme, shown for confirmation. */

@@ -601,6 +601,14 @@ function statusLabel(status) {
   return t(status);
 }
 
+// A failed dispatch is retried automatically; the note says so, and says which
+// attempt failed, so a slow generation does not look like a stalled one.
+function retryNote(retry) {
+  return state.language === "en"
+    ? `Generation failed on attempt ${retry.failedAttempt}. Retrying automatically, attempt ${retry.failedAttempt + 1} of ${retry.maxAttempts}.`
+    : `第 ${retry.failedAttempt} 次生成失败，正在自动重新生成（第 ${retry.failedAttempt + 1}/${retry.maxAttempts} 次尝试）`;
+}
+
 function localizedExample(example) {
   return state.language === "en" ? { ...example, ...example.en } : example;
 }
@@ -1563,6 +1571,7 @@ function renderTaskDetail(task) {
       <h3>${escapeHtml(statusLabel(task.status))}</h3>
       <div class="progress-line"></div>
       <p>${task.status === "generating" ? t("generatingProgress") : t("composingProgress")}</p>
+      ${task.generationRetry ? `<p class="progress-retry">${escapeHtml(retryNote(task.generationRetry))}</p>` : ""}
     </div>
   ` : "";
   const error = task.status === "failed" ? `

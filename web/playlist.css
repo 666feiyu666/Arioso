@@ -666,6 +666,16 @@ body.has-drawer { overflow: hidden; }
 .pl-progress-gauge { font-size: 1.7rem; font-weight: 600; color: var(--brand); letter-spacing: -0.02em; line-height: 1; }
 .pl-progress-note { color: var(--muted); font-size: 0.85rem; }
 
+.pl-progress-retry {
+  margin-top: 8px;
+  padding: 7px 11px;
+  border: 1px solid color-mix(in srgb, var(--accent, #b1642f) 30%, var(--line));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent, #b1642f) 7%, var(--surface));
+  color: var(--ink);
+  font-size: 0.82rem;
+}
+
 .pl-seg-bar { display: flex; gap: 3px; width: 100%; position: relative; }
 .pl-seg-bar i {
   flex: 1 1 0;

@@ -35,6 +35,7 @@ const COPY = {
       assemble: "拼接导出", done: "已完成", review: "等待你确认构思", failed: "未完成",
     },
     progressWait: "正在进行，请稍候",
+    progressRetry: (failed, next, max) => `第 ${failed} 次生成失败，正在自动重新生成（第 ${next}/${max} 次尝试）`,
     progressCurrent: (title) => `正在处理：${title}`,
     progressCount: (done, total) => `${done} / ${total}`,
     planTitle: "专辑构思",
@@ -110,6 +111,7 @@ const COPY = {
       review: "Waiting for your confirmation", failed: "Not finished",
     },
     progressWait: "In progress, please wait",
+    progressRetry: (failed, next, max) => `Generation failed on attempt ${failed}. Retrying automatically, attempt ${next} of ${max}.`,
     progressCurrent: (title) => `Working on: ${title}`,
     progressCount: (done, total) => `${done} / ${total}`,
     planTitle: "Album plan",
@@ -324,6 +326,13 @@ export function createAlbumStage(options) {
         </div>
         ${progressBar(model)}
         <p class="pl-progress-note">${esc(note)}</p>
+        ${task.generationRetry
+          ? `<p class="pl-progress-retry" role="status">${esc(t("progressRetry")(
+              task.generationRetry.failedAttempt,
+              task.generationRetry.failedAttempt + 1,
+              task.generationRetry.maxAttempts,
+            ))}</p>`
+          : ""}
       </section>`;
   }
 

@@ -3,6 +3,7 @@ import path from "node:path";
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { MAX_GENERATION_ATTEMPTS } from "../src/web/generation.js";
 import { withWebServer } from "./helpers/web-server.js";
 
 const { generateMock } = vi.hoisted(() => ({ generateMock: vi.fn() }));
@@ -129,11 +130,11 @@ describe("MoodMic generation dispatch options", () => {
       expect(options.signal?.aborted).toBe(true);
       expect(failed.error).toMatch(/deadline/u);
       expect(failed.generationAttempts?.[0]?.outcome).toBe("unknown");
-      expect(generateMock).toHaveBeenCalledTimes(1);
+      expect(generateMock).toHaveBeenCalledTimes(MAX_GENERATION_ATTEMPTS);
 
       // The task is recoverable: the reservation was released.
       expect((await fetch(`${baseUrl}/api/tasks/${taskId}/retry`, { method: "POST" })).status).toBe(202);
-      await waitForCalls(2);
+      await waitForCalls(MAX_GENERATION_ATTEMPTS + 1);
       for (let attempt = 0; attempt < 240; attempt += 1) {
         const task = await readTask(baseUrl);
         if (!RUNNING.has(task.status)) break;
@@ -147,20 +148,22 @@ describe("MoodMic generation dispatch options", () => {
     const second = deferred<{ audio: Buffer; generatedText: string | null }>();
     generateMock
       .mockImplementationOnce(() => first.promise)
+      .mockImplementationOnce(() => first.promise)
+      .mockImplementationOnce(() => first.promise)
       .mockImplementationOnce(() => second.promise);
 
     await withWebServer(async ({ baseUrl }) => {
       expect((await approve(baseUrl)).status).toBe(202);
-      await waitForCalls(1);
+      await waitForCalls(MAX_GENERATION_ATTEMPTS);
 
       // The first attempt times out and leaves an unknown outcome.
       const failed = await waitForTask(baseUrl, (task) => task.status === "failed");
-      const firstAttemptId = failed.generationAttempts?.[0]?.id;
+      const firstAttemptId = failed.generationAttempts?.at(-1)?.id;
       expect(firstAttemptId).toBeDefined();
 
       // An explicit retry starts the replacement attempt.
       expect((await fetch(`${baseUrl}/api/tasks/${taskId}/retry`, { method: "POST" })).status).toBe(202);
-      await waitForCalls(2);
+      await waitForCalls(MAX_GENERATION_ATTEMPTS + 1);
       const secondAttemptId = (await readTask(baseUrl)).generationAttemptId;
       expect(secondAttemptId).not.toBe(firstAttemptId);
 

@@ -158,11 +158,12 @@ describe("album generation continuation", () => {
       const response = await fetch(`${baseUrl}/api/tasks/album-task/album/tracks/track-4/retry`, { method: "POST" });
       expect(response.status).toBe(202);
       await response.json();
+      // Fourteen candidates finish in the background, so the wait is generous.
       await vi.waitFor(async () => {
         const latest = await fetch(`${baseUrl}/api/tasks/album-task`).then(taskResponse);
         expect(latest.status).toBe("completed");
         expect(latest.albumTracks?.every((track) => track.status === "completed" && track.audioFile)).toBe(true);
-      });
+      }, { timeout: 15000 });
       expect(composeMock).toHaveBeenCalledTimes(1);
       expect(reviewMock).toHaveBeenCalledTimes(2);
       expect(generateMock).toHaveBeenCalledTimes(14);
@@ -252,7 +253,9 @@ describe("album generation continuation", () => {
       task.albumTracks![index]!.status = "failed";
       delete task.albumTracks![index]!.audioFile;
     }
-    generateMock.mockRejectedValueOnce(new Error("Invalid candidate request"))
+    // A rejected request is not retried, so one failure keeps the track failed.
+    generateMock
+      .mockRejectedValueOnce(Object.assign(new Error("Invalid candidate request"), { status: 400 }))
       .mockResolvedValue({ audio: Buffer.from([1, 2, 3]), generatedText: null });
     await withWebServer(async ({ baseUrl }) => {
       const getTask = () => fetch(`${baseUrl}/api/tasks/album-task`).then(taskResponse);
@@ -265,7 +268,7 @@ describe("album generation continuation", () => {
         expect(latest.albumTracks!.slice(0, 2).map((track) => track.status)).toEqual(["failed", "completed"]);
       });
       expect(generateMock.mock.calls.map((call) => call[0])).toEqual(["prompt 1", "prompt 2"]);
-      // Every dispatch carries an explicit deadline and no retry policy.
+      // Every dispatch carries an explicit deadline and the shared failure policy.
       expect(generateMock.mock.calls[0]?.[1]).toMatchObject({ model: "lyria-3.5" });
       const retry = await fetch(`${baseUrl}/api/tasks/album-task/album/tracks/track-1/retry`, { method: "POST" });
       expect(retry.status).toBe(202);

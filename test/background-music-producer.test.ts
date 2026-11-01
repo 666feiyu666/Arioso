@@ -165,13 +165,18 @@ describe("Background Music Producer lifecycle", () => {
 
   it("does not postprocess an album with a failed generation candidate", async () => {
     const { store, task, compose } = await setup();
-    mocks.generate.mockRejectedValueOnce(new Error("Generation rejected"));
+    // The automatic retries spend the whole budget on this candidate before the
+    // run gives up, so three dispatches fail here and the next run succeeds.
+    mocks.generate
+      .mockRejectedValueOnce(new Error("Generation rejected"))
+      .mockRejectedValueOnce(new Error("Generation rejected"))
+      .mockRejectedValueOnce(new Error("Generation rejected"));
     const command = fakeCommand();
     await expect(runBackgroundMusicProducer(store, task, config, compose, command)).rejects.toThrow("Generation rejected");
     expect(command.mock.calls.map(([args]) => args[0])).toEqual(["doctor"]);
     expect(store.get(task.id)?.albumTracks?.filter((track) => track.status === "completed")).toHaveLength(13);
     await runBackgroundMusicProducer(store, store.get(task.id)!, config, compose, command);
-    expect(mocks.generate).toHaveBeenCalledTimes(15);
+    expect(mocks.generate).toHaveBeenCalledTimes(17);
     expect(store.get(task.id)?.status).toBe("completed");
   });
 

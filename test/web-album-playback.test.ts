@@ -66,7 +66,12 @@ function album() {
 }
 
 async function interfaceHarness(initial = album()) {
-  const source = await readFile(new URL("../web/app.js", import.meta.url), "utf8");
+  const page = await readFile(new URL("../web/app.js", import.meta.url), "utf8");
+  // The page scripts are ES modules; this harness runs them as a function body,
+  // so the shared playback helper is inlined and the import line dropped.
+  const focus = await readFile(new URL("../web/audio-focus.js", import.meta.url), "utf8");
+  const source = `${focus.replace(/^export /gmu, "")}
+${page.replace(/^import .*$/gmu, "")}`;
   const nodes = new Map<string, Element>();
   const audio = new Audio();
   nodes.set("#audio-player", audio);

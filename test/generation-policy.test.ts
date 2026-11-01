@@ -9,7 +9,7 @@ import {
   recordGenerationAttempt,
   type GenerationAttempt,
 } from "../src/utils/attempts.js";
-import { dispatchGeneration, GenerationFailure } from "../src/web/generation.js";
+import { MAX_GENERATION_ATTEMPTS, dispatchGeneration, GenerationFailure } from "../src/web/generation.js";
 import { TaskStore } from "../src/web/task-store.js";
 import { withWebServer } from "./helpers/web-server.js";
 
@@ -56,6 +56,7 @@ function dispatch(
     prompt: "slow calm piano",
     apiKey: "test-key",
     timeoutMs,
+    retryDelaysMs: [0, 0],
   });
 }
 
@@ -87,23 +88,24 @@ describe("request failure classification", () => {
 });
 
 describe("paid generation dispatch", () => {
-  it("bounds a hung provider and records the unknown outcome", async () => {
+  it("bounds a hung provider on every attempt and records the unknown outcome", async () => {
     const { store, task } = await temporaryStore();
     generateMock.mockImplementation(() => new Promise(() => undefined));
 
     await expect(dispatch(store, task, 120)).rejects.toBeInstanceOf(GenerationFailure);
-    expect(generateMock).toHaveBeenCalledTimes(1);
+    expect(generateMock).toHaveBeenCalledTimes(MAX_GENERATION_ATTEMPTS);
 
     const record = store.get(task.id);
-    expect(record?.generationAttempts).toHaveLength(1);
+    expect(record?.generationAttempts).toHaveLength(MAX_GENERATION_ATTEMPTS);
+    expect(record?.generationAttempts?.every((attempt) => attempt.outcome === "unknown")).toBe(true);
     expect(record?.generationAttempts?.[0]).toMatchObject({
       purpose: "generate", model: "lyria-3.5", outcome: "unknown",
     });
     expect(record?.generationAttempts?.[0]?.requestRef).toMatch(/^[a-f0-9]{16}$/u);
-    expect(record?.generationAttemptId).toBe(record?.generationAttempts?.[0]?.id);
+    expect(record?.generationAttemptId).toBe(record?.generationAttempts?.at(-1)?.id);
   });
 
-  it("never repeats a generation whose remote outcome is unknown", async () => {
+  it("retries an unknown outcome until the attempt budget is spent", async () => {
     const { store, task } = await temporaryStore();
     generateMock.mockImplementation(() => Promise.reject(
       Object.assign(new Error("socket hang up after upload"), { code: "ECONNRESET" }),
@@ -113,8 +115,27 @@ describe("paid generation dispatch", () => {
     expect(failure).toBeInstanceOf(GenerationFailure);
     expect((failure as GenerationFailure).kind).toBe("unknown");
     expect((failure as Error).message).toContain("remote outcome is unknown");
-    expect(generateMock).toHaveBeenCalledTimes(1);
-    expect(store.get(task.id)?.generationAttempts?.[0]?.outcome).toBe("unknown");
+    expect(generateMock).toHaveBeenCalledTimes(MAX_GENERATION_ATTEMPTS);
+    expect(store.get(task.id)?.generationAttempts?.map((attempt) => attempt.outcome))
+      .toEqual(["unknown", "unknown", "unknown"]);
+    expect(store.get(task.id)?.generationRetry).toBeUndefined();
+  });
+
+  it("shows the retry note between attempts", async () => {
+    const { store, task } = await temporaryStore();
+    const notes: Array<{ failedAttempt: number; maxAttempts: number } | undefined> = [];
+    generateMock.mockImplementation(async () => {
+      const current = store.get(task.id)?.generationRetry;
+      notes.push(current ? { failedAttempt: current.failedAttempt, maxAttempts: current.maxAttempts } : undefined);
+      throw Object.assign(new Error("socket hang up"), { code: "ECONNRESET" });
+    });
+
+    await expect(dispatch(store, task)).rejects.toBeInstanceOf(GenerationFailure);
+    expect(notes).toEqual([
+      undefined,
+      { failedAttempt: 1, maxAttempts: MAX_GENERATION_ATTEMPTS },
+      { failedAttempt: 2, maxAttempts: MAX_GENERATION_ATTEMPTS },
+    ]);
   });
 
   it("reports a definite rejection without claiming an unknown outcome", async () => {
@@ -157,10 +178,11 @@ describe("paid generation dispatch", () => {
 
   it("leaves the store usable after a deadline failure", async () => {
     const { store, task } = await temporaryStore();
-    generateMock.mockImplementationOnce(() => new Promise(() => undefined));
+    generateMock.mockImplementation(() => new Promise(() => undefined));
     await expect(dispatch(store, task, 100)).rejects.toBeInstanceOf(GenerationFailure);
 
-    generateMock.mockImplementationOnce(async () => ({ audio: Buffer.from([9]), generatedText: null }));
+    generateMock.mockReset();
+    generateMock.mockImplementation(async () => ({ audio: Buffer.from([9]), generatedText: null }));
     await expect(dispatch(store, task)).resolves.toMatchObject({ generatedText: null });
     expect(store.get(task.id)?.generationAttempts?.at(-1)?.outcome).toBe("completed");
   });
