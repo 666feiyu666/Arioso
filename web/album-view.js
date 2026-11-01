@@ -68,6 +68,7 @@ const COPY = {
     planCollapsedHint: "音频生成完成后仍可在这里回看当初的构思。",
     scopeCandidates: "候选",
     scopeIncluded: "已收录",
+    sideTracksTitle: (n) => `${n} 首曲目`,
     playAll: "播放全部",
     nowPlaying: "正在播放",
     previousTrack: "上一首",
@@ -142,6 +143,7 @@ const COPY = {
     planCollapsedHint: "You can still look back at this plan once the audio is done.",
     scopeCandidates: "Candidates",
     scopeIncluded: "Included",
+    sideTracksTitle: (n) => `${n} track${n === 1 ? "" : "s"}`,
     playAll: "Play all",
     nowPlaying: "Now playing",
     previousTrack: "Previous track",
@@ -503,34 +505,43 @@ export function createAlbumStage(options) {
     const anyPlayable = playableTracks(task, "candidate").length > 0;
     const readyCount = orderedTracks(task).filter((track) => track.audioFile).length;
     const planBody = `${readingPanel(task)}${ideaPanel(task)}${outlinePanel(task)}`;
+    // Two columns: the album on the left (progress, plan, exports), its tracks in
+    // their own list on the right, so the track list reads like a music library
+    // rather than the tail of a long page.
     return `
-      ${task.status === "failed" ? "" : progressPanel(task)}
-      ${task.albumPlan ? `<details class="pl-plan-fold"${state.planOpen ? " open" : ""}>
-        <summary>${esc(t("planCollapsed"))}</summary>
-        <p class="pl-plan-intro">${esc(t("planCollapsedHint"))}</p>
-        ${planBody}
-        ${(task.playlistDiscussion ?? []).length ? `<section class="pl-plan-section pl-chat"><h3>${esc(t("chatTitle"))}</h3>
-          <div class="pl-thread">${(task.playlistDiscussion ?? []).map((message) => `<div class="pl-bubble is-${esc(message.role)}"><p>${esc(message.content)}</p></div>`).join("")}</div></section>` : ""}
-      </details>` : ""}
-
-      ${candidateCount ? `<div class="pl-toolbar">
-        <div class="pl-scope" role="group" aria-label="${esc(t("scopeCandidates"))}">
-          <button type="button" data-album-action="scope" data-scope="candidate" aria-pressed="${scope === "candidate"}">${esc(t("scopeCandidates"))} <small class="num">${candidateCount}</small></button>
-          <button type="button" data-album-action="scope" data-scope="included" aria-pressed="${scope === "included"}">${esc(t("scopeIncluded"))} <small class="num">${includedCount}</small></button>
+      <div class="pl-album-grid">
+        <div class="pl-album-main">
+          ${task.status === "failed" ? "" : progressPanel(task)}
+          ${task.albumPlan ? `<details class="pl-plan-fold"${state.planOpen ? " open" : ""}>
+            <summary>${esc(t("planCollapsed"))}</summary>
+            <p class="pl-plan-intro">${esc(t("planCollapsedHint"))}</p>
+            ${planBody}
+            ${(task.playlistDiscussion ?? []).length ? `<section class="pl-plan-section pl-chat"><h3>${esc(t("chatTitle"))}</h3>
+              <div class="pl-thread">${(task.playlistDiscussion ?? []).map((message) => `<div class="pl-bubble is-${esc(message.role)}"><p>${esc(message.content)}</p></div>`).join("")}</div></section>` : ""}
+          </details>` : ""}
+          ${candidateCount ? `<div class="pl-toolbar">
+            <button class="pl-btn pl-btn-primary" type="button" data-album-action="play-all" ${playable.length ? "" : "disabled"}>▶ ${esc(t("playAll"))}</button>
+            <span class="pl-toolbar-duration num">${esc(t("playlistDuration", durationText(totalDuration(playable))))}</span>
+            <div class="pl-toolbar-actions">
+              <button class="pl-btn pl-btn-quiet" type="button" data-album-action="export" data-scope="included" ${readyCount ? "" : "disabled"}>${esc(t("exportIncluded"))}</button>
+              <button class="pl-btn pl-btn-quiet" type="button" data-album-action="export" data-scope="candidate" ${readyCount ? "" : "disabled"}>${esc(t("exportCandidates"))}</button>
+              <button class="pl-btn pl-btn-quiet" type="button" data-album-action="timestamps" ${readyCount ? "" : "disabled"}>${esc(t("timestamps"))}</button>
+            </div>
+          </div>` : ""}
+          ${state.message ? `<p class="pl-message">${esc(state.message)}</p>` : ""}
         </div>
-        <button class="pl-btn pl-btn-primary" type="button" data-album-action="play-all" ${playable.length ? "" : "disabled"}>▶ ${esc(t("playAll"))}</button>
-        <span class="pl-toolbar-duration num">${esc(t("playlistDuration", durationText(totalDuration(playable))))}</span>
-        <div class="pl-toolbar-actions">
-          <button class="pl-btn pl-btn-quiet" type="button" data-album-action="export" data-scope="included" ${readyCount ? "" : "disabled"}>${esc(t("exportIncluded"))}</button>
-          <button class="pl-btn pl-btn-quiet" type="button" data-album-action="export" data-scope="candidate" ${readyCount ? "" : "disabled"}>${esc(t("exportCandidates"))}</button>
-          <button class="pl-btn pl-btn-quiet" type="button" data-album-action="timestamps" ${readyCount ? "" : "disabled"}>${esc(t("timestamps"))}</button>
-        </div>
-      </div>` : ""}
 
-      ${tracks.length
-        ? `<div class="pl-tracks">${tracks.map((track, index) => trackRow(task, track, index + 1, scope)).join("")}</div>`
-        : `<p class="pl-empty">${esc(t(scope === "included" ? "listIncludedEmpty" : "listCandidatesEmpty"))}</p>`}
-      ${state.message ? `<p class="pl-message">${esc(state.message)}</p>` : ""}
+        <aside class="pl-album-side">
+          <h2 class="pl-side-title">${esc(t("sideTracksTitle", tracks.length))}</h2>
+          ${candidateCount ? `<div class="pl-scope" role="group" aria-label="${esc(t("scopeCandidates"))}">
+            <button type="button" data-album-action="scope" data-scope="candidate" aria-pressed="${scope === "candidate"}">${esc(t("scopeCandidates"))} <small class="num">${candidateCount}</small></button>
+            <button type="button" data-album-action="scope" data-scope="included" aria-pressed="${scope === "included"}">${esc(t("scopeIncluded"))} <small class="num">${includedCount}</small></button>
+          </div>` : ""}
+          ${tracks.length
+            ? `<div class="pl-tracks">${tracks.map((track, index) => trackRow(task, track, index + 1, scope)).join("")}</div>`
+            : `<p class="pl-empty">${esc(t(scope === "included" ? "listIncludedEmpty" : "listCandidatesEmpty"))}</p>`}
+        </aside>
+      </div>
       ${anyPlayable ? playerBar(task) : ""}`;
   }
 

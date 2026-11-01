@@ -1,8 +1,9 @@
-/* Mini player: the bar every page other than the playlist shows when a track is
-   already playing, so navigating away does not silence the music. */
+/* Mini player: a thin dock that every page other than the playlist shows when a
+   track is already loaded, so a page change keeps the music one click away.
+   Title left, transport centred, position right — no panel, no progress bar. */
 
 body.has-mini-player {
-  padding-bottom: 68px;
+  padding-bottom: 96px;
 }
 
 .pb {
@@ -12,10 +13,11 @@ body.has-mini-player {
   bottom: 0;
   z-index: 45;
   display: grid;
-  grid-template-columns: 40px minmax(0, 1fr) minmax(120px, 1.6fr) auto 32px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  gap: 14px;
-  padding: 10px max(18px, calc((100vw - 1080px) / 2));
+  gap: 16px;
+  min-height: 56px;
+  padding: 6px max(20px, calc((100vw - 1080px) / 2));
   color: #f4f6fa;
   background: color-mix(in srgb, var(--ink) 97%, var(--brand));
   border-top: 1px solid color-mix(in srgb, var(--ink) 70%, var(--line));
@@ -23,31 +25,16 @@ body.has-mini-player {
   backdrop-filter: blur(18px);
 }
 
-.pb-toggle {
-  width: 40px;
-  height: 40px;
-  display: grid;
-  place-items: center;
-  border: 0;
-  border-radius: 50%;
-  background: var(--brand);
-  color: #fff;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background 0.16s var(--ease);
-}
-
-.pb-toggle:hover { background: var(--brand-deep); }
-
 .pb-meta {
   min-width: 0;
   display: grid;
-  gap: 2px;
+  gap: 1px;
 }
 
 .pb-meta strong {
   overflow: hidden;
-  font-size: 0.92rem;
+  font-size: 0.88rem;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -55,77 +42,61 @@ body.has-mini-player {
 .pb-meta small {
   overflow: hidden;
   color: #9aa2b2;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.pb-seek {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 100%;
-  height: 4px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.22);
-  cursor: pointer;
+.pb-transport {
+  display: flex;
+  align-items: center;
+  gap: 2px;
 }
 
-.pb-seek::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.16);
-}
-
-.pb-seek::-moz-range-thumb {
-  width: 12px;
-  height: 12px;
-  border: 0;
-  border-radius: 50%;
-  background: #fff;
-}
-
-.pb-seek:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
-
-.pb-time {
-  color: #c8cede;
-  font-size: 0.76rem;
-  white-space: nowrap;
-}
-
-.pb-stop {
-  width: 28px;
-  height: 28px;
+.pb-transport button {
+  width: 32px;
+  height: 32px;
   display: grid;
   place-items: center;
   border: 0;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  color: #f4f6fa;
-  font-size: 0.7rem;
+  background: none;
+  color: #c8cede;
+  font-size: 0.78rem;
   cursor: pointer;
+  transition: color 0.16s var(--ease), background 0.16s var(--ease);
 }
 
-.pb-stop:hover { background: rgba(255, 255, 255, 0.22); }
+.pb-transport button:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+
+.pb-toggle {
+  width: 36px;
+  height: 36px;
+  font-size: 0.9rem;
+  color: #f4f6fa;
+}
+
+.pb-stop { font-size: 0.68rem; }
+
+.pb-time {
+  justify-self: end;
+  color: #9aa2b2;
+  font-size: 0.74rem;
+  white-space: nowrap;
+}
+
+.pb-sep { padding: 0 4px; opacity: 0.6; }
 
 @media (max-width: 640px) {
   .pb {
-    grid-template-columns: 36px minmax(0, 1fr) auto;
-    grid-template-areas: "toggle meta stop" "seek seek seek";
-    gap: 6px 12px;
-    padding: 8px 16px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    padding: 6px 16px;
   }
-  .pb-toggle { grid-area: toggle; width: 36px; height: 36px; }
-  .pb-meta { grid-area: meta; }
-  .pb-stop { grid-area: stop; }
-  .pb-seek { grid-area: seek; }
   .pb-time { display: none; }
-  body.has-mini-player { padding-bottom: 76px; }
+  body.has-mini-player { padding-bottom: 92px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pb-toggle { transition: none; }
+  .pb-transport button { transition: none; }
 }

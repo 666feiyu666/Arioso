@@ -24,8 +24,11 @@ const COPY = {
     tabPlaylist: "播放列表（测试）", tabHelp: "帮助", tabBarLabel: "主导航", switchLanguage: "切换界面语言",
     title: "播放列表（测试）",
     libraryNote: "选一张继续制作，或者新建一张。",
+    recentTitle: "最近更新",
+    allTitle: "全部歌单",
     intro: "把 MoodMic 里满意的对话与音乐当作参考，规划并生成一整个歌单。",
     newPlaylist: "＋ 新建歌单",
+    newPlaylistLabel: "新建歌单",
     emptyShelf: "还没有歌单。新建一个，从 MoodMic 的音乐开始。",
     back: "← 返回",
     createTitle: "新建歌单",
@@ -66,8 +69,11 @@ const COPY = {
     tabPlaylist: "Playlist (test)", tabHelp: "Help", tabBarLabel: "Tab navigation", switchLanguage: "Switch interface language",
     title: "Playlist (test)",
     libraryNote: "Pick one to keep working on, or start a new album.",
+    recentTitle: "Recently updated",
+    allTitle: "All playlists",
     intro: "Use the MoodMic conversations and music you liked as references, then plan and generate a whole album.",
     newPlaylist: "＋ New playlist",
+    newPlaylistLabel: "New playlist",
     emptyShelf: "No playlists yet. Start one from your MoodMic music.",
     back: "← Back",
     createTitle: "New playlist",
@@ -248,16 +254,27 @@ const stage = createAlbumStage({
 // ---- views ---------------------------------------------------------------
 
 function viewLibrary() {
-  const albums = state.tasks.filter((task) => task.workflowType === "05-playlist");
+  const albums = state.tasks
+    .filter((task) => task.workflowType === "05-playlist")
+    .sort((left, right) => String(right.updatedAt ?? "").localeCompare(String(left.updatedAt ?? "")));
+  const recent = albums.slice(0, 4);
+  const rest = albums.slice(4);
+  const section = (title, items) => (items.length
+    ? `<section class="lib-section">
+        <h2>${esc(title)}</h2>
+        <div class="lib-grid">${items.map(libraryCard).join("")}</div>
+      </section>`
+    : "");
   return `
     <header class="lib-head">
       <div class="lib-heading">
         <h1>${esc(t("title"))}</h1>
         <p class="lib-note">${esc(t("libraryNote"))}</p>
       </div>
-      <button class="pl-btn pl-btn-primary" type="button" data-action="new">${esc(t("newPlaylist"))}</button>
+      <button class="lib-new" type="button" data-action="new" aria-label="${esc(t("newPlaylistLabel"))}" title="${esc(t("newPlaylistLabel"))}">＋</button>
     </header>
-    ${albums.length ? `<div class="lib-grid">${albums.map(libraryCard).join("")}</div>`
+    ${albums.length
+      ? `${section(t("recentTitle"), recent)}${section(t("allTitle"), rest)}`
       : `<p class="lib-empty">${esc(t("emptyShelf"))}</p>`}
     ${state.message ? `<p class="pl-message">${esc(state.message)}</p>` : ""}
   `;
@@ -272,13 +289,13 @@ function libraryCard(task) {
   const count = ready || tracks.length;
   return `
     <button class="lib-card" type="button" data-open="${esc(task.id)}">
-      ${coverMarkup(task)}
+      <span class="lib-cover-wrap">
+        ${coverMarkup(task)}
+        <span class="lib-state ${tone}" role="img" aria-label="${esc(statusLabel(task))}" title="${esc(statusLabel(task))}"></span>
+      </span>
       <span class="lib-card-body">
         <strong>${esc(albumTitle(task))}</strong>
-        <span class="lib-card-meta">
-          <span class="lib-badge ${tone}">${esc(statusLabel(task))}</span>
-          ${count ? `<span class="lib-count num">${esc(t("albumMeta", count, durationText(taskDuration(task))))}</span>` : ""}
-        </span>
+        ${count ? `<span class="lib-count num">${esc(t("albumMeta", count, durationText(taskDuration(task))))}</span>` : ""}
       </span>
     </button>`;
 }
@@ -287,7 +304,6 @@ function viewAlbum() {
   const task = currentTask();
   if (!task) return `<p class="lib-empty">…</p>`;
   const tracks = task.albumTracks ?? [];
-  const playable = tracks.filter((track) => track.audioFile && track.admission !== "excluded").length;
   return `
     <button class="pl-back" type="button" data-action="library">${esc(t("back"))}</button>
     <header class="album-head">
@@ -298,9 +314,6 @@ function viewAlbum() {
         <div class="album-meta">
           ${albumPlanBadge(task, language)}
           <span class="lib-count num">${esc(t("albumMeta", tracks.length, durationText(taskDuration(task))))}</span>
-          <button class="pl-btn pl-btn-quiet" type="button" data-action="play-all" ${playable ? "" : "disabled"}>
-            ${esc(t("playAll"))}
-          </button>
         </div>
       </div>
     </header>
@@ -390,18 +403,19 @@ function render() {
 function playerBarMarkup(snapshot) {
   const task = state.tasks.find((item) => item.id === snapshot.taskId);
   return `
-    ${task ? coverMarkup(task, "pl-cover-sm") : ""}
-    <div class="pbar-now">
-      <strong>${esc(snapshot.trackTitle)}</strong>
-      <small>${esc(snapshot.taskTitle)}</small>
+    <div class="pbar-left">
+      ${task ? coverMarkup(task, "pl-cover-xs") : ""}
+      <div class="pbar-now">
+        <strong>${esc(snapshot.trackTitle)}</strong>
+        <small>${esc(snapshot.taskTitle)}</small>
+      </div>
     </div>
     <div class="pbar-transport">
       <button type="button" data-bar="prev" aria-label="${esc(t("prevTrack"))}">⏮</button>
       <button type="button" class="pbar-toggle" data-bar="toggle" aria-label="${esc(t("play"))}">▶</button>
       <button type="button" data-bar="next" aria-label="${esc(t("nextTrack"))}">⏭</button>
     </div>
-    <input class="pbar-seek" type="range" min="0" max="0" step="0.1" value="0" aria-label="${esc(t("nowPlaying"))}" />
-    <span class="pbar-time num"><span data-bar-now>0:00</span> / <span data-bar-total>0:00</span></span>
+    <span class="pbar-time num"><span data-bar-now>0:00</span><span class="pbar-sep">/</span><span data-bar-total>0:00</span></span>
   `;
 }
 
@@ -426,12 +440,6 @@ function updateBar(snapshot) {
     barRoot.innerHTML = playerBarMarkup(snapshot);
     bindBar();
   }
-  const seek = barRoot.querySelector(".pbar-seek");
-  const max = snapshot.duration > 0 ? snapshot.duration : 0;
-  if (seek) {
-    if (Number(seek.max) !== max) seek.max = String(max);
-    if (document.activeElement !== seek) seek.value = String(Math.min(snapshot.currentTime, max));
-  }
   const now = barRoot.querySelector("[data-bar-now]");
   if (now) now.textContent = clockText(snapshot.currentTime);
   const total = barRoot.querySelector("[data-bar-total]");
@@ -452,8 +460,6 @@ function bindBar() {
       else if (action === "next") stage.controls.stepTrack(1);
     });
   });
-  const seek = barRoot.querySelector(".pbar-seek");
-  if (seek) seek.addEventListener("input", () => stage.controls.seekTo(Number(seek.value)));
 }
 
 let lastPersistedAt = 0;

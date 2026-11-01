@@ -55,10 +55,49 @@
   line-height: 1.6;
 }
 
+/* A single icon button, not a labelled button: creating is one action and the
+   shelf is the subject. */
+.lib-new {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--surface);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.16s var(--ease), background 0.16s var(--ease);
+}
+
+.lib-new:hover {
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--ink) 86%, var(--brand));
+}
+
+.lib-new:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lib-new:hover { transform: none; }
+}
+
 .lib-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(196px, 1fr));
-  gap: 24px 18px;
+  grid-template-columns: repeat(auto-fill, minmax(156px, 1fr));
+  gap: 22px 16px;
+}
+
+.lib-section { display: grid; gap: 12px; }
+.lib-section + .lib-section { margin-top: 28px; }
+
+.lib-section h2 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .lib-card {
@@ -77,6 +116,31 @@
   transition: transform 0.18s var(--ease), box-shadow 0.18s var(--ease);
 }
 
+.lib-cover-wrap {
+  position: relative;
+  display: block;
+}
+
+/* One small dot carries the album state; the line under the cover stays a
+   single quiet metadata line, the way a music library shows a release. */
+.lib-state {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+.lib-state.is-review { background: var(--brand); }
+.lib-state.is-failed { background: var(--danger); }
+.lib-state.is-busy {
+  background: var(--mood-gold);
+  animation: lib-pulse 1.4s ease-in-out infinite;
+}
+
 .lib-card:hover .pl-cover {
   transform: translateY(-2px);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 20px 32px -24px rgba(16, 21, 31, 0.85);
@@ -93,7 +157,7 @@
   place-items: center;
   width: 100%;
   aspect-ratio: 1 / 1;
-  border-radius: var(--radius-lg);
+  border-radius: 5px;
   background-image: linear-gradient(var(--cover-angle, 120deg), var(--cover-from, #5546e0), var(--cover-to, #2b2170));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 14px 26px -22px rgba(16, 21, 31, 0.8);
   overflow: hidden;
@@ -120,11 +184,15 @@
 .pl-cover-sm b { font-size: 1.15rem; }
 .pl-cover-sm::after { display: none; }
 
+.pl-cover-xs { width: 32px; border-radius: 7px; }
+.pl-cover-xs b { font-size: 0.82rem; }
+.pl-cover-xs::after { display: none; }
+
 .pl-cover-xl { width: 132px; flex: none; }
 .pl-cover-xl b { font-size: 2.7rem; }
 
-.lib-card-body { display: grid; gap: 6px; }
-.lib-card-body strong { font-size: 0.98rem; line-height: 1.35; }
+.lib-card-body { display: grid; gap: 4px; }
+.lib-card-body strong { font-size: 0.95rem; line-height: 1.3; }
 .lib-card-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .lib-count { color: var(--muted); font-size: 0.78rem; }
 
@@ -209,6 +277,69 @@
 
 /* The page owns the persistent bar, so the stage's own player stays hidden here. */
 #album-stage .pl-player { display: none; }
+
+/* ---- album: two columns ----
+   The album keeps the wide column (cover, progress, plan, exports); its tracks
+   get a list of their own on the right, the way a music library shows them
+   instead of as the tail of a long page. */
+
+.pl-album-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 400px);
+  gap: 24px;
+  align-items: start;
+}
+
+.pl-album-main {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.pl-album-main .pl-progress-card { margin: 0; }
+.pl-album-main .pl-toolbar { margin-bottom: 0; }
+.pl-album-main .pl-toolbar-actions { margin-left: 0; }
+
+.pl-album-side {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  min-width: 0;
+}
+
+.pl-album-side .pl-scope { justify-self: start; }
+
+.pl-side-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* Narrower list: tighter rows and smaller row actions so a track stays one line. */
+.pl-album-side .pl-track {
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  gap: 10px;
+  padding: 10px 12px;
+}
+
+.pl-album-side .pl-track-actions { gap: 4px; }
+
+.pl-album-side .pl-track-actions .pl-btn {
+  padding: 4px 9px;
+  font-size: 0.74rem;
+}
+
+.pl-album-side .pl-track-body span {
+  overflow: hidden;
+  font-size: 0.74rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 1080px) {
+  .pl-album-grid { grid-template-columns: minmax(0, 1fr); }
+}
 
 /* ---- buttons ---- */
 
@@ -737,11 +868,11 @@ body.has-drawer { overflow: hidden; }
 }
 
 /* ---- persistent bar ----
-   Playback is not a page state: the album stage owns the audio element and the
-   page paints this bar from its snapshots, so a track keeps playing while the
-   library is open. */
+   A thin dock, not a panel: the album stage owns the audio element and the page
+   paints this bar from its snapshots, so a track keeps playing while the library
+   is open. Cover and title left, transport centred, position right. */
 
-body.has-pbar .pl-main { padding-bottom: 136px; }
+body.has-pbar .pl-main { padding-bottom: 96px; }
 
 .pl-pbar {
   position: fixed;
@@ -750,10 +881,11 @@ body.has-pbar .pl-main { padding-bottom: 136px; }
   bottom: 0;
   z-index: 50;
   display: grid;
-  grid-template-columns: 44px minmax(0, 1fr) auto minmax(140px, 1.6fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: 16px;
-  padding: 12px max(24px, calc((100vw - 1080px) / 2));
+  min-height: 56px;
+  padding: 6px max(24px, calc((100vw - 1080px) / 2));
   color: #f4f6fa;
   background: color-mix(in srgb, var(--ink) 97%, var(--brand));
   border-top: 1px solid color-mix(in srgb, var(--ink) 70%, var(--line));
@@ -763,13 +895,21 @@ body.has-pbar .pl-main { padding-bottom: 136px; }
 
 .pl-pbar[hidden] { display: none; }
 
-.pl-pbar .pl-cover-sm { box-shadow: none; }
+.pbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
 
-.pbar-now { min-width: 0; display: grid; gap: 2px; }
+.pbar-left .pl-cover-xs { box-shadow: none; }
+
+.pbar-now { min-width: 0; display: grid; gap: 1px; }
 
 .pbar-now strong {
   overflow: hidden;
-  font-size: 0.95rem;
+  font-size: 0.88rem;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -777,74 +917,54 @@ body.has-pbar .pl-main { padding-bottom: 136px; }
 .pbar-now small {
   overflow: hidden;
   color: #9aa2b2;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.pbar-transport { display: flex; align-items: center; gap: 6px; }
+.pbar-transport { display: flex; align-items: center; gap: 2px; }
 
 .pbar-transport button {
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   display: grid;
   place-items: center;
   border: 0;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  color: #f4f6fa;
-  font-size: 0.8rem;
+  background: none;
+  color: #c8cede;
+  font-size: 0.78rem;
   cursor: pointer;
-  transition: background 0.16s var(--ease);
+  transition: color 0.16s var(--ease), background 0.16s var(--ease);
 }
 
-.pbar-transport button:hover:not([disabled]) { background: rgba(255, 255, 255, 0.22); }
+.pbar-transport button:hover:not([disabled]) { background: rgba(255, 255, 255, 0.12); color: #fff; }
 
 .pbar-transport .pbar-toggle {
-  width: 42px;
-  height: 42px;
-  background: var(--brand);
-  font-size: 0.95rem;
+  width: 36px;
+  height: 36px;
+  color: #f4f6fa;
+  font-size: 0.9rem;
 }
 
-.pbar-transport .pbar-toggle:hover { background: var(--brand-deep); }
-
-.pbar-seek {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 100%;
-  height: 4px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.22);
-  cursor: pointer;
+.pbar-time {
+  justify-self: end;
+  color: #9aa2b2;
+  font-size: 0.74rem;
+  white-space: nowrap;
 }
 
-.pbar-seek::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.16);
-}
-
-.pbar-seek::-moz-range-thumb { width: 13px; height: 13px; border: 0; border-radius: 50%; background: #fff; }
-.pbar-seek:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
-
-.pbar-time { color: #c8cede; font-size: 0.78rem; white-space: nowrap; }
+.pbar-sep { padding: 0 4px; opacity: 0.6; }
 
 @media (max-width: 760px) {
   .pl-pbar {
-    grid-template-columns: 40px minmax(0, 1fr) auto;
-    grid-template-areas: "cover now transport" "seek seek seek";
-    gap: 8px 12px;
-    padding: 10px 16px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "left transport";
+    gap: 10px;
+    padding: 6px 16px;
   }
-  .pl-pbar .pl-cover-sm { grid-area: cover; width: 40px; }
-  .pbar-now { grid-area: now; }
+  .pbar-left { grid-area: left; }
   .pbar-transport { grid-area: transport; }
-  .pbar-seek { grid-area: seek; }
   .pbar-time { display: none; }
-  body.has-pbar .pl-main { padding-bottom: 152px; }
+  body.has-pbar .pl-main { padding-bottom: 92px; }
 }
