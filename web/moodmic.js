@@ -13,6 +13,7 @@ import {
 import { createAlbumStage } from "./album-view.js";
 import { openSettingsDialog } from "./settings-dialog.js";
 import { adoptAudio, playExclusive } from "./audio-focus.js";
+import { mountPlayerBar } from "./player-bar.js";
 
 // Four starting prompts, one per feeling colour. They fill the otherwise
 // empty MoodMic screen and reuse the four mood signals already defined in
@@ -65,6 +66,9 @@ const COPY = {
     stopMood: (name) => `暂停${name}情绪的音乐`,
     listen: "试听",
     nowPlaying: "正在播放",
+    play: "播放", pause: "暂停", queue: "播放队列",
+    queueEmpty: "还没有可播放的曲目。", close: "关闭",
+    previous: "上一首", next: "下一首", stop: "关闭播放",
     composerPlaceholder: "说说此刻的心情，和想要的音乐…",
     composerHint: "Enter 发送，Shift + Enter 换行",
     send: "发送",
@@ -178,6 +182,9 @@ const COPY = {
     stopMood: (name) => `Pause the ${name} example`,
     listen: "Listen",
     nowPlaying: "Playing",
+    play: "Play", pause: "Pause", queue: "Play queue",
+    queueEmpty: "Nothing queued yet.", close: "Close",
+    previous: "Previous track", next: "Next track", stop: "Stop playback",
     composerPlaceholder: "Describe how you feel, and the music you want…",
     composerHint: "Enter to send, Shift + Enter for a new line",
     send: "Send",
@@ -408,6 +415,8 @@ function activeTask() {
 // The album stage is shared with the Playlist page. Here it reads and writes
 // the album task of this journey, and approval goes through the journey route
 // so a revision number binds the confirmation to the plan on screen.
+const playerListeners = [];
+
 const albumStage = createAlbumStage({
   language: () => state.language,
   api,
@@ -434,6 +443,29 @@ const albumStage = createAlbumStage({
     state.albumTask = body.albumTask;
   },
   onRunning: () => pollJourney(),
+  onPlayerChange: (next) => {
+    for (const listener of playerListeners) listener(next);
+  },
+});
+
+// The page shows one player, the shared dock at the bottom. The album stage keeps
+// owning the audio element; the bar reads its snapshot and drives its controls,
+// the same way the Playlist page does.
+mountPlayerBar({
+  subscribe(listener) {
+    playerListeners.push(listener);
+    listener(albumStage.snapshot());
+  },
+  toggle: () => albumStage.controls.togglePlay(),
+  next: () => albumStage.controls.stepTrack(1),
+  prev: () => albumStage.controls.stepTrack(-1),
+  play: (trackId) => albumStage.controls.playTrack(trackId),
+  queue: () => albumStage.queueTracks(),
+}, {
+  t: (key) => t(({
+    queue: "queue", previous: "previous", next: "next", close: "close",
+    play: "play", pause: "pause", nowPlaying: "nowPlaying", queueEmpty: "queueEmpty",
+  })[key] ?? key),
 });
 
 // ---------------------------------------------------------------------------
@@ -972,7 +1004,7 @@ function renderJourney(task) {
   if (state.albumTask) {
     return `<div class="mm-album">
       <p class="mm-album-eyebrow">${esc(t("albumEyebrow"))}</p>
-      ${albumStage.render()}
+      <div id="album-stage">${albumStage.render()}</div>
     </div>`;
   }
   if (journey.phase === "failed") {
