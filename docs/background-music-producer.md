@@ -14,11 +14,6 @@ The producer applies to an album created in the studio (`04-album`). Albums buil
 on the playlist page or continued from a kept MoodMic piece keep their candidate
 MP3s and merged export, and do not run the producer.
 
-```powershell
-pnpm dev produce-album "Instrumental background music for quiet nighttime reading"
-pnpm dev produce-album --resume "<failed-task-id>"
-```
-
 The same mode is available through `POST /api/tasks` with
 `workflowType: "04-album"` and `produceAlbum: true`. The studio offers 12 to 15
 candidates with a 30, 35, or 40 minute target, or a long album of 24 to 28

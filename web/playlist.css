@@ -1,4 +1,4 @@
-/* Playlist (test): build an album from MoodMic conversations and music.
+/* Playlist: a player-first library over the album workflow's output.
    Colours and radii come from theme.css so the page sits with the rest of
    Arioso; only the layout and the states unique to this page live here. */
 
@@ -13,42 +13,11 @@
   padding: 32px 24px 88px;
 }
 
-.pl-head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px;
-  flex-wrap: wrap;
-  margin-bottom: 24px;
-}
-
-.pl-head h1 {
-  margin: 0 0 6px;
-  font-size: 1.7rem;
-  letter-spacing: -0.01em;
-}
-
-.pl-head p {
-  margin: 0;
-  max-width: 60ch;
-  color: var(--muted);
-  line-height: 1.6;
-}
-
-.pl-eyebrow {
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin: 0 0 10px;
-}
-
 .pl-back {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
   padding: 6px 10px 6px 6px;
   border: 0;
   border-radius: 999px;
@@ -59,6 +28,187 @@
 }
 
 .pl-back:hover { color: var(--ink); }
+
+/* ---- library ----
+   A shelf of albums: the cover carries the album, the line under it carries
+   state and size. Nothing else competes with it. */
+
+.lib-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.lib-heading h1 {
+  margin: 0 0 6px;
+  font-size: 1.7rem;
+  letter-spacing: -0.02em;
+}
+
+.lib-note {
+  margin: 0;
+  max-width: 52ch;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.lib-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(196px, 1fr));
+  gap: 24px 18px;
+}
+
+.lib-card {
+  display: grid;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.lib-card .pl-cover {
+  transition: transform 0.18s var(--ease), box-shadow 0.18s var(--ease);
+}
+
+.lib-card:hover .pl-cover {
+  transform: translateY(-2px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 20px 32px -24px rgba(16, 21, 31, 0.85);
+}
+
+.lib-card:focus-visible { outline: none; }
+.lib-card:focus-visible .pl-cover { outline: 2px solid var(--brand); outline-offset: 3px; }
+
+/* A deterministic two-tone cover per album, so the shelf reads as covers even
+   before any artwork exists. */
+.pl-cover {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-lg);
+  background-image: linear-gradient(var(--cover-angle, 120deg), var(--cover-from, #5546e0), var(--cover-to, #2b2170));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 14px 26px -22px rgba(16, 21, 31, 0.8);
+  overflow: hidden;
+}
+
+.pl-cover::after {
+  content: "";
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.pl-cover b {
+  position: relative;
+  z-index: 1;
+  font-size: clamp(2rem, 6vw, 3.1rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: rgba(255, 255, 255, 0.94);
+}
+
+.pl-cover-sm { width: 44px; border-radius: 10px; }
+.pl-cover-sm b { font-size: 1.15rem; }
+.pl-cover-sm::after { display: none; }
+
+.pl-cover-xl { width: 132px; flex: none; }
+.pl-cover-xl b { font-size: 2.7rem; }
+
+.lib-card-body { display: grid; gap: 6px; }
+.lib-card-body strong { font-size: 0.98rem; line-height: 1.35; }
+.lib-card-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.lib-count { color: var(--muted); font-size: 0.78rem; }
+
+.lib-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  background: color-mix(in srgb, var(--brand) 10%, var(--surface));
+  color: var(--brand-deep);
+}
+
+.lib-badge.is-done { background: var(--ok-soft); color: var(--ok); }
+.lib-badge.is-failed { background: var(--danger-soft); color: var(--danger); }
+.lib-badge.is-busy { background: var(--surface-3); color: var(--ink-soft); }
+
+.lib-badge.is-busy::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: lib-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes lib-pulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lib-badge.is-busy::before { animation: none; }
+  .lib-card:hover .pl-cover { transform: none; }
+}
+
+.lib-empty {
+  padding: 56px 8px;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* ---- one album ---- */
+
+.album-head {
+  display: flex;
+  align-items: flex-end;
+  gap: 22px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.album-head-body {
+  display: grid;
+  gap: 8px;
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+.album-head-body h1 {
+  margin: 0;
+  font-size: 1.9rem;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.album-head-body p {
+  margin: 0;
+  max-width: 60ch;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.album-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* The page owns the persistent bar, so the stage's own player stays hidden here. */
+#album-stage .pl-player { display: none; }
 
 /* ---- buttons ---- */
 
@@ -101,68 +251,133 @@
   background: color-mix(in srgb, var(--brand) 12%, var(--surface));
 }
 
-/* ---- shelf ---- */
+/* ---- create drawer ----
+   Creating is an overlay on the library, not a page of its own: the shelf stays
+   behind it, so a new album reads as adding to the shelf. */
 
-.pl-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 16px;
+.drawer-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: var(--overlay);
 }
 
-.pl-card {
-  position: relative;
+body.has-drawer { overflow: hidden; }
+
+.pl-drawer {
+  position: fixed;
+  inset: 0 0 0 auto;
+  z-index: 61;
+  width: min(520px, 100vw);
   display: grid;
-  gap: 8px;
-  align-content: start;
-  text-align: left;
-  padding: 18px 20px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
+  grid-template-rows: auto minmax(0, 1fr) auto;
   background: var(--surface);
-  color: var(--ink);
+  border-left: 1px solid var(--line);
+  box-shadow: -32px 0 64px -48px rgba(16, 21, 31, 0.7);
+  animation: drawer-slide 0.22s var(--ease);
+}
+
+@keyframes drawer-slide {
+  from { transform: translateX(18px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pl-drawer { animation: none; }
+}
+
+.drawer-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 24px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.drawer-head h2 { margin: 0 0 4px; font-size: 1.15rem; }
+.drawer-head p { margin: 0; max-width: 44ch; color: var(--muted); font-size: 0.86rem; line-height: 1.55; }
+
+.drawer-close {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--muted);
   font: inherit;
   cursor: pointer;
-  transition: transform 0.16s var(--ease), border-color 0.16s var(--ease), box-shadow 0.16s var(--ease);
 }
 
-.pl-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--brand);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 14%, transparent);
+.drawer-close:hover { color: var(--ink); border-color: var(--ink-soft); }
+
+.drawer-body {
+  overflow-y: auto;
+  padding: 20px 24px;
+  display: grid;
+  gap: 22px;
+  align-content: start;
 }
 
-.pl-card strong { font-size: 1.02rem; }
+.drawer-section { display: grid; gap: 10px; }
 
-.pl-card-meta { color: var(--muted); font-size: 0.84rem; }
+.drawer-section h3 {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  font-size: 0.95rem;
+}
 
-.pl-card-state {
-  display: inline-flex;
+.drawer-note { margin: 0; color: var(--muted); font-size: 0.84rem; line-height: 1.5; }
+.drawer-count { color: var(--muted); font-size: 0.78rem; font-weight: 500; }
+
+.drawer-fields {
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  align-items: end;
+}
+
+.drawer-field { display: grid; gap: 6px; }
+.drawer-field > span { font-size: 0.8rem; color: var(--muted); }
+
+.drawer-field select,
+.drawer-field textarea {
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 9px 11px;
+}
+
+.drawer-field textarea { width: 100%; min-height: 108px; resize: vertical; line-height: 1.55; }
+
+.drawer-field select:focus-visible,
+.drawer-field textarea:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--brand) 55%, transparent);
+  outline-offset: 1px;
+}
+
+.drawer-foot {
+  display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--brand);
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 24px;
+  border-top: 1px solid var(--line);
+  background: var(--surface-2);
 }
-.pl-card-state.is-review { color: var(--brand-deep); }
-.pl-card-state.is-review .pl-state-dot { width: 7px; height: 7px; }
-.pl-card-cta { margin-left: 2px; color: var(--brand-deep); }
 
-.pl-empty {
-  padding: 48px 8px;
+.pl-note {
+  margin: 0;
   color: var(--muted);
-  text-align: center;
+  font-size: 0.86rem;
+  line-height: 1.55;
 }
-
-/* ---- create ---- */
-
-.pl-form { display: grid; gap: 26px; }
-
-.pl-section > h2 {
-  margin: 0 0 4px;
-  font-size: 1.05rem;
-}
-
-.pl-section > p { margin: 0 0 14px; color: var(--muted); line-height: 1.6; }
 
 .pl-refs {
   display: grid;
@@ -237,35 +452,6 @@
   color: color-mix(in srgb, var(--brand) 70%, var(--ink));
   font-size: 0.72rem;
 }
-
-.pl-fields {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.pl-field { display: grid; gap: 6px; }
-.pl-field span { font-size: 0.82rem; color: var(--muted); }
-
-.pl-field select,
-.pl-field textarea {
-  font: inherit;
-  color: var(--ink);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md, 10px);
-  padding: 10px 12px;
-}
-
-.pl-field textarea { width: min(640px, 100%); min-height: 96px; resize: vertical; line-height: 1.55; }
-
-.pl-refresh { align-self: center; }
-
-/* ---- detail ---- */
-
-.pl-detail-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 10px; }
-.pl-detail-head h1 { margin: 0 0 4px; font-size: 1.5rem; }
-.pl-detail-head p { margin: 0; color: var(--muted); max-width: 62ch; line-height: 1.6; }
 
 /* ---- progress ----
    Deliberately loud: a segmented bar where every track is its own cell, so
@@ -550,20 +736,21 @@
   .pl-bubble { max-width: 100%; }
 }
 
-/* ---- persistent player ----
-   A real playlist needs a player that stays put: now playing, a scrubbable
-   position, and previous/next, docked to the bottom like a music app. */
+/* ---- persistent bar ----
+   Playback is not a page state: the album stage owns the audio element and the
+   page paints this bar from its snapshots, so a track keeps playing while the
+   library is open. */
 
-body:has(.pl-player) .pl-main { padding-bottom: 148px; }
+body.has-pbar .pl-main { padding-bottom: 136px; }
 
-.pl-player {
+.pl-pbar {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 40;
+  z-index: 50;
   display: grid;
-  grid-template-columns: 44px minmax(0, 1fr) minmax(160px, 2fr) auto auto;
+  grid-template-columns: 44px minmax(0, 1fr) auto minmax(140px, 1.6fr) auto;
   align-items: center;
   gap: 16px;
   padding: 12px max(24px, calc((100vw - 1080px) / 2));
@@ -574,27 +761,55 @@ body:has(.pl-player) .pl-main { padding-bottom: 148px; }
   backdrop-filter: blur(18px);
 }
 
-.pl-player-toggle {
-  width: 44px;
-  height: 44px;
+.pl-pbar[hidden] { display: none; }
+
+.pl-pbar .pl-cover-sm { box-shadow: none; }
+
+.pbar-now { min-width: 0; display: grid; gap: 2px; }
+
+.pbar-now strong {
+  overflow: hidden;
+  font-size: 0.95rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pbar-now small {
+  overflow: hidden;
+  color: #9aa2b2;
+  font-size: 0.72rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pbar-transport { display: flex; align-items: center; gap: 6px; }
+
+.pbar-transport button {
+  width: 34px;
+  height: 34px;
   display: grid;
   place-items: center;
   border: 0;
   border-radius: 50%;
-  background: var(--brand);
-  color: #fff;
-  font-size: 0.85rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: #f4f6fa;
+  font-size: 0.8rem;
   cursor: pointer;
   transition: background 0.16s var(--ease);
 }
-.pl-player-toggle:hover { background: var(--brand-deep); }
 
-.pl-player-now { min-width: 0; display: grid; gap: 2px; }
-.pl-player-label { color: #9aa2b2; font-size: 0.68rem; font-weight: 600; }
-.pl-player-now strong { overflow: hidden; font-size: 0.95rem; text-overflow: ellipsis; white-space: nowrap; }
-.pl-player-now small { color: #9aa2b2; font-size: 0.72rem; }
+.pbar-transport button:hover:not([disabled]) { background: rgba(255, 255, 255, 0.22); }
 
-.pl-player-seek {
+.pbar-transport .pbar-toggle {
+  width: 42px;
+  height: 42px;
+  background: var(--brand);
+  font-size: 0.95rem;
+}
+
+.pbar-transport .pbar-toggle:hover { background: var(--brand-deep); }
+
+.pbar-seek {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
@@ -603,7 +818,8 @@ body:has(.pl-player) .pl-main { padding-bottom: 148px; }
   background: rgba(255, 255, 255, 0.22);
   cursor: pointer;
 }
-.pl-player-seek::-webkit-slider-thumb {
+
+.pbar-seek::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 13px;
@@ -612,37 +828,23 @@ body:has(.pl-player) .pl-main { padding-bottom: 148px; }
   background: #fff;
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.16);
 }
-.pl-player-seek::-moz-range-thumb { width: 13px; height: 13px; border: 0; border-radius: 50%; background: #fff; }
-.pl-player-seek:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
 
-.pl-player-time { color: #c8cede; font-size: 0.78rem; white-space: nowrap; }
+.pbar-seek::-moz-range-thumb { width: 13px; height: 13px; border: 0; border-radius: 50%; background: #fff; }
+.pbar-seek:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
 
-.pl-player-nav { display: flex; gap: 6px; }
-.pl-player-nav button {
-  width: 34px;
-  height: 34px;
-  border: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  color: #f4f6fa;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: background 0.16s var(--ease);
-}
-.pl-player-nav button:hover:not([disabled]) { background: rgba(255, 255, 255, 0.22); }
-.pl-player-nav button[disabled] { opacity: 0.35; cursor: not-allowed; }
+.pbar-time { color: #c8cede; font-size: 0.78rem; white-space: nowrap; }
 
 @media (max-width: 760px) {
-  .pl-player {
-    grid-template-columns: 44px minmax(0, 1fr) auto;
-    grid-template-areas: "toggle now nav" "seek seek seek" "time time time";
-    gap: 6px 12px;
-    padding: 12px 18px;
+  .pl-pbar {
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    grid-template-areas: "cover now transport" "seek seek seek";
+    gap: 8px 12px;
+    padding: 10px 16px;
   }
-  .pl-player-toggle { grid-area: toggle; }
-  .pl-player-now { grid-area: now; }
-  .pl-player-nav { grid-area: nav; }
-  .pl-player-seek { grid-area: seek; }
-  .pl-player-time { grid-area: time; text-align: right; }
-  body:has(.pl-player) .pl-main { padding-bottom: 176px; }
+  .pl-pbar .pl-cover-sm { grid-area: cover; width: 40px; }
+  .pbar-now { grid-area: now; }
+  .pbar-transport { grid-area: transport; }
+  .pbar-seek { grid-area: seek; }
+  .pbar-time { display: none; }
+  body.has-pbar .pl-main { padding-bottom: 152px; }
 }

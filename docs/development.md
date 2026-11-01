@@ -17,31 +17,15 @@ Keep API credentials in the local `.env` or enter them through the browser
 settings without selecting persistent storage. Never print, document, or commit
 real keys. `.env.example` is the safe configuration reference.
 
-## Inspect the CLI
+## Generating audio
 
-```powershell
-pnpm dev -- --help
-```
+Everything runs through the browser application (`pnpm web`): composing a spec,
+generating audio, the album producer, and stitching orchestral movements are
+workflow steps the interface drives, and each writes a task record under the
+output root. There is no command-line generator.
 
-## Compose without generating audio
-
-This path requires an OpenAI API key and prints the validated `MusicSpec`:
-
-```powershell
-pnpm dev -- compose "A quiet instrumental nocturne for piano and muted trumpet."
-```
-
-## Compose and generate audio
-
-This path also requires a Gemini API key. It writes an MP3 and JSON metadata to
-the configured output directory:
-
-```powershell
-pnpm dev -- generate "A quiet instrumental nocturne for piano and muted trumpet."
-```
-
-Use a new task or output filename for new evidence. Do not edit an earlier
-generated record to represent a different model call.
+Use a new task for new evidence. Do not edit an earlier generated record to
+represent a different model call.
 
 ## Run the browser application
 
@@ -68,14 +52,9 @@ server, so a reload is a meaningful test of persistence.
 ## Produce an album
 
 The optional background-music producer generates and denoises an instrumental
-album:
-
-```powershell
-pnpm dev produce-album "Instrumental background music for quiet nighttime reading"
-pnpm dev produce-album --resume "<failed-task-id>"
-```
-
-It requires the installed audio pipeline. See
+album. It runs from the studio: choose the album workflow, then the
+"Background Music Producer · generate and denoise" production mode. It requires
+the installed audio pipeline. See
 [`background-music-producer.md`](background-music-producer.md) and
 [`pipeline/USAGE.md`](../pipeline/USAGE.md).
 

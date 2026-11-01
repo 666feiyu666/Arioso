@@ -1,0 +1,131 @@
+/* Mini player: the bar every page other than the playlist shows when a track is
+   already playing, so navigating away does not silence the music. */
+
+body.has-mini-player {
+  padding-bottom: 68px;
+}
+
+.pb {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 45;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) minmax(120px, 1.6fr) auto 32px;
+  align-items: center;
+  gap: 14px;
+  padding: 10px max(18px, calc((100vw - 1080px) / 2));
+  color: #f4f6fa;
+  background: color-mix(in srgb, var(--ink) 97%, var(--brand));
+  border-top: 1px solid color-mix(in srgb, var(--ink) 70%, var(--line));
+  box-shadow: 0 -18px 40px -30px rgba(16, 21, 31, 0.7);
+  backdrop-filter: blur(18px);
+}
+
+.pb-toggle {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--brand);
+  color: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.16s var(--ease);
+}
+
+.pb-toggle:hover { background: var(--brand-deep); }
+
+.pb-meta {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.pb-meta strong {
+  overflow: hidden;
+  font-size: 0.92rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pb-meta small {
+  overflow: hidden;
+  color: #9aa2b2;
+  font-size: 0.72rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pb-seek {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+  cursor: pointer;
+}
+
+.pb-seek::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.16);
+}
+
+.pb-seek::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.pb-seek:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
+
+.pb-time {
+  color: #c8cede;
+  font-size: 0.76rem;
+  white-space: nowrap;
+}
+
+.pb-stop {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: #f4f6fa;
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.pb-stop:hover { background: rgba(255, 255, 255, 0.22); }
+
+@media (max-width: 640px) {
+  .pb {
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+    grid-template-areas: "toggle meta stop" "seek seek seek";
+    gap: 6px 12px;
+    padding: 8px 16px;
+  }
+  .pb-toggle { grid-area: toggle; width: 36px; height: 36px; }
+  .pb-meta { grid-area: meta; }
+  .pb-stop { grid-area: stop; }
+  .pb-seek { grid-area: seek; }
+  .pb-time { display: none; }
+  body.has-mini-player { padding-bottom: 76px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pb-toggle { transition: none; }
+}

@@ -250,7 +250,7 @@ The implementation covers the three composition modes, the MoodMic journey, and 
 
 ## Authoritative implementation references
 
-- CLI: `src/cli.ts`
+- web server entry: `src/web/server.ts`
 - public exports: `src/index.ts`
 - composer agent and retrieval tool: `src/composer/composer-agent.ts`
 - orchestral composer agent: `src/composer/orchestral-agent.ts`

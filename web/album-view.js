@@ -236,6 +236,8 @@ export function createAlbumStage(options) {
     previewId: null,
     currentTime: 0,
     duration: 0,
+    /** Position to seek to once the next track's metadata is ready. */
+    resumeAt: 0,
     planOpen: false,
     busy: false,
     chatDraft: "",
@@ -253,6 +255,27 @@ export function createAlbumStage(options) {
     state.message = error instanceof Error ? error.message : String(error);
     options.rerender();
   };
+
+  /**
+   * The playback state a page needs to render its own player bar. The stage keeps
+   * owning the audio element; a page that shows a persistent bar reads this and
+   * drives it through `controls` instead of creating a second player.
+   */
+  const snapshot = () => {
+    const activeTask = task();
+    const track = activeTask?.albumTracks?.find((item) => item.id === state.playingTrackId);
+    return {
+      taskId: activeTask?.id ?? null,
+      taskTitle: activeTask?.albumPlan?.albumTitle || activeTask?.title || activeTask?.description || "",
+      trackId: state.playingTrackId,
+      trackTitle: track?.title ?? "",
+      playing: state.playing,
+      currentTime: state.currentTime,
+      duration: state.duration,
+      hasQueue: state.queue.length > 0,
+    };
+  };
+  const notify = () => options.onPlayerChange?.(snapshot());
 
   // ---- planning -----------------------------------------------------------
 
@@ -538,18 +561,27 @@ export function createAlbumStage(options) {
     audio.addEventListener("timeupdate", () => {
       state.currentTime = audio.currentTime;
       updateSeek();
+      notify();
     });
     audio.addEventListener("loadedmetadata", () => {
       if (Number.isFinite(audio.duration) && audio.duration > 0) state.duration = audio.duration;
+      if (state.resumeAt > 0) {
+        audio.currentTime = Math.min(state.resumeAt, audio.duration || state.resumeAt);
+        state.currentTime = audio.currentTime;
+        state.resumeAt = 0;
+      }
       updateSeek();
+      notify();
     });
     audio.addEventListener("play", () => {
       state.playing = true;
       options.rerender();
+      notify();
     });
     audio.addEventListener("pause", () => {
       state.playing = false;
       options.rerender();
+      notify();
     });
     audio.addEventListener("ended", () => stepTrack(1));
     audio.addEventListener("error", () => {
@@ -559,6 +591,7 @@ export function createAlbumStage(options) {
         state.message = t("playbackError");
       }
       options.rerender();
+      notify();
     });
     return audio;
   }
@@ -596,6 +629,7 @@ export function createAlbumStage(options) {
     el.src = `/api/tasks/${encodeURIComponent(activeTask.id)}/album/tracks/${encodeURIComponent(id)}/audio`;
     el.currentTime = 0;
     options.rerender();
+    notify();
     if (autoplay) {
       el.play().catch(() => {
         state.playing = false;
@@ -668,6 +702,33 @@ export function createAlbumStage(options) {
     el.currentTime = Math.max(0, Math.min(value, state.duration));
     state.currentTime = el.currentTime;
     updateSeek();
+    notify();
+  }
+
+  /**
+   * Restores a track at a recorded position. With `autoplay` false the track is
+   * loaded and positioned but stays paused, so a page that resumed after a
+   * navigation waits for the user instead of starting audio on its own.
+   */
+  function resumePlayback(trackId, position = 0, autoplay = true) {
+    const activeTask = task();
+    const track = activeTask?.albumTracks?.find((item) => item.id === trackId);
+    if (!track?.audioFile) return false;
+    let queue = playableTracks(activeTask, state.scope).map((item) => item.id);
+    if (!queue.includes(trackId)) {
+      const other = state.scope === "candidate" ? "included" : "candidate";
+      const otherQueue = playableTracks(activeTask, other).map((item) => item.id);
+      if (!otherQueue.includes(trackId)) return false;
+      state.scope = other;
+      queue = otherQueue;
+    }
+    state.queue = queue;
+    state.resumeAt = position > 0 ? position : 0;
+    // Force a restart instead of toggling an already-playing track.
+    state.playingTrackId = null;
+    if (!autoplay) state.playing = false;
+    playQueueTrack(queue.indexOf(trackId), autoplay);
+    return true;
   }
 
   // ---- actions ------------------------------------------------------------
@@ -830,6 +891,10 @@ export function createAlbumStage(options) {
   return {
     render,
     bind,
+    /** Current playback state for a page that renders its own player bar. */
+    snapshot,
+    /** Playback commands, so a page bar drives the stage's single audio element. */
+    controls: { togglePlay, playTrack, stepTrack, seekTo, playScope: startPlayback, resume: resumePlayback },
     /** Called by the page when an album is opened or replaced. */
     reset(next = {}) {
       Object.assign(state, {
@@ -840,6 +905,7 @@ export function createAlbumStage(options) {
         audio.pause();
         audio.removeAttribute("src");
       }
+      notify();
     },
     setMessage(message) {
       state.message = message;

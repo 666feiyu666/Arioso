@@ -5,9 +5,6 @@
   "description": "An agentic music composition workspace for Google Lyria.",
   "type": "module",
   "packageManager": "pnpm@11.19.0",
-  "bin": {
-    "arioso": "dist/cli.js"
-  },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "corpus:enrich:jazz": "node src/corpus/enrich-jazz-corpus.mjs && node src/corpus/enrich-jazz-corpus.mjs --genres",
@@ -15,11 +12,9 @@
     "corpus:normalize:jazz": "node src/corpus/normalize-jazz-standards.mjs && node src/corpus/normalize-jazz-genres.mjs && node src/corpus/normalize-gioia-jazz-standards.mjs && node src/corpus/combine-jazz-standards.mjs",
     "corpus:import:gioia": "python src/corpus/import-gioia-jazz-standards.py",
     "corpus:normalize:gioia": "node src/corpus/normalize-gioia-jazz-standards.mjs && node src/corpus/combine-jazz-standards.mjs",
-    "dev": "tsx src/cli.ts",
     "orchestral:assemble": "tsx src/tools/assemble-orchestral-tasks.ts",
     "storage:organize": "tsx src/tools/organize-task-storage.ts",
     "web": "tsx src/web/server.ts",
-    "start": "node dist/cli.js",
     "start:web": "node dist/web/server.js",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json"
