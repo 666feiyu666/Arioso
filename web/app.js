@@ -461,7 +461,6 @@ const state = {
   supportsCreativeSessionTimeline: false,
   submitting: false,
   language: "zh-CN",
-  settings: null,
   discussionSession: null,
   discussionSessions: [],
   discussionPending: null,
@@ -531,14 +530,6 @@ const elements = {
   playerPrevious: document.querySelector("#player-previous"),
   playerNext: document.querySelector("#player-next"),
   playerStatus: document.querySelector("#player-status"),
-  settingsDialog: document.querySelector("#settings-dialog"),
-  settingsForm: document.querySelector("#settings-form"),
-  settingsMessage: document.querySelector("#settings-message"),
-  language: document.querySelector("#language-select"),
-  openAiKey: document.querySelector("#openai-api-key"),
-  geminiKey: document.querySelector("#gemini-api-key"),
-  rememberApiKeys: document.querySelector("#remember-api-keys"),
-  saveSettings: document.querySelector("#save-settings"),
 };
 
 function t(key, values = {}) {
@@ -753,7 +744,6 @@ function applyTranslations() {
     }
   }
   syncPlayerMetadata();
-  renderCredentialStatus();
 }
 
 function selectedVocalMode() {
@@ -2188,32 +2178,11 @@ async function submitTask(event, approvedPrompt) {
   }
 }
 
-function setSettingsMessage(message, success = false) {
-  elements.settingsMessage.textContent = message;
-  elements.settingsMessage.classList.toggle("success", success);
-}
-
-function renderCredentialStatus() {
-  if (!state.settings) return;
-  for (const provider of ["openai", "gemini"]) {
-    const summary = state.settings.credentials[provider];
-    const status = document.querySelector(`#${provider}-key-status`);
-    status.textContent = summary.configured
-      ? t("configuredKey", { masked: summary.masked })
-      : t("missingKey");
-    status.classList.toggle("configured", summary.configured);
-  }
-}
-
 async function loadSettings() {
   const response = await fetch("/api/settings", { cache: "no-store" });
   const result = await response.json();
   if (!response.ok) throw new Error(result.error || t("settingsLoadFailed"));
-  state.settings = result;
   state.language = result.language;
-  elements.language.value = result.language;
-  elements.openAiKey.value = "";
-  elements.geminiKey.value = "";
   applyTranslations();
 }
 
@@ -2236,97 +2205,6 @@ async function loadCapabilities() {
     renderDiscussion();
   } catch {
     // An older local server has no capabilities endpoint. Keep orchestral creation blocked.
-  }
-}
-
-async function openSettings() {
-  setSettingsMessage("");
-  try {
-    await loadSettings();
-    elements.settingsDialog.showModal();
-  } catch (error) {
-    elements.message.textContent = error instanceof Error ? error.message : t("settingsLoadFailed");
-  }
-}
-
-async function saveSettings(event) {
-  event.preventDefault();
-  setButtonBusy(elements.saveSettings, true);
-  setSettingsMessage("");
-
-  const credentials = {};
-  if (elements.openAiKey.value.trim()) credentials.openai = elements.openAiKey.value.trim();
-  if (elements.geminiKey.value.trim()) credentials.gemini = elements.geminiKey.value.trim();
-
-  try {
-    const response = await fetch("/api/settings", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        language: elements.language.value,
-        remember: elements.rememberApiKeys.checked,
-        ...(Object.keys(credentials).length ? { credentials } : {}),
-      }),
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.error || t("settingsSaveFailed"));
-    state.settings = result;
-    state.language = result.language;
-    elements.openAiKey.value = "";
-    elements.geminiKey.value = "";
-    applyTranslations();
-    elements.settingsDialog.close();
-  } catch (error) {
-    setSettingsMessage(error instanceof Error ? error.message : t("settingsSaveFailed"));
-  } finally {
-    setButtonBusy(elements.saveSettings, false);
-  }
-}
-
-async function testConnection(provider, button) {
-  const input = provider === "openai" ? elements.openAiKey : elements.geminiKey;
-  setButtonBusy(button, true);
-  setSettingsMessage(t("testingConnection"));
-  try {
-    const response = await fetch("/api/settings/test", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ provider, apiKey: input.value.trim() || undefined }),
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.error || t("connectionFailed"));
-    setSettingsMessage(result.ok ? t("connectionOk") : t("connectionFailed"), result.ok);
-  } catch (error) {
-    setSettingsMessage(error instanceof Error ? error.message : t("connectionFailed"));
-  } finally {
-    setButtonBusy(button, false);
-  }
-}
-
-async function clearCredential(provider, button) {
-  const confirmed = await confirmAction({
-    title: t("confirmRemoveKeyTitle"), body: t("confirmRemoveKeyBody"),
-    confirmLabel: t("removeKeyAction"), danger: true,
-  });
-  if (!confirmed) return;
-  setButtonBusy(button, true);
-  setSettingsMessage("");
-  try {
-    const response = await fetch(`/api/settings/credentials/${provider}`, { method: "DELETE" });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.error || t("settingsSaveFailed"));
-    state.settings = result;
-    const input = provider === "openai" ? elements.openAiKey : elements.geminiKey;
-    input.value = "";
-    renderCredentialStatus();
-    showToast(
-      result.credentials[provider].configured ? t("keyFallback") : t("keyCleared"),
-      "success",
-    );
-  } catch (error) {
-    showToast(error instanceof Error ? error.message : t("settingsSaveFailed"), "error");
-  } finally {
-    setButtonBusy(button, false);
   }
 }
 
@@ -2379,7 +2257,6 @@ elements.musicReference.addEventListener("change", () => {
   state.musicReference = normalizeMusicReference(elements.musicReference.value);
   renderComposerContext();
 });
-elements.settingsForm.addEventListener("submit", saveSettings);
 elements.playerToggle.addEventListener("click", () => {
   if (state.playingAlbumTrackId) playAlbumTrack(state.playingTaskId, state.playingAlbumTrackId, state.albumPlaybackScope);
   else if (state.playingMovementId) playMovement(state.playingTaskId, state.playingMovementId);
@@ -2428,25 +2305,38 @@ document.querySelectorAll("[data-workflow-type]").forEach((button) => {
     elements.input.focus();
   });
 });
-document.querySelector("#open-settings").addEventListener("click", openSettings);
-document.querySelector("#close-settings").addEventListener("click", () => elements.settingsDialog.close());
-document.querySelector("#cancel-settings").addEventListener("click", () => elements.settingsDialog.close());
-elements.language.addEventListener("change", () => {
-  state.language = elements.language.value;
-  applyTranslations();
-});
-elements.settingsDialog.addEventListener("close", () => {
-  if (state.settings && state.language !== state.settings.language) {
-    state.language = state.settings.language;
-    elements.language.value = state.language;
-    applyTranslations();
-  }
-});
-document.querySelectorAll("[data-test-provider]").forEach((button) => {
-  button.addEventListener("click", () => testConnection(button.dataset.testProvider, button));
-});
-document.querySelectorAll("[data-clear-provider]").forEach((button) => {
-  button.addEventListener("click", () => clearCredential(button.dataset.clearProvider, button));
+document.querySelector("#open-settings").addEventListener("click", async () => {
+  const { openSettingsDialog } = await import("./settings-dialog.js");
+  let persistedLanguage = state.language;
+  openSettingsDialog({
+    language: state.language,
+    onLoaded: (settings) => {
+      persistedLanguage = settings.language;
+      state.language = settings.language;
+      applyTranslations();
+    },
+    onLanguageChange: (language) => {
+      state.language = language;
+      applyTranslations();
+    },
+    onClose: ({ saved }) => {
+      if (saved) return;
+      state.language = persistedLanguage;
+      applyTranslations();
+    },
+    onSaved: (settings) => {
+      state.language = settings.language;
+      applyTranslations();
+    },
+    confirmRemove: () => confirmAction({
+      title: t("confirmRemoveKeyTitle"), body: t("confirmRemoveKeyBody"),
+      confirmLabel: t("removeKeyAction"), danger: true,
+    }),
+    onCredentialRemoved: (settings, provider) => showToast(
+      settings.credentials[provider].configured ? t("keyFallback") : t("keyCleared"),
+      "success",
+    ),
+  });
 });
 
 elements.form.hidden = true;

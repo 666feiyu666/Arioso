@@ -188,15 +188,55 @@ so a change there must be reapplied to both corpora.
 
 The following are runtime state or evidence rather than hand-authored source:
 
-- generated MP3 and metadata files under `outputs/`;
-- browser task JSON and audio under `outputs/tasks/` by default;
-- workflow discussion sessions under `outputs/discussions/`;
-- MoodMic conversations under `outputs/moodmic/chats/` and mood entries in
-  `outputs/moodmic/entries.json`; the session file carries the bounded poem
+- generated MP3 and metadata files under the output root (`outputs/` by default;
+  `ARIOSO_OUTPUT_DIR` moves the whole root);
+- browser task records and their audio under `<root>/tasks/<workflowType>/<taskId>/`;
+- album production runs under `<root>/tasks/04-album/<taskId>/production/<runId>/`;
+- workflow discussion sessions under `<root>/discussions/`;
+- MoodMic conversations under `<root>/moodmic/chats/` and mood entries in
+  `<root>/moodmic/entries.json`; the session file carries the bounded poem
   retrieval trace, not the poem texts;
-- journey records under `outputs/journeys/`;
-- local interface settings; and
+- journey records under `<root>/journeys/`;
+- output kept for evidence but no longer written under `<root>/archive/`;
+- local interface settings in `.arioso/settings.json`; and
 - credentials in `.env`.
+
+## Output layout and retention
+
+Every runtime path is derived in `src/config/paths.ts`. Add a location there and
+pass `outputPaths()` values to stores instead of joining segments at each entry
+point, so changing `ARIOSO_OUTPUT_DIR` moves writers and readers together.
+Settings are the exception: they live outside the output root, because deleting
+generated output must not discard the configured language. `.arioso/settings.json`
+is authoritative; when only the older `<root>/settings.json` exists, the next
+read adopts it at the new path.
+
+Each store owns its directory and its stable ids. A task directory holds the
+authoritative `task.json` plus the audio it references; an album task adds one
+`production/<runId>/` directory per production attempt. Inside a production run:
+
+- `manifest.json` and the checksums it records are the completion evidence.
+  `verifyProductionResult` re-reads them against `album-denoised.wav` and the
+  `tracks/<NN>/` fragments, so treat them as one unit while a run is resumable.
+- `album-denoised.wav`, `video.mp4`, `tracklist.txt`, `run-state.json`, and the
+  logs are deliverables or evidence and stay.
+- A `production/<runId>/` directory that `task.json` no longer references is a
+  superseded run. Nothing reads it, so it can be removed; record what was
+  removed before deleting.
+- `tracks/<NN>/*.wav` fragments are re-derivable intermediates. They are only
+  kept for the checksum chain, so pruning them trades resume verification for
+  disk space: the run then fails verification and a later production starts a
+  fresh run.
+
+Pruning and archiving leave a manifest under `<root>/archive/`
+(`legacy.manifest.json`, `pruned-production-runs.json`) with a sha256 per file.
+Write one before deleting, and delete whole directories rather than individual
+files inside a run. The output root is disposable: clearing it loses task
+records and generated audio, nothing else.
+
+Evaluation harnesses and their evidence live under `experiments/eval/`, beside
+the prompt studies in `experiments/` and kept out of git. No source file or
+hand-authored asset belongs in the output root.
 
 Preserve existing generation evidence unless the current task explicitly
 targets it. Never include API keys in diagnostics or committed fixtures.

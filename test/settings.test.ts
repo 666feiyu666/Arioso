@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -35,6 +35,27 @@ describe("SettingsStore", () => {
         language: "en",
       });
     });
+  });
+
+  it("adopts the language from the legacy preferences file in the output root", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "arioso-settings-"));
+    const preferencesPath = path.join(root, ".arioso", "settings.json");
+    const legacyPreferencesPath = path.join(root, "outputs", "settings.json");
+    try {
+      await mkdir(path.dirname(legacyPreferencesPath), { recursive: true });
+      await writeFile(legacyPreferencesPath, JSON.stringify({ language: "en" }), "utf8");
+      const store = new SettingsStore({
+        envPath: path.join(root, ".env"),
+        preferencesPath,
+        legacyPreferencesPath,
+        environment: {},
+      });
+
+      expect(await store.language()).toBe("en");
+      expect(JSON.parse(await readFile(preferencesPath, "utf8"))).toEqual({ language: "en" });
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
   });
 
   it("uses session, local, then environment credential precedence", async () => {

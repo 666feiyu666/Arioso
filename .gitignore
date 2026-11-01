@@ -14,6 +14,8 @@ pnpm-debug.log*
 
 # Runtime output and generated media
 outputs/
+# Interface preferences live outside the output root.
+.arioso/
 *.mp3
 # Mood example audio is a hand-made project asset, not generated output.
 !Assets/music/*.mp3
@@ -41,6 +43,8 @@ Thumbs.db
 Desktop.ini
 
 # Course material and evaluation harness, kept in the local checkout only
-DH6012_Presentation/
-docs/DH6012-Documentation/
-eval/
+HD6012_Presentation/*
+docs/HD6012-Documentation/*
+eval/*
+# Evaluation harness and evidence live under experiments/ but stay local.
+experiments/eval/

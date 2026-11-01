@@ -5,6 +5,9 @@ import { fileURLToPath } from "node:url";
 
 import { configureModelDeadlines, refinePlaylistPlan } from "../composer/bounded-agent.js";
 import { loadConfig, timeoutsFor, type AriosoConfig } from "../config/env.js";
+import {
+  DEFAULT_OUTPUT_DIRECTORY, defaultSettingsPath, legacySettingsPath, outputPaths,
+} from "../config/paths.js";
 import { SettingsStore, SUPPORTED_LANGUAGES, type ApiProvider, type InterfaceLanguage } from "../config/settings.js";
 import { CreativeSessionStore } from "../discussion/creative-session-store.js";
 import { LangChainDiscussionAgent } from "../discussion/langchain-discussion.js";
@@ -210,23 +213,26 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
     preferencesPath: path.resolve(
       options.preferencesPath
         ?? baseEnvironment.ARIOSO_SETTINGS_PATH
-        ?? "outputs/settings.json",
+        ?? defaultSettingsPath(),
+    ),
+    legacyPreferencesPath: legacySettingsPath(
+      baseEnvironment.ARIOSO_OUTPUT_DIR ?? DEFAULT_OUTPUT_DIRECTORY,
     ),
     environment: baseEnvironment,
   });
   const environment = await settings.runtimeEnvironment();
-  const outputDirectory = environment.ARIOSO_OUTPUT_DIR ?? "outputs";
+  const output = outputPaths(environment.ARIOSO_OUTPUT_DIR ?? DEFAULT_OUTPUT_DIRECTORY);
   // Model-call deadlines come from the same environment the server runs with.
   try {
     configureModelDeadlines(timeoutsFor(loadConfig(false, environment)));
   } catch {
     /* No model configured yet: the built-in deadlines apply. */
   }
-  const store = new TaskStore(path.resolve(outputDirectory, "tasks"));
-  const discussionStore = new CreativeSessionStore(path.resolve(outputDirectory, "discussions"));
-  const moodStore = new MoodEntryStore(path.resolve(outputDirectory, "moodmic", "entries.json"));
-  const moodChatStore = new MoodChatStore(path.resolve(outputDirectory, "moodmic", "chats"));
-  const journeyStore = new JourneyStore(path.resolve(outputDirectory, "journeys"));
+  const store = new TaskStore(output.tasks);
+  const discussionStore = new CreativeSessionStore(output.discussions);
+  const moodStore = new MoodEntryStore(output.moodEntries);
+  const moodChatStore = new MoodChatStore(output.moodChats);
+  const journeyStore = new JourneyStore(output.journeys);
   const discussionAgent = options.discussionAgent ?? new LangChainDiscussionAgent();
   const poemRetriever = options.poemRetriever;
   const moodClassifier = options.moodClassifier ?? new LangChainMoodClassifier();

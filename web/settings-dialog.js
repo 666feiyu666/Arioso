@@ -4,8 +4,7 @@
 //
 //   openSettingsDialog({ language, onSaved })
 //
-// The workflow studio still carries its own copy of this dialog inside app.js;
-// this module is what the MoodMic home page uses.
+// Both the workflow studio and MoodMic use this dialog.
 
 import { api } from "./mood-common.js";
 
@@ -70,6 +69,12 @@ const state = {
   language: "zh-CN",
   settings: null,
   onSaved: null,
+  onLoaded: null,
+  onLanguageChange: null,
+  onClose: null,
+  confirmRemove: null,
+  onCredentialRemoved: null,
+  saved: false,
   // Provider whose "remove" button is waiting for its second, confirming click.
   confirming: null,
 };
@@ -164,9 +169,15 @@ function build() {
   dialog.querySelector("[data-close]").addEventListener("click", close);
   dialog.querySelector("[data-cancel]").addEventListener("click", close);
   dialog.addEventListener("close", () => {
+    state.onClose?.({ saved: state.saved });
     state.confirming = null;
     state.settings = null;
     state.onSaved = null;
+    state.onLoaded = null;
+    state.onLanguageChange = null;
+    state.onClose = null;
+    state.confirmRemove = null;
+    state.onCredentialRemoved = null;
   });
 
   // Choosing a language previews the dialog's own copy; the page follows once
@@ -175,6 +186,7 @@ function build() {
     state.language = elements.language.value;
     renderCopy();
     renderCredentials();
+    state.onLanguageChange?.(state.language);
   });
 
   elements.form.addEventListener("submit", save);
@@ -231,11 +243,17 @@ function renderCredentials() {
 
 /** Fill the dialog from the server, then show it. A failed load still opens the
  *  dialog so the reason is visible in its own message slot. */
-async function open({ language, onSaved }) {
+async function open({ language, onSaved, onLoaded, onLanguageChange, onClose, confirmRemove, onCredentialRemoved }) {
   build();
   if (elements.dialog.open) return;
   state.language = language === "en" ? "en" : "zh-CN";
   state.onSaved = onSaved ?? null;
+  state.onLoaded = onLoaded ?? null;
+  state.onLanguageChange = onLanguageChange ?? null;
+  state.onClose = onClose ?? null;
+  state.confirmRemove = confirmRemove ?? null;
+  state.onCredentialRemoved = onCredentialRemoved ?? null;
+  state.saved = false;
   state.settings = null;
   state.confirming = null;
   setMessage("");
@@ -244,6 +262,7 @@ async function open({ language, onSaved }) {
   try {
     const settings = await api("/api/settings");
     state.settings = settings;
+    state.onLoaded?.(settings);
     if (settings?.language === "en" || settings?.language === "zh-CN") {
       state.language = settings.language;
     }
@@ -280,6 +299,7 @@ async function save(event) {
       }),
     });
     state.settings = settings;
+    state.saved = true;
     const onSaved = state.onSaved;
     close();
     onSaved?.(settings);
@@ -311,10 +331,11 @@ async function testConnection(provider) {
   }
 }
 
-/** First click arms the button, a second one within the same dialog session
- *  removes the saved key. */
+/** Without a page-specific confirmation callback, a second click removes the key. */
 async function removeCredential(provider) {
-  if (state.confirming !== provider) {
+  if (state.confirmRemove) {
+    if (!await state.confirmRemove(provider)) return;
+  } else if (state.confirming !== provider) {
     state.confirming = provider;
     renderCredentials();
     return;
@@ -330,6 +351,7 @@ async function removeCredential(provider) {
     elements.keys[provider].value = "";
     renderCredentials();
     setMessage(settings.credentials[provider].configured ? t("keyFallback") : t("keyCleared"), true);
+    state.onCredentialRemoved?.(settings, provider);
   } catch (error) {
     state.confirming = null;
     renderCredentials();
@@ -339,6 +361,6 @@ async function removeCredential(provider) {
   }
 }
 
-export function openSettingsDialog({ language = "zh-CN", onSaved } = {}) {
-  return open({ language, onSaved });
+export function openSettingsDialog(options = {}) {
+  return open({ language: "zh-CN", ...options });
 }

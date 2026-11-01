@@ -25,12 +25,29 @@ export interface SettingsSnapshot {
 
 export interface SettingsStoreOptions {
   preferencesPath: string;
+  /**
+   * Where preferences were stored before they moved out of the output root.
+   * Read only as a migration source when the current path is still missing.
+   */
+  legacyPreferencesPath?: string;
   envPath: string;
   environment?: NodeJS.ProcessEnv;
 }
 
 function isLanguage(value: unknown): value is InterfaceLanguage {
   return typeof value === "string" && SUPPORTED_LANGUAGES.includes(value as InterfaceLanguage);
+}
+
+/** Returns the parsed preferences, or undefined when the file is missing or unreadable. */
+async function readPreferences(filePath: string): Promise<Record<string, unknown> | undefined> {
+  try {
+    const value: unknown = JSON.parse(await readFile(filePath, "utf8"));
+    return typeof value === "object" && value !== null && !Array.isArray(value)
+      ? value as Record<string, unknown>
+      : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 function maskApiKey(value: string): string {
@@ -93,6 +110,7 @@ async function updateDotEnvValue(
 
 export class SettingsStore {
   readonly #preferencesPath: string;
+  readonly #legacyPreferencesPath: string | undefined;
   readonly #envPath: string;
   readonly #environment: NodeJS.ProcessEnv;
   readonly #sessionCredentials = new Map<ApiProvider, string>();
@@ -100,19 +118,32 @@ export class SettingsStore {
 
   constructor(options: SettingsStoreOptions) {
     this.#preferencesPath = options.preferencesPath;
+    this.#legacyPreferencesPath = options.legacyPreferencesPath;
     this.#envPath = options.envPath;
     this.#environment = options.environment ?? process.env;
   }
 
   async language(): Promise<InterfaceLanguage> {
-    try {
-      const value = JSON.parse(await readFile(this.#preferencesPath, "utf8")) as {
-        language?: unknown;
-      };
-      return isLanguage(value.language) ? value.language : DEFAULT_LANGUAGE;
-    } catch {
-      return DEFAULT_LANGUAGE;
-    }
+    const stored = await this.#storedLanguage();
+    return isLanguage(stored) ? stored : DEFAULT_LANGUAGE;
+  }
+
+  /**
+   * Reads the stored language. When the current preferences file is missing but
+   * the legacy one inside the output root still exists, its value is adopted at
+   * the current path so the move survives the next read.
+   */
+  async #storedLanguage(): Promise<unknown> {
+    const current = await readPreferences(this.#preferencesPath);
+    if (current) return current.language;
+    if (!this.#legacyPreferencesPath) return undefined;
+    const legacy = await readPreferences(this.#legacyPreferencesPath);
+    if (!legacy) return undefined;
+    await writeTextFileAtomic(
+      this.#preferencesPath,
+      `${JSON.stringify(legacy, null, 2)}\n`,
+    ).catch(() => undefined);
+    return legacy.language;
   }
 
   async saveLanguage(language: InterfaceLanguage): Promise<void> {

@@ -4,6 +4,7 @@ import path from "node:path";
 
 import { buildAlbumLyriaPrompt } from "../composer/album-prompt.js";
 import { loadConfig } from "../config/env.js";
+import { outputPaths } from "../config/paths.js";
 import { AlbumPlanSchema } from "../schema/album-plan.js";
 import { MusicSpecSchema } from "../schema/music-spec.js";
 import { writeTextFileAtomic } from "../utils/files.js";
@@ -17,7 +18,7 @@ async function main(): Promise<void> {
   const config = loadConfig(generate);
   const study = path.resolve("experiments", "late-night-noir-album-prompt-study", "results");
   const markerPath = path.join(study, "frontend-album.json");
-  const store = new TaskStore(path.resolve(config.outputDirectory, "tasks"));
+  const store = new TaskStore(outputPaths(config.outputDirectory).tasks);
   await store.initialize({ markInterrupted: false });
 
   let albumId: string | undefined;

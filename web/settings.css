@@ -1,6 +1,5 @@
-/* Settings dialog — shared by pages that are not the workflow studio
-   (MoodMic home). Loaded after theme.css; only consumes tokens. The workflow
-   studio keeps an equivalent block in styles.css. */
+/* Shared settings dialog styles. The workflow studio also has matching rules
+   in styles.css for its confirmation dialog and existing page controls. */
 
 .settings-dialog {
   width: min(620px, calc(100vw - 32px));

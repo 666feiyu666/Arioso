@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 
 import { composeMusic } from "./composer/composer-agent.js";
 import { loadConfig } from "./config/env.js";
+import { outputPaths } from "./config/paths.js";
 import { LyriaClient } from "./lyria/lyria-client.js";
 import { stitchAudioFiles } from "./audio/stitch.js";
 import { TaskStore, parseTaskInput } from "./web/task-store.js";
@@ -70,7 +71,7 @@ async function main(): Promise<void> {
 
   if (command === "produce-album") {
     const config = loadConfig(true);
-    const store = new TaskStore(path.resolve(config.outputDirectory, "tasks"));
+    const store = new TaskStore(outputPaths(config.outputDirectory).tasks);
     // A CLI run must not mark unrelated active browser tasks interrupted.
     await store.initialize({ markInterrupted: false });
     const resume = descriptionParts[0] === "--resume";
@@ -112,7 +113,7 @@ async function main(): Promise<void> {
   const generated = await lyria.generate(spec.lyriaPrompt, { model: config.lyriaModel });
   const createdAt = new Date();
   const baseName = `${timestampForFile(createdAt)}-${slugify(spec.title)}`;
-  const outputDirectory = path.resolve(config.outputDirectory);
+  const outputDirectory = outputPaths(config.outputDirectory).root;
   const audioPath = path.join(outputDirectory, `${baseName}.mp3`);
   const metadataPath = path.join(outputDirectory, `${baseName}.json`);
 
