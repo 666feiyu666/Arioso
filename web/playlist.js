@@ -292,7 +292,16 @@ mountPlayerBar({
   },
   coverFor: (snapshot) => {
     const task = state.tasks.find((item) => item.id === snapshot.taskId);
-    return task ? coverFor(task) : { style: "", glyph: Array.from(String(snapshot.albumTitle ?? "A"))[0] ?? "A" };
+    if (!task) return { style: "", glyph: Array.from(String(snapshot.albumTitle ?? "A"))[0] ?? "A", imageUrl: "" };
+    if (task.coverUpdatedAt) {
+      const version = encodeURIComponent(task.coverUpdatedAt);
+      return {
+        style: "",
+        glyph: "",
+        imageUrl: `/api/tasks/${encodeURIComponent(task.id)}/cover?v=${version}`,
+      };
+    }
+    return coverFor(task);
   },
 });
 
@@ -475,10 +484,14 @@ function persistPlayback(snapshot, force = false) {
     position: snapshot.currentTime,
     duration: snapshot.duration,
     playing: snapshot.playing,
-    // The cover travels too, so another page paints the same album colours.
+    // The cover travels too, so another page paints the same album art.
     ...(() => {
       const task = currentTask();
       if (!task) return {};
+      if (task.coverUpdatedAt) {
+        const version = encodeURIComponent(task.coverUpdatedAt);
+        return { coverImageUrl: `/api/tasks/${encodeURIComponent(task.id)}/cover?v=${version}` };
+      }
       const cover = coverFor(task);
       return { coverStyle: cover.style, coverGlyph: cover.glyph };
     })(),
@@ -526,6 +539,12 @@ async function coverBlob(file) {
   return blob;
 }
 
+/** Pushes the current playback snapshot again, e.g. after the cover changed. */
+function refreshPlayer() {
+  const snapshot = stage.snapshot();
+  for (const listener of playerListeners) listener(snapshot);
+}
+
 async function uploadCover(file) {
   const id = state.currentId;
   if (!id) return;
@@ -542,6 +561,7 @@ async function uploadCover(file) {
     const reason = error instanceof Error && error.message ? ` (${error.message})` : "";
     state.message = `${t("coverError")}${reason}`;
   }
+  refreshPlayer();
   render();
 }
 
@@ -554,6 +574,7 @@ async function removeCover() {
   } catch {
     state.message = t("coverError");
   }
+  refreshPlayer();
   render();
 }
 

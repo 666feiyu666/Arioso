@@ -53,6 +53,7 @@ export function mountPlayerBar(controller, options = {}) {
   const coverFor = options.coverFor ?? ((snapshot) => ({
     style: snapshot.coverStyle ?? "",
     glyph: snapshot.coverGlyph || initialOf(snapshot.albumTitle),
+    imageUrl: snapshot.coverImageUrl ?? "",
   }));
 
   const bar = document.createElement("div");
@@ -82,22 +83,26 @@ export function mountPlayerBar(controller, options = {}) {
     }
     bar.hidden = false;
     document.body.classList.add("has-pbar");
-    const key = `${snapshot.taskId ?? ""}:${snapshot.trackId}`;
+    const cover = coverFor(snapshot);
+    // The cover URL is part of the key: replacing the album art rebuilds the bar.
+    const key = `${snapshot.taskId ?? ""}:${snapshot.trackId}:${cover.imageUrl}`;
     if (key !== builtKey) {
       builtKey = key;
-      renderStructure();
+      renderStructure(cover);
       bindBar();
       if (queueOpen) renderQueue();
     }
     patch();
   }
 
-  function renderStructure() {
-    const cover = coverFor(snapshot);
+  function renderStructure(cover = coverFor(snapshot)) {
     const subtitle = snapshot.albumTitle || snapshot.taskTitle || "";
+    const coverMarkup = cover.imageUrl
+      ? `<span class="pl-cover pl-cover-xs is-art" aria-hidden="true"><img src="${escapeText(cover.imageUrl)}" alt="" /></span>`
+      : `<span class="pl-cover pl-cover-xs" style="${cover.style}" aria-hidden="true"><b>${escapeText(cover.glyph)}</b></span>`;
     bar.innerHTML = `
       <button class="pbar-left" type="button" data-bar="queue" aria-label="${escapeText(t("queue"))}" aria-expanded="false">
-        <span class="pl-cover pl-cover-xs" style="${cover.style}" aria-hidden="true"><b>${escapeText(cover.glyph)}</b></span>
+        ${coverMarkup}
         <span class="pbar-now">
           <strong>${escapeText(snapshot.trackTitle)}</strong>
           <small>${escapeText(subtitle)}</small>
@@ -241,6 +246,7 @@ export function mountRecordedPlayback() {
       duration: track?.durationSeconds ?? state.duration ?? 0,
       coverStyle: state.coverStyle ?? "",
       coverGlyph: state.coverGlyph ?? "",
+      coverImageUrl: state.coverImageUrl ?? "",
     };
   }
 
@@ -262,6 +268,7 @@ export function mountRecordedPlayback() {
       playing: state.playing,
       coverStyle: state.coverStyle ?? "",
       coverGlyph: state.coverGlyph ?? "",
+      coverImageUrl: state.coverImageUrl ?? "",
       queue: state.queue,
     });
   }

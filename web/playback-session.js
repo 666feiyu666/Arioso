@@ -26,6 +26,7 @@ export function readPlayback() {
       playing: value.playing !== false,
       coverStyle: typeof value.coverStyle === "string" ? value.coverStyle : "",
       coverGlyph: typeof value.coverGlyph === "string" ? value.coverGlyph : "",
+      coverImageUrl: typeof value.coverImageUrl === "string" ? value.coverImageUrl : "",
       queue: Array.isArray(value.queue)
         ? value.queue
           .filter((item) => item && typeof item.id === "string")

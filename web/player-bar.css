@@ -45,16 +45,29 @@ body.has-pbar:not(.pl-page) {
 
 /* The bar carries its own cover, so it works on pages without playlist.css. */
 .pbar .pl-cover {
+  position: relative;
   display: grid;
   place-items: center;
   width: 32px;
   aspect-ratio: 1 / 1;
+  overflow: hidden;
   border-radius: 7px;
   background-image: linear-gradient(
     var(--cover-angle, 120deg),
     var(--cover-from, #5546e0),
     var(--cover-to, #2b2170)
   );
+}
+
+.pbar .pl-cover.is-art { background-image: none; background: rgba(255, 255, 255, 0.12); }
+
+.pbar .pl-cover.is-art img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
 }
 
 .pbar .pl-cover b {
