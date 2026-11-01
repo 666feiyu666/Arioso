@@ -899,11 +899,33 @@ export function createAlbumStage(options) {
     if (seek) seek.addEventListener("input", () => seekTo(Number(seek.value)));
   }
 
+  /**
+   * The current playback queue, for a page that lets the listener pick a track
+   * from the bar. Read on demand rather than included in every snapshot, which
+   * fires four times a second.
+   */
+  function queueTracks() {
+    const activeTask = task();
+    if (!activeTask || !state.queue.length) return [];
+    const currentId = state.playingTrackId ?? state.queue[state.queueIndex];
+    return state.queue.map((trackId, index) => {
+      const track = (activeTask.albumTracks ?? []).find((item) => item.id === trackId);
+      return {
+        id: trackId,
+        order: index + 1,
+        title: track?.title ?? "",
+        durationSeconds: track?.durationSeconds ?? 0,
+        current: trackId === currentId,
+      };
+    });
+  }
+
   return {
     render,
     bind,
     /** Current playback state for a page that renders its own player bar. */
     snapshot,
+    queueTracks,
     /** Playback commands, so a page bar drives the stage's single audio element. */
     controls: { togglePlay, playTrack, stepTrack, seekTo, playScope: startPlayback, resume: resumePlayback },
     /** Called by the page when an album is opened or replaced. */

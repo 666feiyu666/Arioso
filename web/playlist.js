@@ -17,6 +17,7 @@
 
 import { createAlbumStage, albumPlanBadge, durationText } from "./album-view.js";
 import { clearPlayback, readPlayback, writePlayback } from "./playback-session.js";
+import { mountPlayerBar } from "./player-bar.js";
 
 const COPY = {
   "zh-CN": {
@@ -55,6 +56,8 @@ const COPY = {
     prevTrack: "上一首",
     nextTrack: "下一首",
     nowPlaying: "正在播放",
+    queueTitle: "播放队列",
+    queueEmpty: "还没有可播放的曲目。",
     listen: "试听",
     playbackError: "这段音频暂时无法播放。",
     shelfReviewHint: "进入确认 →",
@@ -100,6 +103,8 @@ const COPY = {
     prevTrack: "Previous track",
     nextTrack: "Next track",
     nowPlaying: "Now playing",
+    queueTitle: "Play queue",
+    queueEmpty: "Nothing queued yet.",
     listen: "Listen",
     playbackError: "This track's audio cannot play right now.",
     shelfReviewHint: "Open to confirm →",
@@ -121,12 +126,10 @@ const COVER_TONES = [
 
 const root = document.querySelector("#pl-main");
 const drawerRoot = document.querySelector("#pl-drawer-root");
-const barRoot = document.querySelector("#pl-pbar");
 const langToggle = document.querySelector("#lang-toggle");
 
 let language = "zh-CN";
 let preview = null;
-let barKey = "";
 const state = {
   view: "library",
   drawer: false,
@@ -176,12 +179,6 @@ function taskDuration(task) {
   return (task.albumTracks ?? []).reduce((total, track) => total + (track.audioFile ? track.durationSeconds || 0 : 0), 0);
 }
 
-function clockText(seconds) {
-  const total = Math.max(0, Math.floor(seconds || 0));
-  const minutes = Math.floor(total / 60);
-  return `${minutes}:${String(total % 60).padStart(2, "0")}`;
-}
-
 function albumTitle(task) {
   return task.albumPlan?.albumTitle || task.title || task.description || "";
 }
@@ -225,6 +222,8 @@ function coverMarkup(task, extraClass = "") {
 
 // The album stage reads and writes the album through these callbacks, so the
 // page keeps owning its task list while the stage owns plan/curation behaviour.
+/** Listeners the shared player bar registers; the stage notifies them. */
+const playerListeners = [];
 const stage = createAlbumStage({
   language: () => language,
   api,
@@ -234,7 +233,8 @@ const stage = createAlbumStage({
     if (state.view === "album") render();
   },
   onPlayerChange: (snapshot) => {
-    updateBar(snapshot);
+    state.player = snapshot ?? null;
+    for (const listener of playerListeners) listener(snapshot);
     persistPlayback(snapshot);
   },
   approve: async (task) => {
@@ -249,6 +249,39 @@ const stage = createAlbumStage({
     replaceTask(updated);
   },
   onRunning: () => pollTask(),
+});
+
+// The shared bar drives the stage's single audio element, so every page shows
+// the same controls, queue panel, and position.
+mountPlayerBar({
+  subscribe(listener) {
+    playerListeners.push(listener);
+    listener(stage.snapshot());
+  },
+  toggle: () => stage.controls.togglePlay(),
+  next: () => stage.controls.stepTrack(1),
+  prev: () => stage.controls.stepTrack(-1),
+  play: (trackId) => stage.controls.playTrack(trackId),
+  queue: () => stage.queueTracks(),
+}, {
+  // The shared bar asks for its own keys; map them to this page's copy.
+  t: (key) => {
+    const keys = {
+      queue: "queueTitle",
+      previous: "prevTrack",
+      next: "nextTrack",
+      close: "closeDrawer",
+      play: "play",
+      pause: "pause",
+      nowPlaying: "nowPlaying",
+      queueEmpty: "queueEmpty",
+    };
+    return t(keys[key] ?? key);
+  },
+  coverFor: (snapshot) => {
+    const task = state.tasks.find((item) => item.id === snapshot.taskId);
+    return task ? coverFor(task) : { style: "", glyph: Array.from(String(snapshot.albumTitle ?? "A"))[0] ?? "A" };
+  },
 });
 
 // ---- views ---------------------------------------------------------------
@@ -395,72 +428,9 @@ function render() {
   bindActions(drawerRoot);
   bindDrawerFields();
   if (state.view === "album") stage.bind(root);
-  updateBar(state.player);
 }
 
 // ---- player bar ----------------------------------------------------------
-
-function playerBarMarkup(snapshot) {
-  const task = state.tasks.find((item) => item.id === snapshot.taskId);
-  return `
-    <div class="pbar-left">
-      ${task ? coverMarkup(task, "pl-cover-xs") : ""}
-      <div class="pbar-now">
-        <strong>${esc(snapshot.trackTitle)}</strong>
-        <small>${esc(snapshot.taskTitle)}</small>
-      </div>
-    </div>
-    <div class="pbar-transport">
-      <button type="button" data-bar="prev" aria-label="${esc(t("prevTrack"))}">⏮</button>
-      <button type="button" class="pbar-toggle" data-bar="toggle" aria-label="${esc(t("play"))}">▶</button>
-      <button type="button" data-bar="next" aria-label="${esc(t("nextTrack"))}">⏭</button>
-    </div>
-    <span class="pbar-time num"><span data-bar-now>0:00</span><span class="pbar-sep">/</span><span data-bar-total>0:00</span></span>
-  `;
-}
-
-/**
- * The stage notifies on every timeupdate, so the bar is rebuilt only when the
- * track changes and patched in place otherwise.
- */
-function updateBar(snapshot) {
-  state.player = snapshot ?? null;
-  if (!snapshot || !snapshot.trackId) {
-    barRoot.hidden = true;
-    barRoot.innerHTML = "";
-    barKey = "";
-    document.body.classList.remove("has-pbar");
-    return;
-  }
-  barRoot.hidden = false;
-  document.body.classList.add("has-pbar");
-  const key = `${snapshot.taskId ?? ""}:${snapshot.trackId}`;
-  if (key !== barKey) {
-    barKey = key;
-    barRoot.innerHTML = playerBarMarkup(snapshot);
-    bindBar();
-  }
-  const now = barRoot.querySelector("[data-bar-now]");
-  if (now) now.textContent = clockText(snapshot.currentTime);
-  const total = barRoot.querySelector("[data-bar-total]");
-  if (total) total.textContent = clockText(snapshot.duration);
-  const toggle = barRoot.querySelector('[data-bar="toggle"]');
-  if (toggle) {
-    toggle.textContent = snapshot.playing ? "⏸" : "▶";
-    toggle.setAttribute("aria-label", snapshot.playing ? t("pause") : t("play"));
-  }
-}
-
-function bindBar() {
-  barRoot.querySelectorAll("[data-bar]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const action = button.dataset.bar;
-      if (action === "toggle") stage.controls.togglePlay();
-      else if (action === "prev") stage.controls.stepTrack(-1);
-      else if (action === "next") stage.controls.stepTrack(1);
-    });
-  });
-}
 
 let lastPersistedAt = 0;
 let lastPersistedPlaying = null;
@@ -488,6 +458,19 @@ function persistPlayback(snapshot, force = false) {
     position: snapshot.currentTime,
     duration: snapshot.duration,
     playing: snapshot.playing,
+    // The cover travels too, so another page paints the same album colours.
+    ...(() => {
+      const task = currentTask();
+      if (!task) return {};
+      const cover = coverFor(task);
+      return { coverStyle: cover.style, coverGlyph: cover.glyph };
+    })(),
+    // The queue travels with the record so another page can show and drive it.
+    queue: stage.queueTracks().map((track) => ({
+      id: track.id,
+      title: track.title,
+      durationSeconds: track.durationSeconds,
+    })),
   });
 }
 
@@ -497,8 +480,9 @@ function restorePlayback() {
   if (!saved) return;
   if (!state.tasks.some((item) => item.id === saved.taskId)) return;
   state.currentId = saved.taskId;
-  // Restored paused: the user decides when audio continues.
-  if (stage.controls.resume(saved.trackId, saved.position, false)) updateBar(stage.snapshot());
+  // Restored paused: the user decides when audio continues. The stage notifies
+  // the bar itself once the track is loaded.
+  stage.controls.resume(saved.trackId, saved.position, false);
 }
 
 // ---- binding -------------------------------------------------------------

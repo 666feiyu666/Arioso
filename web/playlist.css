@@ -278,6 +278,8 @@
 /* The page owns the persistent bar, so the stage's own player stays hidden here. */
 #album-stage .pl-player { display: none; }
 
+body.has-pbar .pl-main { padding-bottom: 96px; }
+
 /* ---- album: two columns ----
    The album keeps the wide column (cover, progress, plan, exports); its tracks
    get a list of their own on the right, the way a music library shows them
@@ -867,104 +869,14 @@ body.has-drawer { overflow: hidden; }
   .pl-bubble { max-width: 100%; }
 }
 
-/* ---- persistent bar ----
-   A thin dock, not a panel: the album stage owns the audio element and the page
-   paints this bar from its snapshots, so a track keeps playing while the library
-   is open. Cover and title left, transport centred, position right. */
-
-body.has-pbar .pl-main { padding-bottom: 96px; }
-
-.pl-pbar {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 50;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  align-items: center;
-  gap: 16px;
-  min-height: 56px;
-  padding: 6px max(24px, calc((100vw - 1080px) / 2));
-  color: #f4f6fa;
-  background: color-mix(in srgb, var(--ink) 97%, var(--brand));
-  border-top: 1px solid color-mix(in srgb, var(--ink) 70%, var(--line));
-  box-shadow: 0 -18px 40px -30px rgba(16, 21, 31, 0.7);
-  backdrop-filter: blur(18px);
-}
-
-.pl-pbar[hidden] { display: none; }
-
-.pbar-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
-
-.pbar-left .pl-cover-xs { box-shadow: none; }
-
-.pbar-now { min-width: 0; display: grid; gap: 1px; }
-
-.pbar-now strong {
-  overflow: hidden;
-  font-size: 0.88rem;
-  font-weight: 600;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.pbar-now small {
-  overflow: hidden;
-  color: #9aa2b2;
-  font-size: 0.7rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.pbar-transport { display: flex; align-items: center; gap: 2px; }
-
-.pbar-transport button {
-  width: 32px;
-  height: 32px;
-  display: grid;
-  place-items: center;
-  border: 0;
-  border-radius: 50%;
-  background: none;
-  color: #c8cede;
-  font-size: 0.78rem;
-  cursor: pointer;
-  transition: color 0.16s var(--ease), background 0.16s var(--ease);
-}
-
-.pbar-transport button:hover:not([disabled]) { background: rgba(255, 255, 255, 0.12); color: #fff; }
-
-.pbar-transport .pbar-toggle {
-  width: 36px;
-  height: 36px;
-  color: #f4f6fa;
-  font-size: 0.9rem;
-}
-
-.pbar-time {
-  justify-self: end;
-  color: #9aa2b2;
-  font-size: 0.74rem;
-  white-space: nowrap;
-}
-
-.pbar-sep { padding: 0 4px; opacity: 0.6; }
+/* ---- small screens ---- */
 
 @media (max-width: 760px) {
-  .pl-pbar {
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas: "left transport";
-    gap: 10px;
-    padding: 6px 16px;
-  }
-  .pbar-left { grid-area: left; }
-  .pbar-transport { grid-area: transport; }
-  .pbar-time { display: none; }
+  .album-head { align-items: flex-start; }
+  .pl-cover-xl { width: 96px; }
+  .album-head-body h1 { font-size: 1.45rem; }
+  .lib-heading h1 { font-size: 1.4rem; }
+  .lib-grid { grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 18px 12px; }
+  .pl-main { padding: 20px 16px 88px; }
   body.has-pbar .pl-main { padding-bottom: 92px; }
 }

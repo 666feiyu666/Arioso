@@ -1,23 +1,23 @@
-/* Mini player: a thin dock that every page other than the playlist shows when a
-   track is already loaded, so a page change keeps the music one click away.
-   Title left, transport centred, position right — no panel, no progress bar. */
+/* The playback bar, shared by every page.
+   One thin dock: cover and title left, transport centred, position right.
+   Clicking the left side opens the queue. Colours come from theme.css. */
 
-body.has-mini-player {
+body.has-pbar:not(.pl-page) {
   padding-bottom: 96px;
 }
 
-.pb {
+.pbar {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 45;
+  z-index: 50;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: 16px;
   min-height: 56px;
-  padding: 6px max(20px, calc((100vw - 1080px) / 2));
+  padding: 6px max(24px, calc((100vw - 1080px) / 2));
   color: #f4f6fa;
   background: color-mix(in srgb, var(--ink) 97%, var(--brand));
   border-top: 1px solid color-mix(in srgb, var(--ink) 70%, var(--line));
@@ -25,13 +25,62 @@ body.has-mini-player {
   backdrop-filter: blur(18px);
 }
 
-.pb-meta {
+.pbar[hidden] { display: none; }
+
+.pbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pbar-left .pl-cover { box-shadow: none; }
+
+/* The bar carries its own cover, so it works on pages without playlist.css. */
+.pbar .pl-cover {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  aspect-ratio: 1 / 1;
+  border-radius: 7px;
+  background-image: linear-gradient(
+    var(--cover-angle, 120deg),
+    var(--cover-from, #5546e0),
+    var(--cover-to, #2b2170)
+  );
+}
+
+.pbar .pl-cover b {
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: rgba(255, 255, 255, 0.94);
+}
+
+.pbar .pl-cover::after { display: none; }
+
+.pbar-left:hover .pbar-now strong { color: #fff; }
+
+.pbar-left:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: -3px;
+  border-radius: 8px;
+}
+
+.pbar-now {
   min-width: 0;
   display: grid;
   gap: 1px;
 }
 
-.pb-meta strong {
+.pbar-now strong {
   overflow: hidden;
   font-size: 0.88rem;
   font-weight: 600;
@@ -39,7 +88,7 @@ body.has-mini-player {
   white-space: nowrap;
 }
 
-.pb-meta small {
+.pbar-now small {
   overflow: hidden;
   color: #9aa2b2;
   font-size: 0.7rem;
@@ -47,13 +96,13 @@ body.has-mini-player {
   white-space: nowrap;
 }
 
-.pb-transport {
+.pbar-transport {
   display: flex;
   align-items: center;
   gap: 2px;
 }
 
-.pb-transport button {
+.pbar-transport button {
   width: 32px;
   height: 32px;
   display: grid;
@@ -67,36 +116,152 @@ body.has-mini-player {
   transition: color 0.16s var(--ease), background 0.16s var(--ease);
 }
 
-.pb-transport button:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
-
-.pb-toggle {
-  width: 36px;
-  height: 36px;
-  font-size: 0.9rem;
-  color: #f4f6fa;
+.pbar-transport button:hover:not([disabled]) {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
 }
 
-.pb-stop { font-size: 0.68rem; }
+.pbar-transport .pbar-toggle {
+  width: 36px;
+  height: 36px;
+  color: #f4f6fa;
+  font-size: 0.9rem;
+}
 
-.pb-time {
+.pbar-time {
   justify-self: end;
   color: #9aa2b2;
   font-size: 0.74rem;
   white-space: nowrap;
 }
 
-.pb-sep { padding: 0 4px; opacity: 0.6; }
+.pbar-sep { padding: 0 4px; opacity: 0.6; }
 
-@media (max-width: 640px) {
-  .pb {
+/* ---- queue panel ---- */
+
+.pbar-queue-root:empty { display: none; }
+
+.pbar-queue-root {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 56px;
+  z-index: 49;
+  display: flex;
+  justify-content: center;
+  padding: 0 16px;
+  pointer-events: none;
+}
+
+.pbar-queue {
+  pointer-events: auto;
+  width: min(520px, 100%);
+  max-height: min(58vh, 460px);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  border-radius: 14px 14px 0 0;
+  box-shadow: 0 -24px 48px -32px rgba(16, 21, 31, 0.6);
+  overflow: hidden;
+}
+
+.pbar-queue-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.pbar-queue-head h2 { margin: 0; font-size: 0.9rem; font-weight: 600; }
+
+.pbar-queue-close {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.pbar-queue-close:hover { color: var(--ink); border-color: var(--ink-soft); }
+
+.pbar-queue-list {
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  overflow-y: auto;
+  display: grid;
+  gap: 2px;
+  align-content: start;
+}
+
+.pbar-queue-item {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 2.2em minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pbar-queue-item:hover { background: var(--surface-2); }
+
+.pbar-queue-item.is-current {
+  background: color-mix(in srgb, var(--brand) 8%, var(--surface));
+  color: var(--brand-deep);
+  font-weight: 600;
+}
+
+.pbar-queue-item:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+
+.pbar-queue-num { color: var(--faint); font-size: 0.78rem; }
+.pbar-queue-item.is-current .pbar-queue-num { color: var(--brand); }
+
+.pbar-queue-name {
+  overflow: hidden;
+  font-size: 0.88rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pbar-queue-dur { color: var(--muted); font-size: 0.76rem; }
+
+.pbar-queue-empty {
+  margin: 0;
+  padding: 26px 16px;
+  color: var(--muted);
+  font-size: 0.86rem;
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .pbar {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 10px;
     padding: 6px 16px;
   }
-  .pb-time { display: none; }
-  body.has-mini-player { padding-bottom: 92px; }
+  .pbar-time { display: none; }
+  .pbar-queue-root { bottom: 52px; padding: 0 10px; }
+  .pbar-queue { max-height: 70vh; }
+  body.has-pbar:not(.pl-page) { padding-bottom: 92px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pb-transport button { transition: none; }
+  .pbar-transport button { transition: none; }
 }

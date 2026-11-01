@@ -7,7 +7,7 @@
 
 const KEY = "arioso.playback";
 
-/** @typedef {{ taskId: string, trackId: string, trackTitle: string, albumTitle: string, position: number, duration: number, playing: boolean }} PlaybackState */
+/** @typedef {{ taskId: string, trackId: string, trackTitle: string, albumTitle: string, position: number, duration: number, playing: boolean, queue: Array<{ id: string, title: string, durationSeconds: number }> }} PlaybackState */
 
 /** @returns {PlaybackState | null} */
 export function readPlayback() {
@@ -24,6 +24,17 @@ export function readPlayback() {
       position: Number.isFinite(value.position) ? Number(value.position) : 0,
       duration: Number.isFinite(value.duration) ? Number(value.duration) : 0,
       playing: value.playing !== false,
+      coverStyle: typeof value.coverStyle === "string" ? value.coverStyle : "",
+      coverGlyph: typeof value.coverGlyph === "string" ? value.coverGlyph : "",
+      queue: Array.isArray(value.queue)
+        ? value.queue
+          .filter((item) => item && typeof item.id === "string")
+          .map((item) => ({
+            id: item.id,
+            title: typeof item.title === "string" ? item.title : "",
+            durationSeconds: Number.isFinite(item.durationSeconds) ? Number(item.durationSeconds) : 0,
+          }))
+        : [],
     };
   } catch {
     return null;

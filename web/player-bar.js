@@ -1,67 +1,251 @@
-// A mini player that survives page changes.
+// The playback bar every page shares.
 //
-// Every Arioso page is its own document, so the playlist page's album stage
-// cannot keep its <audio> element alive across a link click. This module takes
-// over on the other pages: it reads the recorded playback state, recreates the
-// element at the recorded position, and paints a compact bar at the bottom.
-// The playlist page keeps its own full bar and writes the same record, so
-// playback continues in both directions.
+// One component, two owners. On the playlist page the album stage owns the
+// <audio> element and pushes snapshots in; on every other page this module owns
+// the element and rebuilds it from the recorded state. Either way the page shows
+// the same bar, the same queue panel, and the same "one click to continue".
+//
+// The page supplies a controller:
+//   subscribe(listener)  ->  called with each playback snapshot
+//   toggle() next() prev()
+//   play(trackId)
+//   queue()              ->  [{ id, title, durationSeconds, current }]
 
 import { clearPlayback, readPlayback, trackAudioUrl, writePlayback } from "./playback-session.js";
 
 const COPY = {
-  "zh-CN": { play: "播放", pause: "暂停", stop: "关闭播放", nowPlaying: "正在播放" },
-  en: { play: "Play", pause: "Pause", stop: "Stop playback", nowPlaying: "Now playing" },
+  "zh-CN": {
+    play: "播放", pause: "暂停", nowPlaying: "正在播放", queue: "播放队列",
+    queueEmpty: "还没有可播放的曲目。", close: "关闭",
+    previous: "上一首", next: "下一首", stop: "关闭播放",
+  },
+  en: {
+    play: "Play", pause: "Pause", nowPlaying: "Now playing", queue: "Play queue",
+    queueEmpty: "Nothing queued yet.", close: "Close",
+    previous: "Previous track", next: "Next track", stop: "Stop playback",
+  },
 };
 
-const language = document.documentElement.lang === "en" ? "en" : "zh-CN";
-const t = (key) => (COPY[language] ?? COPY["zh-CN"])[key] ?? key;
+function defaultLanguage() {
+  return document.documentElement.lang === "en" ? "en" : "zh-CN";
+}
 
 function clockText(seconds) {
   const total = Math.max(0, Math.floor(Number.isFinite(seconds) ? seconds : 0));
   return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`;
 }
 
-// The playlist page owns playback there; including the bar would duplicate it.
-const handledByPage = document.body.classList.contains("pl-page");
-const restored = handledByPage ? null : readPlayback();
-// A page change pauses rather than continues: the bar comes back paused at the
-// recorded position, and the user decides when audio resumes.
-if (restored) startMiniPlayer({ ...restored, playing: false });
+function escapeText(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (character) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
+}
 
-function startMiniPlayer(initial) {
-  let state = { ...initial };
-  let audio = null;
-  let lastWrite = 0;
+function initialOf(value) {
+  return Array.from(String(value ?? "").trim())[0]?.toUpperCase() ?? "A";
+}
+
+/**
+ * Mounts the bar and its queue panel on the current page.
+ * Returns `{ destroy }` so a page can unmount it if it ever needs to.
+ */
+export function mountPlayerBar(controller, options = {}) {
+  const t = options.t ?? ((key) => (COPY[defaultLanguage()] ?? COPY["zh-CN"])[key] ?? key);
+  const coverFor = options.coverFor ?? ((snapshot) => ({
+    style: snapshot.coverStyle ?? "",
+    glyph: snapshot.coverGlyph || initialOf(snapshot.albumTitle),
+  }));
 
   const bar = document.createElement("div");
-  bar.className = "pb";
-  bar.id = "arioso-mini-player";
+  bar.className = "pbar";
+  bar.id = "arioso-player";
   bar.setAttribute("role", "region");
   bar.setAttribute("aria-label", t("nowPlaying"));
-  bar.innerHTML = `
-    <div class="pb-meta">
-      <strong>${escapeText(state.trackTitle)}</strong>
-      <small>${escapeText(state.albumTitle)}</small>
-    </div>
-    <div class="pb-transport">
-      <button class="pb-toggle" type="button" aria-label="${t("play")}">▶</button>
-      <button class="pb-stop" type="button" aria-label="${t("stop")}">✕</button>
-    </div>
-    <span class="pb-time num"><span data-now>0:00</span><span class="pb-sep">/</span><span data-total>0:00</span></span>
-  `;
+  bar.hidden = true;
   document.body.appendChild(bar);
-  document.body.classList.add("has-mini-player");
 
-  const toggle = bar.querySelector(".pb-toggle");
-  const now = bar.querySelector("[data-now]");
-  const total = bar.querySelector("[data-total]");
+  const queueRoot = document.createElement("div");
+  queueRoot.className = "pbar-queue-root";
+  document.body.appendChild(queueRoot);
 
-  function paint() {
-    toggle.textContent = state.playing ? "⏸" : "▶";
-    toggle.setAttribute("aria-label", state.playing ? t("pause") : t("play"));
-    if (now) now.textContent = clockText(state.position);
-    if (total) total.textContent = clockText(state.duration);
+  let snapshot = null;
+  let builtKey = "";
+  let queueOpen = false;
+
+  function apply() {
+    if (!snapshot?.trackId) {
+      bar.hidden = true;
+      bar.innerHTML = "";
+      builtKey = "";
+      document.body.classList.remove("has-pbar");
+      closeQueue();
+      return;
+    }
+    bar.hidden = false;
+    document.body.classList.add("has-pbar");
+    const key = `${snapshot.taskId ?? ""}:${snapshot.trackId}`;
+    if (key !== builtKey) {
+      builtKey = key;
+      renderStructure();
+      bindBar();
+      if (queueOpen) renderQueue();
+    }
+    patch();
+  }
+
+  function renderStructure() {
+    const cover = coverFor(snapshot);
+    const subtitle = snapshot.albumTitle || snapshot.taskTitle || "";
+    bar.innerHTML = `
+      <button class="pbar-left" type="button" data-bar="queue" aria-label="${escapeText(t("queue"))}" aria-expanded="false">
+        <span class="pl-cover pl-cover-xs" style="${cover.style}" aria-hidden="true"><b>${escapeText(cover.glyph)}</b></span>
+        <span class="pbar-now">
+          <strong>${escapeText(snapshot.trackTitle)}</strong>
+          <small>${escapeText(subtitle)}</small>
+        </span>
+      </button>
+      <div class="pbar-transport">
+        <button type="button" data-bar="prev" aria-label="${escapeText(t("previous"))}">⏮</button>
+        <button type="button" class="pbar-toggle" data-bar="toggle" aria-label="${escapeText(t("play"))}">▶</button>
+        <button type="button" data-bar="next" aria-label="${escapeText(t("next"))}">⏭</button>
+      </div>
+      <span class="pbar-time num"><span data-bar-now>0:00</span><span class="pbar-sep">/</span><span data-bar-total>0:00</span></span>
+    `;
+  }
+
+  function patch() {
+    const now = bar.querySelector("[data-bar-now]");
+    if (now) now.textContent = clockText(snapshot.currentTime);
+    const total = bar.querySelector("[data-bar-total]");
+    if (total) total.textContent = clockText(snapshot.duration);
+    const toggle = bar.querySelector('[data-bar="toggle"]');
+    if (toggle) {
+      toggle.textContent = snapshot.playing ? "⏸" : "▶";
+      toggle.setAttribute("aria-label", snapshot.playing ? t("pause") : t("play"));
+    }
+  }
+
+  function bindBar() {
+    bar.querySelectorAll("[data-bar]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const action = button.dataset.bar;
+        if (action === "toggle") controller.toggle();
+        else if (action === "prev") controller.prev();
+        else if (action === "next") controller.next();
+        else if (action === "queue") toggleQueue();
+      });
+    });
+  }
+
+  function toggleQueue() {
+    queueOpen = !queueOpen;
+    const left = bar.querySelector(".pbar-left");
+    if (left) left.setAttribute("aria-expanded", queueOpen ? "true" : "false");
+    renderQueue();
+  }
+
+  function closeQueue() {
+    if (!queueOpen) return;
+    queueOpen = false;
+    const left = bar.querySelector(".pbar-left");
+    if (left) left.setAttribute("aria-expanded", "false");
+    queueRoot.innerHTML = "";
+  }
+
+  function renderQueue() {
+    if (!queueOpen || !snapshot?.trackId) {
+      queueRoot.innerHTML = "";
+      return;
+    }
+    const tracks = controller.queue();
+    queueRoot.innerHTML = `
+      <div class="pbar-queue" role="dialog" aria-label="${escapeText(t("queue"))}">
+        <header class="pbar-queue-head">
+          <h2>${escapeText(t("queue"))}</h2>
+          <button class="pbar-queue-close" type="button" data-queue-action="close" aria-label="${escapeText(t("close"))}">✕</button>
+        </header>
+        ${tracks.length
+          ? `<ul class="pbar-queue-list">${tracks.map((track) => `
+              <li>
+                <button class="pbar-queue-item${track.current ? " is-current" : ""}" type="button"
+                  data-queue-track="${escapeText(track.id)}" aria-current="${track.current ? "true" : "false"}">
+                  <span class="pbar-queue-num num">${String(track.order).padStart(2, "0")}</span>
+                  <span class="pbar-queue-name">${escapeText(track.title)}</span>
+                  <span class="pbar-queue-dur num">${clockText(track.durationSeconds)}</span>
+                </button>
+              </li>`).join("")}</ul>`
+          : `<p class="pbar-queue-empty">${escapeText(t("queueEmpty"))}</p>`}
+      </div>`;
+    queueRoot.querySelectorAll("[data-queue-action]").forEach((button) => {
+      button.addEventListener("click", () => closeQueue());
+    });
+    queueRoot.querySelectorAll("[data-queue-track]").forEach((button) => {
+      button.addEventListener("click", () => {
+        controller.play(button.dataset.queueTrack);
+        closeQueue();
+      });
+    });
+  }
+
+  controller.subscribe((next) => {
+    snapshot = next;
+    apply();
+  });
+
+  // Clicking anywhere but the bar or the panel closes the queue.
+  document.addEventListener("click", (event) => {
+    if (!queueOpen) return;
+    if (event.target.closest(".pbar-queue") || event.target.closest(".pbar-left")) return;
+    closeQueue();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && queueOpen) closeQueue();
+  });
+
+  return {
+    destroy() {
+      bar.remove();
+      queueRoot.remove();
+      document.body.classList.remove("has-pbar");
+    },
+  };
+}
+
+/**
+ * On pages without an album stage, this module owns the audio element: it
+ * restores the recorded track paused, and drives it from the same bar.
+ */
+export function mountRecordedPlayback() {
+  const saved = readPlayback();
+  if (!saved) return null;
+
+  let state = {
+    ...saved,
+    playing: false,
+    queue: Array.isArray(saved.queue) ? saved.queue : [],
+  };
+  let audio = null;
+  let lastWrite = 0;
+  let listeners = [];
+  let resumeAt = saved.position;
+
+  function snapshot() {
+    const track = state.queue.find((item) => item.id === state.trackId);
+    return {
+      taskId: state.taskId,
+      trackId: state.trackId,
+      trackTitle: track?.title ?? state.trackTitle,
+      albumTitle: state.albumTitle,
+      playing: state.playing,
+      currentTime: state.currentTime ?? 0,
+      duration: track?.durationSeconds ?? state.duration ?? 0,
+      coverStyle: state.coverStyle ?? "",
+      coverGlyph: state.coverGlyph ?? "",
+    };
+  }
+
+  function publish() {
+    for (const listener of listeners) listener(snapshot());
   }
 
   function persist(force = false) {
@@ -71,11 +255,14 @@ function startMiniPlayer(initial) {
     writePlayback({
       taskId: state.taskId,
       trackId: state.trackId,
-      trackTitle: state.trackTitle,
+      trackTitle: snapshot().trackTitle,
       albumTitle: state.albumTitle,
-      position: state.position,
-      duration: state.duration,
+      position: state.currentTime ?? 0,
+      duration: snapshot().duration,
       playing: state.playing,
+      coverStyle: state.coverStyle ?? "",
+      coverGlyph: state.coverGlyph ?? "",
+      queue: state.queue,
     });
   }
 
@@ -85,70 +272,100 @@ function startMiniPlayer(initial) {
     audio.preload = "metadata";
     audio.src = trackAudioUrl(state.taskId, state.trackId);
     audio.addEventListener("loadedmetadata", () => {
-      if (Number.isFinite(audio.duration) && audio.duration > 0) state.duration = audio.duration;
-      if (state.position > 0 && Math.abs(audio.currentTime - state.position) > 1) {
-        audio.currentTime = Math.min(state.position, audio.duration || state.position);
+      const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
+      if (duration > 0) state.duration = duration;
+      if (resumeAt > 0) {
+        audio.currentTime = Math.min(resumeAt, duration || resumeAt);
+        resumeAt = 0;
+        state.currentTime = audio.currentTime;
       }
-      paint();
+      publish();
     });
     audio.addEventListener("timeupdate", () => {
-      state.position = audio.currentTime;
-      paint();
+      state.currentTime = audio.currentTime;
+      publish();
       persist();
     });
     audio.addEventListener("play", () => {
       state.playing = true;
-      paint();
+      publish();
       persist(true);
     });
     audio.addEventListener("pause", () => {
       state.playing = false;
-      paint();
+      publish();
       persist(true);
     });
-    audio.addEventListener("ended", () => stop());
-    audio.addEventListener("error", () => stop());
+    audio.addEventListener("ended", () => next());
+    audio.addEventListener("error", () => {
+      state.playing = false;
+      publish();
+    });
     return audio;
   }
 
-  function start() {
-    const el = element();
-    el.play().catch(() => {
-      // Browsers may still refuse without a fresh gesture: leave the bar paused.
-      state.playing = false;
-      paint();
-    });
-  }
-
-  function stop() {
+  function playTrack(trackId, autoplay = true) {
+    const track = state.queue.find((item) => item.id === trackId);
+    if (!track) return;
+    state.trackId = track.id;
+    state.currentTime = 0;
+    resumeAt = 0;
     if (audio) {
-      audio.pause();
-      audio.removeAttribute("src");
+      audio.src = trackAudioUrl(state.taskId, track.id);
+      audio.currentTime = 0;
+      if (autoplay) audio.play().catch(() => { state.playing = false; publish(); });
+    } else if (autoplay) {
+      element().play().catch(() => { state.playing = false; publish(); });
     }
-    state.playing = false;
-    clearPlayback();
-    bar.remove();
-    document.body.classList.remove("has-mini-player");
-    audio = null;
+    publish();
+    persist(true);
   }
 
-  toggle.addEventListener("click", () => {
-    if (state.playing) element().pause();
-    else start();
-  });
+  function step(direction) {
+    if (!state.queue.length) return;
+    const index = state.queue.findIndex((item) => item.id === state.trackId);
+    const target = state.queue[index + direction];
+    if (target) playTrack(target.id, state.playing);
+  }
 
-  bar.querySelector(".pb-stop").addEventListener("click", () => stop());
+  function next() { step(1); }
+  function prev() { step(-1); }
 
-  // A reload or a link click must not lose the last second of position.
+  function toggle() {
+    const el = element();
+    if (state.playing) el.pause();
+    else el.play().catch(() => { state.playing = false; publish(); });
+  }
+
+  const controller = {
+    subscribe(listener) {
+      listeners.push(listener);
+      listener(snapshot());
+      return () => { listeners = listeners.filter((item) => item !== listener); };
+    },
+    toggle,
+    next,
+    prev,
+    play: (trackId) => playTrack(trackId, true),
+    queue() {
+      const current = state.trackId;
+      return state.queue.map((track, index) => ({
+        id: track.id,
+        order: index + 1,
+        title: track.title,
+        durationSeconds: track.durationSeconds ?? 0,
+        current: track.id === current,
+      }));
+    },
+  };
+
+  // Load metadata so the bar shows the real duration and sits at the position,
+  // but stay paused until the user asks to continue.
+  element();
   window.addEventListener("pagehide", () => persist(true));
 
-  // Load the track so the bar shows its real duration and sits at the recorded
-  // position, but stay paused until the user asks to continue.
-  element();
-  paint();
+  return mountPlayerBar(controller);
 }
 
-function escapeText(value) {
-  return String(value ?? "").replace(/[&<>"']/g, (character) =>
-    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
-}
+// Pages other than the playlist get the bar automatically.
+if (!document.body.classList.contains("pl-page")) mountRecordedPlayback();
