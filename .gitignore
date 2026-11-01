@@ -45,6 +45,7 @@ Desktop.ini
 # Course material and evaluation harness, kept in the local checkout only
 HD6012_Presentation/*
 docs/HD6012-Documentation/*
-eval/*
+Arioso-HD6012-Submission.zip
+
 # Evaluation harness and evidence live under experiments/ but stay local.
 experiments/eval/
