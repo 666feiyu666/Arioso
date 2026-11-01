@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -123,6 +123,14 @@ function decodedFileName(value: string | null): string {
   } catch {
     throw new HttpError(400, "Invalid image filename.");
   }
+}
+
+const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+
+/** Covers are re-encoded PNGs from the browser, so check the header, not the name. */
+function isPngImage(data: Buffer): boolean {
+  return data.length > PNG_SIGNATURE.length
+    && data.subarray(0, PNG_SIGNATURE.length).equals(PNG_SIGNATURE);
 }
 
 function moodText(value: unknown, field: string): string | undefined {
@@ -439,6 +447,7 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
     try {
       const url = new URL(request.url ?? "/", "http://localhost");
       const taskMatch = /^\/api\/tasks\/([^/]+)$/.exec(url.pathname);
+      const taskCoverMatch = /^\/api\/tasks\/([^/]+)\/cover$/.exec(url.pathname);
       const audioMatch = /^\/api\/tasks\/([^/]+)\/audio$/.exec(url.pathname);
       const movementAudioMatch = /^\/api\/tasks\/([^/]+)\/movements\/([^/]+)\/audio$/
         .exec(url.pathname);
@@ -1578,6 +1587,29 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
         }
         await sendAudio(request, response, audioPath);
         return;
+      }
+
+      if (taskCoverMatch?.[1]) {
+        const task = store.get(taskCoverMatch[1]);
+        if (!task) throw new HttpError(404, "Task not found.");
+        if (request.method === "GET" || request.method === "HEAD") {
+          const coverFile = store.coverPath(task);
+          if (!existsSync(coverFile)) throw new HttpError(404, "This album has no cover.");
+          await sendFile(request, response, coverFile, "image/png");
+          return;
+        }
+        if (request.method === "POST") {
+          const data = await readBinaryBody(request, MAX_DISCUSSION_IMAGE_BYTES);
+          if (!isPngImage(data)) throw new HttpError(415, "Upload a PNG image.");
+          const updated = await store.writeCover(task, data);
+          sendJson(response, 200, await taskWithMusicReferences(updated));
+          return;
+        }
+        if (request.method === "DELETE") {
+          const updated = await store.removeCover(task);
+          sendJson(response, 200, await taskWithMusicReferences(updated));
+          return;
+        }
       }
 
       if (request.method === "GET" && taskMatch?.[1]) {

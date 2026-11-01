@@ -178,6 +178,8 @@ export interface MusicTask {
   orchestralAssembly?: OrchestralAssembly;
   generatedText?: string | null;
   audioFile?: string;
+  /** Set when the user picked an album cover; the image is `cover.png`. */
+  coverUpdatedAt?: string | undefined;
   error?: string | undefined;
   sourceDiscussionId?: string;
   /** Set only for MoodMic creations; marks a task that runs the generation check. */
@@ -924,6 +926,25 @@ export class TaskStore {
     await mkdir(taskDirectory, { recursive: true });
     await writeFile(path.join(taskDirectory, audioFile), audio);
     return audioFile;
+  }
+
+  /**
+   * Where the album cover lives. The same file is what the producer uses as the
+   * video's static cover, so a user-picked image and the export share one file.
+   */
+  coverPath(task: MusicTask): string {
+    return path.join(this.taskDirectory(task), "cover.png");
+  }
+
+  async writeCover(task: MusicTask, image: Buffer): Promise<MusicTask> {
+    await mkdir(this.taskDirectory(task), { recursive: true });
+    await writeFile(this.coverPath(task), image);
+    return this.update(task.id, { coverUpdatedAt: new Date().toISOString() });
+  }
+
+  async removeCover(task: MusicTask): Promise<MusicTask> {
+    await rm(this.coverPath(task), { force: true });
+    return this.update(task.id, { coverUpdatedAt: undefined });
   }
 
   async writeMovementAudio(

@@ -191,6 +191,67 @@
 .pl-cover-xl { width: 132px; flex: none; }
 .pl-cover-xl b { font-size: 2.7rem; }
 
+/* A user-picked cover replaces the generated tone field. */
+.pl-cover.is-art { background: var(--surface-3); }
+.pl-cover.is-art::after { display: none; }
+.pl-cover.is-art img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+/* ---- cover editing ----
+   The cover is the control: hovering the album artwork reveals the actions, so
+   nothing permanent sits on the image. Touch layouts keep them visible. */
+
+.album-cover-edit {
+  position: relative;
+  flex: none;
+}
+
+.cover-edit {
+  position: absolute;
+  left: 50%;
+  bottom: 9px;
+  transform: translateX(-50%);
+  padding: 5px 11px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(16, 21, 31, 0.66);
+  color: #fff;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.16s var(--ease), background 0.16s var(--ease);
+}
+
+.cover-edit:hover { background: rgba(16, 21, 31, 0.84); }
+
+.cover-edit.is-remove {
+  top: 9px;
+  bottom: auto;
+  background: rgba(189, 43, 48, 0.86);
+}
+
+.cover-edit.is-remove:hover { background: rgba(189, 43, 48, 1); }
+
+.album-cover-edit:hover .cover-edit,
+.album-cover-edit:focus-within .cover-edit { opacity: 1; }
+
+@media (max-width: 760px) {
+  .cover-edit { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cover-edit { transition: none; }
+}
+
 .lib-card-body { display: grid; gap: 4px; }
 .lib-card-body strong { font-size: 0.95rem; line-height: 1.3; }
 .lib-card-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }

@@ -14,8 +14,8 @@ import {
 
 const COPY = {
   "zh-CN": {
-    pageTitle: "心情日历 · MoodMic",
-    tabMoodMic: "MoodMic", tabCalendar: "心情日历", tabWorkflow: "工作流", tabPlaylist: "播放列表（测试）", tabHelp: "帮助",
+    pageTitle: "心情日历（测试）· MoodMic",
+    tabMoodMic: "MoodMic", tabCalendar: "心情日历（测试）", tabWorkflow: "工作流", tabPlaylist: "播放列表", tabHelp: "帮助",
     tabBarLabel: "主导航", switchLanguage: "切换界面语言",
     title: "我的心情日历",
     lead: "每一天的圆点，来自当天真正做出来的作品；颜色就是记录时的心情。",
@@ -43,8 +43,8 @@ const COPY = {
     errorGeneric: "出了点问题，请再试一次。",
   },
   en: {
-    pageTitle: "Mood calendar · MoodMic",
-    tabMoodMic: "MoodMic", tabCalendar: "Mood calendar", tabWorkflow: "Workflow", tabPlaylist: "Playlist (test)", tabHelp: "Help",
+    pageTitle: "Mood calendar (test) · MoodMic",
+    tabMoodMic: "MoodMic", tabCalendar: "Mood calendar (test)", tabWorkflow: "Workflow", tabPlaylist: "Playlist", tabHelp: "Help",
     tabBarLabel: "Tab navigation", switchLanguage: "Switch interface language",
     title: "My mood calendar",
     lead: "Each day's circle is built from the pieces you actually made — coloured by the mood you recorded.",

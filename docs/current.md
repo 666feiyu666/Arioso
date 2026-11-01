@@ -7,7 +7,7 @@ This document describes the repository as it exists now. It is an evolving snaps
 Arioso is a Node.js and TypeScript application with two interfaces over one agentic composition pipeline:
 
 - a command-line interface for composing a validated prompt or composing and generating one audio file; and
-- a local browser application with five pages: MoodMic (`/`), the mood calendar (`/calendar.html`), the playlist library (`/playlist.html`), the workflow studio (`/workflow.html`), and help (`/help.html`).
+- a local browser application with five pages: MoodMic (`/`), the playlist library (`/playlist.html`), the mood calendar (`/calendar.html`), the workflow studio (`/workflow.html`), and help (`/help.html`).
 
 MoodMic is the everyday entry point. It records a feeling, holds a creative conversation, composes and generates one piece, has Gemini listen to it, and lets the user keep or regenerate the result. A kept piece can continue into an album without leaving the conversation.
 

@@ -21,9 +21,9 @@ import { mountPlayerBar } from "./player-bar.js";
 
 const COPY = {
   "zh-CN": {
-    tabMoodMic: "MoodMic", tabCalendar: "心情日历", tabWorkflow: "工作流",
-    tabPlaylist: "播放列表（测试）", tabHelp: "帮助", tabBarLabel: "主导航", switchLanguage: "切换界面语言",
-    title: "播放列表（测试）",
+    tabMoodMic: "MoodMic", tabCalendar: "心情日历（测试）", tabWorkflow: "工作流",
+    tabPlaylist: "播放列表", tabHelp: "帮助", tabBarLabel: "主导航", switchLanguage: "切换界面语言",
+    title: "播放列表",
     libraryNote: "选一张继续制作，或者新建一张。",
     recentTitle: "最近更新",
     allTitle: "全部歌单",
@@ -51,6 +51,9 @@ const COPY = {
     tracksWord: (n) => `${n} 首候选`,
     includedWord: (n) => `已收录 ${n} 首`,
     playAll: "播放全部",
+    editCover: "更换封面",
+    removeCover: "移除封面",
+    coverError: "封面更新失败，请换一张图片再试。",
     play: "播放",
     pause: "暂停",
     prevTrack: "上一首",
@@ -68,9 +71,9 @@ const COPY = {
     },
   },
   en: {
-    tabMoodMic: "MoodMic", tabCalendar: "Mood calendar", tabWorkflow: "Workflow",
-    tabPlaylist: "Playlist (test)", tabHelp: "Help", tabBarLabel: "Tab navigation", switchLanguage: "Switch interface language",
-    title: "Playlist (test)",
+    tabMoodMic: "MoodMic", tabCalendar: "Mood calendar (test)", tabWorkflow: "Workflow",
+    tabPlaylist: "Playlist", tabHelp: "Help", tabBarLabel: "Tab navigation", switchLanguage: "Switch interface language",
+    title: "Playlist",
     libraryNote: "Pick one to keep working on, or start a new album.",
     recentTitle: "Recently updated",
     allTitle: "All playlists",
@@ -98,6 +101,9 @@ const COPY = {
     tracksWord: (n) => `${n} candidates`,
     includedWord: (n) => `${n} included`,
     playAll: "Play all",
+    editCover: "Change cover",
+    removeCover: "Remove cover",
+    coverError: "The cover could not be updated. Try another image.",
     play: "Play",
     pause: "Pause",
     prevTrack: "Previous track",
@@ -216,8 +222,14 @@ function coverFor(task) {
 }
 
 function coverMarkup(task, extraClass = "") {
+  const classes = `pl-cover${extraClass ? ` ${extraClass}` : ""}`;
+  if (task.coverUpdatedAt) {
+    // The version keeps a replaced image from being served out of the cache.
+    const version = encodeURIComponent(task.coverUpdatedAt);
+    return `<span class="${classes} is-art"><img src="/api/tasks/${encodeURIComponent(task.id)}/cover?v=${version}" alt="" loading="lazy" /></span>`;
+  }
   const cover = coverFor(task);
-  return `<span class="pl-cover${extraClass ? ` ${extraClass}` : ""}" style="${cover.style}" aria-hidden="true"><b>${esc(cover.glyph)}</b></span>`;
+  return `<span class="${classes}" style="${cover.style}" aria-hidden="true"><b>${esc(cover.glyph)}</b></span>`;
 }
 
 // The album stage reads and writes the album through these callbacks, so the
@@ -340,7 +352,12 @@ function viewAlbum() {
   return `
     <button class="pl-back" type="button" data-action="library">${esc(t("back"))}</button>
     <header class="album-head">
-      ${coverMarkup(task, "pl-cover-xl")}
+      <div class="album-cover-edit">
+        ${coverMarkup(task, "pl-cover-xl")}
+        <button class="cover-edit" type="button" data-action="edit-cover">${esc(t("editCover"))}</button>
+        ${task.coverUpdatedAt ? `<button class="cover-edit is-remove" type="button" data-action="remove-cover">${esc(t("removeCover"))}</button>` : ""}
+        <input class="cover-file" type="file" accept="image/png,image/jpeg,image/webp" hidden />
+      </div>
       <div class="album-head-body">
         <h1>${esc(albumTitle(task))}</h1>
         <p>${esc(task.albumPlan?.albumMind || task.description)}</p>
@@ -485,6 +502,55 @@ function restorePlayback() {
   stage.controls.resume(saved.trackId, saved.position, false);
 }
 
+/** Square-crops and re-encodes a picked image, so every cover is one small PNG. */
+async function coverPng(file) {
+  const bitmap = await createImageBitmap(file);
+  const size = 512;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("Canvas is unavailable.");
+  const scale = Math.max(size / bitmap.width, size / bitmap.height);
+  const width = bitmap.width * scale;
+  const height = bitmap.height * scale;
+  context.drawImage(bitmap, (size - width) / 2, (size - height) / 2, width, height);
+  bitmap.close?.();
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+  if (!blob) throw new Error("The image could not be converted.");
+  return blob;
+}
+
+async function uploadCover(file) {
+  const id = state.currentId;
+  if (!id) return;
+  try {
+    const blob = await coverPng(file);
+    const updated = await api(`/api/tasks/${encodeURIComponent(id)}/cover`, {
+      method: "POST",
+      headers: { "Content-Type": "image/png" },
+      body: blob,
+    });
+    replaceTask(updated);
+    state.message = "";
+  } catch {
+    state.message = t("coverError");
+  }
+  render();
+}
+
+async function removeCover() {
+  const id = state.currentId;
+  if (!id) return;
+  try {
+    replaceTask(await api(`/api/tasks/${encodeURIComponent(id)}/cover`, { method: "DELETE" }));
+    state.message = "";
+  } catch {
+    state.message = t("coverError");
+  }
+  render();
+}
+
 // ---- binding -------------------------------------------------------------
 
 function bindActions(container) {
@@ -515,9 +581,22 @@ function bindActions(container) {
         const tracks = currentTask()?.albumTracks ?? [];
         const included = tracks.filter((track) => track.audioFile && track.admission === "included").length;
         stage.controls.playScope(included ? "included" : "candidate");
+      } else if (action === "edit-cover") {
+        container.querySelector(".cover-file")?.click();
+      } else if (action === "remove-cover") {
+        removeCover();
       }
     });
   });
+
+  const coverInput = container.querySelector(".cover-file");
+  if (coverInput) {
+    coverInput.addEventListener("change", () => {
+      const file = coverInput.files?.[0];
+      coverInput.value = "";
+      if (file) uploadCover(file);
+    });
+  }
 
   container.querySelectorAll("[data-open]").forEach((button) => {
     button.addEventListener("click", () => {
