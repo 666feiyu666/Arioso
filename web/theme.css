@@ -55,6 +55,11 @@
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
 
   --tabbar-h: 60px;
+
+  /* Page grid — one content width shared by the bar and the pages inside it, so
+     titles, cards and the player line up on a single left edge. */
+  --page-max: 1280px;
+  --page-gutter: clamp(20px, 2.2vw, 40px);
 }
 
 * {

@@ -8,9 +8,9 @@
 }
 
 .pl-main {
-  max-width: 1080px;
+  max-width: var(--page-max);
   margin: 0 auto;
-  padding: 32px 24px 88px;
+  padding: 28px var(--page-gutter) 88px;
 }
 
 .pl-back {
@@ -44,7 +44,7 @@
 
 .lib-heading h1 {
   margin: 0 0 6px;
-  font-size: 1.7rem;
+  font-size: clamp(1.45rem, 1.7vw, 1.8rem);
   letter-spacing: -0.02em;
 }
 
@@ -86,8 +86,8 @@
 
 .lib-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(156px, 1fr));
-  gap: 22px 16px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 24px 18px;
 }
 
 .lib-section { display: grid; gap: 12px; }

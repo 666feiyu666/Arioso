@@ -3,7 +3,7 @@
    signals) and is always paired with a text label. */
 
 .mm-main {
-  max-width: 960px;
+  max-width: 1120px;
   margin: 0 auto;
   padding: clamp(14px, 3vh, 32px) clamp(20px, 5vw, 48px) 96px;
 }
@@ -642,7 +642,8 @@
 }
 
 .mm-day {
-  aspect-ratio: 1 / 1;
+  /* A month has to fit one screen: full squares made a six-week month 780px tall. */
+  min-height: clamp(56px, 8vh, 92px);
 }
 
 .mm-day.is-blank {
@@ -1431,6 +1432,9 @@ body.mm-home {
   display: block;
   width: 100%;
   height: auto;
+  /* A wide reading column would otherwise turn the curve into a tall band of
+     empty sky; the cap keeps the four points at a glanceable size. */
+  max-height: min(180px, 20vh);
   overflow: visible;
 }
 
@@ -1651,7 +1655,10 @@ body.mm-home {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-top: 12px;
+  /* Cards in a row stretch to the tallest one, so the Listen control sits on a
+     shared baseline instead of drifting with the text length. */
+  margin-top: auto;
+  padding-top: 12px;
 }
 
 .mm-example-play {
@@ -1826,3 +1833,18 @@ body.mm-home {
 .mm-album-fields { display: flex; flex-wrap: wrap; gap: 14px; }
 .mm-album-actions { display: flex; justify-content: flex-end; }
 .mm-album .pl-plan-fold { margin-bottom: 0; }
+
+/* Phones keep square days: the column is narrow enough that a square is the
+   smallest tappable cell, and the min-height rule would make it lopsided. */
+@media (max-width: 640px) {
+  .mm-day {
+    aspect-ratio: 1 / 1;
+    min-height: 0;
+  }
+}
+
+/* The home layout is a fixed-height shell, so the shared player bar would sit on
+   top of the composer instead of under it: take the bar's height out of the shell. */
+body.has-pbar .mm-layout {
+  height: calc(100vh - var(--tabbar-h, 60px) - 56px);
+}

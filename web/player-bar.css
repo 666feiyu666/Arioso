@@ -17,7 +17,7 @@ body.has-pbar:not(.pl-page) {
   align-items: center;
   gap: 16px;
   min-height: 56px;
-  padding: 6px max(24px, calc((100vw - 1080px) / 2));
+  padding: 6px var(--page-gutter);
   color: #f4f6fa;
   background: color-mix(in srgb, var(--ink) 97%, var(--brand));
   border-top: 1px solid color-mix(in srgb, var(--ink) 70%, var(--line));
@@ -277,4 +277,10 @@ body.has-pbar:not(.pl-page) {
 
 @media (prefers-reduced-motion: reduce) {
   .pbar-transport button { transition: none; }
+}
+
+/* The playlist page centres its content, so its bar follows the same centring;
+   every other page starts at the gutter beside its rail. */
+body.pl-page .pbar {
+  padding-inline: calc(max(0px, (100vw - var(--page-max)) / 2) + var(--page-gutter));
 }

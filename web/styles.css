@@ -354,7 +354,7 @@
 .workspace {
   grid-column: 2;
   min-width: 0;
-  padding: 0 7vw var(--dock-space, 230px);
+  padding: 0 clamp(20px, 2.4vw, 44px) var(--dock-space, 96px);
 }
 
 .view {
@@ -365,20 +365,20 @@
 .entry-view {
   min-height: 100vh;
   display: grid;
-  align-content: center;
-  gap: 44px;
-  padding: 72px 0 90px;
+  align-content: start;
+  gap: 20px;
+  padding: 24px 0 40px;
 }
 
 .entry-view[hidden] { display: none; }
 
 .entry-hero h2 {
   max-width: 820px;
-  margin: 14px 0 20px;
-  font-size: clamp(44px, 5.6vw, 80px);
+  margin: 8px 0 12px;
+  font-size: clamp(30px, 3vw, 44px);
   font-weight: 700;
-  line-height: 1.02;
-  letter-spacing: -0.035em;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
 }
 
 .entry-hero > p:last-child {
@@ -398,11 +398,11 @@
 .workflow-card {
   --signal: var(--brand);
   position: relative;
-  min-height: 288px;
+  min-height: 184px;
   display: grid;
   grid-template-rows: auto 1fr auto;
-  gap: 26px;
-  padding: 26px 26px 26px 30px;
+  gap: 12px;
+  padding: 16px 20px 16px 24px;
   text-align: left;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
@@ -440,21 +440,21 @@
   display: grid;
   align-content: center;
   justify-items: start;
-  gap: 13px;
+  gap: 9px;
 }
 
 .workflow-copy strong {
   font-family: var(--display);
-  font-size: clamp(28px, 2.8vw, 38px);
+  font-size: clamp(20px, 1.7vw, 26px);
   font-weight: 700;
   letter-spacing: -0.02em;
 }
 
 .workflow-copy > span:last-child {
-  max-width: 440px;
+  max-width: 460px;
   color: var(--ink-soft);
-  font-size: 0.86rem;
-  line-height: 1.75;
+  font-size: 0.85rem;
+  line-height: 1.55;
 }
 
 .workflow-tag {

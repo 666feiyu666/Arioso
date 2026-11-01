@@ -10,7 +10,7 @@
   display: flex;
   align-items: center;
   gap: 34px;
-  padding: 0 clamp(16px, 4vw, 36px);
+  padding: 0 var(--page-gutter);
   background: color-mix(in srgb, var(--surface) 86%, transparent);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -166,4 +166,10 @@ body.has-tabbar .brand-row {
   .tabbar-settings .label {
     display: none;
   }
+}
+
+/* The playlist page centres its content in --page-max, so its bar follows the
+   same centring; every other page starts at the gutter, beside its own rail. */
+body.pl-page .tabbar {
+  padding: 0 calc(max(0px, (100vw - var(--page-max)) / 2) + var(--page-gutter));
 }

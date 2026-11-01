@@ -65,6 +65,7 @@ If Corepack is unavailable, install pnpm 11.19.0 first.
 - [雨泊山影 | When Blue Meets Calm | 学习、阅读、桌游背景音](https://www.bilibili.com/video/BV1jcpR66Ea/?share_source=copy_web&vd_source=db5fe656aa211faf8e79db42720c8bda) · v0.6.0, mood and music direction
 - [大提琴的寂寞｜城市夜色中的低频旋律](https://www.bilibili.com/video/BV1DwJt65EKc/?share_source=copy_web&vd_source=db5fe656aa211faf8e79db42720c8bda) · v0.9.0, MoodMic playlist
 - [器乐摇滚 Playlist | 心情低落时不妨听听](https://www.bilibili.com/video/BV1ucHK6pELM/?share_source=copy_web&vd_source=db5fe656aa211faf8e79db42720c8bda) · v0.9.0, MoodMic playlist, also example playlist shown above
+- [City Pop | 午后的无所事事 | Playlist](https://www.bilibili.com/video/BV12Bx46HEQq/?share_source=copy_web&vd_source=db5fe656aa211faf8e79db42720c8bda) · v0.9.0, MoodMic playlist
 
 ## Development
 
