@@ -6,6 +6,8 @@
 // asks the caller to approve or revise a plan, and uses the shared album
 // endpoints for inclusion, ordering, retry and export.
 
+import { adoptAudio, playExclusive } from "./audio-focus.js";
+
 const COPY = {
   "zh-CN": {
     listen: "试听",
@@ -567,7 +569,7 @@ export function createAlbumStage(options) {
 
   function audioEl() {
     if (audio) return audio;
-    audio = new Audio();
+    audio = adoptAudio(new Audio());
     audio.preload = "metadata";
     audio.addEventListener("timeupdate", () => {
       state.currentTime = audio.currentTime;
@@ -642,7 +644,7 @@ export function createAlbumStage(options) {
     options.rerender();
     notify();
     if (autoplay) {
-      el.play().catch(() => {
+      playExclusive(el).catch(() => {
         state.playing = false;
         state.message = t("playbackError");
         options.rerender();
@@ -670,7 +672,7 @@ export function createAlbumStage(options) {
       return;
     }
     const el = audioEl();
-    if (el.paused) el.play().catch(() => {});
+    if (el.paused) playExclusive(el).catch(() => {});
     else el.pause();
   }
 

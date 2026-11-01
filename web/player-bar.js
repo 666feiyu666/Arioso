@@ -12,6 +12,7 @@
 //   queue()              ->  [{ id, title, durationSeconds, current }]
 
 import { clearPlayback, readPlayback, trackAudioUrl, writePlayback } from "./playback-session.js";
+import { adoptAudio, playExclusive } from "./audio-focus.js";
 
 const COPY = {
   "zh-CN": {
@@ -275,7 +276,7 @@ export function mountRecordedPlayback() {
 
   function element() {
     if (audio) return audio;
-    audio = new Audio();
+    audio = adoptAudio(new Audio());
     audio.preload = "metadata";
     audio.src = trackAudioUrl(state.taskId, state.trackId);
     audio.addEventListener("loadedmetadata", () => {
@@ -320,9 +321,9 @@ export function mountRecordedPlayback() {
     if (audio) {
       audio.src = trackAudioUrl(state.taskId, track.id);
       audio.currentTime = 0;
-      if (autoplay) audio.play().catch(() => { state.playing = false; publish(); });
+      if (autoplay) playExclusive(audio).catch(() => { state.playing = false; publish(); });
     } else if (autoplay) {
-      element().play().catch(() => { state.playing = false; publish(); });
+      playExclusive(element()).catch(() => { state.playing = false; publish(); });
     }
     publish();
     persist(true);
@@ -341,7 +342,7 @@ export function mountRecordedPlayback() {
   function toggle() {
     const el = element();
     if (state.playing) el.pause();
-    else el.play().catch(() => { state.playing = false; publish(); });
+    else playExclusive(el).catch(() => { state.playing = false; publish(); });
   }
 
   const controller = {

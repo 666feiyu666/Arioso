@@ -17,6 +17,7 @@
 
 import { createAlbumStage, albumPlanBadge, durationText } from "./album-view.js";
 import { clearPlayback, readPlayback, writePlayback } from "./playback-session.js";
+import { adoptAudio, playExclusive } from "./audio-focus.js";
 import { mountPlayerBar } from "./player-bar.js";
 
 const COPY = {
@@ -673,7 +674,7 @@ function bindDrawerFields() {
 
 function togglePreview(url, id) {
   if (!preview) {
-    preview = new Audio();
+    preview = adoptAudio(new Audio());
     preview.preload = "metadata";
     preview.addEventListener("error", () => {
       state.previewId = null;
@@ -690,7 +691,7 @@ function togglePreview(url, id) {
   preview.src = url;
   preview.currentTime = 0;
   state.previewId = id;
-  preview.play().catch(() => { state.previewId = null; });
+  playExclusive(preview).catch(() => { state.previewId = null; });
 }
 
 // ---- data ----------------------------------------------------------------

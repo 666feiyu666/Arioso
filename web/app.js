@@ -1,3 +1,5 @@
+import { adoptAudio, playExclusive } from "./audio-focus.js";
+
 const translations = {
   "zh-CN": {
     albumProductionMode: "制作流程", albumGenerationOnly: "生成候选曲",
@@ -532,6 +534,8 @@ const elements = {
   playerStatus: document.querySelector("#player-status"),
 };
 
+adoptAudio(elements.audio);
+
 function t(key, values = {}) {
   const catalog = translations[state.language] || translations["zh-CN"];
   const template = catalog[key] ?? translations["zh-CN"][key] ?? key;
@@ -909,7 +913,7 @@ async function playTask(id) {
     if (state.playingTaskId === id && !state.playingMovementId && !state.playingAlbumTrackId && !elements.audio.error && state.playbackStatus !== "error") {
       if (elements.audio.paused) {
         if (elements.audio.ended) elements.audio.currentTime = 0;
-        await elements.audio.play();
+        await playExclusive(elements.audio);
       } else {
         elements.audio.pause();
       }
@@ -926,7 +930,7 @@ async function playTask(id) {
     elements.audio.src = `/api/tasks/${encodeURIComponent(task.id)}/audio`;
     elements.audio.load();
     syncPlaybackControls();
-    await elements.audio.play();
+    await playExclusive(elements.audio);
   } catch (error) {
     if (request !== state.playbackRequest || error?.name === "AbortError") return;
     state.playbackStatus = "error";
@@ -947,7 +951,7 @@ async function playMovement(taskId, movementId) {
     if (state.playingTaskId === taskId && state.playingMovementId === movementId && !elements.audio.error && state.playbackStatus !== "error") {
       if (elements.audio.paused) {
         if (elements.audio.ended) elements.audio.currentTime = 0;
-        await elements.audio.play();
+        await playExclusive(elements.audio);
       } else elements.audio.pause();
       return;
     }
@@ -962,7 +966,7 @@ async function playMovement(taskId, movementId) {
     elements.audio.src = `/api/tasks/${encodeURIComponent(taskId)}/movements/${encodeURIComponent(movementId)}/audio`;
     elements.audio.load();
     syncPlaybackControls();
-    await elements.audio.play();
+    await playExclusive(elements.audio);
   } catch (error) {
     if (request !== state.playbackRequest || error?.name === "AbortError") return;
     state.playbackStatus = "error";
@@ -1009,7 +1013,7 @@ async function playAlbumTrack(taskId, trackId, scope = "candidate", start = fals
     if (!start && state.playingTaskId === taskId && state.playingAlbumTrackId === trackId && !elements.audio.error && state.playbackStatus !== "error") {
       if (elements.audio.paused) {
         if (elements.audio.ended) elements.audio.currentTime = 0;
-        await elements.audio.play();
+        await playExclusive(elements.audio);
       } else elements.audio.pause();
       return;
     }
@@ -1023,7 +1027,7 @@ async function playAlbumTrack(taskId, trackId, scope = "candidate", start = fals
     elements.audio.src = `/api/tasks/${encodeURIComponent(taskId)}/album/tracks/${encodeURIComponent(trackId)}/audio`;
     elements.audio.load();
     syncPlaybackControls();
-    await elements.audio.play();
+    await playExclusive(elements.audio);
   } catch (error) {
     if (request !== state.playbackRequest || error?.name === "AbortError") return;
     state.playbackStatus = error?.name === "NotAllowedError" ? "paused" : "error";

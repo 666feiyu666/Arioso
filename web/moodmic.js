@@ -12,6 +12,7 @@ import {
 } from "./mood-common.js";
 import { createAlbumStage } from "./album-view.js";
 import { openSettingsDialog } from "./settings-dialog.js";
+import { adoptAudio, playExclusive } from "./audio-focus.js";
 
 // Four starting prompts, one per feeling colour. They fill the otherwise
 // empty MoodMic screen and reuse the four mood signals already defined in
@@ -349,6 +350,9 @@ const state = {
   pollTimer: null,
   playing: null,
   moodAudio: null,
+  songAudio: null,
+  songTaskId: null,
+  songPlaying: null,
   busy: false,
   message: "",
   messageError: false,
@@ -592,6 +596,7 @@ function renderChat() {
     ${messageLine()}
   `;
   bindChat();
+  paintSongState();
   const thread = stage.querySelector("#mm-thread");
   if (thread) {
     const signature = threadSignature();
@@ -816,6 +821,21 @@ function renderProposal() {
   `;
 }
 
+// The generated piece plays through one element held outside the rendered
+// thread, so a re-render while it plays does not cut the sound.
+function songPlayer(task) {
+  const id = esc(task.id);
+  return `
+    <div class="mm-song" data-song="${id}">
+      <button class="mm-song-play" type="button" data-song-play="${id}" aria-pressed="false" aria-label="${esc(t("listen"))}">
+        <span class="mm-song-icon" aria-hidden="true"></span>
+        <span class="mm-song-label">${esc(t("listen"))}</span>
+      </button>
+      <span class="mm-song-progress" aria-hidden="true"><i></i></span>
+      <span class="mm-song-time num">0:00</span>
+    </div>`;
+}
+
 // Poetry comes from the Director's own trace; music references are resolved by
 // the server from the IDs the Composer recorded.
 function renderReferences(task) {
@@ -890,7 +910,7 @@ function renderResult() {
       <div class="mm-block mm-result mm-review" style="--group:${group?.color ?? "#b1642f"}">
         <h3 class="mm-review-title">${esc(t("reviewTitle"))}</h3>
         <p class="mm-review-lead">${esc(t("reviewLead"))}</p>
-        <audio class="mm-player" controls preload="metadata" src="/api/tasks/${encodeURIComponent(task.id)}/audio"></audio>
+        ${songPlayer(task)}
         <div class="mm-review-note">
           <strong>${esc(note)}</strong>
           ${review?.summary ? `<span class="mm-review-summary">${esc(review.summary)}</span>` : ""}
@@ -917,7 +937,7 @@ function renderResult() {
       ${entry ? `<p class="mm-result-mood"><span class="mm-dot" style="background:${group.color}"></span>${esc(emotionLabel(entry.group, entry.emotion, state.language))}</p>` : ""}
       <h3 class="mm-result-title">${esc(task.title || t("listenTitle"))}</h3>
       ${task.description ? `<p class="mm-result-desc">${esc(task.description)}</p>` : ""}
-      <audio class="mm-player" controls preload="metadata" src="/api/tasks/${encodeURIComponent(task.id)}/audio"></audio>
+      ${songPlayer(task)}
       ${renderReferences(task)}
       ${task.musicSpec?.lyriaPrompt ? `
       <details class="mm-prompt">
@@ -1175,6 +1195,9 @@ function bindChat() {
   for (const button of stage.querySelectorAll("[data-play-group]")) {
     button.addEventListener("click", () => toggleMoodAudio(button.dataset.playGroup));
   }
+  for (const button of stage.querySelectorAll("[data-song-play]")) {
+    button.addEventListener("click", () => toggleSongAudio(button.dataset.songPlay));
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -1189,8 +1212,8 @@ function ensureMoodAudio() {
   audio.addEventListener("error", () => setMoodPlaying(null));
   audio.addEventListener("timeupdate", () => updateMoodPlayback());
   audio.addEventListener("loadedmetadata", () => updateMoodPlayback());
-  state.moodAudio = audio;
-  return audio;
+  state.moodAudio = adoptAudio(audio);
+  return state.moodAudio;
 }
 
 function formatClock(seconds) {
@@ -1258,7 +1281,7 @@ function toggleMoodAudio(groupId) {
   audio.src = MOOD_AUDIO[groupId];
   audio.currentTime = 0;
   setMoodPlaying(groupId);
-  const started = audio.play();
+  const started = playExclusive(audio);
   if (started && typeof started.catch === "function") {
     started.catch(() => setMoodPlaying(null));
   }
@@ -1268,6 +1291,93 @@ function stopMoodAudio() {
   if (state.moodAudio) state.moodAudio.pause();
   state.playing = null;
   if (stage) pushMoodPlayingToDom(null);
+}
+
+// ---- the generated piece ---------------------------------------------------
+
+function ensureSongAudio() {
+  if (state.songAudio) return state.songAudio;
+  const audio = adoptAudio(new Audio());
+  audio.preload = "metadata";
+  audio.addEventListener("timeupdate", () => paintSongPlayback());
+  audio.addEventListener("loadedmetadata", () => paintSongPlayback());
+  audio.addEventListener("play", () => {
+    state.songPlaying = state.songTaskId;
+    paintSongState();
+  });
+  audio.addEventListener("pause", () => {
+    if (!state.songPlaying) return;
+    state.songPlaying = null;
+    paintSongState();
+  });
+  audio.addEventListener("ended", () => {
+    state.songPlaying = null;
+    paintSongState();
+  });
+  audio.addEventListener("error", () => {
+    state.songPlaying = null;
+    paintSongState();
+  });
+  state.songAudio = audio;
+  return audio;
+}
+
+// Play, or pause on a second press. Starting another piece is what interrupts
+// this one; nothing inside the page does.
+function toggleSongAudio(taskId) {
+  const audio = ensureSongAudio();
+  if (state.songTaskId === taskId && !audio.paused) {
+    audio.pause();
+    return;
+  }
+  if (state.songTaskId !== taskId) {
+    state.songTaskId = taskId;
+    audio.src = `/api/tasks/${encodeURIComponent(taskId)}/audio`;
+    audio.currentTime = 0;
+  }
+  state.songPlaying = taskId;
+  paintSongState();
+  const started = playExclusive(audio);
+  if (started && typeof started.catch === "function") {
+    started.catch(() => {
+      state.songPlaying = null;
+      paintSongState();
+    });
+  }
+}
+
+// The thread is re-rendered from scratch on every update, so the button state
+// is painted back after the markup is in place.
+function paintSongState() {
+  if (!stage) return;
+  const audio = state.songAudio;
+  const on = Boolean(audio && state.songPlaying && !audio.paused);
+  for (const card of stage.querySelectorAll("[data-song]")) {
+    const active = on && card.dataset.song === state.songPlaying;
+    card.classList.toggle("is-playing", active);
+    const button = card.querySelector("[data-song-play]");
+    if (!button) continue;
+    button.classList.toggle("is-playing", active);
+    button.setAttribute("aria-pressed", active ? "true" : "false");
+    const label = active ? t("nowPlaying") : t("listen");
+    button.setAttribute("aria-label", label);
+    const text = button.querySelector(".mm-song-label");
+    if (text) text.textContent = label;
+  }
+  paintSongPlayback();
+}
+
+function paintSongPlayback() {
+  const audio = state.songAudio;
+  if (!audio || !stage || !state.songTaskId) return;
+  const card = stage.querySelector(`[data-song="${state.songTaskId}"]`);
+  if (!card) return;
+  const duration = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : 0;
+  const ratio = duration ? Math.min(1, audio.currentTime / duration) : 0;
+  const bar = card.querySelector(".mm-song-progress i");
+  if (bar) bar.style.width = `${(ratio * 100).toFixed(2)}%`;
+  const time = card.querySelector(".mm-song-time");
+  if (time) time.textContent = formatClock(audio.currentTime);
 }
 
 function chatOptions() {
