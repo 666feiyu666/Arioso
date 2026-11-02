@@ -1,4 +1,7 @@
-/* The "Add to playlist" panel, shared by every place a finished piece appears. */
+/* The "Add to playlist" panel, shared by every place a finished piece appears.
+   It is the only overlay in the app that both lists a library and creates a
+   record, so the list reads like the playlist library (thin lines, no float)
+   and naming a playlist happens inline instead of in a browser prompt. */
 
 .atp-layer {
   position: fixed;
@@ -11,18 +14,18 @@
 .atp-scrim {
   position: absolute;
   inset: 0;
-  background: rgba(16, 21, 31, 0.42);
+  background: var(--overlay);
   backdrop-filter: blur(2px);
 }
 
 .atp-panel {
   position: relative;
-  width: min(420px, calc(100vw - 32px));
-  max-height: min(560px, calc(100vh - 64px));
+  width: min(460px, calc(100vw - 32px));
+  max-height: min(600px, calc(100vh - 64px));
   display: grid;
-  grid-template-rows: auto auto 1fr auto;
-  gap: 12px;
-  padding: 18px;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: 14px;
+  padding: 20px;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background: var(--surface);
@@ -30,109 +33,238 @@
   overflow: hidden;
 }
 
+/* Header -------------------------------------------------------------- */
+
 .atp-head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
 }
 
 .atp-head h2 {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 1.06rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .atp-close {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
   border: 0;
+  border-radius: var(--radius-sm);
   background: none;
-  cursor: pointer;
-  font-size: 1rem;
-  line-height: 1;
   color: var(--muted);
-  padding: 4px;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
 }
 
-.atp-close:hover { color: var(--ink); }
+.atp-close:hover {
+  background: var(--surface-2);
+  color: var(--ink);
+}
 
 .atp-lead {
   margin: 0;
   color: var(--muted);
   font-size: 0.84rem;
-  line-height: 1.5;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+/* Existing playlists --------------------------------------------------- */
+
+.atp-body {
+  min-height: 0;
+  overflow: auto;
 }
 
 .atp-list {
   display: grid;
   gap: 6px;
-  overflow: auto;
-  min-height: 0;
 }
 
 .atp-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
   width: 100%;
-  padding: 10px 12px;
+  padding: 11px 13px;
   border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  background: var(--surface-2, var(--surface));
-  cursor: pointer;
-  text-align: left;
-  font: inherit;
+  border-radius: var(--radius-md);
+  background: var(--surface);
   color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 120ms var(--ease), background-color 120ms var(--ease);
 }
 
-.atp-row:hover { border-color: var(--brand); }
+.atp-row:hover,
+.atp-row:focus-visible {
+  border-color: var(--brand);
+  background: var(--surface-2);
+}
 
-.atp-row strong {
+.atp-row[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.atp-row-name {
   font-size: 0.92rem;
+  font-weight: 550;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.atp-row span {
-  color: var(--muted);
-  font-size: 0.78rem;
+.atp-row-count {
   flex: none;
+  color: var(--faint);
+  font-size: 0.74rem;
+  letter-spacing: 0.01em;
 }
 
 .atp-empty {
   margin: 0;
-  padding: 12px 0;
+  padding: 18px 14px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-md);
   color: var(--muted);
   font-size: 0.85rem;
+  line-height: 1.55;
+  text-align: center;
+  text-wrap: pretty;
 }
 
+/* Naming a new playlist ------------------------------------------------ */
+
 .atp-foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
   gap: 10px;
-  border-top: 1px solid var(--line);
   padding-top: 12px;
+  border-top: 1px solid var(--line);
 }
 
 .atp-message {
-  color: var(--muted);
+  margin: 0;
+  color: var(--ok);
   font-size: 0.82rem;
 }
 
+.atp-foot.is-error .atp-message {
+  color: var(--danger);
+}
+
 .atp-new {
-  margin-left: auto;
+  justify-self: start;
+  padding: 8px 2px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--brand);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 550;
+  cursor: pointer;
+}
+
+.atp-new:hover {
+  color: var(--brand-deep);
+}
+
+.atp-new[disabled] {
+  color: var(--faint);
+  cursor: not-allowed;
+}
+
+.atp-new-form {
+  display: grid;
+  gap: 10px;
+}
+
+.atp-field {
+  display: grid;
+  gap: 6px;
+}
+
+.atp-field span {
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.atp-input {
+  width: 100%;
+  padding: 9px 11px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.atp-input::placeholder {
+  color: var(--faint);
+}
+
+.atp-input:focus-visible {
+  border-color: var(--brand);
+  outline-offset: 0;
+}
+
+.atp-new-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.atp-create {
+  padding: 8px 16px;
   border: 1px solid var(--brand);
   border-radius: 999px;
   background: var(--brand);
   color: #fff;
   font: inherit;
-  font-size: 0.85rem;
-  padding: 7px 14px;
+  font-size: 0.84rem;
+  font-weight: 550;
   cursor: pointer;
 }
 
-.atp-new[disabled] {
-  opacity: 0.5;
+.atp-create:hover {
+  background: var(--brand-deep);
+  border-color: var(--brand-deep);
+}
+
+.atp-create[disabled] {
+  opacity: 0.45;
   cursor: not-allowed;
+}
+
+.atp-cancel {
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.84rem;
+  cursor: pointer;
+}
+
+.atp-cancel:hover {
+  color: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atp-row {
+    transition: none;
+  }
 }

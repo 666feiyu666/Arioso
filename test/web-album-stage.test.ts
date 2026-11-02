@@ -77,4 +77,28 @@ describe("album stage rendering", () => {
     // The first start button sits in the plan header, before the track plans.
     expect(html.indexOf('data-album-action="approve"')).toBeLessThan(html.indexOf("pl-outlines"));
   });
+
+  it("offers one playlist action for the whole album, enabled only once a track has audio", () => {
+    const ready = makeStage({
+      id: "album-3",
+      status: "completed",
+      albumCandidateCount: 2,
+      albumTrackOrder: [],
+      albumTracks: [track(1, "completed", "01.mp3"), track(2, "completed", "02.mp3")],
+    }).stage.render();
+    const readyButton = /<button[^>]*data-album-action="add-album-to-playlist"[^>]*>/u.exec(ready);
+    expect(count(ready, 'data-album-action="add-album-to-playlist"')).toBe(1);
+    expect(readyButton?.[0]).not.toContain("disabled");
+
+    const waiting = makeStage({
+      id: "album-4",
+      status: "generating",
+      albumCandidateCount: 2,
+      albumTrackOrder: [],
+      albumTracks: [track(1, "generating"), track(2, "queued")],
+    }).stage.render();
+    const waitingButton = /<button[^>]*data-album-action="add-album-to-playlist"[^>]*>/u.exec(waiting);
+    expect(count(waiting, 'data-album-action="add-album-to-playlist"')).toBe(1);
+    expect(waitingButton?.[0]).toContain("disabled");
+  });
 });

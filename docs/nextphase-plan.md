@@ -1,41 +1,34 @@
 # Next phase plan
 
-This document states what the next phase must deliver and in what order. It
-describes behaviour, not implementation. The implemented snapshot is in
+What the next phase must still deliver, and in what order. This document states
+behaviour, not implementation. The implemented snapshot is in
 [`current.md`](current.md); the product model is in [`abstract.md`](abstract.md).
 
 ## Starting point
 
-The implemented starting point is recorded in [`current.md`](current.md): one
-conversational entry point, a journey from a kept piece to an album, an album
-library, a playlist library, and a workflow studio, all on one language-model
-provider and one audio provider, with a Gemini review before a MoodMic piece is
-kept and with album candidates generated one at a time. Retrieval records what was
+One conversational entry point, a journey from a kept piece to an album, an album
+library, a playlist library, and a workflow studio. An album generates and a
+playlist only references what exists. Album candidates generate concurrently
+under a bounded pool, each with its own attempt record and its own failure.
+Everything runs on one language-model provider and one audio provider, with a
+Gemini review before a MoodMic piece is kept. Retrieval records what was
 retrieved rather than what a composer adopted, and no stored comparison exists
 between a grounded and an ungrounded composition of one brief.
 
 ## Target outcomes
 
-### 1. Playlist and album are two different objects
-
-**Status: implemented.** Albums live at `/albums.html` and generate; playlists
-live at `/playlist.html`, are stored under `outputs/playlists`, and only reference
-existing pieces. Achieved as specified: two identities, two pages, "add to
-playlist" wherever a piece appears, a playlist that spans albums and survives their
-removal, and no regeneration on reorder, rename, or removal. Details in
-[`current.md`](current.md#albums-and-playlists-are-two-objects).
-
-### 2. DeepSeek can serve every conversational and prompting task
+### 1. DeepSeek can serve every conversational and prompting task
 
 - One setting selects the language-model provider for every task: the direction
-  conversation, the MoodMic brief, the `MusicSpec` composer, the orchestral planner,
-  the album planner and reviewer, the mood classifier, and prompt rewriting.
+  conversation, the MoodMic brief, the `MusicSpec` composer, the orchestral
+  planner, the album planner and reviewer, the mood classifier, and prompt
+  rewriting.
 - With DeepSeek selected and only a DeepSeek key configured, all of those tasks
-  complete: no path falls back to OpenAI, and no feature is disabled for want of the
-  other provider.
-- Settings name the active provider and model and report which credential is present,
-  masked. Two stored credentials switch at any time without restarting the server,
-  and stored sessions, tasks, and completed work remain available.
+  complete: no path falls back to OpenAI, and no feature is disabled for want of
+  the other provider.
+- Settings name the active provider and model and report which credential is
+  present, masked. Two stored credentials switch at any time without restarting
+  the server, and stored sessions, tasks, and completed work remain available.
 - Output structure is provider-neutral: `MusicSpec`, album plans, and orchestral
   plans validate under either provider, and each task records the model that
   answered.
@@ -44,89 +37,91 @@ removal, and no regeneration on reorder, rename, or removal. Details in
 - DeepSeek is the default provider for a new installation, and OpenAI stays
   selectable.
 
-**Done when** a journey — conversation, brief, album plan, candidate review —
+**Done when** a journey (conversation, brief, album plan, candidate review)
 completes on DeepSeek alone, and the existing suite passes with the provider
 switched.
 
-### 3. Album and playlist work is faster
+### 2. Generation is resumable and fully observable
 
-- Independent generations run concurrently: album candidates are in flight together,
-  and orchestral movements that do not depend on each other do the same.
-- Concurrency is bounded and configurable through settings.
-- Progress is continuous: the interface reports queued, generating, finished, and
-  failed counts, and each finished track is playable as it arrives.
-- A failed generation is a retryable item that leaves the other tracks untouched.
-- Editing a plan while work is in flight is either refused with a message or handled
-  explicitly, leaving no orphaned or duplicated tracks.
-- Leaving the page and returning shows the album as it stands, and a server restart
-  loses no completed track and duplicates no work.
+Album candidates already generate concurrently. What remains:
 
-**Done when** an album at the maximum candidate count completes in a fraction of its
-sequential time, and a restart mid-album preserves every finished track.
+- Orchestral movements that do not depend on each other generate together.
+- Concurrency is settable from the interface, not only from the environment.
+- The interface reports queued, generating, finished, and failed counts, and each
+  finished track stays playable as it arrives.
+- A failed generation is a retryable item that leaves the other tracks untouched
+  (already true for album candidates; the same holds for movements).
+- Editing a plan while work is in flight is either refused with a message or
+  handled explicitly, leaving no orphaned or duplicated tracks.
+- A server restart resumes the album instead of failing it, losing no completed
+  track and duplicating no work.
 
-### 4. ACE-Step 1.5 replaces Lyria as the audio generator
+**Done when** a restart mid-album preserves every finished track and continues the
+rest.
 
-- Every generation — standalone piece, MoodMic piece, album candidate, orchestral
-  movement — comes from ACE-Step 1.5.
+### 3. ACE-Step 1.5 replaces Lyria as the audio generator
+
+- Every generation (standalone piece, MoodMic piece, album candidate, orchestral
+  movement) comes from ACE-Step 1.5.
 - ACE-Step runs as an inference service behind a configured local or network
   endpoint, and generation needs no Google credential.
-- Delivered audio keeps its contract: a playable file with a stable URL, byte-range
-  playback, a known duration, and the existing task bookkeeping, so albums, export,
-  the producer, the calendar, and the journey work unchanged.
+- Delivered audio keeps its contract: a playable file with a stable URL,
+  byte-range playback, a known duration, and the existing task bookkeeping, so
+  albums, export, the producer, the calendar, and the journey work unchanged.
 - Prompt and duration control map onto what ACE-Step accepts; where a planned
-  duration cannot be honoured, the task records the requested and the actual value.
-- A task records which engine produced its audio, and the same plan can be rendered
-  by either engine.
-- The ACE-Step model or version is a setting, and an unreachable service produces a
-  retryable error naming the endpoint.
+  duration cannot be honoured, the task records the requested and the actual
+  value.
+- A task records which engine produced its audio, and the same plan can be
+  rendered by either engine.
+- The ACE-Step model or version is a setting, and an unreachable service produces
+  a retryable error naming the endpoint.
 - A side-by-side listening record of one brief under both engines is kept.
 
 **Done when** a MoodMic piece and a full album are generated by ACE-Step with no
 Google credential present, and the exported album plays.
 
-### 5. Audio analysis replaces the Gemini listening review
+### 4. Audio analysis replaces the Gemini listening review
 
-- **Technical analysis.** Each delivered file is measured and reported: silence and
-  dropouts, clipping and excessive peaks, abrupt cuts, clicks and impulsive defects,
-  hiss, hum and mains interference, wind and rumble, speech and room leakage, codec
-  or generation artefacts, DC offset, loudness, and dynamic range. Each finding names
-  its position, severity, and a plain description.
-- **Deterministic request checks.** Duration against the plan, silence at head and
-  tail, channel count and sample rate, and the planned sections in their planned
-  order where the plan states them.
+- **Technical analysis.** Each delivered file is measured and reported: silence
+  and dropouts, clipping and excessive peaks, abrupt cuts, clicks and impulsive
+  defects, hiss, hum and mains interference, wind and rumble, speech and room
+  leakage, codec or generation artefacts, DC offset, loudness, and dynamic range.
+  Each finding names its position, severity, and a plain description.
+- **Deterministic request checks.** Duration against the plan, silence at head
+  and tail, channel count and sample rate, and the planned sections in their
+  planned order where the plan states them.
 - The check runs locally on every delivered piece, including offline, and over an
   existing library in a batch.
-- Each piece carries an analysis record with findings, severity, and a summary beside
-  the player, and the library lists pieces with blocking findings. The record reports
-  measured facts and leaves musical judgement to the listener.
-- The Google review model leaves the generation flow, together with its setting, its
-  credential, and the `review` pause created for its verdict.
+- Each piece carries an analysis record with findings, severity, and a summary
+  beside the player, and the library lists pieces with blocking findings. The
+  record reports measured facts and leaves musical judgement to the listener.
+- The Google review model leaves the generation flow, together with its setting,
+  its credential, and the `review` pause created for its verdict.
 
 **Done when** a damaged file (clipped, truncated, silent head, injected noise) is
 flagged with a locatable finding, a clean generated track passes with no blocking
 finding, and no generation calls Gemini.
 
-### 6. The corpus-to-generation relationship is explicit and measured
+### 5. The corpus-to-generation relationship is explicit and measured
 
-- Each music type reports its style and standard record counts, the records carrying
-  musical evidence, the sources and licences, and the corpus version. A type appears
-  in the selector after its collection passes the checks below; an unavailable type
-  states its reason.
+- Each music type reports its style and standard record counts, the records
+  carrying musical evidence, the sources and licences, and the corpus version. A
+  type appears in the selector after its collection passes the checks below; an
+  unavailable type states its reason.
 - Each task states whether it was composed from model knowledge or from retrieved
   evidence, how the query was formed, and which references it retrieved.
-- Adoption is recorded separately from retrieval: the plan names the references that
-  shaped instrumentation, rhythm, texture, harmony, form, or production, and a
-  retrieved reference that shaped nothing is recorded as unused.
-- A fixed brief set is composed twice — with retrieval and without — under the same
-  provider, model, and settings, each pair storing both plans, their differences, the
-  retrieval evidence, and a listening record.
-- Retrieval ranking is scored separately from audio on the same brief set: whether the
-  expected styles and standards were retrieved, the share of irrelevant results, the
-  rate of empty results, and whether an exact title lookup matched or reported a gap.
-  A ranking change is accepted on that score.
-- The direction stage is evaluated with and without poems on whether the Director's
-  description becomes more specific, keeping both outputs, and poetry retrieval
-  extends to the studio's direction conversation and is evaluated there.
+- Adoption is recorded separately from retrieval: the plan names the references
+  that shaped instrumentation, rhythm, texture, harmony, form, or production, and
+  a retrieved reference that shaped nothing is recorded as unused.
+- A fixed brief set is composed twice, with retrieval and without, under the same
+  provider, model, and settings, each pair storing both plans, their differences,
+  the retrieval evidence, and a listening record.
+- Retrieval ranking is scored separately from audio on the same brief set: whether
+  the expected styles and standards were retrieved, the share of irrelevant
+  results, the rate of empty results, and whether an exact title lookup matched or
+  reported a gap. A ranking change is accepted on that score.
+- Poetry retrieval extends to the studio's direction conversation and is
+  evaluated there, with and without poems, keeping both outputs.
 - A new collection is collected, normalized, given a manifest with source and
   licence, and checked for retrievability and for regressions in existing queries
   before the selector offers it.
@@ -135,8 +130,8 @@ finding, and no generation calls Gemini.
 
 **Done when** any piece states whether it was grounded and how; each music type
 either passes its collection checks or states what is missing; and a stored
-comparison exists showing what retrieval changed in the plan and in the heard result
-for a fixed brief.
+comparison exists showing what retrieval changed in the plan and in the heard
+result for a fixed brief.
 
 ## Implementation order
 
@@ -145,29 +140,28 @@ Each stage leaves the product usable.
 ### Now
 
 1. **DeepSeek provider.** Every later stage is written in prompts.
-2. **Playlist and album separated.** *(Done.)* The vocabulary and the two objects
-   are assumed by the stages that follow.
-3. **Grounding made visible and measurable.** Each task states its grounding and
+2. **Grounding made visible and measurable.** Each task states its grounding and
    what it adopted, and the fixed pair-comparison brief set is recorded. This
    baseline precedes corpus collection and later provider and engine changes.
 
 ### Mid-term
 
-4. **Parallel generation.** Depends on albums being the only generating object.
-5. **Fully automatic albums.** Depends on generation being fast and bounded: plan,
+3. **Resumable generation.** Restart recovery and orchestral concurrency on top of
+   the album pool.
+4. **Fully automatic albums.** Depends on generation being fast and bounded: plan,
    generate, review against the plan, keep the coherent candidates, and present a
    sequenced album for acceptance, resequencing, or use in a playlist.
-6. **Corpus expansion.** Complete and validate the four other music types and
+5. **Corpus expansion.** Complete and validate the four other music types and
    extend the poetry corpus through the checked pipeline, then re-run the pair set
    over the enlarged corpus.
 
 ### Long-term
 
-7. **Audio analysis and noise identification.** The measurement layer is built and
+6. **Audio analysis and noise identification.** The measurement layer is built and
    shown read-only during the mid-term; it becomes the delivery check here.
-8. **ACE-Step 1.5.** Replaces the component the rest of the system assumes.
+7. **ACE-Step 1.5.** Replaces the component the rest of the system assumes.
    Analysis thresholds are calibrated on ACE-Step output.
-9. **The grounded-versus-ungrounded verdict.** With provider, engine, and analysis
+8. **The grounded-versus-ungrounded verdict.** With provider, engine, and analysis
    settled, the brief set is run against the final stack and the result is
    reported, including pairs where retrieval produced no audible difference.
 
@@ -184,15 +178,11 @@ Each stage leaves the product usable.
 
 ## Open questions
 
-- ~~Whether a playlist can contain an album as a whole, or only its tracks.~~
-  Settled: a playlist contains pieces, so an album contributes its tracks, never
-  itself as one entry. Whether a one-step "add the whole album" shortcut is worth
-  building on top of that remains open.
 - Which of ACE-Step's conditioning options are exposed to the listener.
 - Which analysis findings block delivery and which warn.
 - Whether the workflow studio keeps a separate theme-album workflow.
 - Whether pair comparison is judged by the listener, a scored rubric, or a
   language model describing the difference between the two plans.
-- Whether the corpus grows by named music type or by mood and atmosphere.
+- Whether the corpus grows by named music type, or by mood and atmosphere.
 - How many briefs a comparison set needs, and whether it re-runs on every corpus
   change or on a release.

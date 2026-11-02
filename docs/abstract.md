@@ -8,9 +8,9 @@ should become. It interprets the user's intent, retrieves musical context when
 requested, and produces an inspectable plan covering form, instrumentation,
 rhythm, harmony, dynamics, vocals, and production.
 
-The generated audio realizes that plan. Arioso also retains the plan, its
-evidence, alternative takes, and the relationships among tracks, so creation
-continues beyond one prompt and one file.
+The generated audio realizes that plan. Arioso also keeps the plan, its evidence,
+alternative takes, and the relationships among tracks, so creation continues
+beyond one prompt and one file.
 
 The user remains the artistic decision-maker: Arioso proposes structure,
 generates candidates, and reports technical evidence, while musical quality stays
@@ -31,17 +31,17 @@ interpretation and becomes neither quotation nor attribution. Reference material
 belongs to the direction stage; the composer receives the confirmed direction,
 not the sources behind it.
 
-Arioso supports three scopes — a standalone piece, one multi-movement orchestral
-work, and a themed album of related pieces — and three ways in: a conversation
-that yields one piece, a studio workflow chosen up front, or an existing piece
-kept and carried into an album.
+Arioso supports three scopes (a standalone piece, one multi-movement orchestral
+work, and a themed album of related pieces) and three ways in: a conversation that
+yields one piece, a studio workflow chosen up front, or an existing piece kept and
+carried into an album.
 
 ### From one kept piece to an album
 
-A piece carries the agreed direction that produced it, and it can become the
-first reference for an album. The listener keeps the piece, states a theme, and
-confirms how that theme was read before any track is generated. Tracks arrive as
-they finish, and the listener curates the set: include, exclude, reorder, export.
+A piece carries the agreed direction that produced it, and it can become the first
+reference for an album. The listener keeps the piece, states a theme, and confirms
+how that theme was read before any track is generated. Tracks arrive as they
+finish, and the listener curates the set: include, exclude, reorder, export.
 Automated review reports resemblance to the brief; selection and sequencing stay
 with the listener.
 
@@ -72,9 +72,8 @@ them.
 
 ## First complete product outcome
 
-The first complete product outcome is a small, coherent album reached from one
-piece the listener kept. A user should be
-able to:
+A small, coherent album reached from one piece the listener kept. A user should
+be able to:
 
 - describe a feeling and settle a musical direction in conversation;
 - listen to the piece that comes back and read how it was checked against the
@@ -112,8 +111,8 @@ Album
 
 The album is the top-level creative project. It owns the concept, track order,
 shared sound world, recurring ideas, production constraints, and release-level
-metadata. Cohesion allows variety: each track holds a distinct function within
-the album arc.
+metadata. Cohesion allows variety: each track holds a distinct function within the
+album arc.
 
 ### Track
 
@@ -124,15 +123,15 @@ section is generated.
 
 ### Musical contract
 
-Sections of one track share a musical contract describing the features that
-must survive separate generations: tonal language, tempo strategy, meter,
-instrumental palette, thematic material, production space, dynamic trajectory,
-and transition intent. The contract distinguishes invariants from parameters
-that are expected to develop or transform.
+Sections of one track share a musical contract describing the features that must
+survive separate generations: tonal language, tempo strategy, meter, instrumental
+palette, thematic material, production space, dynamic trajectory, and transition
+intent. The contract distinguishes invariants from parameters that are expected to
+develop or transform.
 
 Text descriptions cannot guarantee thematic continuity. Where exact recurrence
-matters, the architecture permits explicit representations — notation, MIDI,
-motifs, reference audio, or another model-specific conditioning format — alongside
+matters, the architecture permits explicit representations (notation, MIDI,
+motifs, reference audio, or another model-specific conditioning format) alongside
 the project plan.
 
 ### Section and take
@@ -153,47 +152,11 @@ intended dynamics of individual works.
 ### Playlist
 
 A playlist sits outside this hierarchy. It is the listener's own sequencing of
-pieces that already exist — from one album, from several, or from single
-conversations — and it owns only their order, their name, and its cover. Nothing
-in a playlist is generated, and an album never depends on one existing. Because
-it references rather than copies, a playlist outlives an album it drew from: the
+pieces that already exist, from one album, from several, or from single
+conversations, and it owns only their order, their name, and its cover. Nothing in
+a playlist is generated, and an album never depends on one existing. Because it
+references rather than copies, a playlist outlives an album it drew from: the
 pieces that no longer resolve are reported as missing instead of disappearing.
-
-## Macro architecture
-
-```text
-Human brief
-    |
-    v
-Direction discussion (listen -> confirmed direction)
-    |
-    v
-Album and track planner <---------- Optional musical corpus
-    |
-    v
-Versioned composition plans
-    |
-    +--------------------+
-    |                    |
-    v                    v
-Short-track generation  Long-form section planning
-    |                    |
-    |                    v
-    |               Section generation
-    |                    |
-    +----------+---------+
-               v
-        Candidate take library
-               |
-               v
-       User selection and assembly
-               |
-               v
-      Track finishing and sequencing
-               |
-               v
-            Album export
-```
 
 ## Boundaries
 
@@ -203,7 +166,7 @@ Out of scope:
 - an autonomous system that chooses and publishes its own album;
 - a mechanism for imitating a living artist or reproducing protected lyrics or
   melodies;
-- a system that treats retrieved sources as generation instructions; or
+- a system that treats retrieved sources as generation instructions;
 - a benchmark that reduces musical success to schema validity or signal-level
   measurements.
 

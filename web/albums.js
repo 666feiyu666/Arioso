@@ -733,7 +733,7 @@ async function createPlaylist() {
   state.message = "";
   render();
   try {
-    const task = await api("/api/playlists", {
+    const task = await api("/api/albums", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

@@ -19,6 +19,7 @@ const COPY = {
     exportIncluded: "导出已收录 MP3",
     exportCandidates: "导出候选合集",
     timestamps: "下载时间戳",
+    addAlbumToPlaylist: "整张加入歌单",
     exporting: "正在合并…",
     exportUnavailable: "有曲目尚未完成，暂时无法导出。",
     failedTitle: "这次没有完成",
@@ -95,6 +96,7 @@ const COPY = {
     exportIncluded: "Export included MP3",
     exportCandidates: "Export candidate mix",
     timestamps: "Download timestamps",
+    addAlbumToPlaylist: "Add album to playlist",
     exporting: "Merging…",
     exportUnavailable: "Export is available once every track has finished generating.",
     failedTitle: "This run didn't finish",
@@ -541,6 +543,7 @@ export function createAlbumStage(options) {
               <button class="pl-btn pl-btn-quiet" type="button" data-album-action="export" data-scope="included" ${readyCount ? "" : "disabled"}>${esc(t("exportIncluded"))}</button>
               <button class="pl-btn pl-btn-quiet" type="button" data-album-action="export" data-scope="candidate" ${readyCount ? "" : "disabled"}>${esc(t("exportCandidates"))}</button>
               <button class="pl-btn pl-btn-quiet" type="button" data-album-action="timestamps" ${readyCount ? "" : "disabled"}>${esc(t("timestamps"))}</button>
+              <button class="pl-btn pl-btn-quiet" type="button" data-album-action="add-album-to-playlist" ${anyPlayable ? "" : "disabled"}>${esc(t("addAlbumToPlaylist"))}</button>
             </div>
           </div>` : ""}
           ${state.message ? `<p class="pl-message">${esc(state.message)}</p>` : ""}
@@ -914,6 +917,27 @@ export function createAlbumStage(options) {
                 ...(candidate.durationSeconds === undefined ? {} : { durationSeconds: candidate.durationSeconds }),
               }],
             });
+          }
+        }
+        else if (action === "add-album-to-playlist") {
+          // The playlist takes the set the user is listening to: the included
+          // tracks when the album has any, otherwise every finished candidate.
+          // Entries reference the tracks; no audio is regenerated.
+          const activeTask = task();
+          if (activeTask) {
+            const scope = listTracks(activeTask, "included").length ? "included" : "candidate";
+            const items = playableTracks(activeTask, scope).map((candidate) => ({
+              source: { kind: "album-track", taskId: activeTask.id, trackId: candidate.id },
+              titleSnapshot: candidate.title,
+              ...(candidate.durationSeconds === undefined ? {} : { durationSeconds: candidate.durationSeconds }),
+            }));
+            if (items.length) {
+              void openAddToPlaylist({
+                api: options.api,
+                language: options.language(),
+                items,
+              });
+            }
           }
         }
         else if (action === "retry-task") retryTask();
