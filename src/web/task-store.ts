@@ -23,7 +23,14 @@ import type { OrchestralMovementPlan, OrchestralWorkPlan } from "../schema/orche
 import { writeTextFileAtomic } from "../utils/files.js";
 import { KeyedQueue } from "../utils/queues.js";
 import { isRecord } from "../utils/validation.js";
-import type { GenerationAttempt } from "../utils/attempts.js";
+import {
+  completeGenerationAttempt,
+  ensureGenerationAttempt,
+  latestAttemptIdFor,
+  recordGenerationAttempt,
+  type AttemptOutcome,
+  type GenerationAttempt,
+} from "../utils/attempts.js";
 import { isProductionRunId, type AlbumProduction } from "../producer/types.js";
 import type { MusicReviewRecord } from "../moodmic/music-review.js";
 import { isPlaylistDiscussionMessage, PlaylistBriefingSchema, type PlaylistBriefing, type PlaylistDiscussionMessage } from "../playlist/briefing.js";
@@ -339,6 +346,7 @@ function isTaskRecord(value: unknown): value is MusicTask {
         && typeof attempt.model === "string"
         && typeof attempt.requestRef === "string"
         && typeof attempt.startedAt === "string"
+        && (attempt.key === undefined || typeof attempt.key === "string")
         && (attempt.endedAt === undefined || typeof attempt.endedAt === "string")
         && (attempt.outcome === undefined
           || ["completed", "rejected", "unknown", "cancelled"].includes(String(attempt.outcome)))
@@ -907,6 +915,49 @@ export class TaskStore {
 
   async update(id: string, changes: Partial<MusicTask>): Promise<MusicTask> {
     return this.#mutate(id, () => changes);
+  }
+
+  /**
+   * Records the dispatch that is about to leave this process. The history is
+   * derived inside the mutation, so candidates dispatching at the same moment
+   * cannot overwrite each other's attempt records.
+   */
+  async beginGenerationAttempt(taskId: string, attempt: GenerationAttempt): Promise<MusicTask> {
+    return this.#mutate(taskId, (task) => ({
+      generationAttemptId: attempt.id,
+      generationAttempts: recordGenerationAttempt(task.generationAttempts, attempt),
+    }));
+  }
+
+  /**
+   * Records how one dispatch ended. Whether the attempt still owns its unit of
+   * work is decided inside the same mutation: a late result for work that a
+   * newer attempt replaced is marked cancelled, while a result for another
+   * candidate is settled normally.
+   */
+  async settleGenerationAttempt(
+    taskId: string,
+    attempt: GenerationAttempt,
+    key: string,
+    outcome: AttemptOutcome,
+    error?: string,
+  ): Promise<"settled" | "superseded"> {
+    let verdict: "settled" | "superseded" = "settled";
+    await this.#mutate(taskId, (task) => {
+      const attempts = ensureGenerationAttempt(task.generationAttempts, attempt);
+      if (latestAttemptIdFor(attempts, key) !== attempt.id) {
+        verdict = "superseded";
+        return {
+          generationAttempts: completeGenerationAttempt(
+            attempts, attempt.id, "cancelled", "A newer attempt replaced this one.",
+          ),
+        };
+      }
+      return {
+        generationAttempts: completeGenerationAttempt(attempts, attempt.id, outcome, error),
+      };
+    });
+    return verdict;
   }
 
   async updateMovement(

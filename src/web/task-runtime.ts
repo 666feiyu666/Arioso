@@ -9,7 +9,8 @@ import {
   reviewAlbumCandidates,
   reviseAlbumTrack,
 } from "../composer/bounded-agent.js";
-import { timeoutsFor, type AriosoConfig } from "../config/env.js";
+import { timeoutsFor, generationConcurrencyFor, type AriosoConfig } from "../config/env.js";
+import { mapWithConcurrency } from "../utils/concurrency.js";
 import type { InterfaceLanguage } from "../config/settings.js";
 import { runMoodMicGeneration } from "../moodmic/moodmic-graph.js";
 import { runBackgroundMusicProducer } from "../producer/background-music-producer.js";
@@ -368,45 +369,55 @@ export async function runAlbumTask(
   }
   if (!current.albumTracks?.length) throw new Error("Album candidate tracks are missing.");
   await store.update(task.id, { status: "generating", error: undefined });
-  for (const track of current.albumTracks) {
-    if (generationTrackId && track.id !== generationTrackId) continue;
-    if (track.audioFile && track.status === "completed") continue;
-    try {
-      if (!track.musicSpec) throw new Error("Candidate prompt is missing.");
-      await store.updateAlbumTrack(task.id, track.id, { status: "generating", error: undefined });
-      const generated = await dispatchGeneration(store, store.get(task.id) ?? current, {
-        purpose: "album-track",
-        model: current.lyriaModel,
-        prompt: track.musicSpec.lyriaPrompt,
-        apiKey: config.geminiApiKey!,
-        timeoutMs: timeoutsFor(config).generateMs,
-      });
-      const audioFile = await store.writeAlbumTrackAudio(current, track, generated.audio);
-      let durationSeconds: number | undefined;
+  // Candidates do not depend on one another, so they generate together under a
+  // bounded pool. Each candidate is still an independent dispatch with its own
+  // attempt record and its own failure: one failure leaves the rest untouched.
+  const pending = current.albumTracks.filter((track) => {
+    if (generationTrackId && track.id !== generationTrackId) return false;
+    return !(track.audioFile && track.status === "completed");
+  });
+  await mapWithConcurrency(
+    pending,
+    generationConcurrencyFor(config.generationConcurrency),
+    async (track) => {
       try {
-        durationSeconds = measureAudioDuration(generated.audio);
-      } catch {
-        // Audio stays available when its duration cannot be measured locally.
-      }
-      await store.updateAlbumTrack(task.id, track.id, {
-        status: "completed", audioFile, generatedText: generated.generatedText,
-        ...(durationSeconds === undefined ? {} : { durationSeconds }), error: undefined,
-      });
-      // A playlist built from this album grows as candidates land. A failure
-      // here must never fail the album: the audio is already on disk.
-      try {
-        await hooks?.onAlbumTrackCompleted?.(task.id, {
-          ...track, status: "completed", audioFile,
-          ...(durationSeconds === undefined ? {} : { durationSeconds }),
+        if (!track.musicSpec) throw new Error("Candidate prompt is missing.");
+        await store.updateAlbumTrack(task.id, track.id, { status: "generating", error: undefined });
+        const generated = await dispatchGeneration(store, store.get(task.id) ?? current, {
+          purpose: "album-track",
+          attemptKey: track.id,
+          model: current.lyriaModel,
+          prompt: track.musicSpec.lyriaPrompt,
+          apiKey: config.geminiApiKey!,
+          timeoutMs: timeoutsFor(config).generateMs,
         });
-      } catch {
-        /* The track is delivered; the playlist catches up on its next read. */
+        const audioFile = await store.writeAlbumTrackAudio(current, track, generated.audio);
+        let durationSeconds: number | undefined;
+        try {
+          durationSeconds = measureAudioDuration(generated.audio);
+        } catch {
+          // Audio stays available when its duration cannot be measured locally.
+        }
+        await store.updateAlbumTrack(task.id, track.id, {
+          status: "completed", audioFile, generatedText: generated.generatedText,
+          ...(durationSeconds === undefined ? {} : { durationSeconds }), error: undefined,
+        });
+        // A playlist built from this album grows as candidates land. A failure
+        // here must never fail the album: the audio is already on disk.
+        try {
+          await hooks?.onAlbumTrackCompleted?.(task.id, {
+            ...track, status: "completed", audioFile,
+            ...(durationSeconds === undefined ? {} : { durationSeconds }),
+          });
+        } catch {
+          /* The track is delivered; the playlist catches up on its next read. */
+        }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        await store.updateAlbumTrack(task.id, track.id, { status: "failed", error: message });
       }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      await store.updateAlbumTrack(task.id, track.id, { status: "failed", error: message });
-    }
-  }
+    },
+  );
   const failures = (store.get(task.id)?.albumTracks ?? [])
     .filter((track) => track.status !== "completed")
     .map((track) => `Candidate ${track.order}: ${track.error ?? "Awaiting generation."}`);

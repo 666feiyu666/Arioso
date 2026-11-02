@@ -118,16 +118,55 @@ export interface GenerationAttempt {
   endedAt?: string;
   outcome?: AttemptOutcome;
   error?: string;
+  /**
+   * The unit of work this dispatch renders: an album candidate id, a movement
+   * id, or the task itself. Concurrent dispatches for one task are told apart
+   * by this key, so two candidates finishing at once stay independent records.
+   */
+  key?: string;
 }
 
 /** Keeps only the newest attempt records so a record cannot grow without bound. */
 export const MAX_GENERATION_ATTEMPTS = 10;
 
+/** The owner of an attempt: the candidate or movement it renders. */
+export function attemptKey(attempt: GenerationAttempt): string {
+  return attempt.key ?? attempt.purpose;
+}
+
+/**
+ * Appends an attempt, keeping the newest `MAX_GENERATION_ATTEMPTS` per owner.
+ * Album candidates are dispatched concurrently, so a single bounded list would
+ * evict one candidate's record when another candidate's attempts arrive.
+ */
 export function recordGenerationAttempt(
   existing: GenerationAttempt[] | undefined,
   attempt: GenerationAttempt,
 ): GenerationAttempt[] {
-  return [...(existing ?? []), attempt].slice(-MAX_GENERATION_ATTEMPTS);
+  const kept: GenerationAttempt[] = [];
+  const counts = new Map<string, number>();
+  const all = [...(existing ?? []), attempt];
+  for (let index = all.length - 1; index >= 0; index -= 1) {
+    const candidate = all[index]!;
+    const key = attemptKey(candidate);
+    const count = (counts.get(key) ?? 0) + 1;
+    counts.set(key, count);
+    if (count <= MAX_GENERATION_ATTEMPTS) kept.push(candidate);
+  }
+  return kept.reverse();
+}
+
+/** The newest attempt that renders `key`, or undefined when there is none. */
+export function latestAttemptIdFor(
+  attempts: GenerationAttempt[] | undefined,
+  key: string,
+): string | undefined {
+  const list = attempts ?? [];
+  for (let index = list.length - 1; index >= 0; index -= 1) {
+    const candidate = list[index]!;
+    if (attemptKey(candidate) === key) return candidate.id;
+  }
+  return undefined;
 }
 
 export function completeGenerationAttempt(

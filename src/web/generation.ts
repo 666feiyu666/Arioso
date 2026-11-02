@@ -2,9 +2,6 @@ import { LyriaClient } from "../lyria/lyria-client.js";
 import type { MusicTask, TaskStore } from "./task-store.js";
 import {
   classifyRequestFailure,
-  completeGenerationAttempt,
-  ensureGenerationAttempt,
-  recordGenerationAttempt,
   requestReference,
   withDeadline,
   type FailureKind,
@@ -24,6 +21,12 @@ export class GenerationFailure extends Error {
 
 export interface DispatchGenerationOptions {
   purpose: GenerationAttempt["purpose"];
+  /**
+   * The unit of work this dispatch renders, such as an album candidate id. One
+   * task may have several dispatches in flight, and the key decides which
+   * attempt owns the result. Defaults to the purpose.
+   */
+  attemptKey?: string;
   model: string;
   prompt: string;
   apiKey: string;
@@ -121,20 +124,19 @@ async function dispatchAttempt(
   task: MusicTask,
   options: DispatchGenerationOptions,
 ): Promise<{ audio: Buffer; generatedText: string | null; attemptId: string }> {
+  const key = options.attemptKey ?? options.purpose;
   const attempt: GenerationAttempt = {
     id: crypto.randomUUID(),
     purpose: options.purpose,
     model: options.model,
     requestRef: requestReference(options.purpose, options.model, options.prompt),
     startedAt: new Date().toISOString(),
+    ...(options.attemptKey === undefined ? {} : { key: options.attemptKey }),
   };
   // A retry must extend the history rather than replace it, so the record is
-  // read from the store instead of the task this call was handed.
-  const beforeDispatch = store.get(task.id) ?? task;
-  await store.update(task.id, {
-    generationAttemptId: attempt.id,
-    generationAttempts: recordGenerationAttempt(beforeDispatch.generationAttempts, attempt),
-  });
+  // read inside the store mutation instead of from the task this call was
+  // handed: two candidates may be dispatching at the same moment.
+  await store.beginGenerationAttempt(task.id, attempt);
 
   const client = options.generate ? undefined : new LyriaClient(options.apiKey);
   const generate = options.generate ?? ((prompt: string, generateOptions: {
@@ -153,41 +155,22 @@ async function dispatchAttempt(
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     const kind = classifyRequestFailure(error);
-    const current = store.get(task.id);
-    await store.update(task.id, {
-      generationAttempts: completeGenerationAttempt(
-        ensureGenerationAttempt(current?.generationAttempts ?? task.generationAttempts, attempt),
-        attempt.id,
-        kind === "unknown" ? "unknown" : "rejected",
-        message,
-      ),
-    });
+    await store.settleGenerationAttempt(
+      task.id, attempt, key, kind === "unknown" ? "unknown" : "rejected", message,
+    );
     throw new GenerationFailure(kind, message);
   }
 
   // A late completion must not overwrite a newer attempt's record or audio.
-  const current = store.get(task.id);
-  if (current?.generationAttemptId !== attempt.id) {
-    await store.update(task.id, {
-      generationAttempts: completeGenerationAttempt(
-        ensureGenerationAttempt(current?.generationAttempts ?? task.generationAttempts, attempt),
-        attempt.id,
-        "cancelled",
-        "A newer attempt replaced this one.",
-      ),
-    });
+  // Only an attempt that renders the same unit of work can supersede this one:
+  // album candidates are generated concurrently and must not cancel each other.
+  const verdict = await store.settleGenerationAttempt(task.id, attempt, key, "completed");
+  if (verdict === "superseded") {
     throw new GenerationFailure(
       "rejected",
       "A newer attempt replaced this one; the late result was discarded.",
       false,
     );
   }
-  await store.update(task.id, {
-    generationAttempts: completeGenerationAttempt(
-      ensureGenerationAttempt(current?.generationAttempts ?? task.generationAttempts, attempt),
-      attempt.id,
-      "completed",
-    ),
-  });
   return { ...generated, attemptId: attempt.id };
 }

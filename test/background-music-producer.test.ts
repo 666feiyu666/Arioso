@@ -165,12 +165,22 @@ describe("Background Music Producer lifecycle", () => {
 
   it("does not postprocess an album with a failed generation candidate", async () => {
     const { store, task, compose } = await setup();
-    // The automatic retries spend the whole budget on this candidate before the
-    // run gives up, so three dispatches fail here and the next run succeeds.
-    mocks.generate
-      .mockRejectedValueOnce(new Error("Generation rejected"))
-      .mockRejectedValueOnce(new Error("Generation rejected"))
-      .mockRejectedValueOnce(new Error("Generation rejected"));
+    // Candidates generate concurrently, so the failing one is named rather than
+    // assumed to be first. Its three automatic attempts spend the whole budget
+    // before the run gives up, and the next run succeeds.
+    const attempts = new Map<string, number>();
+    mocks.compose.mockImplementation(async (_plan: unknown, number: number) => ({
+      ...albumSpecFixture(),
+      lyriaPrompt: `candidate ${number}`,
+    }));
+    mocks.generate.mockImplementation(async (prompt: string) => {
+      if (prompt === "candidate 3") {
+        const count = (attempts.get(prompt) ?? 0) + 1;
+        attempts.set(prompt, count);
+        if (count <= 3) throw new Error("Generation rejected");
+      }
+      return { audio: Buffer.from("original-mp3"), generatedText: null };
+    });
     const command = fakeCommand();
     await expect(runBackgroundMusicProducer(store, task, config, compose, command)).rejects.toThrow("Generation rejected");
     expect(command.mock.calls.map(([args]) => args[0])).toEqual(["doctor"]);
