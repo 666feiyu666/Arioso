@@ -12,41 +12,38 @@ The generated audio realizes that plan. Arioso also retains the plan, its
 evidence, alternative takes, and the relationships among tracks, so creation
 continues beyond one prompt and one file.
 
-The user remains the artistic decision-maker. Arioso proposes structure,
-generates candidates, and reports technical evidence; the first result is one
-candidate among others, and musical quality remains a listening decision.
+The user remains the artistic decision-maker: Arioso proposes structure,
+generates candidates, and reports technical evidence, while musical quality stays
+a listening decision.
 
 ## Core workflows
 
 ### Shaping the direction before composition
 
 Every workflow begins by listening. The user states a rough intention; the agent
-turns it into a clear, production-useful direction, which the user confirms
-before any plan is written. Direction is a distinct, revisable stage, and the
-user remains the decision-maker.
+turns it into a production-useful direction, which the user confirms before any
+plan is written. Direction is a distinct, revisable stage.
 
 Listening may draw on reference material. The direction agent can read retrieved
-poetry as evidence for imagery, atmosphere, movement, and emotional
-development, while the user's own words stay authoritative: reference text
-informs an interpretation and never becomes a quotation, an attribution, or a
-substitute for what the user said. Reference material belongs to the direction
-stage; the composer receives the confirmed direction, not the sources behind it.
+poetry as evidence for imagery, atmosphere, movement, and emotional development,
+while the user's own words stay authoritative: reference text informs an
+interpretation and becomes neither quotation nor attribution. Reference material
+belongs to the direction stage; the composer receives the confirmed direction,
+not the sources behind it.
 
-Arioso supports three scopes: a standalone piece, one multi-movement orchestral
-work, and a themed album of related pieces. The standalone piece is the entry
-point: once a listener keeps one, it can continue into an album without a new
-project or a second setup step.
+Arioso supports three scopes — a standalone piece, one multi-movement orchestral
+work, and a themed album of related pieces — and three ways in: a conversation
+that yields one piece, a studio workflow chosen up front, or an existing piece
+kept and carried into an album.
 
 ### From one kept piece to an album
 
 A piece carries the agreed direction that produced it, and it can become the
-first reference for an album. The listener keeps the piece, states a
-theme, and confirms how that theme was read before any track is generated. Tracks
-arrive as they finish. The listener then curates: include, exclude, reorder, and
-export.
-
-The album is a set of candidates the listener narrows. Automated review reports
-resemblance to the brief; selection and sequencing stay with the listener.
+first reference for an album. The listener keeps the piece, states a theme, and
+confirms how that theme was read before any track is generated. Tracks arrive as
+they finish, and the listener curates the set: include, exclude, reorder, export.
+Automated review reports resemblance to the brief; selection and sequencing stay
+with the listener.
 
 ### Composition without a corpus
 
@@ -57,8 +54,7 @@ musical knowledge:
 Human idea -> Agent-composer -> Music plan -> Audio generator -> Candidate take
 ```
 
-This workflow establishes what an agent can compose without external musical
-memory. Assumptions introduced by the agent remain explicit and revisable.
+Assumptions introduced by the agent remain explicit and revisable.
 
 ### Composition with a corpus
 
@@ -69,10 +65,10 @@ Human idea -> Retrieval -> Musical references -> Agent-composer
            -> Music plan -> Audio generator -> Candidate take
 ```
 
-The corpus is external musical memory. Retrieved material is evidence for
+The corpus is external musical memory, and retrieved material is evidence for
 musical decisions. Arioso records what was retrieved and keeps reference titles
-and implementation details out of the generation prompt unless the user needs
-them there.
+and implementation details out of the generation prompt unless the user asks for
+them.
 
 ## First complete product outcome
 
@@ -87,14 +83,15 @@ able to:
 - continue from a kept piece into an album, with its material as the first
   reference;
 - confirm how the album author read the theme before any track is generated;
-- hear tracks as they finish and keep listening while the rest are made; and
-- curate the result by including, excluding, ordering, and exporting tracks.
-
-The same journey serves the older studio workflows: a standalone piece, a
-jazz-grounded piece, a multi-movement orchestral work, and a themed album planned
-from several MoodMic references.
+- hear tracks as they finish and keep listening while the rest are made;
+- curate the result by including, excluding, ordering, and exporting tracks;
+- add any finished piece to a playlist, sequence it across albums and
+  conversations, and export it without generating anything.
 
 ## Project hierarchy
+
+This hierarchy describes what Arioso generates. A playlist is not part of it; see
+[Playlist](#playlist) below.
 
 ```text
 Album
@@ -133,11 +130,10 @@ instrumental palette, thematic material, production space, dynamic trajectory,
 and transition intent. The contract distinguishes invariants from parameters
 that are expected to develop or transform.
 
-Text descriptions do not guarantee thematic continuity. When long-form
-quality requires exact recurrence or variation, the architecture should permit
-more explicit representations such as notation, MIDI, motifs, reference audio,
-or another model-specific conditioning format. These representations supplement
-the user's project plan.
+Text descriptions cannot guarantee thematic continuity. Where exact recurrence
+matters, the architecture permits explicit representations — notation, MIDI,
+motifs, reference audio, or another model-specific conditioning format — alongside
+the project plan.
 
 ### Section and take
 
@@ -154,8 +150,14 @@ level matching, loudness measurement, and format conversion. Album finishing
 orders the tracks and applies release-level consistency without erasing the
 intended dynamics of individual works.
 
-These processes change duration and presentation. Formal coherence, thematic
-development, and artistic value remain listening decisions.
+### Playlist
+
+A playlist sits outside this hierarchy. It is the listener's own sequencing of
+pieces that already exist — from one album, from several, or from single
+conversations — and it owns only their order, their name, and its cover. Nothing
+in a playlist is generated, and an album never depends on one existing. Because
+it references rather than copies, a playlist outlives an album it drew from: the
+pieces that no longer resolve are reported as missing instead of disappearing.
 
 ## Macro architecture
 
@@ -193,14 +195,9 @@ Short-track generation  Long-form section planning
             Album export
 ```
 
-Two stages sit between a plan and the library: a single piece is generated and
-checked against its brief before the listener keeps it, and a kept piece can seed
-the planner as the album's first reference. The diagram describes the full
-target.
-
 ## Boundaries
 
-Not in scope:
+Out of scope:
 
 - a general-purpose digital audio workstation;
 - an autonomous system that chooses and publishes its own album;
@@ -230,3 +227,6 @@ they give better musical control than an in-project approximation.
 8. Validation reports technical evidence; artistic judgement belongs to the
    listener.
 9. The user authorizes final musical selection, sequencing, and export.
+10. Audio is generated only for an album or a single piece. A playlist sequences
+    what exists and never generates, so its lifecycle is independent of the
+    albums and conversations it draws from.

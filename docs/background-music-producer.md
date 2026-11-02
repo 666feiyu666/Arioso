@@ -5,13 +5,13 @@ planning, composition, prompt review and revision, Lyria generation, historical
 denoising, album assembly, and verified delivery. Audacity integration is deferred.
 The existing album author, composer, and reviewer retain their musical roles.
 
-In the browser, open the Workflow tab, go to Albums & playlists, create an album,
+In the browser, open the Workflow tab, choose the album workflow, create an album,
 and select "Background Music Producer · generate and denoise" under Production
 workflow. The candidate-only workflow remains available. The producer checks the
 installed audio runtime before making composition or generation requests.
 
 The producer applies to an album created in the studio (`04-album`). Albums built
-on the playlist page or continued from a kept MoodMic piece keep their candidate
+on the album page or continued from a kept MoodMic piece keep their candidate
 MP3s and merged export, and do not run the producer.
 
 The same mode is available through `POST /api/tasks` with
@@ -32,9 +32,9 @@ The current denoiser averages stereo to mono, runs at 44.1 kHz on CPU,
 and exports 24-bit WAV. It processes all non-excluded generated candidates in
 their original numbered order. Levels are preserved by applying one constant
 attenuation for peak headroom to every track. Denoising quality is judged by
-listening: compare originals and cleaned audio before admitting tracks to a final
-playlist.
-Candidate admissions and playlist order are not changed automatically.
+listening: compare originals and cleaned audio before admitting tracks to the
+album's final order.
+Candidate admissions and the album's track order are not changed automatically.
 
 ## Delivery and recovery
 

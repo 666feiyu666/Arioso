@@ -5,7 +5,7 @@ Arioso is an agentic music-composition workspace. An agent first turns a human i
 ## Document map
 
 - [`abstract.md`](abstract.md) defines the stable product idea, target architecture, and long-term boundaries. Read it to understand what Arioso is intended to become.
-- [`current.md`](current.md) records what the repository implements now: MoodMic with its poetry references and confirmed Lyria prompt, the mood calendar, the playlist library, the journey from a piece to an album, the workflow studio, and how all of it differs from the target. Read it before planning an architectural change.
+- [`current.md`](current.md) records what the repository implements now: MoodMic with its poetry references and confirmed Lyria prompt, the mood calendar, the album library, the playlist library of assembled pieces, the journey from a piece to an album, the workflow studio, and how all of it differs from the target. Read it before planning an architectural change.
 - [`development.md`](development.md) contains the commands and working practices for developing and testing the current implementation.
 - [`background-music-producer.md`](background-music-producer.md) documents the optional album production workflow in the studio.
 - [`nextphase-plan.md`](nextphase-plan.md) records the next phase's six target outcomes and their order.
@@ -14,6 +14,6 @@ Arioso is an agentic music-composition workspace. An agent first turns a human i
 
 Change `abstract.md` only when the product model, target workflow, or architectural boundaries change. Do not fill it with temporary model names, current class names, API routes, or short-lived implementation limitations.
 
-Update `current.md` when code changes alter the implemented workflow, data model, persistence, interfaces, or known gaps. That includes the MoodMic and mood-entry records, the journey record and its endpoints, and the shared album stage. Source code, tests, configuration, and command help remain authoritative when the snapshot is stale.
+Update `current.md` when code changes alter the implemented workflow, data model, persistence, interfaces, or known gaps. That includes the MoodMic and mood-entry records, the journey record and its endpoints, the album and playlist records, and the shared album stage. Source code, tests, configuration, and command help remain authoritative when the snapshot is stale.
 
 Keep this file to the document map; the architecture documents carry the detail.

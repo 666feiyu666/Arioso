@@ -1,66 +1,74 @@
 # Arioso Current Implementation
 
-This document describes the repository as it exists now; it is an evolving snapshot. [`abstract.md`](abstract.md) holds the stable product model.
+What the repository implements today. [`abstract.md`](abstract.md) holds the
+stable product model.
 
 ## Current shape
 
-Arioso is a Node.js and TypeScript application with two interfaces over one agentic composition pipeline:
+A Node.js and TypeScript application over one agentic composition pipeline, driven
+by a local browser application of six pages: MoodMic (`/`), albums
+(`/albums.html`), playlists (`/playlist.html`), the mood calendar
+(`/calendar.html`), the workflow studio (`/workflow.html`), and help
+(`/help.html`). Two maintenance scripts run from the command line.
 
-- a command-line interface for composing a validated prompt or composing and generating one audio file; and
-- a local browser application with six pages: MoodMic (`/`), the album library (`/albums.html`), the playlist library (`/playlist.html`), the mood calendar (`/calendar.html`), the workflow studio (`/workflow.html`), and help (`/help.html`).
-
-MoodMic is the everyday entry point. It records a feeling, holds a creative conversation, composes and generates one piece, has Gemini listen to it, and lets the user keep or regenerate the result. A kept piece can continue into an album without leaving the conversation.
-
-The workflow studio exposes the older, wider surface: a direction discussion followed by a standalone piece, a music-corpus piece, a multi-movement orchestral work, or a themed album of candidates. The album page builds an album from released MoodMic pieces; the playlist page only assembles pieces that already exist. All of these share the composer agents, the Lyria adapter, and the task store.
-
-The pipeline covers three composition modes: `single`, `orchestral`, and `album`, across five workflow types: `01-general`, `02-music`, `03-orchestral`, `04-album`, and `05-playlist`. Historical records that stored `02-jazz` are read as `02-music`.
+MoodMic is the everyday entry point: record a feeling, hold a creative
+conversation, compose and generate one piece, have Gemini listen to it, keep or
+regenerate. A kept piece continues into an album without leaving the conversation.
+The studio exposes the wider surface — a direction discussion followed by a
+standalone piece, a music-corpus piece, a multi-movement orchestral work, or a
+themed album — across three composition modes (`single`, `orchestral`, `album`) and
+five workflow types (`01-general`, `02-music`, `03-orchestral`, `04-album`,
+`05-playlist`), with records written as `02-jazz` reading as `02-music`.
 
 ## MoodMic
 
-A MoodMic conversation keeps its own record, separate from the workflow studio's discussion sessions:
+A MoodMic conversation keeps its own record, separate from the studio's discussion
+sessions: `outputs/moodmic/chats/<id>/session.json` holds the transcript, image
+attachments, the proposal, and the task ids the conversation produced, while
+`outputs/moodmic/entries.json` holds mood entries — a calendar date, a colour group,
+an emotion word, optional notes on the moment and on how the music should feel, and
+the linked task ids.
 
-- `outputs/moodmic/chats/<id>/session.json` holds the transcript, image attachments, the proposal, and the task ids the conversation produced;
-- `outputs/moodmic/entries.json` holds mood entries: a calendar date, a colour group, an emotion word, an optional note, an optional "how I want the music to feel" note, and the task ids linked to that entry.
+`web/mood-common.js` defines four colour groups (red, yellow, blue, green) with four
+emotion words each. The colour is what the calendar reads back; the word is what the
+entry records. A typed word is stored as written, up to 64 characters, and needs no
+built-in id. Every substantive user turn retrieves poems before the Director
+replies, and the proposal step retrieves again; see
+[Poetry references](#poetry-references).
 
-The interface shows four colour groups (red, yellow, blue, green) with four emotion words each, from `web/mood-common.js`. The colour is what the calendar reads back; the word is what the entry records. A word typed into the picker is stored as written, up to 64 characters, and needs no built-in id; the mood picker and the calendar's colour editor accept such a word the same way.
-
-Every substantive user turn retrieves poems before the Director replies, and the proposal step retrieves again; see [Poetry references](#poetry-references).
-
-Submitting a conversation creates one `MusicTask` with `moodChatId` set. Composition runs first, then generation waits for the user to confirm the composed Lyria prompt. That flag also makes the task run the listening review instead of a plain generation:
+Submitting a conversation creates one `MusicTask` with `moodChatId` set. Composition
+runs first; generation waits for the user to confirm the composed Lyria prompt, and
+that confirmation also turns on the listening review:
 
 ```text
-prompt + music specification
-        |
-        v
- composed Lyria prompt, editable, task paused in "planning"
-        |
-   user confirms (an edited prompt wins over the composed one)
-        |
-        v
-   Lyria generation
-        |
-        v
- Gemini listening review
-        |
-   match|mismatch
-        |
-        +--> match: task completed, piece delivered
-        |
-        +--> mismatch: task paused in "review"
-                          |
-                          +--> keep: completed
-                          +--> regenerate: queued, generate and review again
+spec + prompt -> composed Lyria prompt, editable, task "planning"
+              -> user confirms -> Lyria generation -> Gemini listening review
+              -> match:      task completed, piece delivered
+              -> mismatch:   task "review" -> keep: completed
+                                            -> regenerate: queued, review again
 ```
 
-`POST /api/tasks/<id>/prompt/approve` resumes a paused task. A `{ "prompt": "..." }` body replaces the composed Lyria prompt before the first generation; an absent body generates from the composed text, which keeps older clients working.
+`POST /api/tasks/<id>/prompt/approve` resumes a paused task: a `{ "prompt": "…" }`
+body replaces the composed Lyria prompt before the first generation, an absent body
+uses the composed text.
 
-The review compares the audio with the approved request, using the task description and the `MusicSpec`. It returns a verdict, a summary, matched and mismatched points, the model name, and the attempt number, all stored on the task as `musicReview`. When the reviewer cannot run, the piece is delivered with a summary saying so. `POST /api/tasks/<id>/review` records the user's keep or regenerate decision.
+The review compares the audio with the approved request using the task description
+and the `MusicSpec`, storing a verdict, summary, matched and mismatched points,
+model, and attempt number as `musicReview`; a reviewer that cannot run delivers the
+piece with a summary saying so. `POST /api/tasks/<id>/review` records the keep or
+regenerate decision.
 
-The mood calendar reads the MoodMic chats and their latest task, so each conversation contributes one piece. Each day shows the pieces made that day, coloured by the recorded mood entry (the brand colour when no entry exists), with equal colour segments when a day has several pieces. The detail panel plays finished audio, downloads it, retries a failed attempt, opens the originating conversation, and edits the recorded mood colour.
+The mood calendar reads the MoodMic chats and their latest task, one piece per
+conversation. Each day shows that day's pieces, coloured by the recorded mood entry
+(brand colour when none exists), split into equal segments when a day holds several.
+The detail panel plays and downloads finished audio, retries a failed attempt, opens
+the originating conversation, and edits the recorded mood colour.
 
 ## The journey from a piece to an album
 
-`MusicJourney` is a small persistent record in `outputs/journeys/<id>.json` that links a mood conversation, its kept song, and the album planned from it. It stores only identifiers and a phase:
+`MusicJourney` is a small record in `outputs/journeys/<id>.json` linking a mood
+conversation, its kept song, and the album planned from it. It stores identifiers
+and a phase:
 
 ```text
 mood -> song-running -> song-review -> song-ready
@@ -68,252 +76,332 @@ mood -> song-running -> song-review -> song-ready
 any active stage -> failed
 ```
 
-A LangGraph state graph in `src/journey/journey-graph.ts` holds the legal transitions and the human gates. Each phase is a node; events such as `song-reviewing`, `song-kept`, `continue-album`, `plan-ready`, `plan-revised`, `plan-approved`, `album-complete`, and `retry` are the edges. The runtime derives the phase from the linked tasks when a journey is read, so a refresh restores the stage and the available actions.
+A LangGraph state graph (`src/journey/journey-graph.ts`) holds the legal transitions
+and human gates: phases are nodes and the events between them are the edges. Reading
+a journey derives its phase from the linked tasks, so a refresh restores the stage
+and its available actions. Under `GET /api/journeys/:id` sit `continue-album`,
+`album-plan/messages`, `album-plan/approve`, and `retry`, and the identifier may be
+the journey id, the mood chat id, or either linked task id.
 
-Journey operations:
-
-```text
-GET  /api/journeys/:id
-POST /api/journeys/:id/continue-album
-POST /api/journeys/:id/album-plan/messages
-POST /api/journeys/:id/album-plan/approve
-POST /api/journeys/:id/retry
-```
-
-The identifier can be the journey id, the mood chat id, or either linked task id. `continue-album` binds the album to one exact, finished, kept song from that conversation and uses its prompt and `MusicSpec` as the first playlist reference. It refuses an unfinished song, a song from another conversation, or a missing theme, and repeated calls return the existing album.
-
-Planning pauses before any audio exists. Approval is bound to `albumPlanRevision` on the album task and is persisted before generation is dispatched; a later revision increments the revision number and clears `playlistPlanApproved`, invalidating the earlier approval. Generation runs in the background, each track is saved as it finishes, and the interface adds it to the curation list immediately.
+`continue-album` binds the album to one finished, kept song from that conversation
+and uses its prompt and `MusicSpec` as the first album reference; repeated calls
+return the existing album. Planning pauses before any audio exists: approval binds
+to `albumPlanRevision` and is persisted before generation is dispatched, and a later
+revision increments the number and clears `playlistPlanApproved`, invalidating the
+earlier approval. Generation runs in the background, each track is saved as it
+finishes, and the interface adds it to the curation list.
 
 ## Albums and playlists are two objects
 
 An **album** is generated: plan, compose each candidate, generate, review, curate.
-A **playlist** is assembled: it selects, orders, names, plays, and exports pieces
-that already exist. It never generates audio.
+A **playlist** is assembled from pieces that already exist: it selects, orders,
+names, plays, and exports.
 
-The album page (`/albums.html`) lists every album task (`compositionMode: "album"`)
-and its creation flow picks released MoodMic pieces as references:
+The album page (`/albums.html`) lists every album task
+(`compositionMode: "album"`) and creates one from released MoodMic pieces:
+`GET /api/playlists/references` returns the referenceable creations with their
+audio URL and `MusicSpec`, `POST /api/albums` creates the task with them, and
+`POST /api/tasks/<id>/plan/approve` or `/plan/messages` confirms or revises the
+plan before generation. The plan comes from `planPlaylist`, which also returns a
+briefing — how the author read each reference and the user's theme — and the album
+page and MoodMic render the same plan, progress, player, and curation views from
+`web/album-view.js`.
 
-- `GET /api/playlists/references` returns the MoodMic creations that can be referenced, with their audio URL and `MusicSpec`;
-- `POST /api/albums` creates the album task with those references;
-- `POST /api/tasks/<id>/plan/approve` and `POST /api/tasks/<id>/plan/messages` confirm or revise the plan before generation.
-
-The plan itself comes from `planPlaylist`, which also returns a briefing: how the author read each reference and the user's theme. The album page and MoodMic render the same plan, progress, player, and curation views from `web/album-view.js`.
-
-A playlist lives in its own store under `outputs/playlists` and holds no audio.
-Each entry is a reference plus a title snapshot:
+A playlist lives in its own store under `outputs/playlists` and holds no audio. An
+entry is a reference plus a title snapshot:
 
 ```text
 { kind: "task", taskId }                      a MoodMic creation or standalone piece
 { kind: "album-track", taskId, trackId }      one candidate of an album
 ```
 
-- `GET /api/playlists` lists playlists with their entries resolved; `POST /api/playlists` creates one from named pieces in a single step.
-- `GET/PATCH/DELETE /api/playlists/<id>` read, rename, and remove a playlist; `POST/PUT /api/playlists/<id>/items` add and reorder; `DELETE /api/playlists/<id>/items/<itemId>` removes one entry.
-- `POST /api/playlists/<id>/export` joins the resolvable entries into one MP3 with per-track timestamps; entries whose piece no longer resolves are reported in `skipped` rather than failing the export.
-- `GET /api/pieces` returns everything a playlist may import: finished MoodMic creations, standalone pieces, and every album's finished candidates.
+`GET /api/playlists` returns playlists with entries resolved — each item carries
+`audioUrl`, or `missing` with `missingReason` — plus `playableSeconds`,
+`playableCount`, and `missingCount`; `POST /api/playlists` creates one from named
+pieces in a step. `GET/PATCH/DELETE /api/playlists/<id>` reads, renames, and
+removes; `POST/PUT /api/playlists/<id>/items` adds and reorders; `DELETE
+/api/playlists/<id>/items/<itemId>` removes one entry. `POST
+/api/playlists/<id>/export` joins the resolvable entries into one MP3 with
+per-track timestamps and reports the rest in `skipped`. `GET /api/pieces` lists
+everything importable: finished MoodMic creations, standalone pieces, and every
+album's finished candidates.
 
 `POST /api/albums` with `asPlaylist: true` also opens a playlist bound to the new
-album (`fromAlbumTaskId`). Its finished tracks are appended to that playlist as
-they land, and a later read of `GET /api/albums` fills in any that finished while
-nothing was watching. The append is idempotent, so a retry or a restart duplicates
-nothing.
+album (`fromAlbumTaskId`), appending its tracks as they land; a later `GET
+/api/albums` fills in any that finished unobserved, and the append is idempotent
+across retries and restarts.
 
-The playlist survives its sources: removing an album, excluding a candidate, or
-deleting a task leaves the entry in place, reported as missing with its snapshotted
-title. Reordering, removing, and renaming never regenerate anything.
+A playlist survives its sources: removing an album, excluding a candidate, or
+deleting a task leaves the entry in place, reported as missing with its
+snapshotted title, and reordering, renaming, and removal regenerate nothing.
+Deleting a playlist removes its own record and cover and leaves the pieces in
+their albums and conversations.
 
-"Add to playlist" is offered wherever a finished piece appears: the MoodMic result
-card, the calendar day detail, an album candidate row, and the playlist page itself.
-All four use the shared panel in `web/add-to-playlist.js`.
+"Add to playlist" appears on the MoodMic result card, the calendar day detail, an
+album candidate row, and the playlist page, all through `web/add-to-playlist.js`,
+which lists existing playlists or creates one by name. The playlist page shows a
+library and a track sheet: name and description edit in place (Enter saves, Escape
+cancels), entries show number, title, source album, length, and low-contrast controls
+that surface on hover or focus, one audio element backs "play all" and the row
+buttons with the current entry marked in the brand colour, and deletion asks once in
+a small dialog from either the library card or the playlist.
 
-The album's own ordered track list is `albumTrackOrder` (`PUT /api/tasks/<id>/album/track-order`).
-It is not a playlist: it orders the album's own included candidates. Records written
-before the split stored it as `albumPlaylist`, which the task loader migrates on read.
+The album's own ordered track list is `albumTrackOrder` (`PUT
+/api/tasks/<id>/album/track-order`), ordering the album's included candidates.
+Records written before the split stored it as `albumPlaylist`, which the task
+loader migrates on read.
 
 ## Workflow studio and creative direction
 
-Before any task exists, the workflow studio can hold a direction conversation. A `CreativeSession` records messages, image attachments, the requested scope, and a proposal. The `prompt-directing-skill` guides two phases, `discussion` and `proposal`, and outputs a concise request the user may edit and approve. Only approval creates a `MusicTask`, which records the originating `sourceDiscussionId`. Sessions and tasks persist separately; a LangGraph state graph (`src/discussion/session-graph.ts`) resolves the visible phase across `discussion`, `proposal-ready`, and the task's own status.
+Before any task exists, the studio can hold a direction conversation. A
+`CreativeSession` records messages, image attachments, the requested scope, and a
+proposal; the `prompt-directing-skill` guides two phases, `discussion` and
+`proposal`, and outputs a concise request the user may edit and approve. Only
+approval creates a `MusicTask`, which records the originating `sourceDiscussionId`.
+Sessions and tasks persist separately, and a LangGraph state graph
+(`src/discussion/session-graph.ts`) resolves the visible phase across `discussion`,
+`proposal-ready`, and the task's own status.
 
 ## Music specification
 
-`MusicSpec` schema version `1.0` contains:
-
-- a working title and creative intent;
-- ordered genre and mood descriptions;
-- tempo, rhythmic feel, tonality, and meter;
-- instruments with their musical roles and timbres;
-- an ordered structure with approximate section durations and directions;
-- vocal enablement, language, style, and lyrical theme;
-- production direction and excluded elements;
-- explicit assumptions introduced by the composer; and
-- one production-ready Lyria prompt.
-
-The schema describes one piece. Its sections are prompt-planning records, not independently generated objects, and the pipeline does not calculate or enforce their combined duration.
+`MusicSpec` schema version `1.0` describes one piece: a working title and creative
+intent; ordered genre and mood descriptions; tempo, rhythmic feel, tonality, and
+meter; instruments with their roles and timbres; an ordered structure of
+prompt-planning sections with approximate durations and directions; vocal
+enablement, language, style, and lyrical theme; production direction and excluded
+elements; the composer's explicit assumptions; and one production-ready Lyria
+prompt. Its sections plan a single prompt, and the pipeline neither sums nor
+enforces their combined duration.
 
 ## Composition modes
 
 ### Without a corpus
 
-The default workflow relies on the model's musical knowledge. The composer is instructed not to claim that external references were retrieved.
+The default workflow relies on the model's musical knowledge, and the composer
+claims no retrieval it did not perform.
 
 ### Music corpus
 
-One bounded retrieval tool serves five music types: `jazz`, `blues`, `electronic`, `instrumental-rock`, and `instrumental-hip-hop`. The Composer calls `search_music_corpus` once, names exactly one type, and records whether the user, the interface, or the Composer chose it. Recognized child styles map to their parent type before retrieval (ambient to electronic, lo-fi hip-hop to instrumental-hip-hop, post-rock to instrumental-rock, modal jazz to jazz, Chicago blues to blues). A request outside the five types uses the no-corpus path.
+One bounded retrieval tool serves five music types: `jazz`, `blues`, `electronic`,
+`instrumental-rock`, `instrumental-hip-hop`. The Composer calls
+`search_music_corpus` once, names exactly one type, and records whether the user,
+the interface, or the Composer chose it. Recognized child styles map to their
+parent first (ambient → electronic, lo-fi hip-hop → instrumental-hip-hop,
+post-rock → instrumental-rock, modal jazz → jazz, Chicago blues → blues); a request
+outside the five takes the no-corpus path.
 
-Each type keeps two independent TF-IDF indexes:
+Each type keeps two TF-IDF indexes under `corpus/music/<type>/` (override with
+`ARIOSO_MUSIC_CORPUS_ROOT`): `styles.normalized.jsonl` for the audible conventions
+of a genre, `standards.normalized.jsonl` for representative works. A description
+search returns up to two styles and three standards; a title search reads standards
+only, normalizes case, punctuation, whitespace and diacritics, and returns exact
+matches with a miss reported as an evidence gap. Retrieved text shapes
+instrumentation, rhythm, texture, harmony, form, and production, while the Lyria
+prompt names no retrieval, score, or reference title. A type whose collections fail
+to load leaves the selector.
 
-- `styles.normalized.jsonl` describes the audible conventions of a genre or subgenre;
-- `standards.normalized.jsonl` describes representative works that demonstrate them.
+Capabilities, the workflow selector, and MoodMic offer a type once both collections
+load, and all five load today. Each task stores a `musicRetrieval` trace of type,
+selection source, query, mode, and the style and standard reference ids.
+`src/corpus/build-music-corpus.mjs` writes the canonical files, and
+`ARIOSO_JAZZ_CORPUS` remains a fallback for a Jazz-only directory.
 
-The runtime reads `corpus/music/<type>/` (override with `ARIOSO_MUSIC_CORPUS_ROOT`). A description search returns up to two styles and up to three standards, five references in total. A title search reads standards only, normalizes case, punctuation, whitespace and diacritics, and returns exact matches; no match is reported as an evidence gap. Retrieved text is reference evidence: the Composer may use instrumentation, rhythm, texture, harmony, form, or production details, but must not mention retrieval, scores, or reference titles in the Lyria prompt. A missing or malformed collection makes that music type unavailable.
-
-A music type is offered by the capabilities endpoint, the workflow selector, and MoodMic when both of its normalized collections load. All five types load today; Jazz holds the largest standards set (606 records). Each task stores a `musicRetrieval` trace: music type, selection source, query, mode, style reference IDs, and standard reference IDs. Historical tasks that stored `corpusMode: "jazz"` and a `retrievalQuery` remain readable.
-
-The Jazz collection was migrated from `corpus/jazz/` to `corpus/music/jazz/`; `src/corpus/build-music-corpus.mjs` writes the canonical `styles.normalized.jsonl` and `standards.normalized.jsonl` from the existing normalized artifacts. This supersedes the earlier poetry refinement's note that the music corpus reorganization was deferred. `ARIOSO_JAZZ_CORPUS` remains a temporary fallback for a Jazz-only corpus directory.
-
-The repository also contains raw and manifest data for Jazz genres and standards plus normalization tooling. The standards collection contains 354 Wikipedia source records and 252 tune discussions from Ted Gioia's *The Jazz Standards: A Guide to the Repertoire* (2012), for 606 source records. Of these, 520 have musical evidence and are searchable. One tune discussed in two sources counts as two text records; this total does not mean 606 different compositions.
-
-The book's raw and normalized data are stored separately as `corpus/music/jazz/gioia_2012.*`. Every chapter retains Zotero item and attachment keys, the PDF fingerprint, printed and PDF page ranges, and an author citation. Recommended-recording lists are preserved in the raw data but excluded from musical retrieval evidence. Retrieved references retain their source metadata. Book-derived text is marked all rights reserved, separately from Wikipedia's license.
+Jazz holds the largest collection: 606 source records — 354 from Wikipedia and 252
+tune discussions from Ted Gioia's *The Jazz Standards* (2012) — of which 520 carry
+musical evidence, with a tune discussed twice counting twice. The book's data sits
+in `corpus/music/jazz/gioia_2012.*` with its Zotero keys, PDF fingerprint, page
+ranges, and citation; recommended recordings stay outside retrieval evidence, and
+book-derived text is marked all rights reserved.
 
 ### Orchestral works
 
-The `orchestral` scope plans one multi-movement work first. `OrchestralWorkPlan` (1.0) fixes a shared contract (tonal world, identity motif, orchestra, acoustic space, dynamic language, exclusions) and two to six movements, each with a dramatic role, tempo and meter, motif development, orchestration arc, and entrance/exit contracts. Each movement fits one Lyria 3.5 generation, and the planned total is five to twelve minutes. Movements are generated in order and assembled; the task records the plan, movement status, and assembly metadata. The optional knowledge-card retrieval path has been removed; historical task records that still contain an `orchestralReference` snapshot load safely and the field is ignored.
+The `orchestral` scope plans one multi-movement work first. `OrchestralWorkPlan`
+(1.0) fixes a shared contract — tonal world, identity motif, orchestra, acoustic
+space, dynamic language, exclusions — and two to six movements, each with a
+dramatic role, tempo and meter, motif development, orchestration arc, and
+entrance/exit contracts. Each movement fits one Lyria 3.5 generation and the
+planned total is five to twelve minutes; movements generate in order and are
+assembled, with plan, movement status, and assembly metadata on the task. Older
+records carrying an `orchestralReference` snapshot load with that field ignored.
 
 ### Themed albums
 
-The `album` scope plans a cohesive set of candidates. The album agent produces an `AlbumPlan` (1.0): a shared sound contract, a cohesion strategy, and 12 to 28 consecutively numbered outlines of 60 to 180 seconds each, with at least three distinct durations. A reviewer pass (`AlbumReview`) records similarities and per-candidate verdicts. Each candidate is composed and generated into an `AlbumTrackTask`; the task tracks admissions (`candidate`, `included`, `excluded`), revisions, and an ordered `albumTrackOrder` that can be reordered and retried.
-
-The workflow studio's album page uses these same records through the `04-album` workflow, which starts generating after planning. The `05-playlist` workflow is the referenced-album variant: it is created by the album page and by a journey, adds references, and pauses for plan confirmation before any audio is generated. It remains an album; only its name mentions playlists.
+The `album` scope plans a cohesive set of candidates. The album agent produces an
+`AlbumPlan` (1.0): a shared sound contract, a cohesion strategy, and 12 to 28
+consecutively numbered outlines of 60 to 180 seconds with at least three distinct
+durations. A reviewer pass (`AlbumReview`) records similarities and per-candidate
+verdicts. Each candidate is composed and generated into an `AlbumTrackTask`; the
+task tracks admissions (`candidate`, `included`, `excluded`), revisions, and an
+ordered `albumTrackOrder` that can be reordered and retried. The studio's album page
+uses these records through the `04-album` workflow, which starts generating after
+planning. `05-playlist` is the referenced-album variant — created by the album page
+and by a journey, adding references, and pausing for plan confirmation before any
+audio — and keeps its historical workflow name.
 
 ### Album production and export
 
-An album exports as a merged MP3 with per-track timestamps (`/api/tasks/<id>/album/export`). Optionally the Background Music Producer (`produceAlbum: true`) denoises all non-excluded candidates into a single-channel 44.1 kHz 24-bit WAV album plus an MP4 and a manifest, stored under the task's `production/` directory and served from `/api/tasks/<id>/production/...`; see [`background-music-producer.md`](background-music-producer.md). Albums created by the album page or a journey do not run the producer; they keep the candidate MP3s and the merged export.
+An album exports as a merged MP3 with per-track timestamps
+(`/api/tasks/<id>/album/export`). The optional Background Music Producer
+(`produceAlbum: true`) denoises non-excluded candidates into a single-channel
+44.1 kHz 24-bit WAV album plus an MP4 and a manifest under the task's
+`production/` directory, served from `/api/tasks/<id>/production/…`; see
+[`background-music-producer.md`](background-music-producer.md). Albums created by
+the album page or a journey keep their candidate MP3s and the merged export, and
+run the producer when it is selected.
 
 ## Poetry references
 
-Poetry retrieval supports the direction stage only. Before the Director replies to a MoodMic message, and again before it writes the proposal — the editable creative brief — the server retrieves at most three complete poems. The query is every user-authored message plus the latest structured mood; Director prose, earlier poem text, system instructions, and interface copy are excluded. A shared bilingual mood lexicon expands the query, so a phrase reaches the same terms whether the user wrote Chinese or English.
+Poetry retrieval supports the direction stage: before the Director replies to a
+MoodMic message, and again before it writes the proposal, the server retrieves at
+most three complete poems. The query is every user-authored message plus the latest
+structured mood — Director prose, earlier poem text, system instructions, and
+interface copy stay out — expanded through a shared bilingual mood lexicon so a
+phrase reaches the same terms in Chinese and English.
 
-Two corpora share one deterministic retriever:
+Three files drive it: `corpus/poem/Chinese/` holds 630 modern Chinese poems from
+the pinned `sheepzh/poetry` commit; `corpus/poem/English/` holds 356 English poems
+by 148 authors, tagged with Plutchik-derived mood cues; and
+`corpus/poem/mood-lexicon.json` (1.0.2) holds the bilingual mood categories, the
+single-character allowlist, and both stop-word lists.
 
-- `corpus/poem/Chinese/` holds 630 modern Chinese poems from the pinned `sheepzh/poetry` commit;
-- `corpus/poem/English/` holds 356 English poems by 148 authors, tagged with Plutchik-derived mood cues;
-- `corpus/poem/mood-lexicon.json` (version 1.0.2) holds the bilingual mood categories, the single-character allowlist, and the stop words for both tokenizers.
+The corpus language follows what the user wrote: CJK characters against Latin
+letters. Ranking is TF-IDF over character bigrams and trigrams for Chinese and
+lightly stemmed words for English, weighted towards mood cues and titles; a
+calibrated relevance floor keeps a generic phrase such as `感到` from supplying a
+poem, results cap at three with at most one poem per author, and ties break on
+record id.
 
-The corpus language follows what the user actually wrote: CJK characters against Latin letters. Ranking is TF-IDF over character bigrams and trigrams for Chinese and lightly stemmed words for English, weighted towards mood cues and titles. A calibrated relevance floor keeps a generic phrase such as `感到` from supplying a poem, results are capped at three with at most one poem per author, and ties break on record id.
+The conversation stores a bounded `poem_retrieval` trace — query, hash, corpus
+version, reference ids with titles, authors, scores, matched terms, retrieval time,
+and an unavailable reason — while full poem text stays out of the saved session. An
+unchanged query and corpus version reuse the stored references; a new message
+changes the hash and retrieves again; a corpus version change re-retrieves.
+Retrieval fails open: a missing corpus, unreadable manifest, bad record, or empty
+query leaves the set empty and the conversation continues.
 
-The conversation stores a bounded trace as `poem_retrieval`: query, query hash, corpus version, reference ids with titles, authors, scores and matched terms, retrieval time, and an unavailable reason. Full poem text is not duplicated into the saved session. An unchanged query and corpus version reuse the stored references; a new user message changes the hash and retrieves again; a corpus version change re-retrieves. Retrieval fails open — a missing corpus, unreadable manifest, bad record, or empty query leaves the reference set empty and the conversation continues.
-
-The Director receives the poems as delimited, untrusted reference data and the Composer never receives poem text. The interface shows only poem titles and authors, as inspiration for the piece; the intended Director behaviour and the evaluation that is still open are recorded in the course material, which is kept outside this repository.
+The Director receives the poems as delimited, untrusted reference data, and the
+Composer never sees poem text. The interface shows titles and authors as
+inspiration; the intended Director behaviour and the outstanding evaluation live in
+the course material kept outside this repository.
 
 ## Lyria integration
 
-`LyriaClient` uses the Google Gen AI Interactions API. It sends one text prompt to a selected model and expects base64-encoded audio, which it saves as MP3. The current interfaces expose:
+`LyriaClient` uses the Google Gen AI Interactions API: one text prompt to a
+selected model, base64-encoded audio back, saved as MP3. The interfaces are
+`lyria-3-clip-preview` for a 30-second clip and `lyria-3.5` for a complete song. A
+single piece is one request per task; orchestral works and albums issue one
+request per movement or candidate, then assemble or export. Generation is one
+prompt to one take, and the optional producer denoises it.
 
-- `lyria-3-clip-preview` for a 30-second clip; and
-- `lyria-3.5` for a complete song.
+## Maintenance scripts
 
-A single piece is one request per task; orchestral works and albums issue one request per movement or candidate, then assemble or export. Arioso does not submit reference audio, continue a previous result, generate multiple takes of a target, join sections, or master; the optional producer denoises only.
+Two command-line scripts work on existing task records, and both run with `tsx`
+through pnpm scripts:
 
-## Command-line interface
+- `pnpm orchestral:assemble` joins recorded orchestral movements
+  (`src/tools/assemble-orchestral-tasks.ts`);
+- `pnpm storage:organize` moves task records into the current directory layout
+  (`src/tools/organize-task-storage.ts`).
 
-The CLI provides several commands:
-
-- `compose` prints a validated `MusicSpec` without calling Lyria;
-- `generate` composes a `MusicSpec`, calls Lyria, and writes a timestamped MP3 plus JSON metadata under the configured output directory;
-- `stitch` joins existing audio files; and
-- `produce-album` plans, reviews, generates, denoises, and exports an instrumental album (`--resume` continues a failed production task).
-
-The JSON metadata records the original description, model names, generated text when present, audio filename, creation time, and complete `MusicSpec`.
+Composing and generating run through the browser application. Each task stores its
+own record with the original description, model names, generated text when
+present, audio filename, creation time, and complete `MusicSpec`.
 
 ## Browser interface and local server
 
-The local web application provides:
+The six pages carry the behaviour described above. Across them, the interface also
+offers status and detail views for all three scopes, retrieval query and reference
+display, bilingual (Chinese and English) text with per-workflow examples, MP3
+playback with HTTP byte-range support, retry of failed tasks, and local API-key and
+language settings.
 
-- MoodMic: a conversation, four mood examples, an editable brief, poem inspiration for the piece, an editable Lyria prompt confirmed before the first generation, the listening review, the kept-piece result, and the album continuation;
-- the mood calendar: a month grid of made pieces, day detail, playback, retry, and mood-colour editing;
-- the album page: references, album planning, plan confirmation and revision, candidate listening, inclusion, ordering, MP3 export, and timestamps;
-- the playlist page: a library of assembled playlists, their entries with missing-piece reporting, ordering, renaming, covers, playback, and MP3 export — with no generation control;
-- the workflow studio: four workflows (no-corpus single, music-corpus single, orchestral multi-movement, themed album), a direction conversation with text and image input, an editable proposal, explicit approval before handoff, compose-only and compose-and-generate modes, Lyria and vocal settings, a music-reference selector, and optional Background Music Producer;
-- status and detail views for all three scopes, including movements and album candidates;
-- retrieval query and reference display;
-- bilingual (Chinese and English) text with per-workflow examples;
-- MP3 playback with HTTP byte-range support;
-- retry of failed tasks; and
-- local API-key and language settings.
+`GET /api/capabilities` reports `apiVersion: 12`, the five workflow types, the album
+candidate range (12 to 28, default 14), the orchestral duration limits (5 to 12
+minutes total, 3 per movement), music-type availability, and feature flags for
+discussions, mood entries, playlist references, plan confirmation, `albums` and
+`playlists`, album track order and export, orchestral assembly, and the producer.
 
-`GET /api/capabilities` reports `apiVersion: 12`, the five workflow types, the album candidate range (12 to 28, default 14), the orchestral duration limits (5 to 12 minutes in total, 3 minutes per movement), the supported music types with their availability, and feature flags for discussions, mood entries, playlist references, plan confirmation, `albums` and `playlists` (the two objects), album track order and export, orchestral assembly, and the producer.
+Route families: `/api/tasks` and `/api/tasks/<id>` with audio, movements, album
+tracks, album track order, album export, prompt confirmation, review, retry, and
+production artifacts; `/api/albums`; `/api/pieces`; `/api/playlists/…`;
+`/api/discussions/…`; `/api/mood-chats/…`; `/api/mood-entries/…` and
+`/api/mood-entries/classify`; `/api/journeys/…`; `/api/settings/…`.
 
-Other route families: `/api/tasks` and `/api/tasks/<id>` with audio, movements, album tracks, album track order, album export, prompt confirmation, review, retry, and production artifacts; `/api/discussions/...`; `/api/mood-chats/...`; `/api/mood-entries/...` and `/api/mood-entries/classify`; `/api/albums`; `/api/pieces`; `/api/playlists/...`; `/api/journeys/...`; and `/api/settings/...`.
+Tasks move through `queued`, `composing`, `planning`, `generating`, `review`,
+`assembling`, `processing`, `completed`, or `failed`. `planning` is a MoodMic piece
+awaiting prompt confirmation; `review` marks the MoodMic listening review and a plan
+awaiting confirmation. Each task is JSON under `outputs/tasks` with its audio, and
+interrupted active tasks are marked failed on startup; retrying reuses an existing
+`MusicSpec`. A task carries `workflowType`, `compositionMode`, its scope records
+(`albumPlan`, `albumTracks`, `orchestralPlan`, `movements`, `albumProduction`),
+optional journey lineage (`journeyId`, `parentTaskId`), the plan revision
+(`albumPlanRevision`), and the Lyria prompt confirmation (`lyriaPromptApproved`).
 
-Tasks move through `queued`, `composing`, `planning`, `generating`, `review`, `assembling`, `processing`, `completed`, or `failed`. `planning` is a MoodMic piece whose composed Lyria prompt awaits confirmation; `review` is used by the MoodMic listening review and by a playlist plan waiting for confirmation. Each task is saved as JSON under `outputs/tasks` with its audio; interrupted active tasks are marked failed on startup. Retrying reuses an existing `MusicSpec` when present. A task carries `workflowType`, `compositionMode`, and its scope-specific records (`albumPlan`, `albumTracks`, `orchestralPlan`, `movements`, `albumProduction`), plus optional journey lineage (`journeyId`, `parentTaskId`), the plan revision (`albumPlanRevision`), and the Lyria prompt confirmation (`lyriaPromptApproved`).
-
-Credentials may be held for the current server session or, with explicit user selection, written to the local `.env`. The settings API returns only masked credential summaries and never the complete stored value.
-
-Creative discussions persist separately under `outputs/discussions`; uploaded JPEG, PNG, and WebP references are stored as attachment files outside session JSON. Discussion turns do not create tasks.
-
-The browser presents the discussion and its linked task as one continuous creative-session timeline. A LangGraph state graph resolves the visible phase from discussion state and the latest task state, covering discussion, prompt approval, queueing, composition, generation, assembly, processing, completion, and failure. `MusicTask` remains a separate execution record for recovery and retry, while the sidebar and workspace use the parent creative session whenever one exists. Legacy tasks without a session remain available.
+Credentials live in the current server session or, when the user selects persistent
+storage, in the local `.env`; the settings API returns masked summaries. Creative
+discussions persist under `outputs/discussions`, with uploaded JPEG, PNG, and WebP
+references stored as attachment files outside session JSON. The browser presents a
+discussion and its linked task as one creative-session timeline: a LangGraph state
+graph resolves the visible phase from discussion state and the latest task state
+across discussion, prompt approval, queueing, composition, generation, assembly,
+processing, completion, and failure. `MusicTask` remains the execution record for
+recovery and retry, while the sidebar and workspace use the parent creative session
+when one exists.
 
 ## Configuration
 
-The runtime reads:
+The runtime reads `OPENAI_API_KEY` for composition, `OPENAI_MODEL` (default
+`gpt-6-sol`), `GEMINI_API_KEY` for generation and the listening review,
+`GEMINI_REVIEW_MODEL` (default `gemini-3.5-flash`), `LYRIA_MODEL` (default
+`lyria-3-clip-preview`), and `ARIOSO_OUTPUT_DIR` (default `outputs`). Optional
+paths cover the two skills, the music corpus root (`ARIOSO_MUSIC_CORPUS_ROOT`,
+with `ARIOSO_JAZZ_CORPUS` as a Jazz-only fallback), the poetry corpus and lexicon
+(`ARIOSO_POEM_CORPUS`, `ARIOSO_POEM_LEXICON`), settings, `.env`, and the producer
+pipeline (`ARIOSO_PIPELINE_PYTHON`, `ARIOSO_PIPELINE_CONFIG`). `ARIOSO_WEB_HOST`
+and `ARIOSO_WEB_PORT` set the local server address, defaulting to
+`127.0.0.1:4173`.
 
-- `OPENAI_API_KEY` for composition;
-- `OPENAI_MODEL`, defaulting to `gpt-6-sol`;
-- `GEMINI_API_KEY` when audio generation or the listening review is requested;
-- `GEMINI_REVIEW_MODEL`, defaulting to `gemini-3.5-flash`;
-- `LYRIA_MODEL`, defaulting to `lyria-3-clip-preview`;
-- `ARIOSO_OUTPUT_DIR`, defaulting to `outputs`;
-- optional paths for the composer skill, the prompt-directing skill, the music corpus root (`ARIOSO_MUSIC_CORPUS_ROOT`, with `ARIOSO_JAZZ_CORPUS` as a temporary Jazz fallback), the poetry corpus and its lexicon (`ARIOSO_POEM_CORPUS`, `ARIOSO_POEM_LEXICON`), settings, and `.env`;
-- `ARIOSO_WEB_HOST` and `ARIOSO_WEB_PORT` for the local server, defaulting to `127.0.0.1:4173`; and
-- optional producer pipeline paths (`ARIOSO_PIPELINE_PYTHON`, `ARIOSO_PIPELINE_CONFIG`).
+Secrets belong in the local `.env` or the in-memory settings session, and stay
+out of documentation, task metadata, and source control.
 
-Secrets belong in the local `.env` or the in-memory settings session. They must not be written into project documentation, task metadata, or source control.
+## Implementation limits
 
-## Differences from the abstract architecture
+The three composition modes, the MoodMic journey, the album and playlist objects,
+and the workflow studio are in place. Beyond them, the implementation differs from
+[`abstract.md`](abstract.md) here:
 
-The implementation covers the three composition modes, the MoodMic journey, and an album candidate flow. These parts of the abstract architecture are not implemented:
-
-- no persistent `Album -> Track -> Section -> Take` hierarchy; an album is one task with `AlbumTrackTask` records, not nested projects;
-- candidates share only the plan's sound contract and the album's own track order, not a stable album identity; a playlist is a separate assembled object, not a property of an album;
-- a section list produces one prompt; sections are not generated and assembled separately;
-- orchestral assembly joins whole movements; no section-level continuation, transition generation, beat or key alignment, crossfade, or loudness matching;
-- no take-level comparison or retention of superseded generations;
-- no release-level metadata;
-- all five music types have a collection manifest with normalized style and standard files; record counts range from 6 (instrumental-hip-hop styles) to 606 (Jazz standards);
-- poetry retrieval is wired into MoodMic only; the workflow studio's direction conversation does not retrieve poems;
-- the two-paragraph brief and the poetry-on/off comparison have deterministic coverage but no recorded live text evaluation;
-- evaluation covers schemas and behavior; listening coherence and album diversity are unmeasured; and
-- the journey has been exercised with fake providers; its end-to-end behavior against live Lyria and Gemini is unverified.
+- an album is one task holding `AlbumTrackTask` records; the `Album → Track →
+  Section → Take` hierarchy, stable album identity, and release-level metadata
+  remain target shapes, and a section list produces one prompt rather than separate
+  section generations;
+- orchestral assembly joins whole movements, without section-level continuation,
+  transitions, key or beat alignment, crossfade, or loudness matching;
+- poetry retrieval runs in MoodMic, and the studio's direction conversation reads no
+  poems;
+- evaluation covers schemas and behaviour: no live text evaluation,
+  listening-coherence or album-diversity measurement, or live end-to-end journey run
+  is recorded.
 
 ## Authoritative implementation references
 
-- web server entry: `src/web/server.ts`
-- public exports: `src/index.ts`
-- composer agent and retrieval tool: `src/composer/composer-agent.ts`
-- orchestral composer agent: `src/composer/orchestral-agent.ts`
-- album composer agent: `src/composer/album-agent.ts`
-- local composer instructions: `skills/composer-skill/`
-- `MusicSpec` schema: `src/schema/music-spec.ts`
-- orchestral plan schema: `src/schema/orchestral-plan.ts`
-- album plan schema: `src/schema/album-plan.ts`
-- music retrieval: `src/retrieval/music-retriever.ts`
-- poetry retrieval: `src/retrieval/poem-retriever.ts`
-- MoodMic poetry references: `src/web/poem-references.ts`
-- poetry corpora and bilingual mood lexicon: `corpus/poem/`
-- poetry importers: `scripts/import-modern-poetry.mjs`, `scripts/import-english-poetry.py`
-- music corpus migration: `src/corpus/build-music-corpus.mjs`
-- Lyria adapter: `src/lyria/lyria-client.ts`
-- MoodMic listening review: `src/moodmic/music-review.ts`
-- MoodMic generation check graph: `src/moodmic/moodmic-graph.ts`
+- server, task persistence, album and playlist routes: `src/web/server.ts`,
+  `src/web/task-store.ts`
+- composer agents and instructions: `src/composer/`, `skills/composer-skill/`;
+  schemas: `src/schema/`
+- retrieval: `src/retrieval/`; corpora: `corpus/`, built by
+  `src/corpus/build-music-corpus.mjs` and `scripts/`
+- Lyria adapter: `src/lyria/lyria-client.ts`; MoodMic review and generation graph:
+  `src/moodmic/`
 - journey record, graph, runtime: `src/journey/`
-- settings and credential storage: `src/config/settings.ts`
-- local server and task persistence: `src/web/server.ts`, `src/web/task-store.ts`
-- MoodMic conversations and mood entries: `src/web/mood-chat-store.ts`, `src/web/mood-store.ts`
-- creative discussion sessions: `src/discussion/`
-- local prompt-directing instructions: `skills/prompt-directing-skill/`
-- creative-session state graph: `src/discussion/session-graph.ts`
-- background music producer: `src/producer/`
-- browser client: `web/` (shared album stage in `web/album-view.js`)
-- regression behavior: `test/`
+- playlist record, store, resolution, export: `src/playlist/`,
+  `src/web/playlist-pieces.ts`, `src/web/playlist-export.ts`; shared panel:
+  `web/add-to-playlist.js`
+- MoodMic conversations and mood entries: `src/web/mood-chat-store.ts`,
+  `src/web/mood-store.ts`
+- discussions and their state graph: `src/discussion/`,
+  `skills/prompt-directing-skill/`
+- settings and credentials: `src/config/settings.ts`; producer: `src/producer/`
+- browser client: `web/` (shared album stage `web/album-view.js`, playlist page
+  `web/playlist.js`); regression behaviour: `test/`
 
-When exact behavior matters, inspect these sources and the current command help.
+When exact behaviour matters, inspect these sources and the current command help.
