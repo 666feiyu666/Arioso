@@ -1,0 +1,138 @@
+/* The "Add to playlist" panel, shared by every place a finished piece appears. */
+
+.atp-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+}
+
+.atp-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(16, 21, 31, 0.42);
+  backdrop-filter: blur(2px);
+}
+
+.atp-panel {
+  position: relative;
+  width: min(420px, calc(100vw - 32px));
+  max-height: min(560px, calc(100vh - 64px));
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: 0 24px 60px rgba(16, 21, 31, 0.24);
+  overflow: hidden;
+}
+
+.atp-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.atp-head h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.atp-close {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--muted);
+  padding: 4px;
+}
+
+.atp-close:hover { color: var(--ink); }
+
+.atp-lead {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.atp-list {
+  display: grid;
+  gap: 6px;
+  overflow: auto;
+  min-height: 0;
+}
+
+.atp-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface-2, var(--surface));
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+
+.atp-row:hover { border-color: var(--brand); }
+
+.atp-row strong {
+  font-size: 0.92rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.atp-row span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  flex: none;
+}
+
+.atp-empty {
+  margin: 0;
+  padding: 12px 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.atp-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+
+.atp-message {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.atp-new {
+  margin-left: auto;
+  border: 1px solid var(--brand);
+  border-radius: 999px;
+  background: var(--brand);
+  color: #fff;
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 7px 14px;
+  cursor: pointer;
+}
+
+.atp-new[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

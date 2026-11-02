@@ -23,23 +23,23 @@ import { mountPlayerBar } from "./player-bar.js";
 const COPY = {
   "zh-CN": {
     tabMoodMic: "MoodMic", tabCalendar: "心情日历（测试）", tabWorkflow: "工作流",
-    tabPlaylist: "播放列表", tabHelp: "帮助", tabBarLabel: "主导航", switchLanguage: "切换界面语言",
-    title: "播放列表",
+    tabAlbums: "专辑", tabPlaylist: "歌单", tabHelp: "帮助", tabBarLabel: "主导航", switchLanguage: "切换界面语言",
+    title: "专辑",
     libraryNote: "选一张继续制作，或者新建一张。",
     recentTitle: "最近更新",
-    allTitle: "全部歌单",
-    intro: "把 MoodMic 里满意的对话与音乐当作参考，规划并生成一整个歌单。",
-    newPlaylist: "＋ 新建歌单",
-    newPlaylistLabel: "新建歌单",
-    emptyShelf: "还没有歌单。新建一个，从 MoodMic 的音乐开始。",
+    allTitle: "全部专辑",
+    intro: "把 MoodMic 里满意的对话与音乐当作参考，规划并生成一整张专辑。",
+    newPlaylist: "＋ 新建专辑",
+    newPlaylistLabel: "新建专辑",
+    emptyShelf: "还没有专辑。新建一张，从 MoodMic 的音乐开始。",
     back: "← 返回",
-    createTitle: "新建歌单",
-    createIntro: "选几段 MoodMic 里满意的对话与音乐作为参考，再写下这个歌单想要的样子。",
+    createTitle: "新建专辑",
+    createIntro: "选几段 MoodMic 里满意的对话与音乐作为参考，再写下这张专辑想要的样子。",
     refsTitle: "参考",
     refsIntro: "选中的对话会连同它们的音乐方案一起交给专辑作者。",
     refsEmpty: "还没有可用的参考。先在 MoodMic 里生成一首音乐，再回到这里。",
     refresh: "刷新",
-    describeLabel: "歌单主题",
+    describeLabel: "专辑主题",
     describePlaceholder: "例如：适合深夜专注的一组器乐，延续参考里的温暖质感。",
     countLabel: "曲目数",
     minutesLabel: "目标总时长",
@@ -47,7 +47,7 @@ const COPY = {
     creating: "正在创建…",
     closeDrawer: "关闭",
     selectedCount: (n) => `已选 ${n} 段参考`,
-    needDescription: "先写一句歌单主题。",
+    needDescription: "先写一句专辑主题。",
     albumMeta: (n, d) => `${n} 首 · ${d}`,
     tracksWord: (n) => `${n} 首候选`,
     includedWord: (n) => `已收录 ${n} 首`,
@@ -73,11 +73,11 @@ const COPY = {
   },
   en: {
     tabMoodMic: "MoodMic", tabCalendar: "Mood calendar (test)", tabWorkflow: "Workflow",
-    tabPlaylist: "Playlist", tabHelp: "Help", tabBarLabel: "Tab navigation", switchLanguage: "Switch interface language",
-    title: "Playlist",
+    tabAlbums: "Albums", tabPlaylist: "Playlists", tabHelp: "Help", tabBarLabel: "Tab navigation", switchLanguage: "Switch interface language",
+    title: "Albums",
     libraryNote: "Pick one to keep working on, or start a new album.",
     recentTitle: "Recently updated",
-    allTitle: "All playlists",
+    allTitle: "All albums",
     intro: "Use the MoodMic conversations and music you liked as references, then plan and generate a whole album.",
     newPlaylist: "＋ New playlist",
     newPlaylistLabel: "New playlist",
@@ -310,7 +310,7 @@ mountPlayerBar({
 
 function viewLibrary() {
   const albums = state.tasks
-    .filter((task) => task.workflowType === "05-playlist")
+    .filter((task) => task.compositionMode === "album")
     .sort((left, right) => String(right.updatedAt ?? "").localeCompare(String(left.updatedAt ?? "")));
   const recent = albums.slice(0, 4);
   const rest = albums.slice(4);

@@ -7,6 +7,7 @@
 // endpoints for inclusion, ordering, retry and export.
 
 import { adoptAudio, playExclusive } from "./audio-focus.js";
+import { openAddToPlaylist } from "./add-to-playlist.js";
 
 const COPY = {
   "zh-CN": {
@@ -79,6 +80,7 @@ const COPY = {
     seekLabel: "播放进度",
     moveUp: "上移",
     moveDown: "下移",
+    addToPlaylist: "加入歌单",
     listCandidatesEmpty: "还没有候选曲目。",
     listIncludedEmpty: "还没有收录曲目。在「候选」里把喜欢的收进来，就能排成一张专辑。",
     playlistDuration: (d) => `共 ${d}`,
@@ -155,6 +157,7 @@ const COPY = {
     seekLabel: "Playback position",
     moveUp: "Move up",
     moveDown: "Move down",
+    addToPlaylist: "Add to playlist",
     listCandidatesEmpty: "No candidate tracks yet.",
     listIncludedEmpty: "Nothing included yet. Add the ones you like from Candidates to build the album.",
     playlistDuration: (d) => `${d} total`,
@@ -190,7 +193,7 @@ function orderedTracks(task) {
 function listTracks(task, scope) {
   const tracks = task.albumTracks ?? [];
   if (scope === "included") {
-    return (task.albumPlaylist ?? [])
+    return (task.albumTrackOrder ?? [])
       .map((id) => tracks.find((track) => track.id === id && track.admission === "included"))
       .filter(Boolean);
   }
@@ -480,7 +483,7 @@ export function createAlbumStage(options) {
     const stateWord = track.admission === "included" ? t("included")
       : track.admission === "excluded" ? t("excluded") : t("unadmitted");
     const percent = isCurrent && state.duration > 0 ? Math.min(100, (state.currentTime / state.duration) * 100) : 0;
-    const playlistLength = (activeTask.albumPlaylist ?? []).length;
+    const playlistLength = (activeTask.albumTrackOrder ?? []).length;
     return `
       <div class="pl-track is-${esc(track.admission)}${working ? " is-working" : ""}${isCurrent ? " is-current" : ""}">
         <span class="pl-track-number num">${String(number).padStart(2, "0")}</span>
@@ -503,6 +506,7 @@ export function createAlbumStage(options) {
             <button class="pl-btn pl-btn-quiet" type="button" data-album-action="move" data-track="${esc(track.id)}" data-direction="-1" aria-label="${esc(t("moveUp"))}" ${number === 1 ? "disabled" : ""}>↑</button>
             <button class="pl-btn pl-btn-quiet" type="button" data-album-action="move" data-track="${esc(track.id)}" data-direction="1" aria-label="${esc(t("moveDown"))}" ${number === playlistLength ? "disabled" : ""}>↓</button>
           </span>` : ""}
+          <button class="pl-btn pl-btn-quiet" type="button" data-album-action="add-to-playlist" data-track="${esc(track.id)}" ${track.audioFile ? "" : "disabled"}>${esc(t("addToPlaylist"))}</button>
         </div>
       </div>`;
   }
@@ -855,13 +859,13 @@ export function createAlbumStage(options) {
 
   async function moveTrack(trackId, direction) {
     const activeTask = task();
-    const ids = [...(activeTask.albumPlaylist ?? [])];
+    const ids = [...(activeTask.albumTrackOrder ?? [])];
     const index = ids.indexOf(trackId);
     const target = index + direction;
     if (index < 0 || target < 0 || target >= ids.length) return;
     [ids[index], ids[target]] = [ids[target], ids[index]];
     try {
-      const updated = await options.api(`/api/tasks/${encodeURIComponent(activeTask.id)}/album/playlist`, {
+      const updated = await options.api(`/api/tasks/${encodeURIComponent(activeTask.id)}/album/track-order`, {
         method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ trackIds: ids }),
       });
       accept(updated);
@@ -896,6 +900,22 @@ export function createAlbumStage(options) {
             .then(() => options.onRunning?.())
             .catch(fail);
         } else if (action === "move") moveTrack(button.dataset.track, Number(button.dataset.direction));
+        else if (action === "add-to-playlist") {
+          // A playlist references this candidate; its admission here is unchanged.
+          const activeTask = task();
+          const candidate = (activeTask?.albumTracks ?? []).find((item) => item.id === button.dataset.track);
+          if (activeTask && candidate) {
+            void openAddToPlaylist({
+              api: options.api,
+              language: options.language(),
+              items: [{
+                source: { kind: "album-track", taskId: activeTask.id, trackId: candidate.id },
+                titleSnapshot: candidate.title,
+                ...(candidate.durationSeconds === undefined ? {} : { durationSeconds: candidate.durationSeconds }),
+              }],
+            });
+          }
+        }
         else if (action === "retry-task") retryTask();
         else if (action === "export") exportAlbum(button.dataset.scope);
         else if (action === "timestamps") exportTimestamps();

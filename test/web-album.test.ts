@@ -55,7 +55,7 @@ function album(overrides: Partial<MusicTask> = {}): MusicTask {
     title: plan.albumTitle, mode: "generate", vocalMode: "instrumental", corpusMode: "none",
     compositionMode: "album", workflowType: "04-album", status: "completed",
     composerModel: "test", lyriaModel: "lyria-3.5", createdAt: now, updatedAt: now,
-    albumPlan: plan, albumPromptsReady: true, albumPlaylist: [],
+    albumPlan: plan, albumPromptsReady: true, albumTrackOrder: [],
     albumTracks: plan.tracks.map((outline) => ({
       id: `track-${outline.number}`, order: outline.number, title: outline.title,
       targetDurationSeconds: outline.targetSeconds, musicSpec: spec(outline.number),
@@ -86,23 +86,23 @@ describe("album selection and playback persistence", () => {
       const patch = (id: number, admission: string) => fetch(`${baseUrl}/api/tasks/album-task/album/tracks/track-${id}`, {
         method: "PATCH", body: JSON.stringify({ admission }),
       });
-      expect((await fetch(`${baseUrl}/api/tasks/album-task`).then(taskResponse)).albumPlaylist).toEqual([]);
+      expect((await fetch(`${baseUrl}/api/tasks/album-task`).then(taskResponse)).albumTrackOrder).toEqual([]);
       for (const number of [1, 2]) expect((await patch(number, "included")).status).toBe(200);
-      const url = `${baseUrl}/api/tasks/album-task/album/playlist`;
+      const url = `${baseUrl}/api/tasks/album-task/album/track-order`;
       for (const trackIds of [["track-1"], ["track-1", "track-1"], ["track-1", "track-3"]]) {
         expect((await fetch(url, { method: "PUT", body: JSON.stringify({ trackIds }) })).status).toBe(400);
       }
       const ordered = await fetch(url, { method: "PUT", body: JSON.stringify({ trackIds: ["track-2", "track-1"] }) });
       expect(ordered.status).toBe(200);
-      expect((await taskResponse(ordered)).albumPlaylist).toEqual(["track-2", "track-1"]);
+      expect((await taskResponse(ordered)).albumTrackOrder).toEqual(["track-2", "track-1"]);
       expect((await patch(2, "included")).status).toBe(200);
       const store = new TaskStore(path.join(root, "outputs", "tasks"));
       await store.initialize();
       expect(store.get("album-task")?.compositionMode).toBe("album");
-      expect(store.get("album-task")?.albumPlaylist).toEqual(["track-2", "track-1"]);
+      expect(store.get("album-task")?.albumTrackOrder).toEqual(["track-2", "track-1"]);
       expect((await patch(2, "excluded")).status).toBe(200);
       const saved = JSON.parse(await readFile(path.join(root, "outputs", "tasks", "04-album", "album-task", "task.json"), "utf8"));
-      expect(saved.albumPlaylist).toEqual(["track-1"]);
+      expect(saved.albumTrackOrder).toEqual(["track-1"]);
       expect(saved.albumTracks[1].admission).toBe("excluded");
       expect((await patch(3, "automatic")).status).toBe(400);
     }, { prepare: prepareAlbum });
@@ -277,7 +277,7 @@ describe("album generation continuation", () => {
       expect(generateMock).toHaveBeenCalledTimes(3);
       expect(generateMock.mock.calls[2]?.[0]).toBe("prompt 1");
       expect(generateMock.mock.calls[2]?.[1]).toMatchObject({ model: "lyria-3.5" });
-      expect((await getTask()).albumPlaylist).toEqual([]);
+      expect((await getTask()).albumTrackOrder).toEqual([]);
     }, {
       prepare: (root) => prepareAlbum(root, task),
       environment: { OPENAI_API_KEY: "test-local", GEMINI_API_KEY: "test-local" },
@@ -310,7 +310,7 @@ describe("album generation continuation", () => {
   });
 
   it("marks interrupted candidates failed on restart while retaining completed audio and inclusion", async () => {
-    const task = album({ status: "generating", albumPlaylist: ["track-1"] });
+    const task = album({ status: "generating", albumTrackOrder: ["track-1"] });
     task.albumTracks![0]!.admission = "included";
     task.albumTracks![1]!.status = "generating";
     await withWebServer(async ({ baseUrl }) => {
@@ -318,7 +318,7 @@ describe("album generation continuation", () => {
       expect(latest.status).toBe("failed");
       expect(latest.albumTracks![0]).toMatchObject({ status: "completed", audioFile: "track-1.mp3", admission: "included" });
       expect(latest.albumTracks![1]!.status).toBe("failed");
-      expect(latest.albumPlaylist).toEqual(["track-1"]);
+      expect(latest.albumTrackOrder).toEqual(["track-1"]);
     }, { prepare: (root) => prepareAlbum(root, task) });
   });
 });

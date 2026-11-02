@@ -62,7 +62,7 @@ function track(id: string, order: number, admission = "candidate", audio = true)
 }
 
 function album() {
-  return { id: "album", title: "Late Night Noir", description: "Late night noir jazz for relaxation", compositionMode: "album", workflowType: "04-album", status: "completed", lyriaModel: "lyria-3.5", updatedAt: "2026-10-04T08:00:00Z", albumCandidateCount: 14, albumPlan: { albumTitle: "Late Night Noir", albumMind: "Quiet variations after midnight." }, albumTracks: [track("one", 1), track("two", 2), track("three", 3)], albumPlaylist: [] as string[] };
+  return { id: "album", title: "Late Night Noir", description: "Late night noir jazz for relaxation", compositionMode: "album", workflowType: "04-album", status: "completed", lyriaModel: "lyria-3.5", updatedAt: "2026-10-04T08:00:00Z", albumCandidateCount: 14, albumPlan: { albumTitle: "Late Night Noir", albumMind: "Quiet variations after midnight." }, albumTracks: [track("one", 1), track("two", 2), track("three", 3)], albumTrackOrder: [] as string[] };
 }
 
 async function interfaceHarness(initial = album()) {
@@ -125,8 +125,8 @@ ${page.replace(/^import .*$/gmu, "")}`;
       const id = url.split("/").at(-1);
       const target = stored.albumTracks.find((item) => item.id === id)!;
       target.admission = body.admission;
-      stored.albumPlaylist = stored.albumPlaylist.filter((item) => item !== id);
-      if (body.admission === "included") stored.albumPlaylist.push(id!);
+      stored.albumTrackOrder = stored.albumTrackOrder.filter((item) => item !== id);
+      if (body.admission === "included") stored.albumTrackOrder.push(id!);
       result = stored;
     }
     return { ok: true, json: async () => structuredClone(result) };
@@ -223,7 +223,7 @@ describe("album listening interface", () => {
     expect(api.state.albumViewScope).toBe("candidate");
     expect(audio.src).toBe("/api/tasks/album/album/tracks/one/audio");
     expect(audio.paused).toBe(false);
-    expect(api.state.tasks[0].albumPlaylist).toEqual([]);
+    expect(api.state.tasks[0].albumTrackOrder).toEqual([]);
     expect(api.state.tasks[0].albumTracks.every((item: { admission: string }) => item.admission === "candidate")).toBe(true);
     expect(api.elements.form.hidden).toBe(true);
   });
@@ -252,7 +252,7 @@ describe("album listening interface", () => {
     const initial = album();
     initial.albumTracks[0]!.admission = "included";
     initial.albumTracks[2]!.admission = "included";
-    initial.albumPlaylist = ["three", "one"];
+    initial.albumTrackOrder = ["three", "one"];
     const { api, audio } = await interfaceHarness(initial);
     await api.openAlbum("album");
     expect(api.state.albumViewScope).toBe("included");
@@ -280,12 +280,12 @@ describe("album listening interface", () => {
   it("continues after the playing track is removed from the included playlist", async () => {
     const initial = album();
     initial.albumTracks.forEach((item) => { item.admission = "included"; });
-    initial.albumPlaylist = ["one", "two", "three"];
+    initial.albumTrackOrder = ["one", "two", "three"];
     const { api, audio, requests } = await interfaceHarness(initial);
     await api.openAlbum("album");
     await api.changeAdmission("album", "one", "excluded", new Element());
     expect(requests.at(-1)).toEqual({ url: "/api/tasks/album/album/tracks/one", method: "PATCH", body: { admission: "excluded" } });
-    expect(api.state.tasks[0].albumPlaylist).toEqual(["two", "three"]);
+    expect(api.state.tasks[0].albumTrackOrder).toEqual(["two", "three"]);
     await audio.finish();
     expect(api.state.playingAlbumTrackId).toBe("two");
   });

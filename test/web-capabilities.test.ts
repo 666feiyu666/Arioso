@@ -12,7 +12,7 @@ describe("web capabilities API", () => {
       const response = await fetch(`${baseUrl}/api/capabilities`);
       expect(response.ok).toBe(true);
       expect(await response.json()).toEqual({
-        apiVersion: 11,
+        apiVersion: 12,
         version: expect.any(String),
         workflows: ["01-general", "02-music", "03-orchestral", "04-album", "05-playlist"],
         discussionSessions: true,
@@ -23,7 +23,7 @@ describe("web capabilities API", () => {
         },
         discussionMood: true,
         moodEntries: true,
-        albumPlaylist: true,
+        albumTrackOrder: true,
         albumExport: true,
         backgroundMusicProducer: { denoiser: "denoising-historical-recordings", outputChannels: 1, listeningReview: "required" },
         albumCandidates: { minimum: 12, maximum: 28, default: 14 },
@@ -37,6 +37,8 @@ describe("web capabilities API", () => {
         },
         playlistReferences: true,
         playlistPlanConfirmation: true,
+        albums: true,
+        playlists: true,
         orchestralAssembly: true,
         orchestralPromptFormat: "orchestral-v1",
         orchestralDuration: {

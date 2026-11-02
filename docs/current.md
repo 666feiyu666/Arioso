@@ -7,11 +7,11 @@ This document describes the repository as it exists now; it is an evolving snaps
 Arioso is a Node.js and TypeScript application with two interfaces over one agentic composition pipeline:
 
 - a command-line interface for composing a validated prompt or composing and generating one audio file; and
-- a local browser application with five pages: MoodMic (`/`), the playlist library (`/playlist.html`), the mood calendar (`/calendar.html`), the workflow studio (`/workflow.html`), and help (`/help.html`).
+- a local browser application with six pages: MoodMic (`/`), the album library (`/albums.html`), the playlist library (`/playlist.html`), the mood calendar (`/calendar.html`), the workflow studio (`/workflow.html`), and help (`/help.html`).
 
 MoodMic is the everyday entry point. It records a feeling, holds a creative conversation, composes and generates one piece, has Gemini listen to it, and lets the user keep or regenerate the result. A kept piece can continue into an album without leaving the conversation.
 
-The workflow studio exposes the older, wider surface: a direction discussion followed by a standalone piece, a music-corpus piece, a multi-movement orchestral work, or a themed album of candidates. The playlist page builds an album from released MoodMic pieces. All of these share the composer agents, the Lyria adapter, and the task store.
+The workflow studio exposes the older, wider surface: a direction discussion followed by a standalone piece, a music-corpus piece, a multi-movement orchestral work, or a themed album of candidates. The album page builds an album from released MoodMic pieces; the playlist page only assembles pieces that already exist. All of these share the composer agents, the Lyria adapter, and the task store.
 
 The pipeline covers three composition modes: `single`, `orchestral`, and `album`, across five workflow types: `01-general`, `02-music`, `03-orchestral`, `04-album`, and `05-playlist`. Historical records that stored `02-jazz` are read as `02-music`.
 
@@ -84,15 +84,51 @@ The identifier can be the journey id, the mood chat id, or either linked task id
 
 Planning pauses before any audio exists. Approval is bound to `albumPlanRevision` on the album task and is persisted before generation is dispatched; a later revision increments the revision number and clears `playlistPlanApproved`, invalidating the earlier approval. Generation runs in the background, each track is saved as it finishes, and the interface adds it to the curation list immediately.
 
-## The playlist library
+## Albums and playlists are two objects
 
-The playlist page lists every `05-playlist` task, and its creation flow picks released MoodMic pieces as references:
+An **album** is generated: plan, compose each candidate, generate, review, curate.
+A **playlist** is assembled: it selects, orders, names, plays, and exports pieces
+that already exist. It never generates audio.
+
+The album page (`/albums.html`) lists every album task (`compositionMode: "album"`)
+and its creation flow picks released MoodMic pieces as references:
 
 - `GET /api/playlists/references` returns the MoodMic creations that can be referenced, with their audio URL and `MusicSpec`;
-- `POST /api/playlists` creates the album task with those references;
+- `POST /api/albums` creates the album task with those references;
 - `POST /api/tasks/<id>/plan/approve` and `POST /api/tasks/<id>/plan/messages` confirm or revise the plan before generation.
 
-The plan itself comes from `planPlaylist`, which also returns a briefing: how the author read each reference and the user's theme. The playlist page and MoodMic render the same plan, progress, player, and curation views from `web/album-view.js`.
+The plan itself comes from `planPlaylist`, which also returns a briefing: how the author read each reference and the user's theme. The album page and MoodMic render the same plan, progress, player, and curation views from `web/album-view.js`.
+
+A playlist lives in its own store under `outputs/playlists` and holds no audio.
+Each entry is a reference plus a title snapshot:
+
+```text
+{ kind: "task", taskId }                      a MoodMic creation or standalone piece
+{ kind: "album-track", taskId, trackId }      one candidate of an album
+```
+
+- `GET /api/playlists` lists playlists with their entries resolved; `POST /api/playlists` creates one from named pieces in a single step.
+- `GET/PATCH/DELETE /api/playlists/<id>` read, rename, and remove a playlist; `POST/PUT /api/playlists/<id>/items` add and reorder; `DELETE /api/playlists/<id>/items/<itemId>` removes one entry.
+- `POST /api/playlists/<id>/export` joins the resolvable entries into one MP3 with per-track timestamps; entries whose piece no longer resolves are reported in `skipped` rather than failing the export.
+- `GET /api/pieces` returns everything a playlist may import: finished MoodMic creations, standalone pieces, and every album's finished candidates.
+
+`POST /api/albums` with `asPlaylist: true` also opens a playlist bound to the new
+album (`fromAlbumTaskId`). Its finished tracks are appended to that playlist as
+they land, and a later read of `GET /api/albums` fills in any that finished while
+nothing was watching. The append is idempotent, so a retry or a restart duplicates
+nothing.
+
+The playlist survives its sources: removing an album, excluding a candidate, or
+deleting a task leaves the entry in place, reported as missing with its snapshotted
+title. Reordering, removing, and renaming never regenerate anything.
+
+"Add to playlist" is offered wherever a finished piece appears: the MoodMic result
+card, the calendar day detail, an album candidate row, and the playlist page itself.
+All four use the shared panel in `web/add-to-playlist.js`.
+
+The album's own ordered track list is `albumTrackOrder` (`PUT /api/tasks/<id>/album/track-order`).
+It is not a playlist: it orders the album's own included candidates. Records written
+before the split stored it as `albumPlaylist`, which the task loader migrates on read.
 
 ## Workflow studio and creative direction
 
@@ -145,13 +181,13 @@ The `orchestral` scope plans one multi-movement work first. `OrchestralWorkPlan`
 
 ### Themed albums
 
-The `album` scope plans a cohesive set of candidates. The album agent produces an `AlbumPlan` (1.0): a shared sound contract, a cohesion strategy, and 12 to 28 consecutively numbered outlines of 60 to 180 seconds each, with at least three distinct durations. A reviewer pass (`AlbumReview`) records similarities and per-candidate verdicts. Each candidate is composed and generated into an `AlbumTrackTask`; the task tracks admissions (`candidate`, `included`, `excluded`), revisions, and an ordered `albumPlaylist` that can be reordered and retried.
+The `album` scope plans a cohesive set of candidates. The album agent produces an `AlbumPlan` (1.0): a shared sound contract, a cohesion strategy, and 12 to 28 consecutively numbered outlines of 60 to 180 seconds each, with at least three distinct durations. A reviewer pass (`AlbumReview`) records similarities and per-candidate verdicts. Each candidate is composed and generated into an `AlbumTrackTask`; the task tracks admissions (`candidate`, `included`, `excluded`), revisions, and an ordered `albumTrackOrder` that can be reordered and retried.
 
-The workflow studio's album page uses these same records through the `04-album` workflow, which starts generating after planning. The `05-playlist` variant is created by the playlist page and by a journey; it adds references and pauses for plan confirmation.
+The workflow studio's album page uses these same records through the `04-album` workflow, which starts generating after planning. The `05-playlist` workflow is the referenced-album variant: it is created by the album page and by a journey, adds references, and pauses for plan confirmation before any audio is generated. It remains an album; only its name mentions playlists.
 
 ### Album production and export
 
-An album exports as a merged MP3 with per-track timestamps (`/api/tasks/<id>/album/export`). Optionally the Background Music Producer (`produceAlbum: true`) denoises all non-excluded candidates into a single-channel 44.1 kHz 24-bit WAV album plus an MP4 and a manifest, stored under the task's `production/` directory and served from `/api/tasks/<id>/production/...`; see [`background-music-producer.md`](background-music-producer.md). Albums created by the playlist page or a journey do not run the producer; they keep the candidate MP3s and the merged export.
+An album exports as a merged MP3 with per-track timestamps (`/api/tasks/<id>/album/export`). Optionally the Background Music Producer (`produceAlbum: true`) denoises all non-excluded candidates into a single-channel 44.1 kHz 24-bit WAV album plus an MP4 and a manifest, stored under the task's `production/` directory and served from `/api/tasks/<id>/production/...`; see [`background-music-producer.md`](background-music-producer.md). Albums created by the album page or a journey do not run the producer; they keep the candidate MP3s and the merged export.
 
 ## Poetry references
 
@@ -195,7 +231,8 @@ The local web application provides:
 
 - MoodMic: a conversation, four mood examples, an editable brief, poem inspiration for the piece, an editable Lyria prompt confirmed before the first generation, the listening review, the kept-piece result, and the album continuation;
 - the mood calendar: a month grid of made pieces, day detail, playback, retry, and mood-colour editing;
-- the playlist page: references, album planning, plan confirmation and revision, candidate listening, inclusion, ordering, MP3 export, and timestamps;
+- the album page: references, album planning, plan confirmation and revision, candidate listening, inclusion, ordering, MP3 export, and timestamps;
+- the playlist page: a library of assembled playlists, their entries with missing-piece reporting, ordering, renaming, covers, playback, and MP3 export — with no generation control;
 - the workflow studio: four workflows (no-corpus single, music-corpus single, orchestral multi-movement, themed album), a direction conversation with text and image input, an editable proposal, explicit approval before handoff, compose-only and compose-and-generate modes, Lyria and vocal settings, a music-reference selector, and optional Background Music Producer;
 - status and detail views for all three scopes, including movements and album candidates;
 - retrieval query and reference display;
@@ -204,11 +241,11 @@ The local web application provides:
 - retry of failed tasks; and
 - local API-key and language settings.
 
-`GET /api/capabilities` reports `apiVersion: 11`, the five workflow types, the album candidate range (12 to 28, default 14), the orchestral duration limits (5 to 12 minutes in total, 3 minutes per movement), the supported music types with their availability, and feature flags for discussions, mood entries, playlist references, plan confirmation, album playlist and export, orchestral assembly, and the producer.
+`GET /api/capabilities` reports `apiVersion: 12`, the five workflow types, the album candidate range (12 to 28, default 14), the orchestral duration limits (5 to 12 minutes in total, 3 minutes per movement), the supported music types with their availability, and feature flags for discussions, mood entries, playlist references, plan confirmation, `albums` and `playlists` (the two objects), album track order and export, orchestral assembly, and the producer.
 
-Other route families: `/api/tasks` and `/api/tasks/<id>` with audio, movements, album tracks, album playlist, album export, prompt confirmation, review, retry, and production artifacts; `/api/discussions/...`; `/api/mood-chats/...`; `/api/mood-entries/...` and `/api/mood-entries/classify`; `/api/playlists/...`; `/api/journeys/...`; and `/api/settings/...`.
+Other route families: `/api/tasks` and `/api/tasks/<id>` with audio, movements, album tracks, album track order, album export, prompt confirmation, review, retry, and production artifacts; `/api/discussions/...`; `/api/mood-chats/...`; `/api/mood-entries/...` and `/api/mood-entries/classify`; `/api/albums`; `/api/pieces`; `/api/playlists/...`; `/api/journeys/...`; and `/api/settings/...`.
 
-Tasks move through `queued`, `composing`, `planning`, `generating`, `review`, `assembling`, `processing`, `completed`, or `failed`. `planning` is a MoodMic piece whose composed Lyria prompt awaits confirmation; `review` is used by the MoodMic listening review and by a playlist plan waiting for confirmation. Each task is saved as JSON under `outputs/tasks` with its audio; interrupted active tasks are marked failed on startup. Retrying reuses an existing `MusicSpec` when present. A task carries `workflowType`, `compositionMode`, and its scope-specific records (`albumPlan`, `albumTracks`, `orchestralPlan`, `movements`, `albumProduction`), plus optional journey lineage (`journeyId`, `parentTaskId`), the playlist plan revision (`albumPlanRevision`), and the Lyria prompt confirmation (`lyriaPromptApproved`).
+Tasks move through `queued`, `composing`, `planning`, `generating`, `review`, `assembling`, `processing`, `completed`, or `failed`. `planning` is a MoodMic piece whose composed Lyria prompt awaits confirmation; `review` is used by the MoodMic listening review and by a playlist plan waiting for confirmation. Each task is saved as JSON under `outputs/tasks` with its audio; interrupted active tasks are marked failed on startup. Retrying reuses an existing `MusicSpec` when present. A task carries `workflowType`, `compositionMode`, and its scope-specific records (`albumPlan`, `albumTracks`, `orchestralPlan`, `movements`, `albumProduction`), plus optional journey lineage (`journeyId`, `parentTaskId`), the plan revision (`albumPlanRevision`), and the Lyria prompt confirmation (`lyriaPromptApproved`).
 
 Credentials may be held for the current server session or, with explicit user selection, written to the local `.env`. The settings API returns only masked credential summaries and never the complete stored value.
 
@@ -237,7 +274,7 @@ Secrets belong in the local `.env` or the in-memory settings session. They must 
 The implementation covers the three composition modes, the MoodMic journey, and an album candidate flow. These parts of the abstract architecture are not implemented:
 
 - no persistent `Album -> Track -> Section -> Take` hierarchy; an album is one task with `AlbumTrackTask` records, not nested projects;
-- candidates share only the plan's sound contract and the playlist, not a stable album identity;
+- candidates share only the plan's sound contract and the album's own track order, not a stable album identity; a playlist is a separate assembled object, not a property of an album;
 - a section list produces one prompt; sections are not generated and assembled separately;
 - orchestral assembly joins whole movements; no section-level continuation, transition generation, beat or key alignment, crossfade, or loudness matching;
 - no take-level comparison or retention of superseded generations;

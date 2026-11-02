@@ -16,7 +16,7 @@ import { runBackgroundMusicProducer } from "../producer/background-music-produce
 import type { MusicRetrievalTrace } from "../retrieval/music-retriever.js";
 import type { AlbumPlan } from "../schema/album-plan.js";
 import { dispatchGeneration } from "./generation.js";
-import type { MusicTask, TaskStore } from "./task-store.js";
+import type { MusicTask, AlbumTrackTask, TaskStore } from "./task-store.js";
 
 /**
  * Task execution, independent of any transport. The HTTP handlers and the CLI
@@ -46,19 +46,30 @@ export class TaskAdmission {
   }
 }
 
+/**
+ * Optional callbacks a runner fires as work lands. The server uses them to keep
+ * a playlist up to date as an album finishes its candidates; nothing in the
+ * task itself depends on a playlist existing.
+ */
+export interface TaskHooks {
+  /** Called once a candidate has finished audio on disk. */
+  onAlbumTrackCompleted?: (taskId: string, track: AlbumTrackTask) => Promise<void>;
+}
+
 export async function runTask(
   store: TaskStore,
   task: MusicTask,
   config: AriosoConfig,
   albumTrackId?: string,
   language?: InterfaceLanguage,
+  hooks?: TaskHooks,
 ): Promise<void> {
   try {
     if (task.compositionMode === "album") {
       if (task.albumProduction) {
-        await runBackgroundMusicProducer(store, task, config, () => runAlbumTask(store, store.get(task.id) ?? task, config, albumTrackId));
+        await runBackgroundMusicProducer(store, task, config, () => runAlbumTask(store, store.get(task.id) ?? task, config, albumTrackId, hooks));
       } else {
-        await runAlbumTask(store, task, config, albumTrackId);
+        await runAlbumTask(store, task, config, albumTrackId, hooks);
       }
       return;
     }
@@ -241,6 +252,7 @@ export async function runAlbumTask(
   task: MusicTask,
   config: AriosoConfig,
   retryTrackId?: string,
+  hooks?: TaskHooks,
 ): Promise<void> {
   let current = store.get(task.id) ?? task;
   if (current.status === "completed" && current.albumPromptsReady
@@ -269,7 +281,7 @@ export async function runAlbumTask(
         ...(references.length ? { references } : {}),
       });
       current = await store.update(task.id, {
-        title: plan.albumTitle, albumPlan: plan, albumPlaylist: [],
+        title: plan.albumTitle, albumPlan: plan, albumTrackOrder: [],
         playlistBriefing: briefing, playlistDiscussion: [], playlistPlanApproved: false,
         albumPlanRevision: (current.albumPlanRevision ?? 0) + 1,
         albumTracks: outlineTracks(plan),
@@ -285,7 +297,7 @@ export async function runAlbumTask(
       ...(references.length ? { references } : {}),
     });
     current = await store.update(task.id, {
-      title: plan.albumTitle, albumPlan: plan, albumPlaylist: [],
+      title: plan.albumTitle, albumPlan: plan, albumTrackOrder: [],
       albumPlanRevision: (current.albumPlanRevision ?? 0) + 1,
       albumTracks: outlineTracks(plan),
     });
@@ -380,6 +392,16 @@ export async function runAlbumTask(
         status: "completed", audioFile, generatedText: generated.generatedText,
         ...(durationSeconds === undefined ? {} : { durationSeconds }), error: undefined,
       });
+      // A playlist built from this album grows as candidates land. A failure
+      // here must never fail the album: the audio is already on disk.
+      try {
+        await hooks?.onAlbumTrackCompleted?.(task.id, {
+          ...track, status: "completed", audioFile,
+          ...(durationSeconds === undefined ? {} : { durationSeconds }),
+        });
+      } catch {
+        /* The track is delivered; the playlist catches up on its next read. */
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       await store.updateAlbumTrack(task.id, track.id, { status: "failed", error: message });

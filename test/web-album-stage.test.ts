@@ -42,7 +42,7 @@ describe("album stage rendering", () => {
       id: "album-1",
       status: "composing",
       albumCandidateCount: 2,
-      albumPlaylist: [],
+      albumTrackOrder: [],
       albumTracks: [track(1, "composing"), track(2, "queued")],
     });
 
@@ -56,7 +56,7 @@ describe("album stage rendering", () => {
       id: "album-2",
       status: "review",
       albumCandidateCount: 1,
-      albumPlaylist: [],
+      albumTrackOrder: [],
       albumPlan: {
         albumTitle: "A Plan",
         albumMind: "One idea.",

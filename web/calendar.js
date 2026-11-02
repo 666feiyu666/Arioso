@@ -11,11 +11,12 @@ import {
   GROUPS, WEEKDAYS, api, applyI18n, customEmotionDraft, dateParts, emotionLabel, esc,
   groupById, groupName, markerStyle, readLanguage, persistLanguage, todayISO,
 } from "./mood-common.js";
+import { openAddToPlaylist } from "./add-to-playlist.js";
 
 const COPY = {
   "zh-CN": {
     pageTitle: "心情日历（测试）· MoodMic",
-    tabMoodMic: "MoodMic", tabCalendar: "心情日历（测试）", tabWorkflow: "工作流", tabPlaylist: "播放列表", tabHelp: "帮助",
+    tabMoodMic: "MoodMic", tabCalendar: "心情日历（测试）", tabWorkflow: "工作流", tabAlbums: "专辑", tabPlaylist: "歌单", tabHelp: "帮助",
     tabBarLabel: "主导航", switchLanguage: "切换界面语言",
     title: "我的心情日历",
     lead: "每一天的圆点，来自当天真正做出来的作品；颜色就是记录时的心情。",
@@ -35,6 +36,7 @@ const COPY = {
     customEmotionPlaceholder: "或写下你自己的词，例如「振奋」",
     needPick: "先选一个颜色和词。",
     download: "下载音频",
+    addToPlaylist: "加入歌单",
     tryAgain: "再试一次",
     statusQueued: "排队中", statusComposing: "正在构思编曲", statusGenerating: "正在生成音频",
     statusAssembling: "正在拼接乐章", statusProcessing: "正在后期处理",
@@ -44,7 +46,7 @@ const COPY = {
   },
   en: {
     pageTitle: "Mood calendar (test) · MoodMic",
-    tabMoodMic: "MoodMic", tabCalendar: "Mood calendar (test)", tabWorkflow: "Workflow", tabPlaylist: "Playlist", tabHelp: "Help",
+    tabMoodMic: "MoodMic", tabCalendar: "Mood calendar (test)", tabWorkflow: "Workflow", tabAlbums: "Albums", tabPlaylist: "Playlists", tabHelp: "Help",
     tabBarLabel: "Tab navigation", switchLanguage: "Switch interface language",
     title: "My mood calendar",
     lead: "Each day's circle is built from the pieces you actually made — coloured by the mood you recorded.",
@@ -64,6 +66,7 @@ const COPY = {
     customEmotionPlaceholder: "Or write your own word, e.g. “Energised”",
     needPick: "Pick a colour and a word first.",
     download: "Download audio",
+    addToPlaylist: "Add to playlist",
     tryAgain: "Try again",
     statusQueued: "Queued", statusComposing: "Shaping the arrangement", statusGenerating: "Generating audio",
     statusAssembling: "Assembling movements", statusProcessing: "Post-processing",
@@ -274,7 +277,8 @@ function renderTaskCard({ task, chat }) {
           <span class="mm-entry-task-status">${esc(taskLine(task))}</span>
           ${task.status === "completed"
             ? `<audio class="mm-mini-player" controls preload="none" src="/api/tasks/${encodeURIComponent(task.id)}/audio"></audio>
-               <a class="e-btn e-btn-ghost" href="/api/tasks/${encodeURIComponent(task.id)}/audio" download>${esc(t("download"))}</a>`
+               <a class="e-btn e-btn-ghost" href="/api/tasks/${encodeURIComponent(task.id)}/audio" download>${esc(t("download"))}</a>
+               <button class="e-btn e-btn-ghost" type="button" data-add-to-playlist="${esc(task.id)}" data-title="${esc(task.title || task.musicSpec?.title || task.description || "")}">${esc(t("addToPlaylist"))}</button>`
             : task.status === "failed"
               ? `<button class="e-btn e-btn-ghost" type="button" data-retry="${esc(task.id)}">${esc(t("tryAgain"))}</button>`
               : ""}
@@ -382,6 +386,18 @@ function bind() {
   });
   for (const button of stage.querySelectorAll("[data-retry]")) {
     button.addEventListener("click", () => retryAsNewAttempt(button.dataset.retry));
+  }
+  for (const button of stage.querySelectorAll("[data-add-to-playlist]")) {
+    button.addEventListener("click", () => {
+      void openAddToPlaylist({
+        api,
+        language: state.language,
+        items: [{
+          source: { kind: "task", taskId: button.dataset.addToPlaylist },
+          titleSnapshot: button.dataset.title,
+        }],
+      });
+    });
   }
 }
 

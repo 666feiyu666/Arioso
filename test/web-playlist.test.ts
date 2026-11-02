@@ -130,7 +130,7 @@ describe("Playlist references and creation", () => {
 
   it("plans a 05-playlist album, pauses for confirmation, then generates on approval", async () => {
     await withWebServer(async ({ baseUrl }) => {
-      const response = await fetch(`${baseUrl}/api/playlists`, {
+      const response = await fetch(`${baseUrl}/api/albums`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           description: "深夜专注的器乐歌单，延续雨夜钢琴的质感", candidateCount: 14,
@@ -169,9 +169,47 @@ describe("Playlist references and creation", () => {
     }, { prepare: prepareMoodMic, environment });
   });
 
+  it("opens a playlist for an album started from the playlist page and fills it as tracks land", async () => {
+    await withWebServer(async ({ baseUrl }) => {
+      const response = await fetch(`${baseUrl}/api/albums`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          description: "深夜专注的器乐歌单", candidateCount: 14, targetTotalMinutes: 35,
+          referenceChatIds: [chatId], asPlaylist: true, playlistName: "Late night",
+        }),
+      });
+      expect(response.status).toBe(202);
+      const created = await response.json() as {
+        id: string;
+        playlist?: {
+          playlist: { id: string; name: string; fromAlbumTaskId?: string };
+          items: unknown[];
+        };
+      };
+      expect(created.playlist?.playlist.name).toBe("Late night");
+      expect(created.playlist?.playlist.fromAlbumTaskId).toBe(created.id);
+      expect(created.playlist?.items).toEqual([]);
+
+      await waitForTask(baseUrl, created.id, (task) => task.status === "review");
+      const approve = await fetch(`${baseUrl}/api/tasks/${created.id}/plan/approve`, { method: "POST" });
+      expect(approve.status).toBe(202);
+      await waitForTask(baseUrl, created.id, (task) => task.status === "completed");
+
+      const playlist = await fetch(`${baseUrl}/api/playlists/${created.playlist!.playlist.id}`)
+        .then((result) => result.json()) as {
+          items: Array<{ missing: boolean; audioUrl?: string }>;
+          playableCount: number;
+        };
+      // Every finished candidate is referenced; the playlist generated nothing.
+      expect(playlist.items).toHaveLength(14);
+      expect(playlist.playableCount).toBe(14);
+      expect(playlist.items.every((item) => item.missing === false)).toBe(true);
+    }, { prepare: prepareMoodMic, environment });
+  });
+
   it("revises a paused playlist plan from a follow-up message", async () => {
     await withWebServer(async ({ baseUrl }) => {
-      const created = await fetch(`${baseUrl}/api/playlists`, {
+      const created = await fetch(`${baseUrl}/api/albums`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ description: "深夜专注", candidateCount: 14, targetTotalMinutes: 35, referenceChatIds: [chatId] }),
       }).then((response) => response.json()) as { id: string };
@@ -210,13 +248,13 @@ describe("Playlist references and creation", () => {
 
   it("rejects a request without a theme or with an unknown reference", async () => {
     await withWebServer(async ({ baseUrl }) => {
-      const noTheme = await fetch(`${baseUrl}/api/playlists`, {
+      const noTheme = await fetch(`${baseUrl}/api/albums`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ description: "  ", referenceChatIds: [chatId] }),
       });
       expect(noTheme.status).toBe(400);
 
-      const badReference = await fetch(`${baseUrl}/api/playlists`, {
+      const badReference = await fetch(`${baseUrl}/api/albums`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ description: "A playlist", referenceChatIds: ["99999999-9999-4999-8999-999999999999"] }),
       });

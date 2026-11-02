@@ -22,7 +22,8 @@
       </a>
       <div class="tabbar-tabs">
         <a class="tabbar-tab" href="/" data-i18n="tabMoodMic">MoodMic</a>
-        <a class="tabbar-tab" href="/playlist.html" data-i18n="tabPlaylist">播放列表</a>
+        <a class="tabbar-tab" href="/albums.html" data-i18n="tabAlbums">专辑</a>
+        <a class="tabbar-tab" href="/playlist.html" data-i18n="tabPlaylist">歌单</a>
         <a class="tabbar-tab" href="/calendar.html" data-i18n="tabCalendar">心情日历（测试）</a>
         <a class="tabbar-tab" href="/workflow.html" data-i18n="tabWorkflow">工作流</a>
         <a class="tabbar-tab is-active" href="/help.html" aria-current="page" data-i18n="tabHelp">帮助</a>
@@ -77,6 +78,15 @@
       </section>
 
       <section class="help-section">
+        <h2 data-i18n="helpObjectsTitle">专辑和歌单</h2>
+        <p data-i18n="helpObjectsBody">
+          专辑是生成出来的：给一个方向，Arioso 规划、作曲、生成一批候选，再挑出听起来成一组的那几张。
+          歌单是拼出来的：从已经做好的曲子里挑、排序、命名、播放、导出，全程不会生成任何音频。
+          一首做好的曲子可以在任何地方「加入歌单」；歌单可以跨专辑、跨对话收集，原来的专辑被删掉也还在，
+          只会把那首标成无法解析。
+        </p>
+      </section>
+      <section class="help-section">
         <h2 data-i18n="helpWorkflowTitle">工作流</h2>
         <p data-i18n="helpWorkflowBody">顶部的"工作流"页签里，有四种更专门的创作方式：</p>
         <ul>
@@ -105,7 +115,7 @@
       const COPY = {
         "zh-CN": {
           pageTitle: "帮助说明 · Arioso",
-          tabMoodMic: "MoodMic", tabCalendar: "心情日历（测试）", tabWorkflow: "工作流", tabPlaylist: "播放列表", tabHelp: "帮助", tabBarLabel: "主导航",
+          tabMoodMic: "MoodMic", tabCalendar: "心情日历（测试）", tabWorkflow: "工作流", tabAlbums: "专辑", tabPlaylist: "歌单", tabHelp: "帮助", tabBarLabel: "主导航",
           switchLanguage: "切换界面语言",
           helpEyebrow: "使用说明",
           helpTitle: "帮助说明",
@@ -126,6 +136,8 @@
           helpColorGreen: "绿色 —— 低能量、愉快：平静、满足、放松、安宁。",
           helpShapeTitle: "一首单曲",
           helpShapeBody: "MoodMic 每次把一段心情写成一首完整的单曲。想要多乐章、专辑等更专门的创作，可以在\u201c工作流\u201d页签里进行。",
+          helpObjectsTitle: "专辑和歌单",
+          helpObjectsBody: "专辑是生成出来的：给一个方向，Arioso 规划、作曲、生成一批候选，再挑出听起来成一组的那几张。歌单是拼出来的：从已经做好的曲子里挑、排序、命名、播放、导出，全程不会生成任何音频。一首做好的曲子可以在任何地方「加入歌单」，歌单可以跨专辑、跨对话收集；原来的专辑被删掉也还在，只会把那首标成无法解析。",
           helpWorkflowTitle: "工作流",
           helpWorkflowBody: "顶部的\u201c工作流\u201d页签里，有四种更专门的创作方式：",
           helpWf1: "无语料生成：直接使用模型已有的音乐知识。",
@@ -139,7 +151,7 @@
         },
         en: {
           pageTitle: "Help · Arioso",
-          tabMoodMic: "MoodMic", tabCalendar: "Mood calendar (test)", tabWorkflow: "Workflow", tabPlaylist: "Playlist", tabHelp: "Help", tabBarLabel: "Tab navigation",
+          tabMoodMic: "MoodMic", tabCalendar: "Mood calendar (test)", tabWorkflow: "Workflow", tabAlbums: "Albums", tabPlaylist: "Playlists", tabHelp: "Help", tabBarLabel: "Tab navigation",
           switchLanguage: "Switch interface language",
           helpEyebrow: "HELP",
           helpTitle: "Help",
@@ -159,7 +171,9 @@
           helpColorBlue: "Blue — low energy, unpleasant: sad, lonely, drained, discouraged.",
           helpColorGreen: "Green — low energy, pleasant: calm, content, relaxed, peaceful.",
           helpShapeTitle: "One piece",
-          helpShapeBody: "MoodMic turns one feeling into one complete piece. For multi-movement or album work, use the \u201cWorkflows\u201d tab.",          helpWorkflowTitle: "Workflows",
+          helpShapeBody: "MoodMic turns one feeling into one complete piece. For multi-movement or album work, use the \u201cWorkflows\u201d tab.",          helpObjectsTitle: "Albums and playlists",
+          helpObjectsBody: "An album is generated: Arioso plans, composes, and generates a batch of candidates, then you keep the ones that hold together. A playlist is assembled: you pick, order, name, play, and export pieces that already exist, and nothing is generated. Any finished piece offers \"add to playlist\"; a playlist can draw from several albums and conversations, and it survives an album being deleted, reporting that piece as missing.",
+          helpWorkflowTitle: "Workflows",
           helpWorkflowBody: "The \u201cWorkflows\u201d tab at the top holds four more specialised ways to create:",
           helpWf1: "Model-only: compose straight from the model's existing musical knowledge.",
           helpWf2: "Music references: retrieve local styles and representative works for the chosen type before arranging.",

@@ -179,7 +179,12 @@ export interface MusicTask {
   albumFinalReview?: AlbumReview;
   albumRevisedTrackNumbers?: number[];
   albumPromptsReady?: boolean;
-  albumPlaylist?: string[];
+  /**
+   * The album's own track order. Historical records stored this as
+   * `albumPlaylist`, which the loader migrates on read; nothing writes that
+   * name any more, because "playlist" now means the separate assembled object.
+   */
+  albumTrackOrder?: string[];
   albumCandidateCount?: number;
   albumTargetTotalMinutes?: number;
   albumProduction?: AlbumProduction;
@@ -282,8 +287,9 @@ function isTaskRecord(value: unknown): value is MusicTask {
       && typeof track.targetDurationSeconds === "number" && track.targetDurationSeconds > 0
       && typeof track.admission === "string"
       && ["candidate", "included", "excluded"].includes(track.admission)));
-  const playlistValid = value.albumPlaylist === undefined || (Array.isArray(value.albumPlaylist)
-    && value.albumPlaylist.every((id: unknown) => isSafeFileName(id)));
+  const trackOrder = value.albumTrackOrder ?? (value as { albumPlaylist?: unknown }).albumPlaylist;
+  const playlistValid = trackOrder === undefined || (Array.isArray(trackOrder)
+    && trackOrder.every((id: unknown) => isSafeFileName(id)));
   const albumPlanValid = value.albumPlan === undefined || AlbumPlanSchema.safeParse(value.albumPlan).success;
   const production = value.albumProduction;
   const productionProgress = isRecord(production) ? production.progress : undefined;
@@ -341,6 +347,20 @@ function isTaskRecord(value: unknown): value is MusicTask {
     && musicReviewValid && moodChatValid && reviewAttemptValid && referencesValid
     && briefingValid && discussionValid && approvedValid && lyriaPromptApprovedValid
     && planRevisionValid && lineageValid && attemptsValid;
+}
+
+/**
+ * Records written before the album/playlist split called the album's own track
+ * order `albumPlaylist`. Rename it on load so the rest of the runtime only ever
+ * sees one meaning for "playlist" — the assembled object in PlaylistStore.
+ */
+function migrateAlbumTrackOrder(task: MusicTask): void {
+  const legacy = (task as { albumPlaylist?: unknown }).albumPlaylist;
+  if (task.albumTrackOrder === undefined
+    && Array.isArray(legacy) && legacy.every((id) => typeof id === "string")) {
+    task.albumTrackOrder = [...legacy];
+  }
+  delete (task as { albumPlaylist?: unknown }).albumPlaylist;
 }
 
 function safeAudioName(value: string | undefined, fallback: string): string {
@@ -433,6 +453,7 @@ export async function organizeTaskStorage(
     task.compositionMode = task.workflowType === "03-orchestral" ? "orchestral"
       : ["04-album", "05-playlist"].includes(task.workflowType) ? "album" : "single";
     task.corpusMode = corpusModeForWorkflow(task.workflowType, task.corpusMode);
+    migrateAlbumTrackOrder(task);
     const taskDirectory = path.join(directory, task.workflowType, task.id);
     const recordPath = path.join(taskDirectory, "task.json");
     try {
@@ -555,6 +576,7 @@ export class TaskStore {
       task.compositionMode = task.workflowType === "03-orchestral" ? "orchestral"
       : ["04-album", "05-playlist"].includes(task.workflowType) ? "album" : "single";
       task.corpusMode = corpusModeForWorkflow(task.workflowType, task.corpusMode);
+      migrateAlbumTrackOrder(task);
 
       let interrupted = false;
       if (options.markInterrupted !== false) {
@@ -626,7 +648,7 @@ export class TaskStore {
       ...(input.compositionMode === "album" ? {
         albumCandidateCount: input.candidateCount ?? 14,
         albumTargetTotalMinutes: input.targetTotalMinutes ?? 35,
-        albumPlaylist: [],
+        albumTrackOrder: [],
       } : {}),
       ...(input.musicType ? { musicType: input.musicType } : {}),
       ...(input.produceAlbum ? { albumProduction: {
@@ -686,7 +708,7 @@ export class TaskStore {
         title: plan.albumTitle,
         albumPlan: plan,
         albumPromptsReady: true,
-        albumPlaylist: [],
+        albumTrackOrder: [],
         albumTracks: tracks.map((track) => ({
           ...track, id: crypto.randomUUID(), admission: "candidate",
           status: task.mode === "compose" ? "completed" : "queued",
@@ -720,30 +742,31 @@ export class TaskStore {
       if (admission === "included" && (track.status !== "completed" || !track.audioFile)) {
         throw new Error("Only completed audio candidates can be included.");
       }
-      const albumPlaylist = (task.albumPlaylist ?? []).filter((id) => id !== trackId);
+      const albumTrackOrder = (task.albumTrackOrder ?? []).filter((id) => id !== trackId);
       if (admission === "included") {
-        // Repeating an inclusion keeps its existing place in the playlist.
-        const currentIndex = task.albumPlaylist?.indexOf(trackId) ?? -1;
-        albumPlaylist.splice(currentIndex < 0 ? albumPlaylist.length : currentIndex, 0, trackId);
+        // Repeating an inclusion keeps its existing place in the album order.
+        const currentIndex = task.albumTrackOrder?.indexOf(trackId) ?? -1;
+        albumTrackOrder.splice(currentIndex < 0 ? albumTrackOrder.length : currentIndex, 0, trackId);
       }
       return {
         albumTracks: (task.albumTracks ?? []).map((candidate) => candidate.id === trackId
           ? { ...candidate, admission, updatedAt: new Date().toISOString() } : candidate),
-        albumPlaylist,
+        albumTrackOrder,
       };
     });
   }
 
-  async setAlbumPlaylist(taskId: string, trackIds: string[]): Promise<MusicTask> {
+  /** Replaces the album's own track order; included tracks only. */
+  async setAlbumTrackOrder(taskId: string, trackIds: string[]): Promise<MusicTask> {
     return this.#mutate(taskId, (task) => {
       if (task.compositionMode !== "album") throw new Error("Album task not found.");
       const included = task.albumTracks?.filter((track) => track.admission === "included") ?? [];
       if (new Set(trackIds).size !== trackIds.length
         || trackIds.length !== included.length
         || trackIds.some((id) => !included.some((track) => track.id === id))) {
-        throw new Error("Playlist must contain every included track exactly once.");
+        throw new Error("The album order must contain every included track exactly once.");
       }
-      return { albumPlaylist: [...trackIds] };
+      return { albumTrackOrder: [...trackIds] };
     });
   }
 
@@ -759,7 +782,7 @@ export class TaskStore {
     if (task.compositionMode !== "album") throw new Error("Album task not found.");
     const all = task.albumTracks ?? [];
     const selected = scope === "included"
-      ? (task.albumPlaylist ?? []).map((id) => all.find((track) => track.id === id))
+      ? (task.albumTrackOrder ?? []).map((id) => all.find((track) => track.id === id))
       : [...all].filter((track) => track.admission !== "excluded").sort((a, b) => a.order - b.order);
     if (!selected.length) throw new Error("The selected album list is empty.");
     const tracks = selected.map((track) => {

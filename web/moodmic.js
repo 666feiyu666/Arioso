@@ -14,6 +14,7 @@ import { createAlbumStage } from "./album-view.js";
 import { openSettingsDialog } from "./settings-dialog.js";
 import { adoptAudio, playExclusive } from "./audio-focus.js";
 import { mountPlayerBar } from "./player-bar.js";
+import { openAddToPlaylist } from "./add-to-playlist.js";
 
 // Four starting prompts, one per feeling colour. They fill the otherwise
 // empty MoodMic screen and reuse the four mood signals already defined in
@@ -49,7 +50,7 @@ const MOOD_AUDIO = {
 const COPY = {
   "zh-CN": {
     pageTitle: "MoodMic · 把心情变成音乐",
-    tabMoodMic: "MoodMic", tabCalendar: "心情日历（测试）", tabWorkflow: "工作流", tabPlaylist: "播放列表", tabHelp: "帮助",
+    tabMoodMic: "MoodMic", tabCalendar: "心情日历（测试）", tabWorkflow: "工作流", tabAlbums: "专辑", tabPlaylist: "歌单", tabHelp: "帮助",
     tabBarLabel: "主导航", switchLanguage: "切换界面语言", openSettings: "设置",
     historyLabel: "对话记录",
     collapseSide: "收起对话记录",
@@ -142,6 +143,7 @@ const COPY = {
     listenTitle: "你的音乐。",
     lyriaPrompt: "Lyria 生成提示",
     download: "下载音频",
+    addToPlaylist: "加入歌单",
     tryAgain: "再试一次",
     createAnother: "开始新的对话",
     failedTitle: "这一次没有完成",
@@ -165,7 +167,7 @@ const COPY = {
   },
   en: {
     pageTitle: "MoodMic · Music from your mood",
-    tabMoodMic: "MoodMic", tabCalendar: "Mood calendar (test)", tabWorkflow: "Workflow", tabPlaylist: "Playlist", tabHelp: "Help",
+    tabMoodMic: "MoodMic", tabCalendar: "Mood calendar (test)", tabWorkflow: "Workflow", tabAlbums: "Albums", tabPlaylist: "Playlists", tabHelp: "Help",
     tabBarLabel: "Tab navigation", switchLanguage: "Switch interface language", openSettings: "Settings",
     historyLabel: "Conversations",
     collapseSide: "Collapse conversations",
@@ -258,6 +260,7 @@ const COPY = {
     listenTitle: "Your music.",
     lyriaPrompt: "Lyria generation prompt",
     download: "Download audio",
+    addToPlaylist: "Add to playlist",
     tryAgain: "Try again",
     createAnother: "Start a new chat",
     failedTitle: "This run didn't finish",
@@ -988,6 +991,7 @@ function renderResult() {
       </details>` : ""}
       <div class="mm-foot-actions">
         <a class="e-btn e-btn-secondary" href="/api/tasks/${encodeURIComponent(task.id)}/audio" download>${esc(t("download"))}</a>
+        <button class="e-btn e-btn-secondary" type="button" id="mm-add-to-playlist">${esc(t("addToPlaylist"))}</button>
         <button class="e-btn e-btn-primary" type="button" id="mm-new-2">${esc(t("createAnother"))}</button>
       </div>
     </div>
@@ -1165,6 +1169,7 @@ function bindChat() {
     });
   }
   stage.querySelector("#mm-retry")?.addEventListener("click", () => retryAsNewAttempt(state.session?.tasks?.at(-1)?.id));
+  stage.querySelector("#mm-add-to-playlist")?.addEventListener("click", addCurrentToPlaylist);
   stage.querySelector("#mm-new-2")?.addEventListener("click", newChat);
   stage.querySelector("#mm-review-regenerate")?.addEventListener("click", () => decideReview("regenerate"));
   stage.querySelector("#mm-review-keep")?.addEventListener("click", () => decideReview("keep"));
@@ -1660,6 +1665,21 @@ async function approvePrompt() {
     state.messageError = true;
     render();
   }
+}
+
+// "Add to playlist" references the kept piece as it stands. The playlist never
+// regenerates or moves the task; it only points at it.
+async function addCurrentToPlaylist() {
+  const task = activeTask();
+  if (!task) return;
+  await openAddToPlaylist({
+    api,
+    language: state.language,
+    items: [{
+      source: { kind: "task", taskId: task.id },
+      titleSnapshot: task.title || task.musicSpec?.title || task.description || "",
+    }],
+  });
 }
 
 async function decideReview(decision) {

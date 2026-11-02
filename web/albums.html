@@ -4,13 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#e8ebf1" />
-    <title>Arioso · 播放列表</title>
+    <title>Arioso · 专辑</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/theme.css" />
     <link rel="stylesheet" href="/nav.css" />
     <link rel="stylesheet" href="/playlist.css" />
+    <link rel="stylesheet" href="/add-to-playlist.css" />
     <link rel="stylesheet" href="/player-bar.css" />
   </head>
   <body class="has-tabbar pl-page">
@@ -21,7 +22,8 @@
       </a>
       <div class="tabbar-tabs">
         <a class="tabbar-tab" href="/" data-i18n="tabMoodMic">MoodMic</a>
-        <a class="tabbar-tab is-active" href="/playlist.html" aria-current="page" data-i18n="tabPlaylist">播放列表</a>
+        <a class="tabbar-tab is-active" href="/albums.html" aria-current="page" data-i18n="tabAlbums">专辑</a>
+        <a class="tabbar-tab" href="/playlist.html" data-i18n="tabPlaylist">歌单</a>
         <a class="tabbar-tab" href="/calendar.html" data-i18n="tabCalendar">心情日历（测试）</a>
         <a class="tabbar-tab" href="/workflow.html" data-i18n="tabWorkflow">工作流</a>
         <a class="tabbar-tab" href="/help.html" data-i18n="tabHelp">帮助</a>
@@ -34,6 +36,6 @@
     <main class="pl-main" id="pl-main" aria-live="polite"></main>
     <div class="pl-drawer-root" id="pl-drawer-root"></div>
 
-    <script type="module" src="/playlist.js"></script>
+    <script type="module" src="/albums.js"></script>
   </body>
 </html>

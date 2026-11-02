@@ -21,6 +21,12 @@ export interface OutputPaths {
   moodChats: string;
   /** Journey records: `<root>/journeys/<journeyId>.json`. */
   journeys: string;
+  /**
+   * Playlists and their covers/exports: `<root>/playlists/<playlistId>.json`
+   * plus `<root>/playlists/<playlistId>/`. A playlist never holds audio of its
+   * own; it references pieces that albums and MoodMic conversations produced.
+   */
+  playlists: string;
   /** Output that is no longer produced but kept as evidence: `<root>/archive`. */
   archive: string;
 }
@@ -36,6 +42,7 @@ export function outputPaths(
     moodEntries: path.join(root, "moodmic", "entries.json"),
     moodChats: path.join(root, "moodmic", "chats"),
     journeys: path.join(root, "journeys"),
+    playlists: path.join(root, "playlists"),
     archive: path.join(root, "archive"),
   };
 }

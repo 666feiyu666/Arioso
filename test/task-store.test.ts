@@ -79,6 +79,29 @@ describe("task persistence boundaries", () => {
     expect(JSON.parse(await readFile(recordPath, "utf8")).status).toBe("failed");
   });
 
+  it("reads an album's track order written under the old albumPlaylist name", async () => {
+    const directory = path.join(await temporaryDirectory(), "tasks");
+    const recordPath = path.join(directory, "04-album", "legacy-album", "task.json");
+    await mkdir(path.dirname(recordPath), { recursive: true });
+    await writeFile(recordPath, JSON.stringify({
+      id: "legacy-album", description: "A night album", title: "Night Set",
+      mode: "generate", status: "completed", workflowType: "04-album",
+      updatedAt: "2026-01-01T00:00:00.000Z",
+      albumPlaylist: ["track-one"],
+      albumTracks: [{
+        id: "track-one", order: 1, title: "One", status: "completed",
+        createdAt: "2026-01-01T00:00:00.000Z", updatedAt: "2026-01-01T00:00:00.000Z",
+        targetDurationSeconds: 90, admission: "included", audioFile: "track-one.mp3",
+      }],
+    }));
+    const store = new TaskStore(directory);
+    await store.initialize();
+    const task = store.get("legacy-album");
+    expect(task?.albumTrackOrder).toEqual(["track-one"]);
+    // The old name is gone at runtime, so only one thing is called a playlist.
+    expect((task as unknown as Record<string, unknown>).albumPlaylist).toBeUndefined();
+  });
+
   it("persists the newest snapshot after overlapping task updates", async () => {
     const directory = path.join(await temporaryDirectory(), "tasks");
     const recordPath = await writeTask(directory, savedTask());

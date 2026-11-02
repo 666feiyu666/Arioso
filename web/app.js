@@ -16,7 +16,7 @@ const translations = {
     productionCreatingVideo: "专辑 WAV 已完成，正在合成 MP4。",
     pageTitle: "Arioso · AI 音乐工坊",
     newTask: "新建任务", tasks: "任务", musicTasks: "音乐任务", settings: "设置",
-    tabMoodMic: "MoodMic", tabCalendar: "心情日历（测试）", tabWorkflow: "工作流", tabPlaylist: "播放列表", tabHelp: "帮助", tabBarLabel: "主导航",
+    tabMoodMic: "MoodMic", tabCalendar: "心情日历（测试）", tabWorkflow: "工作流", tabAlbums: "专辑", tabPlaylist: "歌单", tabHelp: "帮助", tabBarLabel: "主导航",
     entryEyebrow: "CHOOSE A WORKFLOW", entryTitle: "选择音乐的<br />创作方式。",
     entryCopy: "先选一种创作方式：单曲、带音乐参考，还是多乐章作品。",
     workflowChoices: "生成方式", allStyles: "不限风格", musicOnly: "含音乐参考",
@@ -42,7 +42,7 @@ const translations = {
     exportAlbum: "导出专辑 MP3", exportCandidates: "导出候选合集 MP3",
     albumExporting: "正在合并…", albumExportStarted: "已开始下载：{count} 首曲目，{duration}。",
     albumExportFailed: "专辑导出失败。", albumExportUnavailable: "列表为空或有曲目尚未完成，暂时无法导出。",
-    albumPlaylistDuration: "播放列表 {duration}", playPlaylist: "播放列表", playCandidates: "试听候选曲",
+    albumTrackOrderDuration: "播放列表 {duration}", playPlaylist: "播放列表", playCandidates: "试听候选曲",
     albumSelectionHint: "试听后选择收录。已收录列表按你的顺序连续播放。",
     noIncludedTracks: "还没有收录曲目。到候选试听中选出想放进专辑的曲目。",
     albumPreparing: "正在构思并审阅候选曲方案。", albumGenerating: "正在生成候选曲，已完成 {completed}/{total} 首。",
@@ -167,7 +167,7 @@ const translations = {
     productionCreatingVideo: "Album WAV complete · creating the MP4.",
     pageTitle: "Arioso · AI Music Studio",
     newTask: "New task", tasks: "Tasks", musicTasks: "Music tasks", settings: "Settings",
-    tabMoodMic: "MoodMic", tabCalendar: "Mood calendar (test)", tabWorkflow: "Workflow", tabPlaylist: "Playlist", tabHelp: "Help", tabBarLabel: "Tab navigation",
+    tabMoodMic: "MoodMic", tabCalendar: "Mood calendar (test)", tabWorkflow: "Workflow", tabAlbums: "Albums", tabPlaylist: "Playlists", tabHelp: "Help", tabBarLabel: "Tab navigation",
     entryEyebrow: "CHOOSE A WORKFLOW", entryTitle: "Choose how to<br />create your music.",
     entryCopy: "Pick how you want to create: a single piece, one with music references, or a multi-movement work.",
     workflowChoices: "Generation workflows", allStyles: "All styles", musicOnly: "With music references",
@@ -193,7 +193,7 @@ const translations = {
     exportAlbum: "Export album MP3", exportCandidates: "Export candidate mix MP3",
     albumExporting: "Merging…", albumExportStarted: "Download started: {count} tracks, {duration}.",
     albumExportFailed: "Album export failed.", albumExportUnavailable: "Export is available when the list has completed audio for every track.",
-    albumPlaylistDuration: "Playlist {duration}", playPlaylist: "Play playlist", playCandidates: "Listen to candidates",
+    albumTrackOrderDuration: "Playlist {duration}", playPlaylist: "Play playlist", playCandidates: "Listen to candidates",
     albumSelectionHint: "Listen and choose what to include. The included playlist plays continuously in your chosen order.",
     noIncludedTracks: "No tracks included yet. Choose tracks from Candidate listening to build your album.",
     albumPreparing: "Planning and reviewing the candidate tracks.", albumGenerating: "Generating candidates. {completed}/{total} tracks ready.",
@@ -987,7 +987,7 @@ async function playMovement(taskId, movementId) {
 function albumTracks(task, scope = "candidate", playableOnly = false) {
   const tracks = [...(task?.albumTracks || [])];
   const ordered = scope === "included"
-    ? (task?.albumPlaylist || []).map((id) => tracks.find((track) => track.id === id && track.admission === "included")).filter(Boolean)
+    ? (task?.albumTrackOrder || []).map((id) => tracks.find((track) => track.id === id && track.admission === "included")).filter(Boolean)
     : tracks.sort((a, b) => a.order - b.order);
   return playableOnly ? ordered.filter((track) => track.audioFile && track.admission !== "excluded") : ordered;
 }
@@ -1227,7 +1227,7 @@ function renderAlbumDetail(task) {
   ${running ? `<p class="album-progress" role="status">${escapeHtml(t(task.status === "generating" ? "albumGenerating" : "albumPreparing", { completed: ready, total: all.length || task.albumCandidateCount || 14 }))}</p>` : ""}
   ${task.status === "failed" ? `<div class="error-box"><div><strong>${t("taskInterrupted")}</strong><p>${escapeHtml(task.error || t("taskFailedFallback"))}</p></div><button class="retry-button" type="button" data-retry-task="${escapeHtml(task.id)}">${t("continueTask")}</button></div>` : ""}
   <section class="album-playlist"><div class="album-playlist-toolbar"><div class="album-tabs" role="group" aria-label="${escapeHtml(t("albumTitle"))}"><button type="button" data-album-scope="candidate" aria-pressed="${scope === "candidate"}">${t("albumCandidates")} <small>${all.length}</small></button><button type="button" data-album-scope="included" aria-pressed="${scope === "included"}">${t("albumIncluded")} <small>${included.length}</small></button></div>
-    <div class="album-play-action"><span>${escapeHtml(t("albumPlaylistDuration", { duration: durationLabel(scope === "included" ? playlistDuration : playable.reduce((sum, track) => sum + (track.durationSeconds || 0), 0)) }))}</span><button class="primary-button" type="button" id="start-album-playlist" ${!playable.length ? "disabled" : ""}>▶ ${t(scope === "included" ? "playPlaylist" : "playCandidates")}</button><button class="secondary-button" type="button" id="export-album" ${!exportReady || state.albumExporting ? "disabled" : ""} ${!exportReady ? `title="${escapeHtml(t("albumExportUnavailable"))}"` : ""}>${t(state.albumExporting ? "albumExporting" : scope === "included" ? "exportAlbum" : "exportCandidates")}</button></div></div>
+    <div class="album-play-action"><span>${escapeHtml(t("albumTrackOrderDuration", { duration: durationLabel(scope === "included" ? playlistDuration : playable.reduce((sum, track) => sum + (track.durationSeconds || 0), 0)) }))}</span><button class="primary-button" type="button" id="start-album-playlist" ${!playable.length ? "disabled" : ""}>▶ ${t(scope === "included" ? "playPlaylist" : "playCandidates")}</button><button class="secondary-button" type="button" id="export-album" ${!exportReady || state.albumExporting ? "disabled" : ""} ${!exportReady ? `title="${escapeHtml(t("albumExportUnavailable"))}"` : ""}>${t(state.albumExporting ? "albumExporting" : scope === "included" ? "exportAlbum" : "exportCandidates")}</button></div></div>
     <p class="album-selection-hint">${t("albumSelectionHint")}</p><p class="album-action-message" id="album-action-message" role="status"></p>
     ${exportRecord ? `<div class="album-export-timestamps"><div class="album-timestamps-toolbar"><div><strong>${t("albumTimestamps")}</strong><small>${escapeHtml(exportRecord.fileName)}</small></div><button class="secondary-button" type="button" id="copy-album-timestamps">${t("copyAlbumTimestamps")}</button><button class="secondary-button" type="button" id="download-album-timestamps">${t("downloadAlbumTimestamps")}</button></div><pre>${escapeHtml(exportRecord.timestampsText)}</pre></div>` : ""}
     <div class="album-track-list">${tracks.length ? tracks.map((track, index) => {

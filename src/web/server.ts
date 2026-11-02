@@ -23,6 +23,10 @@ import { JourneyStore } from "../journey/journey-store.js";
 import { JourneyTransitionError } from "../journey/journey-graph.js";
 import { MAX_PLAYLIST_REFERENCES, type PlaylistReference } from "../playlist/reference.js";
 import { MAX_PLAYLIST_DISCUSSION_MESSAGES, MAX_PLAYLIST_FEEDBACK_LENGTH, type PlaylistDiscussionMessage } from "../playlist/briefing.js";
+import { PlaylistStore } from "../playlist/playlist-store.js";
+import { isPlaylistItemSource, type PlaylistItemInput } from "../playlist/playlist.js";
+import { collectPlayablePieces, describeSource, resolvePlaylist, type PieceLookup } from "./playlist-pieces.js";
+import { exportPlaylistAudio } from "./playlist-export.js";
 import type { PoemRetriever } from "../retrieval/poem-retriever.js";
 import { MUSIC_TYPES, loadMusicRetriever } from "../retrieval/music-retriever.js";
 import {
@@ -31,7 +35,7 @@ import {
   ALBUM_MIN_CANDIDATES,
   ALBUM_MIN_TOTAL_MINUTES,
 } from "../schema/album-plan.js";
-import { runTask, TaskAdmission } from "./task-runtime.js";
+import { runTask, TaskAdmission, type TaskHooks } from "./task-runtime.js";
 import { TaskStore, parseTaskInput, type AlbumAdmission, type AlbumAudioExport, type MusicTask } from "./task-store.js";
 import { MoodEntryStore, isCalendarDate, isMoodGroup, type MoodEntryInput } from "./mood-store.js";
 import { LangChainMoodClassifier, type MoodClassifier } from "./mood-classifier.js";
@@ -156,6 +160,29 @@ function moodText(value: unknown, field: string): string | undefined {
   return trimmed || undefined;
 }
 
+/** Playlist entries name pieces that already exist; nothing here generates. */
+function parsePlaylistItems(value: unknown, tasks: PieceLookup): PlaylistItemInput[] {
+  if (value === undefined) return [];
+  if (!Array.isArray(value)) throw new HttpError(400, "A playlist entry array is required.");
+  return value.map((entry) => {
+    if (!isRecord(entry) || !isPlaylistItemSource(entry.source)) {
+      throw new HttpError(400, "Every playlist entry must name a piece.");
+    }
+    // An entry added by source alone still needs a readable title and length,
+    // taken from the piece as it stands now.
+    const described = describeSource(entry.source, tasks);
+    const titleSnapshot = typeof entry.titleSnapshot === "string" && entry.titleSnapshot.trim()
+      ? entry.titleSnapshot : described.title;
+    const durationSeconds = typeof entry.durationSeconds === "number" && Number.isFinite(entry.durationSeconds)
+      ? entry.durationSeconds : described.durationSeconds;
+    return {
+      source: entry.source,
+      titleSnapshot,
+      ...(durationSeconds === undefined ? {} : { durationSeconds }),
+    };
+  });
+}
+
 function parseMoodEntryInput(value: unknown): MoodEntryInput {
   if (!isRecord(value)) throw new HttpError(400, "A feeling is required.");
   if (!isCalendarDate(value.date)) throw new HttpError(400, "A calendar date (YYYY-MM-DD) is required.");
@@ -256,6 +283,7 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
   const moodStore = new MoodEntryStore(output.moodEntries);
   const moodChatStore = new MoodChatStore(output.moodChats);
   const journeyStore = new JourneyStore(output.journeys);
+  const playlistStore = new PlaylistStore(output.playlists);
   const discussionAgent = options.discussionAgent ?? new LangChainDiscussionAgent();
   const poemRetriever = options.poemRetriever;
   const moodClassifier = options.moodClassifier ?? new LangChainMoodClassifier();
@@ -264,6 +292,7 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
   await moodStore.initialize();
   await moodChatStore.initialize();
   await journeyStore.initialize();
+  await playlistStore.initialize();
   const journeys = new JourneyRuntime({ tasks: store, journeys: journeyStore });
   const activeTaskIds = new TaskAdmission();
   /**
@@ -345,6 +374,34 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
    * release the reservation the first runner owns. The owning runner releases it
    * in its own `finally` path.
    */
+  /**
+   * Every album track that finishes is offered to the playlists built from that
+   * album. The append is idempotent, so a retry, a restart, or a second reader
+   * cannot duplicate a track.
+   */
+  const albumTaskHooks: TaskHooks = {
+    onAlbumTrackCompleted: async (taskId, track) => {
+      await playlistStore.appendAlbumTrack(taskId, {
+        id: track.id,
+        title: track.title,
+        ...(track.durationSeconds === undefined ? {} : { durationSeconds: track.durationSeconds }),
+      });
+    },
+  };
+
+  /** Brings a playlist up to date with the album it was created from. */
+  const syncAlbumPlaylists = async (task: MusicTask): Promise<void> => {
+    if (!playlistStore.listFromAlbum(task.id).length) return;
+    for (const track of task.albumTracks ?? []) {
+      if (track.status !== "completed" || !track.audioFile) continue;
+      await playlistStore.appendAlbumTrack(task.id, {
+        id: track.id,
+        title: track.title,
+        ...(track.durationSeconds === undefined ? {} : { durationSeconds: track.durationSeconds }),
+      });
+    }
+  };
+
   const startTask = (task: MusicTask, config: AriosoConfig, albumTrackId?: string): boolean => {
     if (!activeTaskIds.reserve(task.id)) {
       console.error(`Task ${task.id} is already running; the duplicate dispatch was ignored.`);
@@ -352,7 +409,7 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
     }
     void (async () => {
       const language = task.moodChatId ? await settings.language() : undefined;
-      await runTask(store, task, config, albumTrackId, language);
+      await runTask(store, task, config, albumTrackId, language, albumTaskHooks);
     })()
       .catch((error: unknown) => {
         const message = error instanceof Error ? error.message : String(error);
@@ -471,9 +528,16 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
       const albumTrackRetryMatch = /^\/api\/tasks\/([^/]+)\/album\/tracks\/([^/]+)\/retry$/.exec(url.pathname);
       const albumExportAudioMatch = /^\/api\/tasks\/([^/]+)\/album\/exports\/([a-f0-9]{64})\/(audio|timestamps)$/.exec(url.pathname);
       const albumExportMatch = /^\/api\/tasks\/([^/]+)\/album\/export$/.exec(url.pathname);
-      const albumPlaylistMatch = /^\/api\/tasks\/([^/]+)\/album\/playlist$/.exec(url.pathname);
+      const albumTrackOrderMatch = /^\/api\/tasks\/([^/]+)\/album\/track-order$/.exec(url.pathname);
       const playlistPlanApproveMatch = /^\/api\/tasks\/([^/]+)\/plan\/approve$/.exec(url.pathname);
       const playlistPlanMessagesMatch = /^\/api\/tasks\/([^/]+)\/plan\/messages$/.exec(url.pathname);
+      const playlistMatch = /^\/api\/playlists\/([^/]+)$/.exec(url.pathname);
+      const playlistItemsMatch = /^\/api\/playlists\/([^/]+)\/items$/.exec(url.pathname);
+      const playlistItemMatch = /^\/api\/playlists\/([^/]+)\/items\/([^/]+)$/.exec(url.pathname);
+      const playlistCoverMatch = /^\/api\/playlists\/([^/]+)\/cover$/.exec(url.pathname);
+      const playlistExportMatch = /^\/api\/playlists\/([^/]+)\/export$/.exec(url.pathname);
+      const playlistExportAudioMatch = /^\/api\/playlists\/([^/]+)\/exports\/([a-f0-9]{64})\/audio$/.exec(url.pathname);
+      const playlistExportTimestampsMatch = /^\/api\/playlists\/([^/]+)\/exports\/([a-f0-9]{64})\/timestamps$/.exec(url.pathname);
       const productionArtifactMatch = /^\/api\/tasks\/([^/]+)\/production\/(audio|video|tracklist|manifest)$/.exec(url.pathname);
       const retryMatch = /^\/api\/tasks\/([^/]+)\/retry$/.exec(url.pathname);
       const reviewDecisionMatch = /^\/api\/tasks\/([^/]+)\/review$/.exec(url.pathname);
@@ -503,7 +567,7 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
         // type is never offered as if it had validated references.
         const music = await loadMusicRetriever();
         const capabilities = {
-          apiVersion: 11,
+          apiVersion: 12,
           version: APPLICATION_VERSION,
           workflows: ["01-general", "02-music", "03-orchestral", "04-album", "05-playlist"],
           discussionSessions: true,
@@ -511,7 +575,7 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
           discussionImages: { types: ["image/jpeg", "image/png", "image/webp"], maximumBytes: MAX_DISCUSSION_IMAGE_BYTES },
           discussionMood: true,
           moodEntries: true,
-          albumPlaylist: true,
+          albumTrackOrder: true,
           albumExport: true,
           backgroundMusicProducer: { denoiser: "denoising-historical-recordings", outputChannels: 1, listeningReview: "required" },
           albumCandidates: { minimum: 12, maximum: 28, default: 14 },
@@ -522,6 +586,9 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
           },
           playlistReferences: true,
           playlistPlanConfirmation: true,
+          /** Albums generate; playlists only sequence existing pieces. */
+          albums: true,
+          playlists: true,
           orchestralAssembly: true,
           orchestralPromptFormat: "orchestral-v1",
           orchestralDuration: {
@@ -1221,9 +1288,181 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
         return;
       }
 
+      // Playlists are assembled, never generated: every entry references a
+      // piece an album or a MoodMic conversation already produced.
+      if (request.method === "GET" && url.pathname === "/api/pieces") {
+        sendJson(response, 200, { pieces: collectPlayablePieces(store.list()) });
+        return;
+      }
+
+      if (request.method === "GET" && url.pathname === "/api/playlists") {
+        sendJson(response, 200, playlistStore.list().map((playlist) => resolvePlaylist(playlist, store)));
+        return;
+      }
+
       if (request.method === "POST" && url.pathname === "/api/playlists") {
+        const value = await readOptionalJsonBody(request);
+        const body = isRecord(value) ? value : {};
+        const playlist = await playlistStore.create({
+          ...(typeof body.name === "string" ? { name: body.name } : {}),
+          ...(typeof body.description === "string" ? { description: body.description } : {}),
+          items: parsePlaylistItems(body.items, store),
+        });
+        sendJson(response, 201, resolvePlaylist(playlist, store));
+        return;
+      }
+
+      if (playlistMatch?.[1] && playlistMatch[1] !== "references") {
+        const playlist = playlistStore.get(playlistMatch[1]);
+        if (!playlist) throw new HttpError(404, "Playlist not found.");
+        if (request.method === "GET") {
+          sendJson(response, 200, resolvePlaylist(playlist, store));
+          return;
+        }
+        if (request.method === "PATCH") {
+          const value = await readJsonBody(request);
+          if (!isRecord(value)) throw new HttpError(400, "A playlist change is required.");
+          const updated = typeof value.name === "string"
+            ? await playlistStore.rename(
+              playlist.id,
+              value.name,
+              value.description === null || typeof value.description === "string"
+                ? value.description : undefined,
+            )
+            : playlist;
+          sendJson(response, 200, resolvePlaylist(updated, store));
+          return;
+        }
+        if (request.method === "DELETE") {
+          await playlistStore.remove(playlist.id);
+          sendJson(response, 200, { removed: true });
+          return;
+        }
+      }
+
+      if (playlistItemsMatch?.[1]) {
+        const playlist = playlistStore.get(playlistItemsMatch[1]);
+        if (!playlist) throw new HttpError(404, "Playlist not found.");
+        if (request.method === "POST") {
+          const value = await readJsonBody(request);
+          const items = parsePlaylistItems(isRecord(value) ? value.items : undefined, store);
+          if (!items.length) throw new HttpError(400, "Choose at least one piece to add.");
+          sendJson(response, 200, resolvePlaylist(await playlistStore.addItems(playlist.id, items), store));
+          return;
+        }
+        if (request.method === "PUT") {
+          const value = await readJsonBody(request);
+          if (!isRecord(value) || !Array.isArray(value.itemIds)
+            || !value.itemIds.every((itemId: unknown) => typeof itemId === "string")) {
+            throw new HttpError(400, "A playlist entry ID array is required.");
+          }
+          sendJson(response, 200, resolvePlaylist(
+            await playlistStore.setItemOrder(playlist.id, value.itemIds as string[]), store,
+          ));
+          return;
+        }
+      }
+
+      if (playlistItemMatch?.[1] && playlistItemMatch[2] && request.method === "DELETE") {
+        const playlist = playlistStore.get(playlistItemMatch[1]);
+        if (!playlist) throw new HttpError(404, "Playlist not found.");
+        sendJson(response, 200, resolvePlaylist(
+          await playlistStore.removeItem(playlist.id, playlistItemMatch[2]), store,
+        ));
+        return;
+      }
+
+      if (playlistCoverMatch?.[1]) {
+        const playlist = playlistStore.get(playlistCoverMatch[1]);
+        if (!playlist) throw new HttpError(404, "Playlist not found.");
+        if (request.method === "GET" || request.method === "HEAD") {
+          const coverFile = playlistStore.coverPath(playlist);
+          if (!existsSync(coverFile)) throw new HttpError(404, "This playlist has no cover.");
+          await sendFile(request, response, coverFile, imageMimeType(coverFile));
+          return;
+        }
+        if (request.method === "POST") {
+          const data = await readBinaryBody(request, MAX_DISCUSSION_IMAGE_BYTES);
+          const extension = imageExtension(data);
+          if (!extension) throw new HttpError(415, "Upload a PNG, JPEG, or WebP image.");
+          sendJson(response, 200, resolvePlaylist(
+            await playlistStore.writeCover(playlist.id, data, extension), store,
+          ));
+          return;
+        }
+        if (request.method === "DELETE") {
+          sendJson(response, 200, resolvePlaylist(await playlistStore.removeCover(playlist.id), store));
+          return;
+        }
+      }
+
+      if (request.method === "POST" && playlistExportMatch?.[1]) {
+        const playlist = playlistStore.get(playlistExportMatch[1]);
+        if (!playlist) throw new HttpError(404, "Playlist not found.");
+        const exported = await exportPlaylistAudio(playlist, store, playlistStore.playlistDirectory(playlist.id));
+        const base = "/api/playlists/" + encodeURIComponent(playlist.id) + "/exports/" + exported.exportId;
+        sendJson(response, 200, {
+          exportId: exported.exportId,
+          fileName: exported.fileName,
+          trackCount: exported.trackCount,
+          durationSeconds: exported.durationSeconds,
+          chapters: exported.chapters,
+          timestampsText: exported.timestampsText,
+          skipped: exported.skipped,
+          audioUrl: base + "/audio",
+          timestampsUrl: base + "/timestamps",
+        });
+        return;
+      }
+
+      if ((request.method === "GET" || request.method === "HEAD")
+        && (playlistExportAudioMatch?.[1] || playlistExportTimestampsMatch?.[1])) {
+        const match = playlistExportAudioMatch ?? playlistExportTimestampsMatch!;
+        const playlist = playlistStore.get(match[1]!);
+        if (!playlist) throw new HttpError(404, "Playlist not found.");
+        const exportId = match[2]!;
+        const playlistDirectory = playlistStore.playlistDirectory(playlist.id);
+        if (playlistExportTimestampsMatch) {
+          const playlist_ = playlist;
+          const exported = await exportPlaylistAudio(playlist_, store, playlistDirectory);
+          if (exported.exportId !== exportId) throw new HttpError(404, "Playlist export is not available.");
+          const fileName = exported.fileName.replace(/\.mp3$/i, " - Timestamps.txt");
+          const encodedName = encodeURIComponent(fileName)
+            .replace(/['()*]/g, (character) => "%" + character.charCodeAt(0).toString(16).toUpperCase());
+          response.writeHead(200, {
+            "Content-Type": "text/plain; charset=utf-8",
+            "Content-Disposition": "attachment; filename=\"timestamps.txt\"; filename*=UTF-8''" + encodedName,
+            "Content-Length": Buffer.byteLength(exported.timestampsText),
+            "Cache-Control": "private, no-cache",
+          });
+          response.end(request.method === "HEAD" ? undefined : exported.timestampsText);
+          return;
+        }
+        const exportPath = path.join(playlistDirectory, "exports", `${exportId}.mp3`);
+        if (!existsSync(exportPath)) throw new HttpError(404, "Playlist export is not available.");
+        await sendAudio(request, response, exportPath);
+        return;
+      }
+
+      if (request.method === "GET" && url.pathname === "/api/albums") {
+        // Reading the album library also lets a playlist catch up with tracks
+        // that finished while nothing was watching.
+        for (const task of store.list()) {
+          if (task.compositionMode === "album") await syncAlbumPlaylists(task);
+        }
+        sendJson(response, 200, store.list()
+          .filter((task) => task.compositionMode === "album")
+          .map((task) => ({
+            ...task,
+            playlistIds: playlistStore.listFromAlbum(task.id).map((playlist) => playlist.id),
+          })));
+        return;
+      }
+
+      // Creating an album is the only generating entry point in this family.
+      if (request.method === "POST" && url.pathname === "/api/albums") {
         const value = await readJsonBody(request);
-        if (!isRecord(value)) throw new HttpError(400, "A playlist request is required.");
+        if (!isRecord(value)) throw new HttpError(400, "An album request is required.");
         const referenceChatIds = Array.isArray(value.referenceChatIds)
           ? value.referenceChatIds.filter((id: unknown): id is string => typeof id === "string")
           : [];
@@ -1249,11 +1488,24 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
         });
         if (references.length) input.playlistReferences = references;
         const config = loadConfig(true, await settings.runtimeEnvironment());
-        // parseTaskInput() never yields a moodChatId, so a playlist has no
+        // parseTaskInput() never yields a moodChatId, so an album has no
         // conversation to adopt; MoodMic adoption happens on its own route.
         const task = await store.create(input, config);
+        // Starting an album from the playlist page also opens the playlist that
+        // will hold its tracks. The playlist only references them; it never
+        // generates, and it keeps whatever it already holds if the album changes.
+        const asPlaylist = value.asPlaylist === true;
+        const playlist = asPlaylist
+          ? await playlistStore.create({
+            ...(typeof value.playlistName === "string" ? { name: value.playlistName } : {}),
+            fromAlbumTaskId: task.id,
+          })
+          : undefined;
         startTask(task, config);
-        sendJson(response, 202, task);
+        sendJson(response, 202, {
+          ...task,
+          ...(playlist ? { playlist: resolvePlaylist(playlist, store) } : {}),
+        });
         return;
       }
 
@@ -1349,15 +1601,15 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
         return;
       }
 
-      if (request.method === "PUT" && albumPlaylistMatch?.[1]) {
-        const task = store.get(albumPlaylistMatch[1]);
+      if (request.method === "PUT" && albumTrackOrderMatch?.[1]) {
+        const task = store.get(albumTrackOrderMatch[1]);
         if (!task || task.compositionMode !== "album") throw new HttpError(404, "Album task not found.");
         const value = await readJsonBody(request);
         if (!isRecord(value) || !Array.isArray(value.trackIds)
           || !value.trackIds.every((id: unknown) => typeof id === "string")) {
-          throw new HttpError(400, "A playlist track ID array is required.");
+          throw new HttpError(400, "An album track ID array is required.");
         }
-        sendJson(response, 200, await store.setAlbumPlaylist(task.id, value.trackIds as string[]));
+        sendJson(response, 200, await store.setAlbumTrackOrder(task.id, value.trackIds as string[]));
         return;
       }
 

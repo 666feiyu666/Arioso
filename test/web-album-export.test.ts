@@ -39,7 +39,7 @@ function album(overrides: Partial<MusicTask> = {}): MusicTask {
     mode: "generate", vocalMode: "instrumental", corpusMode: "none",
     compositionMode: "album", workflowType: "04-album", status: "completed",
     composerModel: "test", lyriaModel: "lyria-3.5", createdAt: now, updatedAt: now,
-    albumPlaylist: ["track-3", "track-1"],
+    albumTrackOrder: ["track-3", "track-1"],
     albumTracks: [1, 2, 3].map((number): AlbumTrackTask => ({
       id: `track-${number}`, order: number, title: `Candidate ${number}`,
       targetDurationSeconds: 150, status: "completed",
@@ -103,7 +103,7 @@ describe("album MP3 export", () => {
   it("exports candidates in original track order, includes admitted tracks, and skips excluded tracks", async () => {
     const task = album();
     task.albumTracks![2]!.admission = "excluded";
-    task.albumPlaylist = ["track-1"];
+    task.albumTrackOrder = ["track-1"];
     task.albumTracks = [task.albumTracks![2]!, task.albumTracks![0]!, task.albumTracks![1]!];
     await withWebServer(async ({ baseUrl }) => {
       const before = await taskResponse(baseUrl);
@@ -120,7 +120,7 @@ describe("album MP3 export", () => {
       const original = await exportAlbum(baseUrl, "included");
       expect(Buffer.from(await original.arrayBuffer())).toEqual(Buffer.concat([audioFrames(3), audioFrames(1)]));
 
-      const reorder = await fetch(`${baseUrl}/api/tasks/${TASK_ID}/album/playlist`, {
+      const reorder = await fetch(`${baseUrl}/api/tasks/${TASK_ID}/album/track-order`, {
         method: "PUT", body: JSON.stringify({ trackIds: ["track-1", "track-3"] }),
       });
       expect(reorder.status).toBe(200);
@@ -143,7 +143,7 @@ describe("album MP3 export", () => {
   });
 
   it("exports a single selected track without requiring a second input", async () => {
-    const task = album({ albumPlaylist: ["track-1"] });
+    const task = album({ albumTrackOrder: ["track-1"] });
     task.albumTracks![2]!.admission = "candidate";
     await withWebServer(async ({ baseUrl }) => {
       const before = await taskResponse(baseUrl);
@@ -174,7 +174,7 @@ describe("album MP3 export", () => {
   });
 
   it("rejects an empty included selection or an entirely excluded candidate pool", async () => {
-    const task = album({ albumPlaylist: [] });
+    const task = album({ albumTrackOrder: [] });
     for (const track of task.albumTracks!) track.admission = "excluded";
     await withWebServer(async ({ baseUrl }) => {
       await expectInvalidExport(await exportAlbum(baseUrl));
@@ -208,7 +208,7 @@ describe("album MP3 export", () => {
 
   it.each([["track-1"], ["track-1", "track-1"], ["track-1", "track-unknown"]])(
     "rejects a saved playlist that does not contain every included track exactly once: %j", async (...trackIds) => {
-      const task = album({ albumPlaylist: trackIds });
+      const task = album({ albumTrackOrder: trackIds });
       await withWebServer(async ({ baseUrl }) => {
         await expectInvalidExport(await exportAlbum(baseUrl));
       }, { prepare: (root) => prepareAlbum(root, task) });
@@ -282,7 +282,7 @@ describe("album MP3 export", () => {
       });
       expect(response.status).toBe(200);
       const manifest = await response.json() as { audioUrl: string };
-      const reorder = await fetch(`${baseUrl}/api/tasks/${TASK_ID}/album/playlist`, {
+      const reorder = await fetch(`${baseUrl}/api/tasks/${TASK_ID}/album/track-order`, {
         method: "PUT", body: JSON.stringify({ trackIds: ["track-1", "track-3"] }),
       });
       expect(reorder.status).toBe(200);
@@ -344,7 +344,7 @@ describe("album MP3 export", () => {
       expect(response.status).toBe(200);
       const manifest = await response.json() as { timestampsUrl: string; timestampsText: string };
       expect(manifest.timestampsUrl).toEqual(expect.any(String));
-      const reorder = await fetch(`${baseUrl}/api/tasks/${TASK_ID}/album/playlist`, {
+      const reorder = await fetch(`${baseUrl}/api/tasks/${TASK_ID}/album/track-order`, {
         method: "PUT", body: JSON.stringify({ trackIds: ["track-1", "track-3"] }),
       });
       expect(reorder.status).toBe(200);

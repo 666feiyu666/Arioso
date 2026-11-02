@@ -93,7 +93,7 @@ describe("Background Music Producer lifecycle", () => {
     expect(mocks.compose).toHaveBeenCalledTimes(14);
     expect(mocks.review).toHaveBeenCalledTimes(2);
     expect(mocks.generate).toHaveBeenCalledTimes(14);
-    expect(completed).toMatchObject({ status: "completed", albumPlaylist: [], albumProduction: {
+    expect(completed).toMatchObject({ status: "completed", albumTrackOrder: [], albumProduction: {
       role: "background_music_producer", status: "completed", stage: "delivery", listeningReview: "pending", durationSeconds: 14,
       videoCreated: true,
     } });
