@@ -30,10 +30,10 @@ Commands use an argument array without shell interpolation.
 
 The current denoiser averages stereo to mono, runs at 44.1 kHz on CPU,
 and exports 24-bit WAV. It processes all non-excluded generated candidates in
-their original numbered order. It preserves their relative levels using one
-constant attenuation for peak headroom; this is not loudness normalization.
-The workflow does not measure whether denoising improves musical quality.
-Compare originals and cleaned audio before admitting tracks to a final playlist.
+their original numbered order. Levels are preserved by applying one constant
+attenuation for peak headroom to every track. Denoising quality is judged by
+listening: compare originals and cleaned audio before admitting tracks to a final
+playlist.
 Candidate admissions and playlist order are not changed automatically.
 
 ## Delivery and recovery

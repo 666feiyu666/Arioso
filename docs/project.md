@@ -1,6 +1,6 @@
 # Arioso Documentation
 
-Arioso is an agentic music-composition workspace. An agent first turns a human idea into an explicit musical plan, then a music-generation model realizes that plan as audio. MoodMic, the conversational entry point, carries one piece from a described feeling through a listening review, and can continue a kept piece into an album. This file is the documentation entry point; long-term product intent and the implemented repository state are deliberately kept separate.
+Arioso is an agentic music-composition workspace. An agent first turns a human idea into an explicit musical plan, then a music-generation model realizes that plan as audio. MoodMic, the conversational entry point, carries one piece from a described feeling through a listening review, and can continue a kept piece into an album. This file is the documentation entry point. Long-term intent lives in `abstract.md`; the implemented state lives in `current.md`.
 
 ## Document map
 
@@ -8,7 +8,7 @@ Arioso is an agentic music-composition workspace. An agent first turns a human i
 - [`current.md`](current.md) records what the repository implements now: MoodMic with its poetry references and confirmed Lyria prompt, the mood calendar, the playlist library, the journey from a piece to an album, the workflow studio, and how all of it differs from the target. Read it before planning an architectural change.
 - [`development.md`](development.md) contains the commands and working practices for developing and testing the current implementation.
 - [`background-music-producer.md`](background-music-producer.md) documents the optional album production workflow in the studio.
-- [`nextphase-plan.md`](nextphase-plan.md) records what is in place for the mood-driven product and what is still open.
+- [`nextphase-plan.md`](nextphase-plan.md) records the next phase's six target outcomes and their order.
 
 ## Maintenance rule
 
@@ -16,4 +16,4 @@ Change `abstract.md` only when the product model, target workflow, or architectu
 
 Update `current.md` when code changes alter the implemented workflow, data model, persistence, interfaces, or known gaps. That includes the MoodMic and mood-entry records, the journey record and its endpoints, and the shared album stage. Source code, tests, configuration, and command help remain authoritative when the snapshot is stale.
 
-Keep this file short. It should explain the documentation structure rather than duplicate either architecture document.
+Keep this file to the document map; the architecture documents carry the detail.

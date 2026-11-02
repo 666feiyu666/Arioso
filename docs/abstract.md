@@ -8,15 +8,13 @@ should become. It interprets the user's intent, retrieves musical context when
 requested, and produces an inspectable plan covering form, instrumentation,
 rhythm, harmony, dynamics, vocals, and production.
 
-The generated audio is a realization of that plan rather than the complete
-project. Arioso retains the plan, its evidence, alternative takes, and the
-relationships among tracks so that creation can continue beyond one prompt and
-one generated file.
+The generated audio realizes that plan. Arioso also retains the plan, its
+evidence, alternative takes, and the relationships among tracks, so creation
+continues beyond one prompt and one file.
 
-The user remains the artistic decision-maker. Arioso may propose structure,
-generate candidates, and report technical evidence, but it does not treat the
-first result as authoritative or claim that automated checks establish musical
-quality.
+The user remains the artistic decision-maker. Arioso proposes structure,
+generates candidates, and reports technical evidence; the first result is one
+candidate among others, and musical quality remains a listening decision.
 
 ## Core workflows
 
@@ -41,15 +39,14 @@ project or a second setup step.
 
 ### From one kept piece to an album
 
-A piece is not only a file. It is evidence of an agreed direction, and it can
-become the first reference for an album. The listener keeps the piece, states a
+A piece carries the agreed direction that produced it, and it can become the
+first reference for an album. The listener keeps the piece, states a
 theme, and confirms how that theme was read before any track is generated. Tracks
 arrive as they finish. The listener then curates: include, exclude, reorder, and
 export.
 
-The album is a set of candidates narrowed by the listener rather than a fixed
-track list. Automated review may report resemblance to the brief, but selection
-and sequencing stay with the listener.
+The album is a set of candidates the listener narrows. Automated review reports
+resemblance to the brief; selection and sequencing stay with the listener.
 
 ### Composition without a corpus
 
@@ -72,16 +69,15 @@ Human idea -> Retrieval -> Musical references -> Agent-composer
            -> Music plan -> Audio generator -> Candidate take
 ```
 
-The corpus is external musical memory, not a source of hidden instructions or a
-license to reproduce an existing work. Retrieved material is evidence for
-musical decisions. Arioso records what was retrieved while keeping reference
-titles and implementation details out of the generation prompt unless the user
-explicitly needs them there.
+The corpus is external musical memory. Retrieved material is evidence for
+musical decisions. Arioso records what was retrieved and keeps reference titles
+and implementation details out of the generation prompt unless the user needs
+them there.
 
 ## First complete product outcome
 
-The first complete product outcome is a small, coherent album rather than an
-isolated generation, reached from one piece the listener kept. A user should be
+The first complete product outcome is a small, coherent album reached from one
+piece the listener kept. A user should be
 able to:
 
 - describe a feeling and settle a musical direction in conversation;
@@ -119,8 +115,8 @@ Album
 
 The album is the top-level creative project. It owns the concept, track order,
 shared sound world, recurring ideas, production constraints, and release-level
-metadata. Cohesion does not mean uniformity: each track needs a distinct
-function within the album arc.
+metadata. Cohesion allows variety: each track holds a distinct function within
+the album arc.
 
 ### Track
 
@@ -137,18 +133,18 @@ instrumental palette, thematic material, production space, dynamic trajectory,
 and transition intent. The contract distinguishes invariants from parameters
 that are expected to develop or transform.
 
-Text descriptions alone cannot guarantee thematic continuity. When long-form
+Text descriptions do not guarantee thematic continuity. When long-form
 quality requires exact recurrence or variation, the architecture should permit
 more explicit representations such as notation, MIDI, motifs, reference audio,
 or another model-specific conditioning format. These representations supplement
-rather than silently replace the user's project plan.
+the user's project plan.
 
 ### Section and take
 
 A section is a planned span with a dramatic function and explicit entry and exit
 conditions. Each generation creates a take associated with the exact prompt,
 model, retrieval evidence, settings, and resulting audio. Takes are immutable
-evidence; selection and assembly point to them rather than overwriting them.
+evidence; selection and assembly reference them by identity.
 
 ### Assembly and album finishing
 
@@ -158,9 +154,8 @@ level matching, loudness measurement, and format conversion. Album finishing
 orders the tracks and applies release-level consistency without erasing the
 intended dynamics of individual works.
 
-These processes can solve duration and presentation problems. They cannot by
-themselves prove formal coherence, successful thematic development, or artistic
-value; those remain listening decisions.
+These processes change duration and presentation. Formal coherence, thematic
+development, and artistic value remain listening decisions.
 
 ## Macro architecture
 
@@ -198,26 +193,25 @@ Short-track generation  Long-form section planning
             Album export
 ```
 
-Two stages sit between a plan and the library in the current product model. A
-single piece is generated and checked against its brief before the listener keeps
-it, and a kept piece can seed the planner as the first reference of an album. The
-diagram above describes the full target; the review and continuation stages are
-what make the first two scopes usable one after the other.
+Two stages sit between a plan and the library: a single piece is generated and
+checked against its brief before the listener keeps it, and a kept piece can seed
+the planner as the album's first reference. The diagram describes the full
+target.
 
 ## Boundaries
 
-Arioso is not initially intended to become:
+Not in scope:
 
 - a general-purpose digital audio workstation;
-- an autonomous system that silently chooses and publishes its own album;
+- an autonomous system that chooses and publishes its own album;
 - a mechanism for imitating a living artist or reproducing protected lyrics or
   melodies;
 - a system that treats retrieved sources as generation instructions; or
 - a benchmark that reduces musical success to schema validity or signal-level
   measurements.
 
-Manual editing or external production tools may remain part of the workflow
-when they provide better musical control than an in-project approximation.
+Manual editing and external production tools remain part of the workflow where
+they give better musical control than an in-project approximation.
 
 ## Architectural invariants
 
@@ -225,13 +219,14 @@ when they provide better musical control than an in-project approximation.
    generation; both remain inspectable afterward.
 2. The album is the top-level project; tracks, sections, and takes have stable
    identities beneath it.
-3. Generated audio is a realization and evidence item, not the entire project.
+3. Generated audio is a realization and an evidence item; the project also holds
+   the plan, the takes, and their relationships.
 4. Corpus retrieval is explicit, traceable, and separated from model-only
    composition.
 5. Retrieved text is untrusted reference evidence, never hidden instructions.
-6. Long-form music is represented structurally rather than requested as one
-   oversized opaque generation.
+6. Long-form music is planned as sections, then generated and assembled.
 7. Candidate takes are preserved; selection and assembly do not rewrite their
    provenance.
-8. Technical validation does not claim artistic quality.
+8. Validation reports technical evidence; artistic judgement belongs to the
+   listener.
 9. The user authorizes final musical selection, sequencing, and export.

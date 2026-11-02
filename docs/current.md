@@ -1,6 +1,6 @@
 # Arioso Current Implementation
 
-This document describes the repository as it exists now. It is an evolving snapshot, not the target architecture. See [`abstract.md`](abstract.md) for the stable product model.
+This document describes the repository as it exists now; it is an evolving snapshot. [`abstract.md`](abstract.md) holds the stable product model.
 
 ## Current shape
 
@@ -122,16 +122,16 @@ The default workflow relies on the model's musical knowledge. The composer is in
 
 ### Music corpus
 
-One bounded retrieval tool serves five music types: `jazz`, `blues`, `electronic`, `instrumental-rock`, and `instrumental-hip-hop`. The Composer calls `search_music_corpus` once, names exactly one type, and records whether the user, the interface, or the Composer chose it. Recognized child styles map to their parent type before retrieval (ambient to electronic, lo-fi hip-hop to instrumental-hip-hop, post-rock to instrumental-rock, modal jazz to jazz, Chicago blues to blues). A request outside the five types stays valid: the Composer uses the no-corpus path and does not claim retrieval.
+One bounded retrieval tool serves five music types: `jazz`, `blues`, `electronic`, `instrumental-rock`, and `instrumental-hip-hop`. The Composer calls `search_music_corpus` once, names exactly one type, and records whether the user, the interface, or the Composer chose it. Recognized child styles map to their parent type before retrieval (ambient to electronic, lo-fi hip-hop to instrumental-hip-hop, post-rock to instrumental-rock, modal jazz to jazz, Chicago blues to blues). A request outside the five types uses the no-corpus path.
 
 Each type keeps two independent TF-IDF indexes:
 
 - `styles.normalized.jsonl` describes the audible conventions of a genre or subgenre;
 - `standards.normalized.jsonl` describes representative works that demonstrate them.
 
-The runtime reads `corpus/music/<type>/` (override with `ARIOSO_MUSIC_CORPUS_ROOT`). A description search returns up to two styles and up to three standards, five references in total. A title search reads standards only, normalizes case, punctuation, whitespace and diacritics, and returns exact matches; no match is reported as an evidence gap rather than filled with a similar work. Retrieved text is reference evidence: the Composer may use instrumentation, rhythm, texture, harmony, form, or production details, but must not mention retrieval, scores, or reference titles in the Lyria prompt. A missing or malformed collection makes that music type explicitly unavailable instead of failing the run.
+The runtime reads `corpus/music/<type>/` (override with `ARIOSO_MUSIC_CORPUS_ROOT`). A description search returns up to two styles and up to three standards, five references in total. A title search reads standards only, normalizes case, punctuation, whitespace and diacritics, and returns exact matches; no match is reported as an evidence gap. Retrieved text is reference evidence: the Composer may use instrumentation, rhythm, texture, harmony, form, or production details, but must not mention retrieval, scores, or reference titles in the Lyria prompt. A missing or malformed collection makes that music type unavailable.
 
-Only types with both normalized collections are offered by the capabilities endpoint, the workflow selector, and MoodMic. Jazz is the populated type today; the other four await source collection, so the generic interfaces stay bounded to what the corpus actually supports. Each task stores a `musicRetrieval` trace: music type, selection source, query, mode, style reference IDs, and standard reference IDs. Historical tasks that stored `corpusMode: "jazz"` and a `retrievalQuery` remain readable.
+A music type is offered by the capabilities endpoint, the workflow selector, and MoodMic when both of its normalized collections load. All five types load today; Jazz holds the largest standards set (606 records). Each task stores a `musicRetrieval` trace: music type, selection source, query, mode, style reference IDs, and standard reference IDs. Historical tasks that stored `corpusMode: "jazz"` and a `retrievalQuery` remain readable.
 
 The Jazz collection was migrated from `corpus/jazz/` to `corpus/music/jazz/`; `src/corpus/build-music-corpus.mjs` writes the canonical `styles.normalized.jsonl` and `standards.normalized.jsonl` from the existing normalized artifacts. This supersedes the earlier poetry refinement's note that the music corpus reorganization was deferred. `ARIOSO_JAZZ_CORPUS` remains a temporary fallback for a Jazz-only corpus directory.
 
@@ -145,7 +145,7 @@ The `orchestral` scope plans one multi-movement work first. `OrchestralWorkPlan`
 
 ### Themed albums
 
-The `album` scope plans a cohesive set of candidates rather than one work. The album agent produces an `AlbumPlan` (1.0): a shared sound contract, a cohesion strategy, and 12 to 28 consecutively numbered outlines of 60 to 180 seconds each, with at least three distinct durations. A reviewer pass (`AlbumReview`) records similarities and per-candidate verdicts. Each candidate is composed and generated into an `AlbumTrackTask`; the task tracks admissions (`candidate`, `included`, `excluded`), revisions, and an ordered `albumPlaylist` that can be reordered and retried.
+The `album` scope plans a cohesive set of candidates. The album agent produces an `AlbumPlan` (1.0): a shared sound contract, a cohesion strategy, and 12 to 28 consecutively numbered outlines of 60 to 180 seconds each, with at least three distinct durations. A reviewer pass (`AlbumReview`) records similarities and per-candidate verdicts. Each candidate is composed and generated into an `AlbumTrackTask`; the task tracks admissions (`candidate`, `included`, `excluded`), revisions, and an ordered `albumPlaylist` that can be reordered and retried.
 
 The workflow studio's album page uses these same records through the `04-album` workflow, which starts generating after planning. The `05-playlist` variant is created by the playlist page and by a journey; it adds references and pauses for plan confirmation.
 
@@ -208,11 +208,11 @@ The local web application provides:
 
 Other route families: `/api/tasks` and `/api/tasks/<id>` with audio, movements, album tracks, album playlist, album export, prompt confirmation, review, retry, and production artifacts; `/api/discussions/...`; `/api/mood-chats/...`; `/api/mood-entries/...` and `/api/mood-entries/classify`; `/api/playlists/...`; `/api/journeys/...`; and `/api/settings/...`.
 
-Tasks move through `queued`, `composing`, `planning`, `generating`, `review`, `assembling`, `processing`, `completed`, or `failed`. `planning` is a MoodMic piece whose composed Lyria prompt awaits confirmation; `review` is used by the MoodMic listening review and by a playlist plan waiting for confirmation. Each task is saved as JSON under `outputs/tasks` with its audio; interrupted active tasks are marked failed on startup rather than resumed. Retrying reuses an existing `MusicSpec` when present. A task carries `workflowType`, `compositionMode`, and its scope-specific records (`albumPlan`, `albumTracks`, `orchestralPlan`, `movements`, `albumProduction`), plus optional journey lineage (`journeyId`, `parentTaskId`), the playlist plan revision (`albumPlanRevision`), and the Lyria prompt confirmation (`lyriaPromptApproved`).
+Tasks move through `queued`, `composing`, `planning`, `generating`, `review`, `assembling`, `processing`, `completed`, or `failed`. `planning` is a MoodMic piece whose composed Lyria prompt awaits confirmation; `review` is used by the MoodMic listening review and by a playlist plan waiting for confirmation. Each task is saved as JSON under `outputs/tasks` with its audio; interrupted active tasks are marked failed on startup. Retrying reuses an existing `MusicSpec` when present. A task carries `workflowType`, `compositionMode`, and its scope-specific records (`albumPlan`, `albumTracks`, `orchestralPlan`, `movements`, `albumProduction`), plus optional journey lineage (`journeyId`, `parentTaskId`), the playlist plan revision (`albumPlanRevision`), and the Lyria prompt confirmation (`lyriaPromptApproved`).
 
 Credentials may be held for the current server session or, with explicit user selection, written to the local `.env`. The settings API returns only masked credential summaries and never the complete stored value.
 
-Creative discussions persist separately under `outputs/discussions`; uploaded JPEG, PNG, and WebP references are stored as attachment files rather than embedded in session JSON. Discussion turns do not create tasks.
+Creative discussions persist separately under `outputs/discussions`; uploaded JPEG, PNG, and WebP references are stored as attachment files outside session JSON. Discussion turns do not create tasks.
 
 The browser presents the discussion and its linked task as one continuous creative-session timeline. A LangGraph state graph resolves the visible phase from discussion state and the latest task state, covering discussion, prompt approval, queueing, composition, generation, assembly, processing, completion, and failure. `MusicTask` remains a separate execution record for recovery and retry, while the sidebar and workspace use the parent creative session whenever one exists. Legacy tasks without a session remain available.
 
@@ -234,19 +234,19 @@ Secrets belong in the local `.env` or the in-memory settings session. They must 
 
 ## Differences from the abstract architecture
 
-The implementation covers the three composition modes, the MoodMic journey, and an album candidate flow, but parts of the abstract architecture remain unimplemented:
+The implementation covers the three composition modes, the MoodMic journey, and an album candidate flow. These parts of the abstract architecture are not implemented:
 
 - no persistent `Album -> Track -> Section -> Take` hierarchy; an album is one task with `AlbumTrackTask` records, not nested projects;
 - candidates share only the plan's sound contract and the playlist, not a stable album identity;
-- a section list still produces one prompt, not separately generated and assembled takes;
+- a section list produces one prompt; sections are not generated and assembled separately;
 - orchestral assembly joins whole movements; no section-level continuation, transition generation, beat or key alignment, crossfade, or loudness matching;
 - no take-level comparison or retention of superseded generations;
 - no release-level metadata;
-- only Jazz has validated style and standard collections; the other four music types are coded but stay unavailable until their corpora exist;
+- all five music types have a collection manifest with normalized style and standard files; record counts range from 6 (instrumental-hip-hop styles) to 606 (Jazz standards);
 - poetry retrieval is wired into MoodMic only; the workflow studio's direction conversation does not retrieve poems;
 - the two-paragraph brief and the poetry-on/off comparison have deterministic coverage but no recorded live text evaluation;
-- evaluation covers schemas and behavior, not listening coherence or album diversity; and
-- the journey has only been exercised with fake providers, so its end-to-end behavior against live Lyria and Gemini is still unverified.
+- evaluation covers schemas and behavior; listening coherence and album diversity are unmeasured; and
+- the journey has been exercised with fake providers; its end-to-end behavior against live Lyria and Gemini is unverified.
 
 ## Authoritative implementation references
 
@@ -279,4 +279,4 @@ The implementation covers the three composition modes, the MoodMic journey, and 
 - browser client: `web/` (shared album stage in `web/album-view.js`)
 - regression behavior: `test/`
 
-When exact behavior matters, inspect these sources and the current command help rather than relying on this snapshot alone.
+When exact behavior matters, inspect these sources and the current command help.

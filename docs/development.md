@@ -88,19 +88,18 @@ Poetry retrieval has its own focused set:
 npx vitest run test/poem-retriever.test.ts test/poem-retriever-english.test.ts test/discussion-poem-references.test.ts
 ```
 
-Live provider calls are not part of the default verification set. Use them only
-when the change requires new external evidence, and do not mistake a technically
-successful generation for proof of musical quality. The journey has only been
-verified with fake providers so far; its first live run is still outstanding.
+Live provider calls are not part of the default verification set. Use them when
+the change requires new external evidence. Journey verification uses fake
+providers; its first live run is outstanding.
 
 ## Rebuild corpus material
 
 The runtime reads one canonical layout, `corpus/music/<type>/`, with two
 normalized collections per music type: `styles.normalized.jsonl` and
-`standards.normalized.jsonl`. Jazz is populated; Blues, Electronic, Instrumental
-Rock and Instrumental Hip-Hop stay unavailable until their collections exist.
-The migration step rewrites the canonical files from the existing Jazz
-artifacts without collecting new data:
+`standards.normalized.jsonl`. Each music collection has a manifest and both
+normalized files; Jazz holds the largest standards set. The
+migration step rewrites the canonical Jazz files from the existing artifacts
+without collecting new data:
 
 ```powershell
 node src/corpus/build-music-corpus.mjs
@@ -134,8 +133,8 @@ page provenance. Normalization retains music-specific source excerpts, then
 rebuilds the combined file and its count manifest. `corpus:normalize:jazz` also
 rebuilds both normalized standards sources and their combination. The count
 unit is a source document about a tune, so different sources discussing the
-same tune remain separate records. Book-derived text retains its own copyright
-metadata rather than inheriting Wikipedia's license.
+same tune remain separate records. Book-derived text carries its own copyright
+metadata and licence.
 
 ## Rebuild the poetry corpora
 
@@ -158,14 +157,13 @@ no other dependency is required.
 
 Both importers write a manifest with a sha256 checksum, and the retriever uses
 that checksum as its corpus version while refusing a mismatched file. A rebuilt
-corpus therefore invalidates previously stored traces instead of silently
-reusing old reference ids. The mood vocabulary in
+corpus invalidates previously stored traces. The mood vocabulary in
 `corpus/poem/mood-lexicon.json` is shared by both importers and the retriever,
 so a change there must be reapplied to both corpora.
 
 ## Generated and local state
 
-The following are runtime state or evidence rather than hand-authored source:
+Runtime state and evidence:
 
 - generated MP3 and metadata files under the output root (`outputs/` by default;
   `ARIOSO_OUTPUT_DIR` moves the whole root);
