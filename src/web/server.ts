@@ -51,6 +51,7 @@ import {
   sendFile,
   sendJson,
   serveAsset,
+  servePage,
   serveStatic,
 } from "./http.js";
 import { isRecord } from "../utils/validation.js";
@@ -1900,6 +1901,12 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
       if ((request.method === "GET" || request.method === "HEAD")
         && url.pathname.startsWith("/assets/")) {
         await serveAsset(url.pathname.slice("/assets/".length), response, request.method);
+        return;
+      }
+
+      if ((request.method === "GET" || request.method === "HEAD")
+        && (url.pathname === "/" || url.pathname.endsWith(".html"))) {
+        await servePage(url.pathname, response, request.method, await settings.language());
         return;
       }
 

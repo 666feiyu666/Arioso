@@ -728,6 +728,8 @@ function renderComposerContext() {
 
 function applyTranslations() {
   document.documentElement.lang = state.language;
+  // boot-lang.js holds the translated text back until this point.
+  document.documentElement.removeAttribute("data-ari-lang-pending");
   document.title = t("pageTitle");
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     element.textContent = t(element.dataset.i18n);
@@ -2194,6 +2196,14 @@ async function submitTask(event, approvedPrompt) {
 }
 
 async function loadSettings() {
+  // The server already stamped the language on this page; only ask the API
+  // when a page was served without it.
+  const stamped = document.documentElement.dataset.ariLang;
+  if (stamped === "en" || stamped === "zh-CN") {
+    state.language = stamped;
+    applyTranslations();
+    return;
+  }
   const response = await fetch("/api/settings", { cache: "no-store" });
   const result = await response.json();
   if (!response.ok) throw new Error(result.error || t("settingsLoadFailed"));
@@ -2356,8 +2366,10 @@ document.querySelector("#open-settings").addEventListener("click", async () => {
 
 elements.form.hidden = true;
 try {
-  await loadCapabilities();
+  // The language first: loadCapabilities may take a moment, and the page
+  // should not sit there untranslated while it runs.
   await loadSettings();
+  await loadCapabilities();
 } catch {
   applyTranslations();
 }

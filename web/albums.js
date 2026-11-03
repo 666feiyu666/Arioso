@@ -24,6 +24,7 @@ const COPY = {
   "zh-CN": {
     tabMoodMic: "MoodMic", tabCalendar: "心情日历（测试）", tabWorkflow: "工作流",
     tabAlbums: "专辑", tabPlaylist: "歌单", tabHelp: "帮助", tabBarLabel: "主导航", switchLanguage: "切换界面语言",
+    pageTitle: "Arioso · 专辑",
     title: "专辑",
     libraryNote: "选一张继续制作，或者新建一张。",
     recentTitle: "最近更新",
@@ -74,6 +75,7 @@ const COPY = {
   en: {
     tabMoodMic: "MoodMic", tabCalendar: "Mood calendar (test)", tabWorkflow: "Workflow",
     tabAlbums: "Albums", tabPlaylist: "Playlists", tabHelp: "Help", tabBarLabel: "Tab navigation", switchLanguage: "Switch interface language",
+    pageTitle: "Arioso · Albums",
     title: "Albums",
     libraryNote: "Pick one to keep working on, or start a new album.",
     recentTitle: "Recently updated",
@@ -135,7 +137,8 @@ const root = document.querySelector("#pl-main");
 const drawerRoot = document.querySelector("#pl-drawer-root");
 const langToggle = document.querySelector("#lang-toggle");
 
-let language = "zh-CN";
+const stampedLanguage = document.documentElement.dataset.ariLang;
+let language = stampedLanguage === "en" || stampedLanguage === "zh-CN" ? stampedLanguage : "zh-CN";
 let preview = null;
 const state = {
   view: "library",
@@ -169,6 +172,9 @@ function applyI18n() {
   for (const node of document.querySelectorAll("[data-i18n]")) node.textContent = t(node.dataset.i18n);
   for (const node of document.querySelectorAll("[data-i18n-aria-label]")) node.setAttribute("aria-label", t(node.dataset.i18nAriaLabel));
   langToggle.textContent = language === "zh-CN" ? "EN" : "中文";
+  document.title = t("pageTitle");
+  // boot-lang.js holds the translated text back until this point.
+  document.documentElement.removeAttribute("data-ari-lang-pending");
 }
 
 async function api(path, options) {
@@ -793,10 +799,14 @@ langToggle.addEventListener("click", () => {
 });
 
 async function boot() {
-  try {
-    const settings = await api("/api/settings");
-    if (settings.language === "en" || settings.language === "zh-CN") language = settings.language;
-  } catch { /* default language */ }
+  // Apply the static copy before the first fetch; render() applies it again.
+  applyI18n();
+  if (!stampedLanguage) {
+    try {
+      const settings = await api("/api/settings");
+      if (settings.language === "en" || settings.language === "zh-CN") language = settings.language;
+    } catch { /* default language */ }
+  }
   await loadTasks();
   render();
   restorePlayback();

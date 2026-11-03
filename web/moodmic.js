@@ -1975,6 +1975,10 @@ document.querySelector("#open-settings").addEventListener("click", () => {
 
 async function boot() {
   state.language = await readLanguage();
+  // Apply the static copy before the first fetch, so the page is not left
+  // untranslated (or held back by boot-lang.js) while the data loads.
+  applyI18n(COPY, state.language);
+  langToggle.textContent = state.language === "zh-CN" ? "EN" : "中文";
   state.sideCollapsed = readSidePreference();
   await Promise.all([loadDiscussions(), loadEntries(), loadMusicTypes()]);
   const params = new URLSearchParams(window.location.search);

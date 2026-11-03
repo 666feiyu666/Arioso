@@ -1,5 +1,5 @@
 import { createReadStream } from "node:fs";
-import { stat } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import path from "node:path";
 import { pipeline } from "node:stream/promises";
@@ -268,6 +268,57 @@ async function serveFromRoot(
 /** Serve files from the web/ directory (pages, scripts, styles). */
 export function serveStatic(pathname: string, response: ServerResponse, method = "GET"): Promise<void> {
   return serveFromRoot(WEB_ROOT, pathname, response, method);
+}
+
+/**
+ * Serve an HTML page with the interface language stamped on the document.
+ *
+ * The pages are written in the default language, and their scripts translate
+ * them once they run. Stamping the chosen language before the markup reaches
+ * the browser lets the first paint use it, so moving between pages no longer
+ * shows one language and then the other.
+ */
+export async function servePage(
+  pathname: string,
+  response: ServerResponse,
+  method: string,
+  language: string,
+): Promise<void> {
+  const relative = pathname === "/" ? "index.html" : pathname.replace(/^\/+/, "");
+  const filePath = path.resolve(WEB_ROOT, relative);
+  const relativePath = path.relative(WEB_ROOT, filePath);
+
+  if (relativePath.startsWith("..") || path.isAbsolute(relativePath)) {
+    sendJson(response, 404, { error: "Not found." });
+    return;
+  }
+
+  let html: string;
+  try {
+    html = await readFile(filePath, "utf8");
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      sendJson(response, 404, { error: "Not found." });
+      return;
+    }
+    throw error;
+  }
+
+  const stamped = html.replace(
+    /<html lang="[^"]*"/,
+    `<html lang="${language}" data-ari-lang="${language}"`,
+  );
+  const payload = Buffer.from(stamped, "utf8");
+  response.writeHead(200, {
+    "Content-Type": MIME_TYPES[".html"],
+    "Content-Length": payload.byteLength,
+    "Cache-Control": "no-cache",
+  });
+  if (method === "HEAD") {
+    response.end();
+    return;
+  }
+  response.end(payload);
 }
 
 /** Serve the project's Assets/ directory, e.g. the mood example audio. */

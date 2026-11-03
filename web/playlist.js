@@ -12,6 +12,7 @@ const COPY = {
   "zh-CN": {
     tabMoodMic: "MoodMic", tabAlbums: "专辑", tabCalendar: "心情日历（测试）", tabWorkflow: "工作流",
     tabPlaylist: "歌单", tabHelp: "帮助", tabBarLabel: "主导航", switchLanguage: "切换界面语言",
+    pageTitle: "Arioso · 歌单",
     title: "歌单", libraryNote: "把已有的曲子排成一张歌单，或者从一张新专辑开始。",
     newPlaylist: "新建歌单", newPlaylistLabel: "新建歌单",
     emptyShelf: "还没有歌单。",
@@ -61,6 +62,7 @@ const COPY = {
   en: {
     tabMoodMic: "MoodMic", tabAlbums: "Albums", tabCalendar: "Mood calendar (test)", tabWorkflow: "Workflow",
     tabPlaylist: "Playlists", tabHelp: "Help", tabBarLabel: "Tab navigation", switchLanguage: "Switch interface language",
+    pageTitle: "Arioso · Playlists",
     title: "Playlists", libraryNote: "Order pieces you already have, or start from a new album.",
     newPlaylist: "New playlist", newPlaylistLabel: "New playlist",
     emptyShelf: "No playlists yet.",
@@ -113,7 +115,8 @@ const root = document.querySelector("#pl-main");
 const drawerRoot = document.querySelector("#pl-drawer-root");
 const langToggle = document.querySelector("#lang-toggle");
 
-let language = "zh-CN";
+const stampedLanguage = document.documentElement.dataset.ariLang;
+let language = stampedLanguage === "en" || stampedLanguage === "zh-CN" ? stampedLanguage : "zh-CN";
 const state = {
   view: "library",
   loading: true,
@@ -161,6 +164,9 @@ function applyI18n() {
   for (const node of document.querySelectorAll("[data-i18n]")) node.textContent = t(node.dataset.i18n);
   for (const node of document.querySelectorAll("[data-i18n-aria-label]")) node.setAttribute("aria-label", t(node.dataset.i18nAriaLabel));
   langToggle.textContent = language === "zh-CN" ? "EN" : "中文";
+  document.title = t("pageTitle");
+  // boot-lang.js holds the translated text back until this point.
+  document.documentElement.removeAttribute("data-ari-lang-pending");
 }
 
 async function api(path, options) {
@@ -1032,6 +1038,7 @@ async function loadReferences() {
 }
 
 async function loadLanguage() {
+  if (stampedLanguage) return;
   try {
     const settings = await api("/api/settings");
     if (settings?.language) language = settings.language;
@@ -1042,6 +1049,8 @@ async function loadLanguage() {
 
 async function boot() {
   await loadLanguage();
+  // Apply the static copy before the first fetch; render() applies it again.
+  applyI18n();
   root.addEventListener("click", handleClick);
   drawerRoot.addEventListener("click", handleClick);
   document.addEventListener("input", handleInput);

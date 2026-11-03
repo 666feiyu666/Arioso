@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#e8ebf1" />
+    <script src="/boot-lang.js"></script>
     <title>帮助说明 · Arioso</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -202,6 +203,8 @@
         }
         document.title = dict.pageTitle ?? document.title;
         toggle.textContent = language === "zh-CN" ? "EN" : "中文";
+        // boot-lang.js holds the translated text back until this point.
+        document.documentElement.removeAttribute("data-ari-lang-pending");
       }
 
       async function setLanguage(next, persist) {
@@ -222,14 +225,21 @@
 
       toggle.addEventListener("click", () => setLanguage(language === "zh-CN" ? "en" : "zh-CN", true));
 
-      try {
-        const response = await fetch("/api/settings", { cache: "no-store" });
-        if (response.ok) {
-          const settings = await response.json();
-          if (settings.language === "en" || settings.language === "zh-CN") language = settings.language;
+      // The server stamps the language on the page; only ask the API when it
+      // was served without one.
+      const stamped = document.documentElement.dataset.ariLang;
+      if (stamped === "en" || stamped === "zh-CN") {
+        language = stamped;
+      } else {
+        try {
+          const response = await fetch("/api/settings", { cache: "no-store" });
+          if (response.ok) {
+            const settings = await response.json();
+            if (settings.language === "en" || settings.language === "zh-CN") language = settings.language;
+          }
+        } catch {
+          /* Fall back to the default language. */
         }
-      } catch {
-        /* Fall back to the default language. */
       }
       apply();
     </script>

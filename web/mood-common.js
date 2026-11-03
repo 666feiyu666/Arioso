@@ -149,9 +149,23 @@ export function applyI18n(dict, language) {
     if (typeof value === "string") node.setAttribute("aria-label", value);
   }
   if (typeof active.pageTitle === "string") document.title = active.pageTitle;
+  revealLanguage();
+}
+
+/** The language the server stamped on this page, or null when it did not. */
+export function pageLanguage() {
+  const value = document.documentElement.dataset.ariLang;
+  return value === "en" || value === "zh-CN" ? value : null;
+}
+
+/** Show the text boot-lang.js held back until the dictionary was applied. */
+export function revealLanguage() {
+  document.documentElement.removeAttribute("data-ari-lang-pending");
 }
 
 export async function readLanguage() {
+  const stamped = pageLanguage();
+  if (stamped) return stamped;
   try {
     const settings = await api("/api/settings");
     if (settings?.language === "en" || settings?.language === "zh-CN") return settings.language;
