@@ -128,7 +128,7 @@ describe("Playlist references and creation", () => {
     }, { prepare: prepareMoodMic, environment });
   });
 
-  it("plans a 05-playlist album, pauses for confirmation, then generates on approval", async () => {
+  it("plans a referenced album, pauses for confirmation, then generates on approval", async () => {
     await withWebServer(async ({ baseUrl }) => {
       const response = await fetch(`${baseUrl}/api/albums`, {
         method: "POST", headers: { "Content-Type": "application/json" },
@@ -142,7 +142,7 @@ describe("Playlist references and creation", () => {
         id: string; status: string; workflowType: string; compositionMode: string;
         albumCandidateCount: number; playlistReferences: Array<{ chatId: string; prompt: string }>;
       };
-      expect(task.workflowType).toBe("05-playlist");
+      expect(task.workflowType).toBe("04-album");
       expect(task.compositionMode).toBe("album");
       expect(task.albumCandidateCount).toBe(14);
       expect(task.playlistReferences).toHaveLength(1);

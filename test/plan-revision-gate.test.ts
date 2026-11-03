@@ -133,8 +133,8 @@ function playlistRecord(overrides: Record<string, unknown> = {}): Record<string,
   const plan = albumPlan("Night Set");
   return {
     id: albumTaskId, description: "A late-night instrumental set",
-    workflowType: "05-playlist", compositionMode: "album", mode: "generate",
-    status: "review", albumPlanRevision: 2,
+    workflowType: "04-album", compositionMode: "album", mode: "generate",
+    playlistReferences: [], status: "review", albumPlanRevision: 2,
     albumPlan: plan,
     playlistBriefing: briefing(),
     playlistPlanApproved: false,
@@ -151,7 +151,7 @@ async function writePlaylistTask(
   root: string,
   record: Record<string, unknown> = playlistRecord(),
 ): Promise<void> {
-  const directory = path.join(root, "outputs", "tasks", "05-playlist", albumTaskId);
+  const directory = path.join(root, "outputs", "tasks", "04-album", albumTaskId);
   await mkdir(directory, { recursive: true });
   await writeFile(path.join(directory, "task.json"), JSON.stringify({
     composerModel: "test", lyriaModel: "lyria-3.5",

@@ -36,7 +36,7 @@ async function withAlbum(
       } satisfies AriosoConfig;
       const task = await store.create(parseTaskInput({
         description: "A cover test album",
-        workflowType: "05-playlist",
+        workflowType: "04-album",
         candidateCount: 12,
         targetTotalMinutes: 30,
       }), config);

@@ -622,7 +622,9 @@ function normalizeMusicReference(value) {
 }
 
 function normalizeWorkflowType(value) {
-  return value === "02-jazz" ? "02-music" : value;
+  if (value === "02-jazz") return "02-music";
+  if (value === "05-playlist") return "04-album";
+  return value;
 }
 
 /** Resolves the reference setting for a task, including historical Jazz records. */
@@ -646,7 +648,7 @@ function musicReferenceLabel(value) {
 
 function workflowTypeForTask(task) {
   const workflowType = normalizeWorkflowType(task.workflowType);
-  if (["01-general", "02-music", "03-orchestral", "04-album", "05-playlist"].includes(workflowType)) {
+  if (["01-general", "02-music", "03-orchestral", "04-album"].includes(workflowType)) {
     return workflowType;
   }
   if (task.compositionMode === "orchestral") return "03-orchestral";

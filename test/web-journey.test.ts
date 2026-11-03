@@ -213,7 +213,7 @@ describe("Journey: mood to song to album", () => {
       expect(created.albumTask?.parentTaskId).toBe(songTaskId);
       expect(created.albumTask?.journeyId).toBe(journeyId);
       expect(created.albumTask?.playlistReferences?.[0]).toMatchObject({ chatId, taskId: songTaskId });
-      expect(created.albumTask?.workflowType).toBe("05-playlist");
+      expect(created.albumTask?.workflowType).toBe("04-album");
 
       const reviewing = await waitForJourney(baseUrl, chatId, (body) => body.journey.phase === "album-review");
       expect(reviewing.albumTask?.status).toBe("review");

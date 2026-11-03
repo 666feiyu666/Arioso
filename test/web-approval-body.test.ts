@@ -72,8 +72,8 @@ function playlistRecord(): Record<string, unknown> {
   const plan = albumPlan();
   return {
     id: albumTaskId, description: "A late-night instrumental set",
-    workflowType: "05-playlist", compositionMode: "album", mode: "generate",
-    status: "review", albumPlanRevision: 2, albumPlan: plan,
+    workflowType: "04-album", compositionMode: "album", mode: "generate",
+    playlistReferences: [], status: "review", albumPlanRevision: 2, albumPlan: plan,
     playlistBriefing: {
       intentReading: "A quiet late-night set.",
       referenceReadings: [{ title: "Rain", understood: "Slow piano.", usedFor: "Shared tone." }],
@@ -88,7 +88,7 @@ function playlistRecord(): Record<string, unknown> {
 }
 
 async function prepare(root: string, withJourney = false): Promise<void> {
-  const directory = path.join(root, "outputs", "tasks", "05-playlist", albumTaskId);
+  const directory = path.join(root, "outputs", "tasks", "04-album", albumTaskId);
   await mkdir(directory, { recursive: true });
   await writeFile(path.join(directory, "task.json"), JSON.stringify({
     composerModel: "test", lyriaModel: "lyria-3.5",

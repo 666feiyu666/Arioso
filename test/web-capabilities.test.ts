@@ -14,7 +14,7 @@ describe("web capabilities API", () => {
       expect(await response.json()).toEqual({
         apiVersion: 12,
         version: expect.any(String),
-        workflows: ["01-general", "02-music", "03-orchestral", "04-album", "05-playlist"],
+        workflows: ["01-general", "02-music", "03-orchestral", "04-album"],
         discussionSessions: true,
         creativeSessionTimeline: true,
         discussionImages: {

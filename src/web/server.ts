@@ -569,7 +569,7 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
         const capabilities = {
           apiVersion: 12,
           version: APPLICATION_VERSION,
-          workflows: ["01-general", "02-music", "03-orchestral", "04-album", "05-playlist"],
+          workflows: ["01-general", "02-music", "03-orchestral", "04-album"],
           discussionSessions: true,
           creativeSessionTimeline: true,
           discussionImages: { types: ["image/jpeg", "image/png", "image/webp"], maximumBytes: MAX_DISCUSSION_IMAGE_BYTES },
@@ -1481,12 +1481,14 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
           vocalMode: "instrumental",
           corpusMode: "none",
           compositionMode: "album",
-          workflowType: "05-playlist",
+          workflowType: "04-album",
           candidateCount: value.candidateCount,
           targetTotalMinutes: value.targetTotalMinutes,
           lyriaModel: "lyria-3.5",
         });
-        if (references.length) input.playlistReferences = references;
+        // A referenced album always records its references (possibly none), which
+        // is what marks it for the plan-confirmation flow in runAlbumTask.
+        input.playlistReferences = references;
         const config = loadConfig(true, await settings.runtimeEnvironment());
         // parseTaskInput() never yields a moodChatId, so an album has no
         // conversation to adopt; MoodMic adoption happens on its own route.
@@ -1622,7 +1624,7 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
         }
         const config = loadConfig(true, await settings.runtimeEnvironment());
         const queued = await decideTask(taskId, async (task) => {
-          if (!task || task.workflowType !== "05-playlist" || task.compositionMode !== "album") {
+          if (!task || !Array.isArray(task.playlistReferences) || task.compositionMode !== "album") {
             throw new HttpError(404, "Playlist task not found.");
           }
           if (!task.albumPlan || !task.playlistBriefing) {
@@ -1657,7 +1659,7 @@ export async function createAriosoServer(options: AriosoServerOptions = {}) {
         // Gate 1: a short state transition that claims the revision. An approval
         // arriving now is rejected instead of confirming a plan being rewritten.
         const claimed = await decideTask(taskId, async (task) => {
-          if (!task || task.workflowType !== "05-playlist" || task.compositionMode !== "album") {
+          if (!task || !Array.isArray(task.playlistReferences) || task.compositionMode !== "album") {
             throw new HttpError(404, "Playlist task not found.");
           }
           if (!task.albumPlan || !task.playlistBriefing) {

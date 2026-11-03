@@ -274,7 +274,7 @@ export async function runAlbumTask(
       targetDurationSeconds: outline.targetSeconds,
       admission: "candidate" as const, status: "queued" as const, createdAt: now, updatedAt: now,
     }));
-    if (current.workflowType === "05-playlist") {
+    if (Array.isArray(current.playlistReferences)) {
       const { plan, briefing } = await planPlaylist(current.description, {
         ...options,
         candidateCount: current.albumCandidateCount ?? 14,
@@ -304,7 +304,7 @@ export async function runAlbumTask(
     });
   }
   const plan = current.albumPlan!;
-  if (current.workflowType === "05-playlist" && !current.playlistPlanApproved) {
+  if (Array.isArray(current.playlistReferences) && !current.playlistPlanApproved) {
     // A playlist that resumes before the user confirms stays paused.
     await store.update(task.id, { status: "review", error: undefined });
     return;

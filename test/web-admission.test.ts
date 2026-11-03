@@ -112,8 +112,8 @@ function playlistReviewTask(): Record<string, unknown> {
     development: "Begins, develops, ends.", targetSeconds: 90 + (index % 3) * 20,
   }));
   return {
-    workflowType: "05-playlist", compositionMode: "album", mode: "generate",
-    status: "review", albumPlanRevision: 2,
+    workflowType: "04-album", compositionMode: "album", mode: "generate",
+    playlistReferences: [], status: "review", albumPlanRevision: 2,
     albumPlan: {
       schemaVersion: "1.0", albumTitle: "Night Set", albumMind: "Quiet variations.",
       cohesionStrategy: "Keep the room constant; vary density.",

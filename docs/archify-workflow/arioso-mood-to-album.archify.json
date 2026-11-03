@@ -2,11 +2,11 @@
   "schema_version": 2,
   "diagram_type": "workflow",
   "meta": {
-    "title": "From a Feeling to a Playlist",
+    "title": "From a Feeling to an Album",
     "locale": "en",
     "quality_profile": "showcase",
     "animation": "trace",
-    "output": "docs/archify-workflow/arioso-mood-to-playlist.html"
+    "output": "docs/archify-workflow/arioso-mood-to-album.html"
   },
   "lanes": [
     {
@@ -40,15 +40,8 @@
       "id": "album",
       "label": "Album",
       "fromCol": 4,
-      "toCol": 4,
-      "variant": "emphasis"
-    },
-    {
-      "id": "playlist",
-      "label": "Playlist",
-      "fromCol": 5,
       "toCol": 5,
-      "variant": "dashed"
+      "variant": "emphasis"
     }
   ],
   "nodes": [
@@ -127,11 +120,11 @@
       "width": 168
     },
     {
-      "id": "playlist",
+      "id": "album_result",
       "lane": "listener",
       "col": 5,
       "type": "frontend",
-      "label": "Playlist",
+      "label": "Album",
       "sublabel": "audition, order, export",
       "width": 156
     }
@@ -196,7 +189,7 @@
     {
       "id": "candidates",
       "from": "album_render",
-      "to": "playlist",
+      "to": "album_result",
       "label": "candidates as they finish",
       "variant": "emphasis",
       "role": "main"
@@ -221,7 +214,7 @@
     },
     {
       "dot": "amber",
-      "title": "From one kept song to a playlist",
+      "title": "From one kept song to an album",
       "items": [
         "A kept song seeds an album whose plan is confirmed before any candidate",
         "Candidates are auditioned as they finish, then ordered and exported as one MP3"

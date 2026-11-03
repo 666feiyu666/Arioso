@@ -269,7 +269,7 @@ export class JourneyRuntime {
       vocalMode: "instrumental",
       corpusMode: "none",
       compositionMode: "album",
-      workflowType: "05-playlist",
+      workflowType: "04-album",
       lyriaModel: "lyria-3.5",
       ...(input.candidateCount === undefined ? {} : { candidateCount: input.candidateCount }),
       ...(input.targetTotalMinutes === undefined ? {} : { targetTotalMinutes: input.targetTotalMinutes }),

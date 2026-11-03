@@ -41,19 +41,24 @@ export type TaskStatus = "queued" | "composing" | "planning" | "generating" | "r
 export type VocalMode = "auto" | "instrumental" | "vocals";
 export type CorpusMode = "none" | "music";
 export type CompositionMode = "single" | "orchestral" | "album";
-export type WorkflowType = "01-general" | "02-music" | "03-orchestral" | "04-album" | "05-playlist";
+export type WorkflowType = "01-general" | "02-music" | "03-orchestral" | "04-album";
 
 const WORKFLOW_TYPES: readonly WorkflowType[] = [
   "01-general",
   "02-music",
   "03-orchestral",
   "04-album",
-  "05-playlist",
 ];
 
-/** Historical records keep "02-jazz"; the runtime concept is now "02-music". */
+/**
+ * Historical records keep "02-jazz" (the runtime concept is now "02-music")
+ * and "05-playlist" (the referenced-album workflow, since merged into
+ * "04-album"; a referenced album is now an album whose `playlistReferences`
+ * is set).
+ */
 export function normalizeWorkflowType(value: unknown): WorkflowType | undefined {
   if (value === "02-jazz") return "02-music";
+  if (value === "05-playlist") return "04-album";
   return WORKFLOW_TYPES.includes(value as WorkflowType) ? value as WorkflowType : undefined;
 }
 
@@ -428,6 +433,27 @@ export interface TaskStorageMigrationResult {
   migratedAudioFiles: number;
 }
 
+/**
+ * Moves a task directory left in a retired workflow folder (05-playlist) into
+ * the folder its current workflow type names. Returns the directory the record
+ * now lives in; when a move is not possible the source is kept so a readable
+ * record is never orphaned.
+ */
+async function moveTaskDirectory(source: string, destination: string): Promise<string> {
+  if (source === destination) return source;
+  try {
+    await mkdir(path.dirname(destination), { recursive: true });
+    await rename(source, destination);
+    return destination;
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === "ENOENT" || code === "EEXIST" || code === "ENOTEMPTY" || code === "EPERM") {
+      return source;
+    }
+    throw error;
+  }
+}
+
 export async function organizeTaskStorage(
   directory: string,
 ): Promise<TaskStorageMigrationResult> {
@@ -459,7 +485,7 @@ export async function organizeTaskStorage(
     }
     task.workflowType = inferWorkflowType(task);
     task.compositionMode = task.workflowType === "03-orchestral" ? "orchestral"
-      : ["04-album", "05-playlist"].includes(task.workflowType) ? "album" : "single";
+      : task.workflowType === "04-album" ? "album" : "single";
     task.corpusMode = corpusModeForWorkflow(task.workflowType, task.corpusMode);
     migrateAlbumTrackOrder(task);
     const taskDirectory = path.join(directory, task.workflowType, task.id);
@@ -582,9 +608,15 @@ export class TaskStore {
       const task = value;
       task.workflowType = inferWorkflowType(task);
       task.compositionMode = task.workflowType === "03-orchestral" ? "orchestral"
-      : ["04-album", "05-playlist"].includes(task.workflowType) ? "album" : "single";
+      : task.workflowType === "04-album" ? "album" : "single";
       task.corpusMode = corpusModeForWorkflow(task.workflowType, task.corpusMode);
       migrateAlbumTrackOrder(task);
+
+      // The retired 05-playlist workflow folded into 04-album: move the whole
+      // task directory so one album concept lives under one folder.
+      const recordDirectory = path.dirname(recordPath);
+      const expectedDirectory = path.join(this.#directory, task.workflowType, task.id);
+      const taskDirectory = await moveTaskDirectory(recordDirectory, expectedDirectory);
 
       let interrupted = false;
       if (options.markInterrupted !== false) {
@@ -609,7 +641,7 @@ export class TaskStore {
       }
       // A playlist paused for confirmation is idle by design: its track outlines
       // are still "queued" but no work is in flight, so a restart must not kill it.
-      const pausedPlaylist = task.workflowType === "05-playlist" && task.status === "review";
+      const pausedPlaylist = Array.isArray(task.playlistReferences) && task.status === "review";
       if (options.markInterrupted !== false && task.albumTracks && !pausedPlaylist) {
         task.albumTracks = task.albumTracks.map((track) => {
           if (!ACTIVE_TASK_STATUSES.includes(track.status)) return track;
@@ -628,7 +660,7 @@ export class TaskStore {
         task.albumProduction = { ...task.albumProduction, status: "failed", error: task.error };
       }
       this.#tasks.set(task.id, task);
-      this.#taskDirectories.set(task.id, path.dirname(recordPath));
+      this.#taskDirectories.set(task.id, taskDirectory);
       if (interrupted) await this.save(task);
     }
   }
@@ -670,7 +702,7 @@ export class TaskStore {
       updatedAt: now,
       ...(input.sourceDiscussionId ? { sourceDiscussionId: input.sourceDiscussionId } : {}),
       ...(input.moodChatId ? { moodChatId: input.moodChatId } : {}),
-      ...(input.playlistReferences?.length ? { playlistReferences: input.playlistReferences } : {}),
+      ...(input.playlistReferences ? { playlistReferences: input.playlistReferences } : {}),
       ...(input.journeyId ? { journeyId: input.journeyId } : {}),
       ...(input.parentTaskId ? { parentTaskId: input.parentTaskId } : {}),
     };
@@ -1216,7 +1248,7 @@ export function parseTaskInput(value: unknown): CreateTaskInput {
   const corpusMode = corpusModeForWorkflow(workflowType, candidate.corpusMode);
   const compositionMode: CompositionMode = workflowType === "03-orchestral"
     ? "orchestral"
-    : ["04-album", "05-playlist"].includes(workflowType) ? "album" : "single";
+    : workflowType === "04-album" ? "album" : "single";
   const candidateCount = candidate.candidateCount ?? 14;
   const targetTotalMinutes = candidate.targetTotalMinutes ?? 35;
   if (candidate.produceAlbum !== undefined && typeof candidate.produceAlbum !== "boolean") {

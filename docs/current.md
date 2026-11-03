@@ -16,8 +16,8 @@ continue a kept piece into an album. The studio exposes the wider surface: a
 direction discussion guided by `prompt-directing-skill` through `discussion` and
 `proposal` phases, followed by a standalone piece, a music-corpus piece, a
 multi-movement orchestral work, or a themed album. Three composition modes
-(`single`, `orchestral`, `album`) and five workflow types (`01-general` through
-`05-playlist`) cover them.
+(`single`, `orchestral`, `album`) and four workflow types (`01-general` through
+`04-album`) cover them.
 
 ## MoodMic
 
@@ -131,8 +131,9 @@ records similarities and per-candidate verdicts, and each candidate becomes an
 `AlbumTrackTask` with admissions, revisions, and the ordered `albumTrackOrder`.
 Candidates generate concurrently under a bounded pool
 (`ARIOSO_GENERATION_CONCURRENCY`, default 4, at most 16), each dispatch recording
-its own attempt under the candidate's id. `05-playlist` is the referenced-album
-variant, adding references and pausing for plan confirmation before any audio.
+its own attempt under the candidate's id. A referenced album — an album whose
+`playlistReferences` is set — adds references and pauses for plan confirmation
+before any audio.
 
 **Production and generation.** An album exports as a merged MP3 with per-track
 timestamps (`/api/tasks/<id>/album/export`). The optional producer (`produceAlbum:
