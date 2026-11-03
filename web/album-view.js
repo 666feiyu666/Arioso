@@ -82,6 +82,11 @@ const COPY = {
     moveUp: "上移",
     moveDown: "下移",
     addToPlaylist: "加入歌单",
+    selectTrack: (title) => `选择「${title}」`,
+    selectAll: "全选",
+    clearSelection: "清除选择",
+    addSelectedToPlaylist: (n) => `加入歌单（${n} 首）`,
+    pickHint: "勾选几首，一次放进同一张歌单。",
     listCandidatesEmpty: "还没有候选曲目。",
     listIncludedEmpty: "还没有收录曲目。在「候选」里把喜欢的收进来，就能排成一张专辑。",
     playlistDuration: (d) => `共 ${d}`,
@@ -160,6 +165,11 @@ const COPY = {
     moveUp: "Move up",
     moveDown: "Move down",
     addToPlaylist: "Add to playlist",
+    selectTrack: (title) => `Select ${title}`,
+    selectAll: "Select all",
+    clearSelection: "Clear selection",
+    addSelectedToPlaylist: (n) => `Add ${n} to playlist`,
+    pickHint: "Tick a few tracks and put them in one playlist at once.",
     listCandidatesEmpty: "No candidate tracks yet.",
     listIncludedEmpty: "Nothing included yet. Add the ones you like from Candidates to build the album.",
     playlistDuration: (d) => `${d} total`,
@@ -253,6 +263,8 @@ export function createAlbumStage(options) {
     busy: false,
     chatDraft: "",
     message: "",
+    /** Track ids ticked for a one-shot add to a playlist; cleared on any reset. */
+    selected: [],
   };
   let audio = null;
 
@@ -265,6 +277,40 @@ export function createAlbumStage(options) {
   const fail = (error) => {
     state.message = error instanceof Error ? error.message : String(error);
     options.rerender();
+  };
+
+  // ---- selection ----------------------------------------------------------
+
+  /** Tracks that can actually be referenced by a playlist: they have audio. */
+  const pickableTracks = (tracks) => tracks.filter((track) => Boolean(track.audioFile));
+
+  const pickedTracks = (activeTask) => pickableTracks(orderedTracks(activeTask))
+    .filter((track) => state.selected.includes(track.id));
+
+  /** Playlist entries for a set of tracks; the audio itself is never touched. */
+  const playlistItems = (activeTask, tracks) => tracks.map((candidate) => ({
+    source: { kind: "album-track", taskId: activeTask.id, trackId: candidate.id },
+    titleSnapshot: candidate.title,
+    ...(candidate.durationSeconds === undefined ? {} : { durationSeconds: candidate.durationSeconds }),
+  }));
+
+  const setPicked = (trackId, picked) => {
+    state.selected = picked
+      ? [...new Set([...state.selected, trackId])]
+      : state.selected.filter((id) => id !== trackId);
+  };
+
+  // The bulk bar appears as soon as anything is ticked, without a re-render,
+  // so ticking several tracks in a row does not steal focus or scroll.
+  const syncPicks = (root) => {
+    const activeTask = task();
+    if (!activeTask) return;
+    const count = pickedTracks(activeTask).length;
+    const bar = root.querySelector("[data-pick-bar]");
+    if (!bar) return;
+    bar.hidden = count === 0;
+    const label = bar.querySelector("[data-pick-count]");
+    if (label) label.textContent = t("addSelectedToPlaylist", count);
   };
 
   /**
@@ -486,8 +532,11 @@ export function createAlbumStage(options) {
       : track.admission === "excluded" ? t("excluded") : t("unadmitted");
     const percent = isCurrent && state.duration > 0 ? Math.min(100, (state.currentTime / state.duration) * 100) : 0;
     const playlistLength = (activeTask.albumTrackOrder ?? []).length;
+    const picked = state.selected.includes(track.id);
     return `
-      <div class="pl-track is-${esc(track.admission)}${working ? " is-working" : ""}${isCurrent ? " is-current" : ""}">
+      <div class="pl-track is-${esc(track.admission)}${working ? " is-working" : ""}${isCurrent ? " is-current" : ""}${picked ? " is-picked" : ""}">
+        <input class="pl-pick" type="checkbox" data-album-select="${esc(track.id)}"
+          aria-label="${esc(t("selectTrack", track.title))}" ${picked ? "checked" : ""} ${track.audioFile ? "" : "disabled"} />
         <span class="pl-track-number num">${String(number).padStart(2, "0")}</span>
         <button class="pl-play${isPlaying ? " is-playing" : ""}" type="button"
           data-album-action="play" data-track="${esc(track.id)}" ${track.audioFile ? "" : "disabled"}
@@ -521,6 +570,10 @@ export function createAlbumStage(options) {
     const playable = playableTracks(task, scope);
     const anyPlayable = playableTracks(task, "candidate").length > 0;
     const readyCount = orderedTracks(task).filter((track) => track.audioFile).length;
+    const picked = pickedTracks(task);
+    const pickableInScope = pickableTracks(tracks);
+    const allPicked = pickableInScope.length > 0
+      && pickableInScope.every((track) => state.selected.includes(track.id));
     const planBody = `${readingPanel(task)}${ideaPanel(task)}${outlinePanel(task)}`;
     // Two columns: the album on the left (progress, plan, exports), its tracks in
     // their own list on the right, so the track list reads like a music library
@@ -539,6 +592,10 @@ export function createAlbumStage(options) {
           ${candidateCount ? `<div class="pl-toolbar">
             <button class="pl-btn pl-btn-primary" type="button" data-album-action="play-all" ${playable.length ? "" : "disabled"}>▶ ${esc(t("playAll"))}</button>
             <span class="pl-toolbar-duration num">${esc(t("playlistDuration", durationText(totalDuration(playable))))}</span>
+            <div class="pl-pick-bar" data-pick-bar role="group" aria-label="${esc(t("pickHint"))}" ${picked.length ? "" : "hidden"}>
+              <button class="pl-btn pl-btn-primary" type="button" data-album-action="add-selected-to-playlist"><span data-pick-count>${esc(t("addSelectedToPlaylist", picked.length))}</span></button>
+              <button class="pl-btn pl-btn-quiet" type="button" data-album-action="clear-selection">${esc(t("clearSelection"))}</button>
+            </div>
             <div class="pl-toolbar-actions">
               <button class="pl-btn pl-btn-quiet" type="button" data-album-action="export" data-scope="included" ${readyCount ? "" : "disabled"}>${esc(t("exportIncluded"))}</button>
               <button class="pl-btn pl-btn-quiet" type="button" data-album-action="export" data-scope="candidate" ${readyCount ? "" : "disabled"}>${esc(t("exportCandidates"))}</button>
@@ -550,7 +607,10 @@ export function createAlbumStage(options) {
         </div>
 
         <aside class="pl-album-side">
-          <h2 class="pl-side-title">${esc(t("sideTracksTitle", tracks.length))}</h2>
+          <div class="pl-side-head">
+            <h2 class="pl-side-title">${esc(t("sideTracksTitle", tracks.length))}</h2>
+            ${pickableInScope.length ? `<button class="pl-btn pl-btn-quiet" type="button" data-album-action="select-all">${esc(allPicked ? t("clearSelection") : t("selectAll"))}</button>` : ""}
+          </div>
           ${candidateCount ? `<div class="pl-scope" role="group" aria-label="${esc(t("scopeCandidates"))}">
             <button type="button" data-album-action="scope" data-scope="candidate" aria-pressed="${scope === "candidate"}">${esc(t("scopeCandidates"))} <small class="num">${candidateCount}</small></button>
             <button type="button" data-album-action="scope" data-scope="included" aria-pressed="${scope === "included"}">${esc(t("scopeIncluded"))} <small class="num">${includedCount}</small></button>
@@ -877,8 +937,48 @@ export function createAlbumStage(options) {
     }
   }
 
+  /** Put every ticked track into one playlist in a single request. */
+  async function addSelectedToPlaylist() {
+    const activeTask = task();
+    if (!activeTask) return;
+    const items = playlistItems(activeTask, pickedTracks(activeTask));
+    if (!items.length) return;
+    const added = await openAddToPlaylist({
+      api: options.api,
+      language: options.language(),
+      items,
+    });
+    if (!added) return;
+    // The playlist owns them now; the ticks have done their job.
+    state.selected = [];
+    options.rerender();
+  }
+
+  /** Tick every playable track in the current scope, or clear that scope. */
+  function toggleSelectAll() {
+    const activeTask = task();
+    if (!activeTask) return;
+    const inScope = pickableTracks(listTracks(activeTask, state.scope));
+    if (!inScope.length) return;
+    const ids = new Set(inScope.map((track) => track.id));
+    const allPicked = inScope.every((track) => state.selected.includes(track.id));
+    state.selected = allPicked
+      ? state.selected.filter((id) => !ids.has(id))
+      : [...new Set([...state.selected, ...ids])];
+    options.rerender();
+  }
+
   function bind(root) {
     if (!root) return;
+    // Ticking is a local edit: the rows and the bulk bar update in place, so a
+    // run of ticks never re-renders (and never loses focus or scroll).
+    for (const box of root.querySelectorAll("[data-album-select]")) {
+      box.addEventListener("change", () => {
+        setPicked(box.dataset.albumSelect, box.checked);
+        box.closest(".pl-track")?.classList.toggle("is-picked", box.checked);
+        syncPicks(root);
+      });
+    }
     for (const button of root.querySelectorAll("[data-album-action]")) {
       button.addEventListener("click", () => {
         const action = button.dataset.albumAction;
@@ -911,14 +1011,16 @@ export function createAlbumStage(options) {
             void openAddToPlaylist({
               api: options.api,
               language: options.language(),
-              items: [{
-                source: { kind: "album-track", taskId: activeTask.id, trackId: candidate.id },
-                titleSnapshot: candidate.title,
-                ...(candidate.durationSeconds === undefined ? {} : { durationSeconds: candidate.durationSeconds }),
-              }],
+              items: playlistItems(activeTask, [candidate]),
             });
           }
         }
+        else if (action === "add-selected-to-playlist") void addSelectedToPlaylist();
+        else if (action === "clear-selection") {
+          state.selected = [];
+          options.rerender();
+        }
+        else if (action === "select-all") toggleSelectAll();
         else if (action === "add-album-to-playlist") {
           // The playlist takes the set the user is listening to: the included
           // tracks when the album has any, otherwise every finished candidate.
@@ -926,11 +1028,7 @@ export function createAlbumStage(options) {
           const activeTask = task();
           if (activeTask) {
             const scope = listTracks(activeTask, "included").length ? "included" : "candidate";
-            const items = playableTracks(activeTask, scope).map((candidate) => ({
-              source: { kind: "album-track", taskId: activeTask.id, trackId: candidate.id },
-              titleSnapshot: candidate.title,
-              ...(candidate.durationSeconds === undefined ? {} : { durationSeconds: candidate.durationSeconds }),
-            }));
+            const items = playlistItems(activeTask, playableTracks(activeTask, scope));
             if (items.length) {
               void openAddToPlaylist({
                 api: options.api,
@@ -988,6 +1086,7 @@ export function createAlbumStage(options) {
       Object.assign(state, {
         scope: "candidate", queue: [], queueIndex: -1, playingTrackId: null, playing: false,
         currentTime: 0, duration: 0, planOpen: false, busy: false, chatDraft: "", message: "",
+        selected: [],
       }, next);
       if (audio) {
         audio.pause();
