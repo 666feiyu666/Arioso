@@ -11,7 +11,7 @@
   align-items: center;
   gap: 34px;
   padding: 0 var(--page-gutter);
-  background: color-mix(in srgb, var(--surface) 86%, transparent);
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--line);
@@ -26,38 +26,44 @@
 }
 
 .tabbar-brand .mark {
-  width: 26px;
-  height: 26px;
+  width: 27px;
+  height: 27px;
   display: grid;
   place-items: center;
-  border-radius: 7px;
+  /* A record, not an app icon: round, and the letter is set in the serif
+     italic so the mark carries the same voice as the wordmark beside it. */
+  border-radius: 50%;
   background: var(--ink);
   color: var(--surface);
   font-family: var(--display);
-  font-size: 0.94rem;
-  font-weight: 700;
+  font-style: italic;
+  font-size: 1rem;
+  font-weight: 500;
   line-height: 1;
 }
 
 .tabbar-brand .name {
   font-family: var(--display);
-  font-size: 1.06rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-size: 1.14rem;
+  font-weight: 500;
+  letter-spacing: -0.008em;
 }
 
 .tabbar-tabs {
   display: flex;
   align-items: stretch;
-  gap: 4px;
+  gap: 2px;
   height: 100%;
 }
 
+/* Each tab is a channel: at rest it is just a word, and the page you are on
+   gets a lit segment — a two-bar level meter, the same language as the wave on
+   the mood cards. A flat underline says "tab"; this says "playing". */
 .tabbar-tab {
   position: relative;
   display: inline-flex;
   align-items: center;
-  padding: 0 12px;
+  padding: 0 14px;
   color: var(--muted);
   font-weight: 600;
   font-size: 0.93rem;
@@ -73,22 +79,73 @@
   color: var(--ink);
 }
 
-.tabbar-tab.is-active::after {
+/* The level meter sits under every tab but only lights on the current one.
+   Hovering previews it at a quarter strength, so the bar tells you where you
+   are going before you click. */
+.tabbar-tab::after {
   content: "";
   position: absolute;
-  left: 12px;
-  right: 12px;
-  bottom: 0;
-  height: 3px;
-  border-radius: 3px 3px 0 0;
-  background: var(--brand);
+  left: 50%;
+  bottom: 11px;
+  width: 17px;
+  height: 11px;
+  transform: translateX(-50%);
+  /* Three bars of different heights, drawn as gradients: no extra markup. */
+  background-image:
+    linear-gradient(currentColor, currentColor),
+    linear-gradient(currentColor, currentColor),
+    linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-size: 2.5px 6px, 2.5px 11px, 2.5px 7px;
+  background-position: 0 100%, 7px 100%, 14px 100%;
+  border-radius: 1px;
+  opacity: 0;
+  transition: opacity 0.16s ease;
+}
+
+.tabbar-tab:hover::after {
+  opacity: 0.45;
+}
+
+.tabbar-tab.is-active::after {
+  background-image:
+    linear-gradient(var(--brand), var(--brand)),
+    linear-gradient(var(--brand), var(--brand)),
+    linear-gradient(var(--brand), var(--brand));
+  opacity: 0.9;
+}
+
+.tabbar-tab.is-active:hover {
+  background: color-mix(in srgb, var(--brand) 12%, transparent);
 }
 
 .tabbar-end {
   margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 4px;
+}
+
+/* The bar has one button language: a word, no border. The language switch and
+   the settings entry were the last two boxed controls in a row that is
+   otherwise all type, which made a two-letter label read like a form field
+   dropped in the corner. */
+.tabbar-end .e-btn {
+  border-color: transparent;
+  background: none;
+  color: var(--muted);
+  padding: 7px 10px;
+  border-radius: 7px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+
+.tabbar-end .e-btn:hover:not(:disabled) {
+  border-color: transparent;
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  color: var(--ink);
 }
 
 /* Settings entry in the bar: the gear stays, the word folds away on narrow
@@ -152,11 +209,6 @@ body.has-tabbar .brand-row {
     padding: 0 8px;
     font-size: 0.88rem;
     white-space: nowrap;
-  }
-
-  .tabbar-tab.is-active::after {
-    left: 8px;
-    right: 8px;
   }
 
   .tabbar-settings {

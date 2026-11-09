@@ -400,7 +400,7 @@ function viewPlaylist(entry) {
         </div>
         <div class="plt-toolbar">
           <button class="pl-btn pl-btn-primary" type="button" data-action="play-all" ${entry.playableCount ? "" : "disabled"}>${state.isPlaying ? "❚❚" : "▶"} ${esc(playLabel)}</button>
-          <button class="pl-btn" type="button" data-action="export" ${entry.playableCount ? "" : "disabled"}>${esc(t("exportPlaylist"))}</button>
+          <button class="pl-btn pl-btn-quiet" type="button" data-action="export" ${entry.playableCount ? "" : "disabled"}>${esc(t("exportPlaylist"))}</button>
           <button class="pl-btn pl-btn-quiet" type="button" data-action="add-pieces">${esc(t("addPieces"))}</button>
           <button class="pl-btn pl-btn-quiet" type="button" data-action="start-album">${esc(t("createAlbum"))}</button>
         </div>

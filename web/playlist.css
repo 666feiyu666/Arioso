@@ -570,15 +570,41 @@ body.has-pbar .pl-main { padding-bottom: 96px; }
 
 .pl-btn-primary:hover { border-color: transparent; background: color-mix(in srgb, var(--ink) 88%, var(--brand)); }
 
+/* A quiet button is a word, not a capsule. Everything secondary — a row's
+   include/exclude, a toolbar's exports, select-all — reads as type, so a list
+   of actions stops looking like a row of pills and only the primary action
+   keeps a shape. Chinese labels made the old capsules especially bulky: two
+   characters inside 12px of padding each side. */
 .pl-btn-quiet {
-  padding: 6px 12px;
+  padding: 6px 10px;
+  border-color: transparent;
+  background: none;
+  color: var(--ink-soft);
   font-size: 0.82rem;
   font-weight: 500;
+  border-radius: 7px;
+}
+
+.pl-btn-quiet:hover {
+  border-color: transparent;
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  color: var(--ink);
+  transform: none;
 }
 
 .pl-btn.is-on {
   border-color: var(--brand);
   background: color-mix(in srgb, var(--brand) 12%, var(--surface));
+}
+
+/* The current state of a text button is said with weight and colour, not with
+   an outline: an outlined "included" next to an outlined "excluded" reads as
+   two equal choices when one of them is already true. */
+.pl-btn-quiet.is-on {
+  border-color: transparent;
+  background: none;
+  color: var(--brand-deep);
+  font-weight: 700;
 }
 
 /* ---- create drawer ----

@@ -1548,7 +1548,10 @@ body.mm-home {
    card below it. Shown while a conversation is still empty. --------------- */
 
 .mm-thread.is-empty {
-  justify-content: center;
+  /* Safe centring: when the empty state is taller than the stage (a long
+     greeting, a narrow window) it must fall back to top-aligned and scroll.
+     Plain `center` clips the first and last rows with no scrollbar in sight. */
+  justify-content: safe center;
 }
 
 .mm-examples {
@@ -1627,6 +1630,9 @@ body.mm-home {
   opacity: 0;
   transition: transform 0.2s var(--ease);
   animation: mm-dot-in 0.35s var(--ease) forwards;
+  /* A gold note on a pale lavender field is nearly invisible without an edge:
+     the shadow gives every note the same weight regardless of its hue. */
+  filter: drop-shadow(0 1px 2px rgba(16, 21, 31, 0.35));
 }
 
 .mm-melody-point:nth-of-type(1) .mm-melody-dot { animation-delay: 0.5s; }

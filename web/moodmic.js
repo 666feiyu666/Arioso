@@ -553,7 +553,7 @@ function renderExamples() {
   // group sits high, an unpleasant one dips low) and the amplitude around the
   // centre line is energy. So the four notes are not a decorative sine wave:
   // they are the four groups placed where the model puts them.
-  const rows = [148, 58, 138, 82];
+  const rows = [113, 44, 105, 63];
   const dots = GROUPS.map((group, index) => {
     const cx = (index + 0.5) * 250;
     const cy = rows[index];
@@ -572,7 +572,7 @@ function renderExamples() {
   }).join("");
   return `
     <div class="mm-examples"${state.playing ? ` style="--active:${groupById(state.playing).color}"` : ""}>
-      <svg class="mm-melody${state.playing ? " is-playing" : ""}" viewBox="0 0 1000 220" preserveAspectRatio="xMidYMid meet" focusable="false">
+      <svg class="mm-melody${state.playing ? " is-playing" : ""}" viewBox="0 0 1000 168" preserveAspectRatio="xMidYMid meet" focusable="false">
         <defs>
           <linearGradient id="mm-resonance" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0" stop-color="var(--active, #5546e0)" stop-opacity="0.13" />
@@ -581,10 +581,10 @@ function renderExamples() {
           </linearGradient>
         </defs>
         <path class="mm-melody-resonance" aria-hidden="true"
-          d="M0,110 C41.7,110 83.3,148 125,148 C208.3,148 291.7,58 375,58 C458.3,58 541.7,138 625,138 C708.3,138 791.7,82 875,82 C916.7,82 958.3,110 1000,110 L1000,220 L0,220 Z"
+          d="M0,84 C41.7,84 83.3,113 125,113 C208.3,113 291.7,44 375,44 C458.3,44 541.7,105 625,105 C708.3,105 791.7,63 875,63 C916.7,63 958.3,84 1000,84 L1000,168 L0,168 Z"
           fill="url(#mm-resonance)" stroke="none" />
         <path class="mm-melody-path" aria-hidden="true"
-          d="M0,110 C41.7,110 83.3,148 125,148 C208.3,148 291.7,58 375,58 C458.3,58 541.7,138 625,138 C708.3,138 791.7,82 875,82 C916.7,82 958.3,110 1000,110"
+          d="M0,84 C41.7,84 83.3,113 125,113 C208.3,113 291.7,44 375,44 C458.3,44 541.7,105 625,105 C708.3,105 791.7,63 875,63 C916.7,63 958.3,84 1000,84"
           fill="none" stroke-width="2.5" stroke-linecap="round" vector-effect="non-scaling-stroke" />${dots}
       </svg>
       <p class="mm-examples-lead">${esc(t("examplesLead"))}</p>

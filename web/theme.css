@@ -45,10 +45,16 @@
   --mood-blue-ink: #38628f;
   --mood-sage-ink: #37705a;
 
-  /* Type */
+  /* Type — the voice is a serif. Archivo still carries body copy, data and
+     controls; headings and the wordmark speak in a Garamond, the face of printed
+     song and the closest thing to the product's subject in type. Instrument
+     Serif was the first choice and reads well, but it has become the default
+     "tasteful serif" of generated interfaces, which is the opposite of a point
+     of view. */
   --sans: "Archivo", "PingFang SC", "Microsoft YaHei", "Noto Sans SC",
     system-ui, sans-serif;
-  --display: var(--sans);
+  --serif: "EB Garamond", "Noto Serif SC", "Songti SC", Georgia, serif;
+  --display: var(--serif);
   --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Consolas,
     "Courier New", monospace;
 
@@ -60,7 +66,7 @@
   /* Motion */
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
 
-  --tabbar-h: 60px;
+  --tabbar-h: 64px;
 
   /* Page grid — one content width shared by the bar and the pages inside it, so
      titles, cards and the player line up on a single left edge. */
@@ -140,9 +146,11 @@ h3,
 h4 {
   margin: 0;
   font-family: var(--display);
-  font-weight: 600;
-  line-height: 1.12;
-  letter-spacing: -0.017em;
+  /* 500 is the heaviest weight the serif stack ships without synthesising
+     a bold; the browser would fake one and the letterforms would smear. */
+  font-weight: 500;
+  line-height: 1.18;
+  letter-spacing: -0.006em;
   color: var(--ink);
 }
 

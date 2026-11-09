@@ -10,8 +10,8 @@ colors:
   ink-soft: "#454d5e"
   muted: "#666f82"
   faint: "#9aa2b2"
-  line: "#dbdfe8"
-  line-strong: "#c1c7d3"
+  line: "#ccd2e0"
+  line-strong: "#aeb7c8"
   brand: "#5546e0"
   brand-deep: "#3a2ec0"
   brand-soft: "#e9e6fb"
@@ -28,11 +28,11 @@ colors:
   mood-sage-ink: "#37705a"
 typography:
   display:
-    fontFamily: "Archivo, PingFang SC, Microsoft YaHei, Noto Sans SC, system-ui, sans-serif"
+    fontFamily: "EB Garamond, Noto Serif SC, Songti SC, Georgia, serif"
     fontSize: "2.625rem"
-    fontWeight: 600
-    lineHeight: 1.12
-    letterSpacing: "-0.017em"
+    fontWeight: 500
+    lineHeight: 1.18
+    letterSpacing: "-0.006em"
   body:
     fontFamily: "Archivo, PingFang SC, Microsoft YaHei, Noto Sans SC, system-ui, sans-serif"
     fontSize: "15px"
@@ -139,11 +139,23 @@ introduces no new colours or type sizes.
 
 ## Typography
 
-- Archivo for everything that speaks; IBM Plex Mono for anything that reads as
-  data (timecodes, durations, prompts, counts) and for the prompt body.
-- Body is 15px/1.6. Headings step up from 1.2rem to 2.625rem with weight 600
-  and `-0.017em` tracking; the tracking is what keeps the display sizes from
-  feeling loose.
+- **Two voices.** Headings and the wordmark speak in a serif — EB Garamond
+  for Latin, Noto Serif SC for Chinese — because this product is about feeling,
+  not about tooling. Archivo carries body copy, controls and labels; IBM Plex
+  Mono carries anything that reads as data (timecodes, durations, prompts,
+  counts) and the prompt body.
+- **Never let the browser fake a bold.** The serif stack tops out at 500; ask
+  for 600 and the browser synthesises it, which smears the letterforms. 500 is
+  also the right weight for Noto Serif SC at display sizes.
+- **Not Instrument Serif.** It was the first choice and reads well, but it has
+  become the default "tasteful serif" of generated interfaces — the detector
+  flags it as an overused face, which is the opposite of a point of view.
+- Body is 15px/1.6. Headings step up from 1.2rem to 2.625rem with weight 500 and
+  `-0.006em` tracking. Serif tracking is looser than the sans it replaced: the
+  old `-0.017em` pulled the strokes into each other. Line height went 1.12 → 1.18
+  for the same reason — serifs have deeper descenders.
+- The voice is legible, not decorative. No gradient text, no outline text, no
+  per-character animation: the personality comes from the letterforms.
 - **One display step for page titles:** `clamp(2rem, 3.2vw, 2.9rem)` at
   `-0.028em`, shared by the album shelf, the playlist shelf, the calendar and
   the workflow studio. The MoodMic empty state is the only title above it
@@ -290,11 +302,33 @@ mood is playing.
   secondary is white with a `line-strong` border; ghost is border-only. All share
   the 11px radius and 11×18px padding. Loading state is a centred spinner with
   the label made transparent.
+- **One shape per surface.** In the album and playlist views exactly one control
+  is a filled pill — the primary action (`播放全部`). Everything else is a
+  `.pl-btn-quiet`: a word with 6×10px of padding, no border, no fill, gaining a
+  6% ink wash on hover. A row of three outlined pills for `收录 / 排除 / 加入歌单`
+  read as three equal choices and buried the track title behind them; as type
+  they sit behind the content where they belong.
+- **State is type, not outline.** The current state of a quiet button is said
+  with `brand-deep` and weight 700, never with a border: an outlined "included"
+  beside an outlined "excluded" claims both are live choices when one is
+  already true. This matters doubly in Chinese, where two-character labels
+  inside 12px side padding made every capsule bulge.
 - **Fields**: 1px `line-strong`, brand border plus a 3px `brand-soft` ring on
   focus.
 - **Cards**: 1px `line`, 15px radius, white surface, hover lifts 2px and colours
   the border.
 - **Chips / tags**: pill, `surface-2`, `ink-soft`, 0.75rem, weight 600.
+- **Tab bar** (`web/nav.css`): 64px, frosted at 80% surface so the page light
+  shows through. The brand mark is a filled circle with the serif italic A —
+  a record, not an app icon. The current tab carries a two-bar level meter
+  (three gradient bars, no extra markup) instead of an underline: a flat rule
+  says "tab", a lit meter says "playing". Hovering any other tab previews the
+  same meter at 45%, so the bar shows where you are going before you click.
+  **The bar has one button language: a word, no border.** The language switch
+  and the settings entry were the last two boxed controls in a row that is
+  otherwise all type — a two-letter label in a 1px frame reads like a form
+  field dropped into the corner. Both are now text at `muted`, gaining a 6%
+  ink wash on hover, exactly like a tab.
 - **Player bar**: fixed to the bottom, frosted, holds the current take across
   page changes. It is the only always-on chrome besides the tab bar.
 - **Progress**: a 4px rounded track that breathes in opacity while work runs. No
