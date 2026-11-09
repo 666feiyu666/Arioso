@@ -15,7 +15,7 @@
   /* Ink */
   --ink: #10151f;
   --ink-soft: #454d5e;
-  --muted: #767f92;
+  --muted: #666f82;
   --faint: #9aa2b2;
 
   /* Lines */
@@ -33,11 +33,17 @@
   --danger: #c8433a;
   --danger-soft: #fbece9;
 
-  /* Mood signal colours — mirrors web/mood-common.js */
+  /* Mood signal colours — mirrors web/mood-common.js. The *-ink pair carries the
+     same hue at text contrast (4.5:1+ on our surfaces); never set type in the
+     signal colour itself. */
   --mood-coral: #e87575;
   --mood-gold: #e9bd46;
   --mood-blue: #779dd6;
   --mood-sage: #83b59a;
+  --mood-coral-ink: #b14a4a;
+  --mood-gold-ink: #8a6a12;
+  --mood-blue-ink: #38628f;
+  --mood-sage-ink: #37705a;
 
   /* Type */
   --sans: "Archivo", "PingFang SC", "Microsoft YaHei", "Noto Sans SC",

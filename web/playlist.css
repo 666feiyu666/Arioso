@@ -223,7 +223,7 @@
   background: rgba(16, 21, 31, 0.66);
   color: #fff;
   font: inherit;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
@@ -273,6 +273,7 @@
 .lib-badge.is-failed { background: var(--danger-soft); color: var(--danger); }
 .lib-badge.is-busy { background: var(--surface-3); color: var(--ink-soft); }
 
+/* The dot animates because a song is being generated right now — live state. */
 .lib-badge.is-busy::before {
   content: "";
   width: 6px;
@@ -601,34 +602,24 @@ body.has-drawer { overflow: hidden; }
   gap: 8px;
   align-content: start;
   text-align: left;
-  padding: 14px 16px 14px 18px;
+  padding: 14px 16px;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background: var(--surface);
   color: var(--ink);
   font: inherit;
   cursor: pointer;
-  transition: border-color 0.16s var(--ease), box-shadow 0.16s var(--ease);
-}
-
-.pl-ref::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 4px;
-  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
-  background: var(--brand);
-  opacity: 0.35;
+  transition: border-color 0.16s var(--ease), box-shadow 0.16s var(--ease),
+    background 0.16s var(--ease);
 }
 
 .pl-ref:hover { border-color: var(--brand); }
 
 .pl-ref.is-on {
   border-color: var(--brand);
+  background: color-mix(in srgb, var(--brand) 7%, var(--surface));
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 18%, transparent);
 }
-
-.pl-ref.is-on::before { opacity: 1; }
 
 .pl-ref-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 
@@ -660,7 +651,7 @@ body.has-drawer { overflow: hidden; }
   border-radius: 999px;
   background: color-mix(in srgb, var(--brand) 10%, var(--surface));
   color: color-mix(in srgb, var(--brand) 70%, var(--ink));
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 
 /* ---- progress ----
@@ -704,21 +695,9 @@ body.has-drawer { overflow: hidden; }
 .pl-seg-bar i.is-on { background: var(--brand); }
 
 .pl-seg-bar.is-indeterminate { overflow: hidden; border-radius: 3px; }
+/* An indeterminate run shows as pale pending segments; no sweeping highlight.
+   The run's own button carries the loading state. */
 .pl-seg-bar.is-indeterminate i.is-pending { background: color-mix(in srgb, var(--brand) 16%, transparent); }
-.pl-seg-bar.is-indeterminate::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--brand) 55%, transparent), transparent);
-  transform: translateX(-100%);
-  animation: pl-sweep 1.5s ease-in-out infinite;
-}
-
-@keyframes pl-sweep { to { transform: translateX(100%); } }
-
-@media (prefers-reduced-motion: reduce) {
-  .pl-seg-bar.is-indeterminate::after { animation: none; opacity: 0.4; }
-}
 
 .pl-toolbar {
   display: flex;
@@ -858,8 +837,7 @@ body.has-drawer { overflow: hidden; }
   display: grid;
   gap: 8px;
   padding: 14px 16px;
-  border: 1px solid var(--line);
-  border-left: 3px solid var(--brand);
+  border: 1px solid color-mix(in srgb, var(--brand) 20%, var(--line));
   border-radius: var(--radius-md);
   background: var(--surface-2);
 }
@@ -890,7 +868,7 @@ body.has-drawer { overflow: hidden; }
 .pl-outline-role { color: var(--ink-soft); line-height: 1.55; }
 .pl-outline-meta { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px 18px; margin: 0; }
 .pl-outline-meta div { display: grid; gap: 2px; }
-.pl-outline-meta dt { font-size: 0.72rem; font-weight: 600; color: var(--muted); }
+.pl-outline-meta dt { font-size: 0.75rem; font-weight: 600; color: var(--muted); }
 .pl-outline-meta dd { margin: 0; font-size: 0.85rem; color: var(--ink-soft); line-height: 1.5; }
 
 .pl-chat { border-top: 1px solid var(--line); padding-top: 18px; }
@@ -1024,7 +1002,7 @@ body.has-drawer { overflow: hidden; }
   border-radius: 50%;
   background: rgba(16, 21, 31, 0.62);
   color: #fff;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   line-height: 1;
   cursor: pointer;
   opacity: 0.5;

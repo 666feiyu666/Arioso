@@ -17,7 +17,9 @@
     "web": "tsx src/web/server.ts",
     "start:web": "node dist/web/server.js",
     "test": "vitest run",
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "design:detect": "npx --yes impeccable detect web/",
+    "design:detect:json": "npx --yes impeccable detect --json web/"
   },
   "engines": {
     "node": ">=22"

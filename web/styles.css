@@ -95,7 +95,7 @@
   color: var(--muted);
   background: var(--surface-2);
   font-family: var(--mono);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 500;
 }
 
@@ -160,7 +160,7 @@
   background: var(--surface-2);
   text-align: center;
   font-family: var(--mono);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 500;
 }
 
@@ -187,7 +187,7 @@
   margin: 0;
   padding: 6px 14px 2px;
   color: var(--faint);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 
 .task-list-item {
@@ -237,7 +237,7 @@
   border-radius: 50%;
   color: var(--ink);
   background: var(--surface);
-  font-size: 10px;
+  font-size: 11px;
   transition: 150ms ease;
 }
 
@@ -286,7 +286,7 @@
   display: block;
   margin-top: 5px;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 
 .task-state-dot {
@@ -311,7 +311,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  padding: 14px 7px 0;
+  padding: 14px 12px 10px 12px;
   border-top: 1px solid var(--line);
   color: var(--muted);
   font-size: 0.75rem;
@@ -397,37 +397,29 @@
 
 .workflow-card {
   --signal: var(--brand);
+  --signal-ink: var(--brand-deep);
   position: relative;
   min-height: 184px;
   display: grid;
   grid-template-rows: auto 1fr auto;
   gap: 12px;
-  padding: 16px 20px 16px 24px;
+  padding: 16px 20px;
   text-align: left;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   color: var(--ink);
-  background: var(--surface);
+  background: color-mix(in srgb, var(--signal) 6%, var(--surface));
   transition: transform 160ms var(--ease), border-color 160ms var(--ease);
-}
-
-.workflow-card::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 5px;
-  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
-  background: var(--signal);
 }
 
 .workflow-card:hover {
   transform: translateY(-3px);
-  border-color: var(--line-strong);
+  border-color: color-mix(in srgb, var(--signal) 45%, var(--line));
 }
 
-.workflow-card.corpus { --signal: var(--mood-sage); }
-.workflow-card.orchestral { --signal: var(--mood-blue); }
-.workflow-card.album { --signal: var(--mood-coral); }
+.workflow-card.corpus { --signal: var(--mood-sage); --signal-ink: var(--mood-sage-ink); }
+.workflow-card.orchestral { --signal: var(--mood-blue); --signal-ink: var(--mood-blue-ink); }
+.workflow-card.album { --signal: var(--mood-coral); --signal-ink: var(--mood-coral-ink); }
 
 .workflow-index {
   color: var(--muted);
@@ -463,14 +455,14 @@
   border-radius: 999px;
   color: var(--ink-soft);
   background: var(--surface-2);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
 .workflow-action {
   font-size: 0.83rem;
   font-weight: 700;
-  color: var(--signal);
+  color: var(--signal-ink);
 }
 
 .entry-message {
@@ -520,7 +512,7 @@
   color: var(--muted);
   background: color-mix(in srgb, var(--surface) 90%, transparent);
   backdrop-filter: blur(12px);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
@@ -708,7 +700,7 @@
   border-radius: 999px;
   color: var(--ink-soft);
   background: var(--surface-2);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 500;
 }
 
@@ -778,7 +770,7 @@
   border-radius: 999px;
   color: var(--muted);
   background: var(--surface-2);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
@@ -788,7 +780,7 @@
   border-radius: 999px;
   color: var(--brand-deep);
   background: var(--brand-soft);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -858,13 +850,13 @@
   height: 6px;
   border-radius: 50%;
   background: var(--muted);
-  animation: typing-bounce 1.2s ease-in-out infinite;
+  animation: typing-rise 1.2s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 }
 
 .typing-dot:nth-child(2) { animation-delay: 0.15s; }
 .typing-dot:nth-child(3) { animation-delay: 0.3s; }
 
-@keyframes typing-bounce {
+@keyframes typing-rise {
   0%, 60%, 100% { transform: translateY(0); opacity: 0.45; }
   30% { transform: translateY(-4px); opacity: 1; }
 }
@@ -893,7 +885,7 @@
 
 .discussion-next > div span {
   color: var(--brand-deep);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   line-height: 1.55;
 }
 
@@ -932,7 +924,7 @@
 
 .proposal-heading span {
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 
 .prompt-proposal textarea {
@@ -1034,7 +1026,7 @@
 
 .player-now span {
   color: #9aa2b2;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.1em;
 }
@@ -1051,7 +1043,7 @@
 .player-now small {
   overflow: hidden;
   color: #9aa2b2;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1127,7 +1119,7 @@
 .discussion-actions span {
   overflow: hidden;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1156,7 +1148,7 @@
   max-width: min(240px, 45vw);
   overflow: hidden;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1181,6 +1173,7 @@
 
 .composer-form button:hover {
   transform: translateY(-1px);
+  color: var(--surface);
   background: var(--brand);
 }
 
@@ -1195,7 +1188,7 @@
   align-items: center;
   gap: 10px;
   margin: 0;
-  padding: 5px 0 0;
+  padding: 10px 0 0 0;
   border: 0;
   border-top: 1px solid var(--line);
 }
@@ -1204,9 +1197,9 @@
 
 .vocal-setting legend {
   float: left;
-  padding: 7px 0 0;
+  padding: 10px 0 0;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
@@ -1232,7 +1225,7 @@
   padding: 5px 11px;
   border-radius: 999px;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 500;
   cursor: pointer;
   transition: 150ms var(--ease);
@@ -1360,7 +1353,7 @@
 
 .credential-status {
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
@@ -1453,7 +1446,7 @@
 
 .remember-setting small {
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   line-height: 1.55;
 }
 
@@ -1554,8 +1547,8 @@
 
 .prompt-output {
   padding: 18px;
-  border-left: 3px solid var(--brand);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
   color: var(--ink-soft);
   background: var(--surface-2);
   font-family: var(--mono);
@@ -1570,7 +1563,7 @@
   display: block;
   margin-bottom: 4px;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
@@ -1606,7 +1599,7 @@
 
 .audio-panel .eyebrow {
   color: #aaa4f0;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 
 .audio-copy { min-width: 0; }
@@ -1617,7 +1610,7 @@
   gap: 6px;
   margin-top: 13px;
   color: #c8cdd8;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 
 .audio-status::before {
@@ -1651,6 +1644,7 @@
   outline-offset: 5px;
 }
 
+/* The groove rings are the record itself, not surface decoration. */
 .record-disc {
   position: absolute;
   inset: 0;
@@ -1756,11 +1750,11 @@
 .progress-line::after {
   content: "";
   display: block;
-  width: 38%;
+  width: 100%;
   height: 100%;
   border-radius: inherit;
-  background: var(--brand);
-  animation: travel 1.6s ease-in-out infinite;
+  background: color-mix(in srgb, var(--brand) 55%, transparent);
+  animation: progress-breathe 1.6s ease-in-out infinite;
 }
 
 .error-box {
@@ -1855,9 +1849,9 @@
 }
 
 @keyframes pulse { 50% { opacity: 0.45; } }
-@keyframes travel {
-  from { transform: translateX(-110%); }
-  to { transform: translateX(290%); }
+@keyframes progress-breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
 }
 @keyframes record-spin { to { transform: rotate(360deg); } }
 
@@ -1974,7 +1968,7 @@
 
 .album-card-copy .eyebrow {
   color: var(--brand);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 
 .album-card-state {
@@ -2047,7 +2041,7 @@
   gap: 8px 16px;
   margin-top: 18px;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 
 .album-progress {
@@ -2096,7 +2090,7 @@
   background: var(--ink);
 }
 
-.album-tabs small { margin-left: 6px; opacity: 0.7; font-size: 0.72rem; }
+.album-tabs small { margin-left: 6px; opacity: 0.7; font-size: 0.75rem; }
 
 .album-play-action {
   display: flex;
@@ -2105,7 +2099,7 @@
   gap: 14px;
 }
 
-.album-play-action > span { color: var(--muted); font-size: 0.72rem; }
+.album-play-action > span { color: var(--muted); font-size: 0.75rem; }
 
 .album-export-timestamps {
   margin: 18px 0;
@@ -2129,7 +2123,7 @@
   display: block;
   margin-top: 5px;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   overflow-wrap: anywhere;
 }
 
@@ -2193,7 +2187,7 @@
   border-radius: 50%;
   color: var(--ink);
   background: var(--surface);
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .album-track-play:hover:not(:disabled),
@@ -2218,7 +2212,7 @@
 .album-track-copy p {
   margin: 5px 0 0;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 
 .album-track-copy details { margin-top: 7px; }
@@ -2226,11 +2220,11 @@
 .album-track-copy summary {
   width: fit-content;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   cursor: pointer;
 }
 
-.album-track-copy .prompt-output { margin-top: 10px; padding: 12px; font-size: 0.72rem; }
+.album-track-copy .prompt-output { margin-top: 10px; padding: 12px; font-size: 0.75rem; }
 
 .admission-label.included { color: var(--ok); }
 
@@ -2252,7 +2246,7 @@
   border-radius: 999px;
   color: var(--muted);
   background: transparent;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -2341,9 +2335,8 @@
 
 .toast {
   position: relative;
-  padding: 12px 16px 12px 18px;
+  padding: 12px 16px;
   border: 1px solid var(--line);
-  border-left: 3px solid var(--muted);
   border-radius: var(--radius-md);
   color: var(--ink);
   background: color-mix(in srgb, var(--surface) 97%, transparent);
@@ -2565,7 +2558,7 @@ button.is-loading::after {
   .album-tabs button { padding: 9px 11px; font-size: 0.78rem; }
   .album-track-row { grid-template-columns: 18px 30px minmax(0, 1fr) 45px auto; padding: 15px 4px; gap: 10px; }
   .album-track-copy h3 { font-size: 0.82rem; }
-  .admission-actions button { padding: 6px 8px; font-size: 0.68rem; }
+  .admission-actions button { padding: 6px 8px; font-size: 0.75rem; }
   .global-player:has(.playlist-controls:not([hidden])) {
     grid-template-columns: 44px minmax(0, 1fr) 70px;
   }

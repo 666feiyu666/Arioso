@@ -442,7 +442,7 @@
 }
 
 .mm-tag {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.01em;
   color: var(--brand-deep);
@@ -631,7 +631,7 @@
 
 .mm-weekdays li {
   text-align: center;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   letter-spacing: 0;
   color: var(--muted);
   font-weight: 600;
@@ -714,7 +714,7 @@
   position: absolute;
   bottom: 2px;
   right: 6px;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   color: var(--brand-deep);
 }
 
@@ -850,7 +850,8 @@
 
 .mm-entry {
   --group: var(--brand);
-  border-left: 4px solid var(--group);
+  background: color-mix(in srgb, var(--group) 7%, var(--surface));
+  border-color: color-mix(in srgb, var(--group) 22%, var(--line));
 }
 
 .mm-entry-head {
@@ -883,7 +884,7 @@
 }
 
 .mm-entry-music > span {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   letter-spacing: 0;
   color: var(--muted);
   margin-right: 6px;
@@ -950,7 +951,7 @@
 }
 
 .mm-summary-key {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   letter-spacing: 0;
   color: var(--muted);
   font-weight: 600;
@@ -1025,6 +1026,7 @@
   border-bottom-left-radius: 4px;
 }
 
+/* The dots animate because a reply is streaming in right now — live state. */
 .mm-typing {
   display: inline-flex;
   gap: 5px;
@@ -1201,7 +1203,7 @@
 }
 
 .mm-inline-field > span {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   letter-spacing: 0;
   color: var(--muted);
   font-weight: 600;
@@ -1227,6 +1229,7 @@
   padding: 12px 0 4px;
 }
 
+/* The groove rings are the record itself, not surface decoration. */
 .mm-disc {
   width: 84px;
   height: 84px;
@@ -1463,8 +1466,8 @@
 .mm-prompt-body {
   margin-top: 10px;
   padding: 16px 18px;
-  border-left: 3px solid var(--brand);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
   color: var(--ink-soft);
   background: var(--surface-2);
   font-family: var(--mono);
@@ -1664,23 +1667,14 @@ body.mm-home {
   position: relative;
   display: flex;
   flex-direction: column;
-  padding: 15px 16px 14px 18px;
+  padding: 15px 16px 14px;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  background: var(--surface);
+  background: color-mix(in srgb, var(--group) 7%, var(--surface));
   color: var(--ink);
   overflow: hidden;
   transition: transform 0.16s var(--ease), border-color 0.16s var(--ease),
     box-shadow 0.16s var(--ease);
-}
-
-.mm-example::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 4px;
-  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
-  background: var(--group);
 }
 
 .mm-example:hover,
@@ -1694,15 +1688,6 @@ body.mm-home {
   transform: translateY(-2px);
   border-color: var(--group);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--group) 26%, transparent);
-}
-
-.mm-example.is-playing::before {
-  animation: mm-bar-pulse 1.6s var(--ease) infinite;
-}
-
-@keyframes mm-bar-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
 }
 
 .mm-example:focus-within {
@@ -1818,7 +1803,7 @@ body.mm-home {
 }
 
 .mm-example-play-time {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
   color: var(--muted);
   min-width: 2.5em;
@@ -1920,7 +1905,7 @@ body.mm-home {
 
 .mm-album-source-label {
   color: var(--brand);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.04em;
 }
