@@ -193,13 +193,12 @@ function renderCalendar() {
       : t("emptyDay");
     const label = `${monthLabel} ${day} — ${summary}`;
     cells.push(`
-      <li class="mm-day${list.length ? " has-entry" : ""}${isToday ? " is-today" : ""}">
+      <li class="mm-day${list.length ? " has-entry" : ""}${isToday ? " is-today" : ""}"${list.length ? ` style="--day-tone:${colorForTask(list[0].task)}; --day-count:${list.length}"` : ""}>
         <button class="mm-day-btn" type="button" data-date="${iso}"
           aria-label="${esc(label)}" aria-pressed="${state.selectedDate === iso ? "true" : "false"}"
           title="${esc(label)}">
           <span class="mm-day-number">${day}</span>
-          ${list.length ? `<span class="mm-marker" style="${markerStyle(list.map(({ task }) => colorForTask(task)))}"></span>
-            <span class="mm-day-count">${list.length}</span>` : ""}
+          ${list.length ? `<span class="mm-marker" style="${markerStyle(list.map(({ task }) => colorForTask(task)))}"></span>` : ""}
           ${hasMusic ? `<span class="mm-day-note" aria-hidden="true">♪</span>` : ""}
         </button>
       </li>

@@ -136,6 +136,11 @@ introduces no new colours or type sizes.
 - Body is 15px/1.6. Headings step up from 1.2rem to 2.625rem with weight 600
   and `-0.017em` tracking; the tracking is what keeps the display sizes from
   feeling loose.
+- **One display step for page titles:** `clamp(2rem, 3.2vw, 2.9rem)` at
+  `-0.028em`, shared by the album shelf, the playlist shelf, the calendar and
+  the workflow studio. The MoodMic empty state is the only title above it
+  (`clamp(2.15rem, 4.6vw, 3.4rem)`) because that one is the hero. A page title
+  that is smaller than a section heading is a bug.
 - Sentence case everywhere. No tracked-out uppercase eyebrows, no decorative
   micro-labels. 0.75rem (12px) is the floor for anything a person reads or
   clicks — there is nothing smaller in the system on purpose.
@@ -161,18 +166,59 @@ dialogs and popovers, and the toast region. These get a large soft shadow plus
 `backdrop-filter: blur()`. Everything else is separated by `line`, `surface-2`
 or a 6–7% tint of the accent colour.
 
+One environmental light is allowed, and only on the MoodMic empty state: a wide,
+heavily blurred radial wash behind the mood contour, mixed at under 10%. It is
+room light, not a halo — it carries the colour of whatever is playing, and it
+never gets an offset shadow or a border.
+
 A card that belongs to a group (a mood example, a workflow type) is tinted with
 that group's colour at low strength and carries a coloured border on hover. It
 does **not** carry a thick bar down one side.
 
 ## Shapes
 
-- Radii: 15px (large cards), 11px (buttons, fields, small cards), 7px (inline
+- Radii: 15px (large cards), 11px (button, field, small cards), 7px (inline
   blocks, code). Pills (999px) are reserved for chips and segmented controls.
 - Hairlines are 1px `line`, strengthening to `line-strong` on hover. The system
   has no 2px+ accent borders.
-- Circles mean the record, a mood dot, or a status indicator. Nothing else is
-  round.
+- Circles mean the record, a mood dot, a wave line, a calendar day's record, or
+  a status indicator. Nothing else is round.
+
+### The calendar day
+
+Each day in the mood calendar is a cell, a number and — on days that produced a
+piece — one dot. The dot is the record and the number is its label:
+
+- **The dot grows with the pieces kept that day**, up to three, and splits into
+  equal colour segments when the day holds more than one mood. That is the only
+  count on screen; there is no second badge repeating it.
+- **A recorded day carries a 9% wash of its first mood** behind the whole cell,
+  so a month reads as a field of remembered days at a glance.
+- Hover tints *over* that wash rather than replacing it, so a coloured day never
+  goes grey under the cursor.
+
+
+### The mood contour
+
+The MoodMic empty state carries one drawn line through four notes, and it is a
+data graphic, not an illustration. Its geometry is fixed by the mood model in
+`web/mood-common.js`:
+
+- **Vertical position is pleasantness.** A pleasant group sits above the centre
+  line, an unpleasant one below it.
+- **Distance from the centre line is energy.** High-energy groups swing wide,
+  low-energy groups stay near the middle.
+- **Horizontal position is the group's place in the set**, and it must line up
+  with the four cards below it — each note sits on its card's centre line.
+
+So the contour reads, in order: coral low, gold high, blue low, sage high, with
+the gold and coral swings wider than the blue and sage ones. Any future change
+to the drawing has to keep that mapping, or it becomes decoration.
+
+Each card repeats the same model at small scale as a five-line wave: the spread
+of the five bars follows the group's energy. The wave animates only while that
+mood is playing.
+
 
 ## Components
 
@@ -200,6 +246,10 @@ does **not** carry a thick bar down one side.
 - Don't set type in a light `mood-*` hue — use its `mood-*-ink` pair.
 - Don't put a thick coloured bar on one side of a card; that is the single
   strongest "generated UI" tell and it is banned here.
+- Don't draw the mood contour as a decorative wave, and don't add a note that
+  is not one of the four moods: its geometry is the mood model.
+- Don't animate a waveform, a glow or a pulse unless the thing it stands for is
+  actually happening. Motion is state, not atmosphere.
 - Don't add icon tiles above headings, purple-blue gradients, or nested cards.
 - Don't go below 0.75rem for text a person reads or taps.
 - Don't add infinite motion that hides content or competes with reading; motion

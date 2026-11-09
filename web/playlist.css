@@ -43,9 +43,13 @@
 }
 
 .lib-heading h1 {
-  margin: 0 0 6px;
-  font-size: clamp(1.45rem, 1.7vw, 1.8rem);
-  letter-spacing: -0.02em;
+  margin: 0 0 8px;
+  /* One display step for every page title, shared with the calendar and the
+     workflow studio. The MoodMic empty state is the only size above it, because
+     that one is the hero. */
+  font-size: clamp(2rem, 3.2vw, 2.9rem);
+  line-height: 1.05;
+  letter-spacing: -0.028em;
 }
 
 .lib-note {
@@ -956,7 +960,7 @@ body.has-drawer { overflow: hidden; }
   .album-head { align-items: flex-start; }
   .pl-cover-xl { width: 96px; }
   .album-head-body h1 { font-size: 1.45rem; }
-  .lib-heading h1 { font-size: 1.4rem; }
+  .lib-heading h1 { font-size: 2rem; }
   .lib-grid { grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 18px 12px; }
   .pl-main { padding: 20px 16px 88px; }
   body.has-pbar .pl-main { padding-bottom: 92px; }
@@ -1005,13 +1009,21 @@ body.has-drawer { overflow: hidden; }
   font-size: 0.75rem;
   line-height: 1;
   cursor: pointer;
-  opacity: 0.5;
+  /* A destructive control on top of the artwork is noise until you mean it:
+     hidden at rest, revealed on hover or keyboard focus, and always visible on
+     touch, where there is no hover to reveal it. */
+  opacity: 0;
   transition: opacity 0.15s var(--ease), background 0.15s var(--ease);
 }
 
 .plt-card:hover .plt-card-delete,
+.plt-card:focus-within .plt-card-delete,
 .plt-card-delete:focus-visible {
   opacity: 1;
+}
+
+@media (hover: none) {
+  .plt-card-delete { opacity: 0.85; }
 }
 
 .plt-card-delete:hover { background: var(--record-deep); }

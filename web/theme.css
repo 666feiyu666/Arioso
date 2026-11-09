@@ -87,6 +87,7 @@ body {
   background-size: min(1760px, 140%) auto;
   background-attachment: fixed;
   color: var(--ink);
+  caret-color: var(--brand);
   font-family: var(--sans);
   font-size: 15px;
   line-height: 1.6;

@@ -540,7 +540,7 @@ function sideMeta(session) {
 
 function mainHead() {
   return `
-    <div class="mm-chat-head">
+    <div class="mm-chat-head${state.session ? "" : " is-welcome"}">
       <h2 class="mm-title">${esc(state.session ? sessionTitle(state.session) : t("greeting"))}</h2>
       ${state.session ? "" : `<p class="mm-lead">${esc(t("greetingLead"))}</p>`}
     </div>
@@ -549,7 +549,11 @@ function mainHead() {
 
 function renderExamples() {
   const key = state.language === "en" ? "en" : "zh";
-  const rows = [70, 150, 80, 150];
+  // The contour is the mood model, drawn. Height is pleasantness (a pleasant
+  // group sits high, an unpleasant one dips low) and the amplitude around the
+  // centre line is energy. So the four notes are not a decorative sine wave:
+  // they are the four groups placed where the model puts them.
+  const rows = [148, 58, 138, 82];
   const dots = GROUPS.map((group, index) => {
     const cx = (index + 0.5) * 250;
     const cy = rows[index];
@@ -567,10 +571,20 @@ function renderExamples() {
         </g>`;
   }).join("");
   return `
-    <div class="mm-examples">
+    <div class="mm-examples"${state.playing ? ` style="--active:${groupById(state.playing).color}"` : ""}>
       <svg class="mm-melody${state.playing ? " is-playing" : ""}" viewBox="0 0 1000 220" preserveAspectRatio="xMidYMid meet" focusable="false">
+        <defs>
+          <linearGradient id="mm-resonance" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="var(--active, #5546e0)" stop-opacity="0.13" />
+            <stop offset="0.55" stop-color="var(--active, #5546e0)" stop-opacity="0.04" />
+            <stop offset="1" stop-color="var(--active, #5546e0)" stop-opacity="0" />
+          </linearGradient>
+        </defs>
+        <path class="mm-melody-resonance" aria-hidden="true"
+          d="M0,110 C41.7,110 83.3,148 125,148 C208.3,148 291.7,58 375,58 C458.3,58 541.7,138 625,138 C708.3,138 791.7,82 875,82 C916.7,82 958.3,110 1000,110 L1000,220 L0,220 Z"
+          fill="url(#mm-resonance)" stroke="none" />
         <path class="mm-melody-path" aria-hidden="true"
-          d="M0,110 C41.7,110 83.3,70 125,70 C208.3,70 291.7,150 375,150 C458.3,150 541.7,80 625,80 C708.3,80 791.7,150 875,150 C916.7,150 958.3,110 1000,110"
+          d="M0,110 C41.7,110 83.3,148 125,148 C208.3,148 291.7,58 375,58 C458.3,58 541.7,138 625,138 C708.3,138 791.7,82 875,82 C916.7,82 958.3,110 1000,110"
           fill="none" stroke-width="2.5" stroke-linecap="round" vector-effect="non-scaling-stroke" />${dots}
       </svg>
       <p class="mm-examples-lead">${esc(t("examplesLead"))}</p>
@@ -582,9 +596,9 @@ function renderExamples() {
           const playLabel = t("playMood", name);
           const stopLabel = t("stopMood", name);
           return `
-          <div class="mm-example${playing ? " is-playing" : ""}" data-example-group="${group.id}" style="--group:${group.color}">
+          <div class="mm-example${playing ? " is-playing" : ""}" data-example-group="${group.id}" data-energy="${group.energy}" style="--group:${group.color}">
             <button class="mm-example-start" type="button" data-example="${esc(text)}">
-              <span class="mm-example-mood"><span class="mm-example-swatch" aria-hidden="true"></span>${esc(name)}</span>
+              <span class="mm-example-mood"><span class="mm-example-swatch" aria-hidden="true"></span>${esc(name)}<span class="mm-example-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></span>
               <span class="mm-example-text">${esc(text)}</span>
             </button>
             <div class="mm-example-foot">
@@ -1286,6 +1300,13 @@ function updateMoodPlayback() {
 // Reflect the playing mood on the melody points and cards without re-rendering,
 // so the curve keeps its entrance instead of replaying it on every toggle.
 function pushMoodPlayingToDom(groupId) {
+  const examples = stage.querySelector(".mm-examples");
+  if (examples) {
+    // While a mood plays, the wash behind the contour takes that mood's colour,
+    // so the whole stage — not just one line — is the thing sounding.
+    if (groupId) examples.style.setProperty("--active", groupById(groupId).color);
+    else examples.style.removeProperty("--active");
+  }
   const melody = stage.querySelector(".mm-melody");
   if (melody) melody.classList.toggle("is-playing", Boolean(groupId));
   for (const point of stage.querySelectorAll(".mm-melody-point")) {
