@@ -222,6 +222,16 @@ function coverMarkup(playlist, extraClass = "") {
   return `<span class="${classes}" style="${cover.style}" aria-hidden="true"><b>${esc(cover.glyph)}</b></span>`;
 }
 
+/** The header takes its light from the cover, blurred: artwork when there is
+ *  one, the deterministic tones when there is not. Shared with the album page. */
+function backdropStyle(playlist) {
+  if (playlist.coverUpdatedAt) {
+    const version = encodeURIComponent(playlist.coverUpdatedAt);
+    return `--cover-art:url(/api/playlists/${encodeURIComponent(playlist.id)}/cover?v=${version})`;
+  }
+  return coverFor(playlist.name, playlist.id).style;
+}
+
 // ---- views ---------------------------------------------------------------
 
 function durationText(seconds) {
@@ -374,7 +384,7 @@ function viewPlaylist(entry) {
   const playLabel = state.isPlaying && state.queue.length ? t("pause") : t("playAll");
   return `
     <button class="pl-back" type="button" data-action="library">${esc(t("back"))}</button>
-    <header class="album-head">
+    <header class="album-head" style="${backdropStyle(playlist)}">
       <div class="album-cover-edit">
         ${coverMarkup(playlist, "pl-cover-xl")}
         <button class="cover-edit" type="button" data-action="edit-cover">${esc(t("editCover"))}</button>

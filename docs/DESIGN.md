@@ -171,6 +171,44 @@ heavily blurred radial wash behind the mood contour, mixed at under 10%. It is
 room light, not a halo — it carries the colour of whatever is playing, and it
 never gets an offset shadow or a border.
 
+### The record's room
+
+An album or playlist header is not a title block, it is the room that record is
+playing in. The header carries `--cover-art` (the cover image URL) or the
+fallback `--cover-from` / `--cover-to` / `--cover-angle` tones, and CSS blows
+whichever it gets up to 30% beyond the header, blurs it at 64px, saturates it to
+1.55 and washes it down under a white veil so type keeps its contrast.
+
+Rules:
+
+- The cover is the largest object on the page (`clamp(160px, 17vw, 224px)`), and
+  the title sits against its baseline, not above it as a caption.
+- Every record therefore arrives with its own light. No page should look like
+  the same grey surface with different text in it.
+- The veil is part of the component: without it the blurred artwork drops body
+  text below 4.5:1. Do not "show more of the cover" by thinning it.
+- A percentage on a finished record is a receipt, not a headline: muted, at
+  reading size. The record's name is the thing worth looking at.
+
+A tracklist is rows on one surface divided by a hairline — never a stack of
+bordered cards. Row numbers, titles, lengths and controls align with the header
+above them, and the list runs the full width of the page.
+
+### The shelf
+
+A library page is a shelf of records, not square images pasted on a background.
+
+- A cover is a physical object: 10px radius, a soft offset shadow, and it lifts
+  4px on hover. Never a flat square sitting directly on the page colour.
+- The grid uses `auto-fit` with a 380px ceiling, so a shelf of three fills the
+  wall instead of hugging the left edge — but a shelf of two does not stretch
+  one cover across half the screen. The browser sizes the columns from the
+  ceiling, so raising it past that ceiling drops a column at 1440px.
+- Under the cover: the name at 1.12rem with `-0.018em` tracking, then one quiet
+  metadata line. The state dot stays inside the artwork's bottom corner.
+- On a phone the shelf is two columns at 140px minimum, and the type steps down
+  with it.
+
 A card that belongs to a group (a mood example, a workflow type) is tinted with
 that group's colour at low strength and carries a coloured border on hover. It
 does **not** carry a thick bar down one side.

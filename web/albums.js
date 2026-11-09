@@ -239,6 +239,19 @@ function coverMarkup(task, extraClass = "") {
   return `<span class="${classes}" style="${cover.style}" aria-hidden="true"><b>${esc(cover.glyph)}</b></span>`;
 }
 
+/**
+ * The header takes its light from the record it belongs to: the artwork itself
+ * when there is one, and the deterministic tones when there is not. CSS blurs
+ * whatever it is given, so the page reads as the room this album is playing in.
+ */
+function backdropStyle(task) {
+  if (task.coverUpdatedAt) {
+    const version = encodeURIComponent(task.coverUpdatedAt);
+    return `--cover-art:url(/api/tasks/${encodeURIComponent(task.id)}/cover?v=${version})`;
+  }
+  return coverFor(task).style;
+}
+
 // The album stage reads and writes the album through these callbacks, so the
 // page keeps owning its task list while the stage owns plan/curation behaviour.
 /** Listeners the shared player bar registers; the stage notifies them. */
@@ -367,7 +380,7 @@ function viewAlbum() {
   const tracks = task.albumTracks ?? [];
   return `
     <button class="pl-back" type="button" data-action="library">${esc(t("back"))}</button>
-    <header class="album-head">
+    <header class="album-head" style="${backdropStyle(task)}">
       <div class="album-cover-edit">
         ${coverMarkup(task, "pl-cover-xl")}
         <button class="cover-edit" type="button" data-action="edit-cover">${esc(t("editCover"))}</button>
