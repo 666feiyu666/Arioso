@@ -31,6 +31,13 @@
         <a class="tabbar-tab is-active" href="/workflow.html" aria-current="page" data-i18n="tabWorkflow">工作流</a>
         <a class="tabbar-tab" href="/help.html" data-i18n="tabHelp">帮助</a>
       </div>
+      <div class="tabbar-end">
+        <button class="e-btn e-btn-ghost tabbar-settings" id="open-settings" type="button" aria-haspopup="dialog" aria-label="设置" data-i18n-aria-label="openSettings">
+          <span class="gear" aria-hidden="true">⚙</span>
+          <span class="label" data-i18n="openSettings">设置</span>
+        </button>
+        <button class="e-btn e-btn-ghost" id="lang-toggle" type="button" aria-label="Switch language" data-i18n-aria-label="switchLanguage">EN</button>
+      </div>
     </nav>
     <div class="app-shell">
       <aside class="sidebar">
@@ -52,10 +59,6 @@
         <nav class="task-list" id="task-list" aria-label="音乐任务" data-i18n-aria-label="musicTasks"></nav>
 
         <div class="sidebar-foot">
-          <button class="settings-button" id="open-settings" type="button">
-            <span aria-hidden="true">⚙</span>
-            <span data-i18n="settings">设置</span>
-          </button>
           <span class="status-dot"></span>
           <span data-i18n="localWorkspace">本地创作空间</span>
           <small id="app-version">v0.10.0</small>

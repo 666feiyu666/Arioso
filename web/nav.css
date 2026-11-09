@@ -129,16 +129,29 @@
 /* The bar has one button language: a word, no border. The language switch and
    the settings entry were the last two boxed controls in a row that is
    otherwise all type, which made a two-letter label read like a form field
-   dropped in the corner. */
+   dropped in the corner.
+
+   These declarations are deliberately complete rather than a patch on
+   editorial.css's `.e-btn`: the albums, playlist and workflow pages never load
+   that file, and an inherited button there came out 2.7px taller with a 2px
+   border — the same bar, two heights. Nav.css owns its own controls so the bar
+   looks identical on all six pages whatever the page stylesheet. */
 .tabbar-end .e-btn {
-  border-color: transparent;
-  background: none;
-  color: var(--muted);
-  padding: 7px 10px;
-  border-radius: 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-family: inherit;
   font-size: 0.82rem;
   font-weight: 600;
+  line-height: 1.6;
   letter-spacing: 0.01em;
+  padding: 7px 10px;
+  border: 1px solid transparent;
+  background: none;
+  color: var(--muted);
+  border-radius: 7px;
+  cursor: pointer;
   transition: background 0.16s ease, color 0.16s ease;
 }
 

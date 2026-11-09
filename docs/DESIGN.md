@@ -329,6 +329,14 @@ mood is playing.
   otherwise all type — a two-letter label in a 1px frame reads like a form
   field dropped into the corner. Both are now text at `muted`, gaining a 6%
   ink wash on hover, exactly like a tab.
+  **The bar is the same on all six pages:** brand mark, six tabs, then
+  `设置 + 语言` on the right. The workflow page used to hide its settings in the
+  sidebar and carry no language switch at all; the settings entry now lives in
+  the bar everywhere and every page's script binds the same `openSettingsDialog`
+  with its own language state and redraw callback. The bar's own controls are
+  declared in full inside `nav.css` rather than patched onto `editorial.css`'s
+  `.e-btn`: the albums, playlist and workflow pages never load that file, so the
+  same two buttons came out a border-width and 2.7px taller there.
 - **Player bar**: fixed to the bottom, frosted, holds the current take across
   page changes. It is the only always-on chrome besides the tab bar.
 - **Progress**: a 4px rounded track that breathes in opacity while work runs. No

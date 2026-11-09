@@ -16,7 +16,7 @@ const translations = {
     productionCreatingVideo: "专辑 WAV 已完成，正在合成 MP4。",
     pageTitle: "Arioso · AI 音乐工坊",
     newTask: "新建任务", tasks: "任务", musicTasks: "音乐任务", settings: "设置",
-    tabMoodMic: "MoodMic", tabCalendar: "心情日历（测试）", tabWorkflow: "工作流", tabAlbums: "专辑", tabPlaylist: "歌单", tabHelp: "帮助", tabBarLabel: "主导航",
+    tabMoodMic: "MoodMic", tabCalendar: "心情日历（测试）", tabWorkflow: "工作流", tabAlbums: "专辑", tabPlaylist: "歌单", tabHelp: "帮助", tabBarLabel: "主导航", switchLanguage: "切换界面语言", openSettings: "设置",
     entryEyebrow: "CHOOSE A WORKFLOW", entryTitle: "选择音乐的<br />创作方式。",
     entryCopy: "先选一种创作方式：单曲、带音乐参考，还是多乐章作品。",
     workflowChoices: "生成方式", allStyles: "不限风格", musicOnly: "含音乐参考",
@@ -167,7 +167,7 @@ const translations = {
     productionCreatingVideo: "Album WAV complete · creating the MP4.",
     pageTitle: "Arioso · AI Music Studio",
     newTask: "New task", tasks: "Tasks", musicTasks: "Music tasks", settings: "Settings",
-    tabMoodMic: "MoodMic", tabCalendar: "Mood calendar (test)", tabWorkflow: "Workflow", tabAlbums: "Albums", tabPlaylist: "Playlists", tabHelp: "Help", tabBarLabel: "Tab navigation",
+    tabMoodMic: "MoodMic", tabCalendar: "Mood calendar (test)", tabWorkflow: "Workflow", tabAlbums: "Albums", tabPlaylist: "Playlists", tabHelp: "Help", tabBarLabel: "Tab navigation", switchLanguage: "Switch interface language", openSettings: "Settings",
     entryEyebrow: "CHOOSE A WORKFLOW", entryTitle: "Choose how to<br />create your music.",
     entryCopy: "Pick how you want to create: a single piece, one with music references, or a multi-movement work.",
     workflowChoices: "Generation workflows", allStyles: "All styles", musicOnly: "With music references",
@@ -2330,6 +2330,19 @@ document.querySelectorAll("[data-workflow-type]").forEach((button) => {
     elements.input.focus();
   });
 });
+const langToggle = document.querySelector("#lang-toggle");
+if (langToggle) {
+  langToggle.addEventListener("click", async () => {
+    state.language = state.language === "zh-CN" ? "en" : "zh-CN";
+    applyTranslations();
+    langToggle.textContent = state.language === "zh-CN" ? "EN" : "中文";
+    fetch("/api/settings", {
+      method: "PUT", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ language: state.language }),
+    }).catch(() => {});
+  });
+}
+
 document.querySelector("#open-settings").addEventListener("click", async () => {
   const { openSettingsDialog } = await import("./settings-dialog.js");
   let persistedLanguage = state.language;

@@ -8,10 +8,12 @@
 // The album itself keeps its own page; this page never shows a plan, a
 // candidate, or a generation control.
 
+import { openSettingsDialog } from "./settings-dialog.js";
+
 const COPY = {
   "zh-CN": {
     tabMoodMic: "MoodMic", tabAlbums: "专辑", tabCalendar: "心情日历（测试）", tabWorkflow: "工作流",
-    tabPlaylist: "歌单", tabHelp: "帮助", tabBarLabel: "主导航", switchLanguage: "切换界面语言",
+    tabPlaylist: "歌单", tabHelp: "帮助", tabBarLabel: "主导航", switchLanguage: "切换界面语言", openSettings: "设置",
     pageTitle: "Arioso · 歌单",
     title: "歌单", libraryNote: "把已有的曲子排成一张歌单，或者从一张新专辑开始。",
     newPlaylist: "新建歌单", newPlaylistLabel: "新建歌单",
@@ -61,7 +63,7 @@ const COPY = {
   },
   en: {
     tabMoodMic: "MoodMic", tabAlbums: "Albums", tabCalendar: "Mood calendar (test)", tabWorkflow: "Workflow",
-    tabPlaylist: "Playlists", tabHelp: "Help", tabBarLabel: "Tab navigation", switchLanguage: "Switch interface language",
+    tabPlaylist: "Playlists", tabHelp: "Help", tabBarLabel: "Tab navigation", switchLanguage: "Switch interface language", openSettings: "Settings",
     pageTitle: "Arioso · Playlists",
     title: "Playlists", libraryNote: "Order pieces you already have, or start from a new album.",
     newPlaylist: "New playlist", newPlaylistLabel: "New playlist",
@@ -1078,6 +1080,22 @@ async function boot() {
     }
     render();
   });
+
+// The settings entry shares the language state with the language switch, so a
+// language saved from either control redraws the page the same way.
+document.querySelector("#open-settings").addEventListener("click", () => {
+  openSettingsDialog({
+    language,
+    onSaved: (settings) => {
+      const next = settings?.language;
+      if ((next === "en" || next === "zh-CN") && next !== language) {
+        language = next;
+        render();
+      }
+    },
+  });
+});
+
   try {
     await loadPlaylists();
   } catch (error) {

@@ -12,12 +12,13 @@ import {
   groupById, groupName, markerStyle, readLanguage, persistLanguage, todayISO,
 } from "./mood-common.js";
 import { openAddToPlaylist } from "./add-to-playlist.js";
+import { openSettingsDialog } from "./settings-dialog.js";
 
 const COPY = {
   "zh-CN": {
     pageTitle: "心情日历（测试）· MoodMic",
     tabMoodMic: "MoodMic", tabCalendar: "心情日历（测试）", tabWorkflow: "工作流", tabAlbums: "专辑", tabPlaylist: "歌单", tabHelp: "帮助",
-    tabBarLabel: "主导航", switchLanguage: "切换界面语言",
+    tabBarLabel: "主导航", switchLanguage: "切换界面语言", openSettings: "设置",
     title: "我的心情日历",
     lead: "每一天的圆点，来自当天真正做出来的作品；颜色就是记录时的心情。",
     legendTitle: "四种颜色的含义",
@@ -47,7 +48,7 @@ const COPY = {
   en: {
     pageTitle: "Mood calendar (test) · MoodMic",
     tabMoodMic: "MoodMic", tabCalendar: "Mood calendar (test)", tabWorkflow: "Workflow", tabAlbums: "Albums", tabPlaylist: "Playlists", tabHelp: "Help",
-    tabBarLabel: "Tab navigation", switchLanguage: "Switch interface language",
+    tabBarLabel: "Tab navigation", switchLanguage: "Switch interface language", openSettings: "Settings",
     title: "My mood calendar",
     lead: "Each day's circle is built from the pieces you actually made — coloured by the mood you recorded.",
     legendTitle: "What the four colours mean",
@@ -507,6 +508,20 @@ langToggle.addEventListener("click", async () => {
   state.language = state.language === "zh-CN" ? "en" : "zh-CN";
   render();
   await persistLanguage(state.language);
+});
+
+// The settings entry shares the language state with the language switch.
+document.querySelector("#open-settings").addEventListener("click", () => {
+  openSettingsDialog({
+    language: state.language,
+    onSaved: (settings) => {
+      const next = settings?.language;
+      if ((next === "en" || next === "zh-CN") && next !== state.language) {
+        state.language = next;
+        render();
+      }
+    },
+  });
 });
 
 boot();

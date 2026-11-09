@@ -19,11 +19,12 @@ import { createAlbumStage, albumPlanBadge, durationText } from "./album-view.js"
 import { clearPlayback, readPlayback, writePlayback } from "./playback-session.js";
 import { adoptAudio, playExclusive } from "./audio-focus.js";
 import { mountPlayerBar } from "./player-bar.js";
+import { openSettingsDialog } from "./settings-dialog.js";
 
 const COPY = {
   "zh-CN": {
     tabMoodMic: "MoodMic", tabCalendar: "心情日历（测试）", tabWorkflow: "工作流",
-    tabAlbums: "专辑", tabPlaylist: "歌单", tabHelp: "帮助", tabBarLabel: "主导航", switchLanguage: "切换界面语言",
+    tabAlbums: "专辑", tabPlaylist: "歌单", tabHelp: "帮助", tabBarLabel: "主导航", switchLanguage: "切换界面语言", openSettings: "设置",
     pageTitle: "Arioso · 专辑",
     title: "专辑",
     libraryNote: "选一张继续制作，或者新建一张。",
@@ -74,7 +75,7 @@ const COPY = {
   },
   en: {
     tabMoodMic: "MoodMic", tabCalendar: "Mood calendar (test)", tabWorkflow: "Workflow",
-    tabAlbums: "Albums", tabPlaylist: "Playlists", tabHelp: "Help", tabBarLabel: "Tab navigation", switchLanguage: "Switch interface language",
+    tabAlbums: "Albums", tabPlaylist: "Playlists", tabHelp: "Help", tabBarLabel: "Tab navigation", switchLanguage: "Switch interface language", openSettings: "Settings",
     pageTitle: "Arioso · Albums",
     title: "Albums",
     libraryNote: "Pick one to keep working on, or start a new album.",
@@ -809,6 +810,21 @@ langToggle.addEventListener("click", () => {
     body: JSON.stringify({ language }),
   }).catch(() => {});
   render();
+});
+
+// The settings entry shares the language state with the language switch, so a
+// language saved from either control redraws the page the same way.
+document.querySelector("#open-settings").addEventListener("click", () => {
+  openSettingsDialog({
+    language,
+    onSaved: (settings) => {
+      const next = settings?.language;
+      if ((next === "en" || next === "zh-CN") && next !== language) {
+        language = next;
+        render();
+      }
+    },
+  });
 });
 
 async function boot() {

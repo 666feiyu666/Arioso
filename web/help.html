@@ -30,6 +30,10 @@
         <a class="tabbar-tab is-active" href="/help.html" aria-current="page" data-i18n="tabHelp">帮助</a>
       </div>
       <div class="tabbar-end">
+        <button class="e-btn e-btn-ghost tabbar-settings" id="open-settings" type="button" aria-haspopup="dialog" aria-label="设置" data-i18n-aria-label="openSettings">
+          <span class="gear" aria-hidden="true">⚙</span>
+          <span class="label" data-i18n="openSettings">设置</span>
+        </button>
         <button class="e-btn e-btn-ghost" id="lang-toggle" type="button" aria-label="Switch language" data-i18n-aria-label="switchLanguage">EN</button>
       </div>
     </nav>
@@ -113,11 +117,12 @@
 
     <script type="module" src="/player-bar.js"></script>
     <script type="module">
+      import { openSettingsDialog } from "./settings-dialog.js";
       const COPY = {
         "zh-CN": {
           pageTitle: "帮助说明 · Arioso",
           tabMoodMic: "MoodMic", tabCalendar: "心情日历（测试）", tabWorkflow: "工作流", tabAlbums: "专辑", tabPlaylist: "歌单", tabHelp: "帮助", tabBarLabel: "主导航",
-          switchLanguage: "切换界面语言",
+          switchLanguage: "切换界面语言", openSettings: "设置",
           helpEyebrow: "使用说明",
           helpTitle: "帮助说明",
           helpIntro: "这里简单说明 MoodMic 怎么用、它在做什么，以及工作流里的几种创作方式。",
@@ -153,7 +158,7 @@
         en: {
           pageTitle: "Help · Arioso",
           tabMoodMic: "MoodMic", tabCalendar: "Mood calendar (test)", tabWorkflow: "Workflow", tabAlbums: "Albums", tabPlaylist: "Playlists", tabHelp: "Help", tabBarLabel: "Tab navigation",
-          switchLanguage: "Switch interface language",
+          switchLanguage: "Switch interface language", openSettings: "Settings",
           helpEyebrow: "HELP",
           helpTitle: "Help",
           helpIntro: "A short guide to what MoodMic does, how to use it, and the creation modes in the workflow studio.",
@@ -224,6 +229,16 @@
       }
 
       toggle.addEventListener("click", () => setLanguage(language === "zh-CN" ? "en" : "zh-CN", true));
+
+document.querySelector("#open-settings").addEventListener("click", () => {
+  openSettingsDialog({
+    language,
+    onSaved: (settings) => {
+      const next = settings?.language;
+      if ((next === "en" || next === "zh-CN") && next !== language) setLanguage(next, false);
+    },
+  });
+});
 
       // The server stamps the language on the page; only ask the API when it
       // was served without one.
