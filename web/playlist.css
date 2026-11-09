@@ -89,13 +89,15 @@
 }
 
 .lib-grid {
+  --shelf-gap: 26px;
   display: grid;
   /* auto-fit collapses empty tracks, so a three-record shelf fills the wall
-     instead of hugging the left edge. The 360px ceiling stops a two-record
+     instead of hugging the left edge. The 380px ceiling stops a two-record
      shelf from stretching one cover across half the screen. */
   grid-template-columns: repeat(auto-fit, minmax(240px, 380px));
   justify-content: start;
-  gap: 32px 26px;
+  /* Rows stand further apart than columns: the extra space is the shelf. */
+  gap: 46px var(--shelf-gap);
 }
 
 .lib-section { display: grid; gap: 18px; }
@@ -109,15 +111,40 @@
 }
 
 .lib-card {
+  position: relative;
   display: grid;
   gap: 10px;
-  padding: 0;
+  /* Room under the metadata for the plank this record stands on. */
+  padding: 0 0 16px;
   border: 0;
   background: none;
   color: var(--ink);
   font: inherit;
   text-align: left;
   cursor: pointer;
+}
+
+/* The plank. Each card draws its own, and because it overhangs by half the
+   column gap the neighbours join into one continuous shelf — no script, and no
+   need to know how many columns the grid decided to make. The top highlight and
+   the shadow underneath are what give it thickness instead of reading as a
+   divider line. */
+.lib-card::after {
+  content: "";
+  position: absolute;
+  left: calc(var(--shelf-gap, 26px) / -2);
+  right: calc(var(--shelf-gap, 26px) / -2);
+  bottom: 0;
+  /* A shelf is a slab, not a rule: five pixels of edge with a lit top and a
+     shadow underneath. */
+  height: 5px;
+  /* Square ends: a radius on each card makes a notch where two planks meet, so
+     the shelf reads as three segments instead of one board. */
+  border-radius: 0;
+  background: linear-gradient(180deg, #c9d0dd 0%, #a5aebe 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 10px 16px -9px rgba(16, 21, 31, 0.6);
 }
 
 .lib-card .pl-cover {
@@ -1068,7 +1095,8 @@ body.has-drawer { overflow: hidden; }
     opacity: 1;
   }
   .lib-heading h1 { font-size: 2rem; }
-  .lib-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 24px 14px; }
+  .lib-grid { --shelf-gap: 14px; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 34px 14px; }
+  .lib-card { padding-bottom: 12px; }
   .lib-card-body strong { font-size: 0.95rem; letter-spacing: -0.01em; }
   .lib-count { font-size: 0.78rem; }
   .pl-main { padding: 20px 16px 88px; }

@@ -1588,7 +1588,10 @@ body.mm-home {
 }
 
 .mm-melody-path {
-  stroke: #c6c0f0;
+  /* The contour is the page's signature line, so it is drawn to be seen: a
+     deep indigo at 3.5px, not a faint trace. */
+  stroke: #9a8ce4;
+  stroke-width: 3.5;
   stroke-dasharray: 1500;
   stroke-dashoffset: 1500;
   transition: stroke 0.8s var(--ease);

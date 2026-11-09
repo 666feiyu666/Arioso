@@ -119,6 +119,14 @@ introduces no new colours or type sizes.
 - `bg` is a cool neutral, never warm paper. Surfaces lift by one step at a time
   (`surface` → `surface-2` → `surface-3`); there is no shadow-led elevation
   except on floating menus and the player bar.
+- The page itself is lit, not painted: light falls from the top edge, four
+  corners carry the four mood hues, and the bottom of the frame is weighted so
+  the room has a floor. See `body` / `body::before` in `theme.css`. The hues
+  never exceed 22% mix, so no page ever looks tinted by a single colour.
+- `--bg` must be dark enough for that corner light to read. It was `#e8ebf1` and
+  the light disappeared into it; `#e3e6ee` is the working value. If you change
+  it, change `theme-color` in every page's `<head>` and the note fills in
+  `melody.svg` with it.
 - `ink` / `ink-soft` / `muted` / `faint` are a four-step text ramp. `muted` is
   the lightest step allowed for body copy and sits at 4.6:1 or better on every
   surface; `faint` is for placeholders and disabled states only.
@@ -200,14 +208,25 @@ A library page is a shelf of records, not square images pasted on a background.
 
 - A cover is a physical object: 10px radius, a soft offset shadow, and it lifts
   4px on hover. Never a flat square sitting directly on the page colour.
+- **Every card draws its own plank** (`.lib-card::after`): 3px tall, overhanging
+  the column gap by half on each side, so neighbours join into one continuous
+  shelf without any script knowing how many columns the grid made. The plank is
+  not a divider line — it gets its thickness from an inset top highlight and a
+  shadow underneath, both of which are load-bearing.
+- The row gap (46px) is larger than the column gap (26px) because the extra
+  space **is** the shelf: 16px of plank clearance under the metadata, then the
+  air between one shelf and the next.
 - The grid uses `auto-fit` with a 380px ceiling, so a shelf of three fills the
   wall instead of hugging the left edge — but a shelf of two does not stretch
   one cover across half the screen. The browser sizes the columns from the
   ceiling, so raising it past that ceiling drops a column at 1440px.
+- The plank stops at the last card of the row, per the shelf being a holder for
+  records rather than a page-wide rule. Rows of different lengths therefore have
+  planks of different lengths; that is intended.
 - Under the cover: the name at 1.12rem with `-0.018em` tracking, then one quiet
   metadata line. The state dot stays inside the artwork's bottom corner.
-- On a phone the shelf is two columns at 140px minimum, and the type steps down
-  with it.
+- On a phone the shelf is two columns at 140px minimum, `--shelf-gap` drops to
+  14px so the planks still meet, and the type steps down with it.
 
 A card that belongs to a group (a mood example, a workflow type) is tinted with
 that group's colour at low strength and carries a coloured border on hover. It
@@ -217,8 +236,14 @@ does **not** carry a thick bar down one side.
 
 - Radii: 15px (large cards), 11px (button, field, small cards), 7px (inline
   blocks, code). Pills (999px) are reserved for chips and segmented controls.
-- Hairlines are 1px `line`, strengthening to `line-strong` on hover. The system
-  has no 2px+ accent borders.
+- **Lines carry structure, so they are visible.** `--line` is `#ccd2e0` and
+  `--line-strong` is `#aeb7c8` — one clear step below the page, not a hint. A
+  boundary nobody can see is not a boundary.
+- Hairlines are 1px. Where an edge must read as a physical object rather than a
+  division (a shelf plank), it gets real thickness: 5px with a lit top edge and
+  a shadow under it.
+- Planks meet with square ends. A radius on each card's plank leaves a notch
+  where two of them join, and the shelf reads as segments instead of one board.
 - Circles mean the record, a mood dot, a wave line, a calendar day's record, or
   a status indicator. Nothing else is round.
 
@@ -239,8 +264,9 @@ piece — one dot. The dot is the record and the number is its label:
 ### The mood contour
 
 The MoodMic empty state carries one drawn line through four notes, and it is a
-data graphic, not an illustration. Its geometry is fixed by the mood model in
-`web/mood-common.js`:
+data graphic, not an illustration. It is drawn to be **seen**: `#9a8ce4` at
+3.5px, the deepest line in the system. A faint version of it was invisible
+against the page, which made the four notes look like decoration.
 
 - **Vertical position is pleasantness.** A pleasant group sits above the centre
   line, an unpleasant one below it.

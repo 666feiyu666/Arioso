@@ -5,8 +5,8 @@
 :root {
   color-scheme: light;
 
-  /* Surfaces — cool, studio-neutral, deliberately away from warm paper */
-  --bg: #e8ebf1;
+  /* Surfaces — a cool studio neutral, deep enough for the corner light to read */
+  --bg: #e3e6ee;
   --surface: #ffffff;
   --surface-2: #f2f4f8;
   --surface-3: #e7ebf2;
@@ -18,9 +18,9 @@
   --muted: #666f82;
   --faint: #9aa2b2;
 
-  /* Lines */
-  --line: #dbdfe8;
-  --line-strong: #c1c7d3;
+  /* Lines — a visible step, not a hint: these carry the structure of a page */
+  --line: #ccd2e0;
+  --line-strong: #aeb7c8;
 
   /* Brand + signals */
   --brand: #5546e0;
@@ -81,11 +81,15 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background-color: var(--bg);
-  background-image: url("melody.svg");
-  background-repeat: no-repeat;
-  background-position: center 42%;
-  background-size: min(1760px, 140%) auto;
-  background-attachment: fixed;
+  /* Light falls from the top edge, so the page reads as a lit room rather than
+     a flat field of grey. The contour sits under it. */
+  background-image:
+    radial-gradient(1600px 1000px at 50% -34%, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0) 72%),
+    url("melody.svg");
+  background-repeat: no-repeat, no-repeat;
+  background-position: center top, center 42%;
+  background-size: 100% 1100px, min(1760px, 140%) auto;
+  background-attachment: fixed, fixed;
   color: var(--ink);
   caret-color: var(--brand);
   font-family: var(--sans);
@@ -98,7 +102,8 @@ body {
 
 /* A slow wash of the feeling colours sits behind every page. It is fixed so
    it never scrolls, and drawn on a pseudo-element so each page keeps its own
-   background rules (melody on, melody off) on top. */
+   background rules (melody on, melody off) on top. Four corners, four feeling
+   colours: the room is tinted by the palette, never by a neutral gradient. */
 body::before {
   content: "";
   position: fixed;
@@ -106,10 +111,27 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(1200px 820px at 12% -8%, rgba(85, 70, 224, 0.10), transparent 60%),
-    radial-gradient(980px 680px at 90% 2%, rgba(232, 117, 117, 0.07), transparent 58%),
-    radial-gradient(1100px 780px at 84% 102%, rgba(119, 157, 214, 0.09), transparent 60%),
-    radial-gradient(900px 640px at 4% 96%, rgba(131, 181, 154, 0.06), transparent 58%);
+    /* Weight at the bottom of the frame: the room has a floor. */
+    linear-gradient(180deg, transparent 48%, rgba(16, 21, 31, 0.07) 100%),
+    radial-gradient(1100px 780px at 4% -6%, rgba(85, 70, 224, 0.22), transparent 62%),
+    radial-gradient(900px 660px at 97% -2%, rgba(232, 117, 117, 0.16), transparent 60%),
+    radial-gradient(1050px 760px at 90% 104%, rgba(119, 157, 214, 0.20), transparent 62%),
+    radial-gradient(860px 620px at 0% 100%, rgba(131, 181, 154, 0.14), transparent 60%);
+}
+
+/* A fine grain over everything. Screens are perfectly flat, which is what makes
+   an interface read as a rendering rather than a surface; a little noise at
+   under 4% gives the page a material to sit on without ever being visible as
+   texture. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
 }
 
 h1,
